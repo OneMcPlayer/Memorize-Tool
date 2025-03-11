@@ -185,17 +185,17 @@ function extractLines() {
       showToast(t.errorNoInput);
       return;
     }
-    scriptText = scriptFile.files[0].text;
+    const reader = new FileReader();
+    reader.readAsText(scriptFile.files[0]);
+    scriptText = reader.result;
   } else {
     // Library mode is active
     if (!scriptLibrary.value) {
       showToast(t.errorNoInput);
       return;
     }
-    const selectedScript = sampleLibrary[scriptLibrary.value];
-    scriptText = selectedScript.format === 'structured' ? 
-                 selectedScript.content.text : 
-                 selectedScript.text;
+    const selectedScript = ScriptLibrary.scripts.get(scriptLibrary.value);
+    scriptText = selectedScript.content;
   }
 
   if (!scriptText || !character) {
