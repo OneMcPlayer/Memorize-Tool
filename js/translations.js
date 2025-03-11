@@ -1,0 +1,55 @@
+// Make translations globally available
+const translations = {
+    en: {
+      title: "Script Memorization",
+      description:
+        "Paste your theatrical script, enter your character's name,<br>and choose the number of preceding lines to view for context.",
+      scriptPlaceholder: "Paste your script here... (Ctrl+V)",
+      characterPlaceholder: "Your character's name (e.g., HAMLET)",
+      contextLinesPlaceholder: "Context lines (0-5)",
+      contextHelp:
+        "💡 This number determines how many lines before your character's line will be shown as context.",
+      extractButton: "Extract My Lines (Enter)",
+      shortcuts: "Keyboard shortcuts:",
+      shortcutExtract: "Enter - Extract/Next Line",
+      shortcutReveal: "Space - Reveal Line",
+      shortcutRestart: "Esc - Restart",
+      practiceMode: "Practice Mode",
+      pressReveal: 'Press "Reveal" to see your line with context.',
+      revealButton: "Reveal",
+      nextButton: "Next",
+      restartButton: "Restart",
+      context: "Context:",
+      line: "Line",
+      copied: "Line copied to clipboard!",
+      complete: "Practice complete! Well done! 🎭",
+      errorNoInput: "Please enter both the script and your character name.",
+      errorNoLines: "No lines found for the character: "
+    },
+    it: {
+      title: "Memorizzazione Copione",
+      description:
+        "Incolla il tuo copione, inserisci il nome del tuo personaggio,<br>e scegli quante battute precedenti vuoi vedere come contesto.",
+      scriptPlaceholder: "Incolla qui il tuo copione... (Ctrl+V)",
+      characterPlaceholder: "Nome del personaggio (es. AMLETO)",
+      contextLinesPlaceholder: "Linee di contesto (0-5)",
+      contextHelp:
+        "💡 Questo numero determina quante battute prima della tua verranno mostrate come contesto.",
+      extractButton: "Estrai le Mie Battute (Invio)",
+      shortcuts: "Scorciatoie da tastiera:",
+      shortcutExtract: "Invio - Estrai/Prossima Battuta",
+      shortcutReveal: "Spazio - Rivela Battuta",
+      shortcutRestart: "Esc - Ricomincia",
+      practiceMode: "Modalità Pratica",
+      pressReveal: 'Premi "Rivela" per vedere la tua battuta con il contesto.',
+      revealButton: "Rivela",
+      nextButton: "Avanti",
+      restartButton: "Ricomincia",
+      context: "Contesto:",
+      line: "Battuta",
+      copied: "Battuta copiata negli appunti!",
+      complete: "Pratica completata! Ben fatto! 🎭",
+      errorNoInput: "Inserisci sia il copione che il nome del personaggio.",
+      errorNoLines: "Nessuna battuta trovata per il personaggio: "
+    }
+  };

@@ -1,0 +1,273 @@
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+/* 
+ * 1) CREATE A HEADER CONTROLS CONTAINER
+ *    This container is positioned at the top and uses flex to space out
+ *    the language select on the left and theme toggle on the right.
+ */
+.header-controls {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 999; /* Ensure it stays above other elements */
+}
+
+/* Move languageSelect and themeToggle styles into the header container */
+#languageSelect {
+  padding: 8px;
+  border-radius: 15px;
+  border: 2px solid #3498db;
+  background: white;
+  cursor: pointer;
+  font-size: 1em;
+}
+#themeToggle {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 10px;
+  color: #2c3e50;
+}
+
+/* The main container for your script tool */
+#app {
+  background: #fff;
+  border: none;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  width: 90%;
+  max-width: 600px;
+  transition: all 0.3s ease;
+}
+h1 {
+  text-align: center;
+  margin-bottom: 0.5em;
+  color: #2c3e50;
+  font-size: 2em;
+}
+p {
+  text-align: center;
+  color: #555;
+}
+textarea, input[type="text"], input[type="number"] {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  box-sizing: border-box;
+  font-size: 1em;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  transition: border-color 0.3s ease;
+}
+textarea:focus, input[type="text"]:focus, input[type="number"]:focus {
+  outline: none;
+  border-color: #3498db;
+}
+button {
+  padding: 12px 24px;
+  margin: 10px 6px;
+  font-size: 1em;
+  cursor: pointer;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  transition: all 0.3s ease;
+}
+button:hover {
+  background: #2980b9;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+#card {
+  border: none;
+  padding: 30px;
+  text-align: left;
+  margin: 20px 0;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-size: 1.3em;
+  background: #f8f9fa;
+  border-radius: 12px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+  transition: background 0.3s ease, transform 0.3s ease, opacity 0.3s ease;
+  white-space: pre-line;
+  position: relative;
+}
+
+.context-line {
+  padding: 8px 12px;
+  margin: 4px 0;
+  border-radius: 8px;
+  background: rgba(0,0,0,0.03);
+  font-size: 0.9em;
+}
+
+.character-name {
+  font-weight: bold;
+  color: #3498db;
+}
+
+.line-text {
+  margin-left: 8px;
+}
+
+.your-line {
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(52,152,219,0.1);
+  border-left: 4px solid #3498db;
+}
+
+/* Dark mode adjustments */
+body.dark-mode .context-line {
+  background: rgba(255,255,255,0.05);
+}
+
+body.dark-mode .character-name {
+  color: #5dade2;
+}
+
+body.dark-mode .your-line {
+  background: rgba(52,152,219,0.2);
+  border-left: 4px solid #5dade2;
+}
+
+.center {
+  text-align: center;
+}
+#progressIndicator {
+  font-size: 0.9em;
+  color: #333;
+  margin-bottom: 10px;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+#app > * {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Dark mode styles */
+body.dark-mode {
+  background: linear-gradient(135deg, #1a1c1e 0%, #2c3e50 100%);
+}
+body.dark-mode #app {
+  background: #2c3e50;
+  color: #fff;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
+body.dark-mode h1 {
+  color: #fff;
+}
+body.dark-mode p {
+  color: #ddd;
+}
+body.dark-mode #card {
+  background: #34495e;
+  color: #fff;
+}
+body.dark-mode #card.revealed {
+  background: #2980b9;
+}
+
+body.dark-mode #languageSelect {
+  background: #2c3e50;
+  color: #fff;
+  border-color: #fff;
+}
+body.dark-mode #themeToggle {
+  color: #fff;
+}
+
+/* Loading spinner */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+  display: none;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Toast notification */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.8);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 25px;
+  display: none;
+  animation: fadeInUp 0.3s ease;
+}
+@keyframes fadeInUp {
+  from { transform: translate(-50%, 20px); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  #app {
+    width: 95%;
+    padding: 20px;
+    margin: 10px;
+  }
+  h1 {
+    font-size: 1.5em;
+  }
+  button {
+    width: 100%;
+    margin: 5px 0;
+  }
+  .center button {
+    width: auto;
+    min-width: 120px;
+  }
+  #card {
+    font-size: 1.1em;
+    padding: 20px;
+    min-height: 100px;
+  }
+  textarea {
+    max-height: 200px;
+  }
+}
+
+/* Touch-friendly button states */
+@media (hover: none) {
+  button:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  button:active {
+    transform: scale(0.95);
+    background: #2980b9;
+  }
+}

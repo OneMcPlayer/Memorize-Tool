@@ -1,0 +1,292 @@
+const app = document.getElementById('app');
+let extractedLines = [];
+let currentLineIndex = 0;
+let scriptLines = [];
+let precedingCount = 0;
+
+// Load saved language and theme from localStorage
+let currentLang = localStorage.getItem('lang') || 'en';
+const langSelect = document.getElementById('languageSelect');
+const themeToggle = document.getElementById('themeToggle');
+
+langSelect.value = currentLang;
+if (localStorage.getItem('darkMode') === 'true') {
+  document.body.classList.add('dark-mode');
+}
+
+// Event listeners for language, theme, touch, and keyboard
+langSelect.addEventListener('change', (e) => {
+  currentLang = e.target.value;
+  localStorage.setItem('lang', currentLang);
+  renderInputView();
+});
+
+themeToggle.addEventListener('click', () => {
+  document.body.classList.toggle('dark-mode');
+  localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+});
+
+let touchStartX = 0;
+document.addEventListener('touchstart', (e) => {
+  touchStartX = e.changedTouches[0].screenX;
+});
+document.addEventListener('touchend', (e) => {
+  const touchEndX = e.changedTouches[0].screenX;
+  handleSwipeGesture(touchStartX, touchEndX, {
+    onRight: () => document.getElementById('revealButton')?.click(),
+    onLeft: () => document.getElementById('nextButton')?.click()
+  });
+});
+
+document.addEventListener('keydown', handleKeyPress);
+
+/*************************************************************
+ * RENDER VIEWS
+ *************************************************************/
+function renderInputView() {
+  const t = translations[currentLang];
+  app.innerHTML = `
+    <h1>${t.title}</h1>
+    <p>${t.description}</p>
+    <textarea id="scriptInput" rows="10" placeholder="${t.scriptPlaceholder}"></textarea>
+    <input type="text" id="characterName" placeholder="${t.characterPlaceholder}">
+    <div class="input-group">
+      <input type="number" id="precedingCount" placeholder="${t.contextLinesPlaceholder}" value="1" min="0" max="5">
+      <p class="help-text" style="color: #666; font-size: 0.85em; margin: 5px 0 15px;">
+        ${t.contextHelp}
+      </p>
+    </div>
+    <div class="center">
+      <button id="extractButton">${t.extractButton}</button>
+    </div>
+    <p style="font-size: 0.8em; margin-top: 20px;">
+      ${t.shortcuts}<br>
+      ${t.shortcutExtract}<br>
+      ${t.shortcutReveal}<br>
+      ${t.shortcutRestart}
+    </p>
+  `;
+  document.getElementById('extractButton').addEventListener('click', extractLines);
+}
+
+function renderPracticeView() {
+  const t = translations[currentLang];
+  app.innerHTML = `
+    <h1>${t.practiceMode}</h1>
+    <div id="progressIndicator" class="center"></div>
+    <div id="card">${t.pressReveal}</div>
+    <div class="center">
+      <button id="revealButton">${t.revealButton}</button>
+      <button id="nextButton">${t.nextButton}</button>
+      <button id="restartButton" style="display: none;">${t.restartButton}</button>
+    </div>
+  `;
+  document.getElementById('revealButton').addEventListener('click', () => showCurrentCard(true));
+  document.getElementById('nextButton').addEventListener('click', nextCard);
+  document.getElementById('restartButton').addEventListener('click', renderInputView);
+  updateProgress();
+  showCurrentCard(false);
+}
+
+/*************************************************************
+ * CORE LOGIC
+ *************************************************************/
+function preProcessScript(scriptText) {
+  // First, normalize line endings
+  let text = scriptText.replace(/\r\n/g, '\n');
+  
+  let lines = text.split('\n');
+  let processedLines = [];
+  let currentLine = '';
+  let lastCharacterName = '';
+
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i].trim();
+    
+    // Skip empty lines
+    if (!line) continue;
+
+    // Check if this line starts with a character name (all caps, possibly followed by colon)
+    const characterMatch = line.match(/^([A-Z][A-Z\s]+)(?:\s*:?\s*)(.*)/);
+    
+    if (characterMatch) {
+      // If we have a pending line, save it
+      if (currentLine) {
+        processedLines.push(currentLine);
+      }
+      
+      // Start new line with character name
+      lastCharacterName = characterMatch[1].trim();
+      currentLine = `${lastCharacterName}: ${characterMatch[2]}`;
+    } else {
+      // If line starts with lowercase or doesn't match character pattern,
+      // it's probably a continuation of the previous line
+      if (currentLine) {
+        // Add space only if the current line doesn't end with hyphen
+        const connector = currentLine.endsWith('-') ? '' : ' ';
+        currentLine += connector + line;
+      } else if (lastCharacterName) {
+        // If we have a last known character but no current line
+        currentLine = `${lastCharacterName}: ${line}`;
+      } else {
+        // If we can't associate it with any character, store as is
+        currentLine = line;
+      }
+    }
+  }
+
+  // Don't forget the last line
+  if (currentLine) {
+    processedLines.push(currentLine);
+  }
+
+  return processedLines;
+}
+
+function extractLines() {
+  const t = translations[currentLang];
+  const scriptText = document.getElementById('scriptInput').value;
+  const character = document.getElementById('characterName').value.trim();
+  
+  if (!scriptText || !character) {
+    showToast(t.errorNoInput);
+    return;
+  }
+  
+  // Pre-process the script to handle broken lines
+  scriptLines = preProcessScript(scriptText);
+  precedingCount = parseInt(document.getElementById('precedingCount').value) || 0;
+
+  // Escape special characters in character name for regex
+  const escapedCharacter = character.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`^\\s*${escapedCharacter}\\b\\s*:?`, "i");
+  
+  extractedLines = [];
+  for (let i = 0; i < scriptLines.length; i++) {
+    if (regex.test(scriptLines[i])) {
+      extractedLines.push({ index: i, line: scriptLines[i] });
+    }
+  }
+
+  if (extractedLines.length === 0) {
+    showToast(t.errorNoLines + character);
+    return;
+  }
+  
+  currentLineIndex = 0;
+  renderPracticeView();
+}
+
+function showCurrentCard(showFull) {
+  const t = translations[currentLang];
+  const card = document.getElementById('card');
+  
+  if (currentLineIndex >= extractedLines.length) {
+    card.innerHTML = t.complete;
+    card.classList.add('revealed');
+    document.getElementById('revealButton').style.display = 'none';
+    document.getElementById('nextButton').style.display = 'none';
+    document.getElementById('restartButton').style.display = 'inline-block';
+    document.getElementById('progressIndicator').textContent = '';
+    return;
+  }
+
+  const currentEntry = extractedLines[currentLineIndex];
+  const startIndex = Math.max(0, currentEntry.index - precedingCount);
+  const contextLines = scriptLines.slice(startIndex, currentEntry.index);
+  let displayText = "";
+
+  // Build context lines
+  if (contextLines.length > 0) {
+    displayText += `<div class="context-section">`;
+    contextLines.forEach(line => {
+      const match = line.match(/^([^:]+):(.+)$/);
+      if (match) {
+        displayText += `
+          <div class="context-line">
+            <span class="character-name">${match[1].trim()}</span>
+            <span class="line-text">${match[2].trim()}</span>
+          </div>
+        `;
+      } else {
+        displayText += `<div class="context-line">${line}</div>`;
+      }
+    });
+    displayText += `</div>`;
+  }
+
+  // Build your line
+  let yourLine = currentEntry.line;
+  const match = yourLine.match(/^([^:]+):(.+)$/);
+  if (match) {
+    yourLine = `
+      <span class="character-name">${match[1].trim()}</span>
+      <span class="line-text">${match[2].trim()}</span>
+    `;
+  }
+
+  if (!showFull) {
+    displayText += `<div class="your-line">${t.line} ${currentLineIndex + 1}: ????????????????</div>`;
+    card.classList.remove('revealed');
+  } else {
+    displayText += `<div class="your-line">${t.line} ${currentLineIndex + 1}: ${yourLine}</div>`;
+    card.classList.add('revealed');
+  }
+
+  card.innerHTML = displayText;
+
+  // If revealed, add a copy-to-clipboard button
+  if (showFull) {
+    const copyBtn = document.createElement('button');
+    copyBtn.textContent = '📋';
+    copyBtn.style.position = 'absolute';
+    copyBtn.style.right = '10px';
+    copyBtn.style.top = '10px';
+    copyBtn.onclick = () => {
+      navigator.clipboard.writeText(currentEntry.line)
+        .then(() => showToast(t.copied));
+    };
+    card.appendChild(copyBtn);
+  }
+  updateProgress();
+}
+
+function nextCard() {
+  currentLineIndex++;
+  showCurrentCard(false);
+}
+
+function updateProgress() {
+  const t = translations[currentLang];
+  const progress = document.getElementById('progressIndicator');
+  progress.textContent = `${t.line} ${currentLineIndex + 1} of ${extractedLines.length}`;
+}
+
+/*************************************************************
+ * KEYBOARD SHORTCUT HANDLER
+ *************************************************************/
+function handleKeyPress(e) {
+  // Do not trigger shortcuts while typing in text fields
+  if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+  
+  if (e.key === 'Enter') {
+    const nextBtn = document.getElementById('nextButton');
+    const extractBtn = document.getElementById('extractButton');
+    if (nextBtn && nextBtn.style.display !== 'none') {
+      nextBtn.click();
+    } else if (extractBtn) {
+      extractBtn.click();
+    }
+  } else if (e.key === ' ') {
+    const revealBtn = document.getElementById('revealButton');
+    if (revealBtn) {
+      e.preventDefault();
+      revealBtn.click();
+    }
+  } else if (e.key === 'Escape') {
+    renderInputView();
+  }
+}
+
+// Finally, start the app by rendering the input view
+renderInputView();
