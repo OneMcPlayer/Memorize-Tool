@@ -25,9 +25,13 @@
     }
     h1 {
       text-align: center;
-      margin-bottom: 1em;
+      margin-bottom: 0.5em;
       color: #2c3e50;
       font-size: 2em;
+    }
+    p {
+      text-align: center;
+      color: #555;
     }
     textarea, input[type="text"], input[type="number"] {
       width: 100%;
@@ -72,7 +76,7 @@
       background: #f8f9fa;
       border-radius: 12px;
       box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
-      transition: all 0.3s ease;
+      transition: background 0.3s ease, transform 0.3s ease, opacity 0.3s ease;
       white-space: pre-line;
     }
     #card.revealed {
@@ -82,19 +86,107 @@
     .center {
       text-align: center;
     }
+    #progressIndicator {
+      font-size: 0.9em;
+      color: #333;
+      margin-bottom: 10px;
+    }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
+      from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
     #app > * {
       animation: fadeIn 0.5s ease-out;
     }
+    /* Dark mode styles */
+    body.dark-mode {
+      background: linear-gradient(135deg, #1a1c1e 0%, #2c3e50 100%);
+    }
+    
+    body.dark-mode #app {
+      background: #2c3e50;
+      color: #fff;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    }
+    
+    body.dark-mode h1 {
+      color: #fff;
+    }
+    
+    body.dark-mode p {
+      color: #ddd;
+    }
+    
+    body.dark-mode #card {
+      background: #34495e;
+      color: #fff;
+    }
+    
+    body.dark-mode #card.revealed {
+      background: #2980b9;
+    }
+    
+    /* Loading spinner */
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #3498db;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+      display: none;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 25px;
+      display: none;
+      animation: fadeInUp 0.3s ease;
+    }
+    
+    @keyframes fadeInUp {
+      from { transform: translate(-50%, 20px); opacity: 0; }
+      to { transform: translate(-50%, 0); opacity: 1; }
+    }
+
+    /* Theme toggle button */
+    #themeToggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 10px;
+      color: #2c3e50;
+    }
+
+    body.dark-mode #themeToggle {
+      color: #fff;
+    }
   </style>
 </head>
 <body>
+  <button id="themeToggle">🌓</button>
   <div id="app">
     <!-- Content is loaded dynamically here -->
   </div>
+  <div class="spinner"></div>
+  <div class="toast"></div>
 
   <script>
     const app = document.getElementById('app');
@@ -103,22 +195,49 @@
     let scriptLines = [];
     let precedingCount = 0;
 
-    // Renders the initial input view
+    // Render the initial input view
     function renderInputView() {
       app.innerHTML = `
         <h1>Script Memorization</h1>
-        <p>Paste your theatrical script and enter your character's name.</p>
-        <textarea id="scriptInput" rows="10" placeholder="Paste your script here..."></textarea>
-        <input type="text" id="characterName" placeholder="e.g., HAMLET">
-        <input type="number" id="precedingCount" placeholder="Number of preceding lines for context" value="0" min="0">
+        <p>Paste your theatrical script, enter your character's name,<br>
+        and choose the number of preceding lines to view for context.</p>
+        <textarea id="scriptInput" rows="10" placeholder="Paste your script here... (Ctrl+V)"></textarea>
+        <input type="text" id="characterName" placeholder="Your character's name (e.g., HAMLET)">
+        <input type="number" id="precedingCount" placeholder="Number of context lines" value="1" min="0">
         <div class="center">
-          <button id="extractButton">Extract My Lines</button>
+          <button id="extractButton">Extract My Lines (Enter)</button>
         </div>
+        <p style="font-size: 0.8em; margin-top: 20px;">
+          Keyboard shortcuts:<br>
+          Enter - Extract/Next Line<br>
+          Space - Reveal Line<br>
+          Esc - Restart
+        </p>
       `;
       document.getElementById('extractButton').addEventListener('click', extractLines);
+      document.addEventListener('keydown', handleKeyPress);
     }
 
-    // Extracts lines for the given character (colon is now optional) and stores the full script
+    function handleKeyPress(e) {
+      if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+      
+      if (e.key === 'Enter') {
+        const nextBtn = document.getElementById('nextButton');
+        const extractBtn = document.getElementById('extractButton');
+        if (nextBtn && nextBtn.style.display !== 'none') nextBtn.click();
+        else if (extractBtn) extractBtn.click();
+      } else if (e.key === ' ') {
+        const revealBtn = document.getElementById('revealButton');
+        if (revealBtn) {
+          e.preventDefault();
+          revealBtn.click();
+        }
+      } else if (e.key === 'Escape') {
+        renderInputView();
+      }
+    }
+
+    // Extract lines for the given character (colon is optional) and store the full script
     function extractLines() {
       const scriptText = document.getElementById('scriptInput').value;
       const character = document.getElementById('characterName').value.trim();
@@ -129,7 +248,7 @@
       scriptLines = scriptText.split(/\r?\n/);
       precedingCount = parseInt(document.getElementById('precedingCount').value) || 0;
       
-      // Match lines starting with the character name, with an optional colon.
+      // Match lines starting with the character name (colon optional)
       const regex = new RegExp("^\\s*" + character + "\\b\\s*:?", "i");
       extractedLines = [];
       for (let i = 0; i < scriptLines.length; i++) {
@@ -145,10 +264,11 @@
       renderPracticeView();
     }
 
-    // Renders the practice view with interactive flashcard
+    // Render the practice view with a progress indicator and interactive flashcard
     function renderPracticeView() {
       app.innerHTML = `
         <h1>Practice Mode</h1>
+        <div id="progressIndicator" class="center"></div>
         <div id="card">Press "Reveal" to see your line with context.</div>
         <div class="center">
           <button id="revealButton">Reveal</button>
@@ -159,15 +279,32 @@
       document.getElementById('revealButton').addEventListener('click', () => showCurrentCard(true));
       document.getElementById('nextButton').addEventListener('click', nextCard);
       document.getElementById('restartButton').addEventListener('click', renderInputView);
+      updateProgress();
       showCurrentCard(false);
     }
 
-    // Displays the current flashcard, showing preceding context lines plus the character's line (hidden or revealed)
+    // Utility function to update the progress indicator
+    function updateProgress() {
+      const progress = document.getElementById('progressIndicator');
+      progress.textContent = `Line ${currentLineIndex + 1} of ${extractedLines.length}`;
+    }
+
+    // Utility function to smoothly update the card content
+    function updateCardContent(newContent, callback) {
+      const card = document.getElementById('card');
+      card.style.opacity = 0;
+      setTimeout(() => {
+        card.textContent = newContent;
+        card.style.opacity = 1;
+        if (callback) callback();
+      }, 300);
+    }
+
+    // Display the current flashcard with preceding context and the character's line (hidden or revealed)
     function showCurrentCard(showFull) {
       const card = document.getElementById('card');
       if (currentLineIndex < extractedLines.length) {
         const currentEntry = extractedLines[currentLineIndex];
-        // Get preceding context lines (if available)
         const startIndex = Math.max(0, currentEntry.index - precedingCount);
         const contextLines = scriptLines.slice(startIndex, currentEntry.index);
         let displayText = "";
@@ -180,21 +317,54 @@
         } else {
           displayText += `Line ${currentLineIndex + 1}: ` + currentEntry.line;
           card.classList.add('revealed');
+          const copyBtn = document.createElement('button');
+          copyBtn.textContent = '📋';
+          copyBtn.style.position = 'absolute';
+          copyBtn.style.right = '10px';
+          copyBtn.style.top = '10px';
+          copyBtn.onclick = () => {
+            navigator.clipboard.writeText(currentEntry.line)
+              .then(() => showToast('Line copied to clipboard!'));
+          };
+          card.appendChild(copyBtn);
         }
-        card.textContent = displayText;
+        updateCardContent(displayText);
+        updateProgress();
       } else {
-        card.textContent = "Practice complete! Well done! 🎭";
+        updateCardContent("Practice complete! Well done! 🎭");
         card.classList.add('revealed');
         document.getElementById('revealButton').style.display = 'none';
         document.getElementById('nextButton').style.display = 'none';
         document.getElementById('restartButton').style.display = 'inline-block';
+        document.getElementById('progressIndicator').textContent = '';
       }
     }
 
-    // Moves to the next card
+    // Move to the next card
     function nextCard() {
       currentLineIndex++;
       showCurrentCard(false);
+    }
+
+    function showToast(message, duration = 2000) {
+      const toast = document.querySelector('.toast');
+      toast.textContent = message;
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, duration);
+    }
+
+    // Add theme toggle functionality
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+    });
+
+    // Load saved theme preference
+    if (localStorage.getItem('darkMode') === 'true') {
+      document.body.classList.add('dark-mode');
     }
 
     // Start with the input view
