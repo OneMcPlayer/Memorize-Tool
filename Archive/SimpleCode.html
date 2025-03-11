@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Memorization Techniques</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f4f4f4;
+    }
+    #app {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    .hidden {
+      display: none;
+    }
+    .section {
+      margin-bottom: 20px;
+    }
+    .buttons > button {
+      margin-right: 10px;
+      padding: 10px 15px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    /* For partial words (Method 1) */
+    .partial-word {
+      font-weight: bold;
+      margin-right: 8px;
+      white-space: pre;
+    }
+    input[type="text"] {
+      border: none;
+      border-bottom: 1px solid #999;
+      margin: 0 4px;
+      background: transparent;
+      font-size: 1em;
+      text-align: center;
+      min-width: 50px;
+    }
+    .correct {
+      background: #c1e5c1; /* greenish */
+    }
+    .incorrect {
+      background: #f5cfcf; /* reddish */
+    }
+    /* For random‐removal puzzle (Method 2) */
+    .word-box {
+      display: inline-block;
+      background: #e0e0e0;
+      border-radius: 4px;
+      padding: 3px 5px;
+      margin: 4px;
+    }
+    .result {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <h1>Memorization Techniques</h1>
+
+  <!-- STEP 1: USER INPUT TEXT -->
+  <div id="step1" class="section">
+    <h2>Step 1: Enter Your Text</h2>
+    <textarea id="userText" rows="8" style="width:100%;" placeholder="Paste or type the text you want to memorize..."></textarea>
+    <div class="buttons">
+      <button id="toStep2Btn">Next: Choose Method</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: CHOOSE METHOD -->
+  <div id="step2" class="section hidden">
+    <h2>Step 2: Select a Memorization Method</h2>
+    <p>Pick one of the two methods below:</p>
+    <div class="buttons">
+      <button id="method1Btn">Method 1 (Progressive Hiding)</button>
+      <button id="method2Btn">Method 2 (Random Removal)</button>
+    </div>
+  </div>
+
+  <!-- METHOD 1 CONTAINER -->
+  <div id="method1Container" class="section hidden">
+    <h2>Method 1: Progressive Hiding</h2>
+    <p>
+      **Level 1**: Only partial words are shown (similar to the first screenshot).  
+      **Level 2**: No words shown (or minimal hints). 
+      You can choose whether to type your guesses in the blanks or skip and recite aloud.
+    </p>
+
+    <!-- Toggle: Type or Skip -->
+    <label>
+      <input type="checkbox" id="method1TypeToggle" />
+      I want to type the missing parts (uncheck to skip typing).
+    </label>
+
+    <!-- LEVEL SELECTION / NAVIGATION -->
+    <div class="buttons">
+      <button id="m1Level1Btn">Start Level 1</button>
+      <button id="m1Level2Btn">Start Level 2</button>
+    </div>
+
+    <!-- LEVEL 1 DISPLAY -->
+    <div id="m1Level1" class="hidden">
+      <h3>Level 1: Partial Words</h3>
+      <p id="m1Level1Display"></p>
+      <div class="buttons">
+        <button id="m1Level1CheckBtn">Check</button>
+        <button id="m1Level1NextBtn">Next Level &raquo;</button>
+      </div>
+      <div id="m1Level1Result" class="result"></div>
+    </div>
+
+    <!-- LEVEL 2 DISPLAY -->
+    <div id="m1Level2" class="hidden">
+      <h3>Level 2: Barely Any Words</h3>
+      <p>All or most words are hidden. Try reciting from memory!</p>
+      <p id="m1Level2Display"></p>
+      <div class="buttons">
+        <button id="m1Level2CheckBtn">Check</button>
+      </div>
+      <div id="m1Level2Result" class="result"></div>
+    </div>
+  </div>
+
+  <!-- METHOD 2 CONTAINER -->
+  <div id="method2Container" class="section hidden">
+    <h2>Method 2: Random Removal</h2>
+    <p>
+      We remove an increasing percentage of words in multiple steps.  
+      You can choose to type the missing words or skip and just recite aloud.
+    </p>
+
+    <!-- Toggle: Type or Skip -->
+    <label>
+      <input type="checkbox" id="method2TypeToggle" />
+      I want to type the missing words (uncheck to skip typing).
+    </label>
+
+    <div class="buttons">
+      <button id="m2StartBtn">Start / Restart</button>
+      <button id="m2NextStepBtn">Next Step (Remove More)</button>
+      <button id="m2CheckBtn">Check</button>
+    </div>
+    <div id="method2Exercise"></div>
+    <div id="m2Result" class="result"></div>
+  </div>
+
+</div>
+
+<script>
+/* =====================================
+   GLOBAL ELEMENTS & VARIABLES
+====================================== */
+const step1 = document.getElementById("step1");
+const step2 = document.getElementById("step2");
+const toStep2Btn = document.getElementById("toStep2Btn");
+const userTextArea = document.getElementById("userText");
+
+const method1Container = document.getElementById("method1Container");
+const method2Container = document.getElementById("method2Container");
+const method1Btn = document.getElementById("method1Btn");
+const method2Btn = document.getElementById("method2Btn");
+
+let globalText = "";        // The user’s entire text
+let globalWords = [];       // The text split into words
+
+// Method 1 elements
+const m1TypeToggle = document.getElementById("method1TypeToggle");
+const m1Level1 = document.getElementById("m1Level1");
+const m1Level2 = document.getElementById("m1Level2");
+const m1Level1Btn = document.getElementById("m1Level1Btn");
+const m1Level2Btn = document.getElementById("m1Level2Btn");
+const m1Level1Display = document.getElementById("m1Level1Display");
+const m1Level2Display = document.getElementById("m1Level2Display");
+const m1Level1CheckBtn = document.getElementById("m1Level1CheckBtn");
+const m1Level1NextBtn = document.getElementById("m1Level1NextBtn");
+const m1Level1Result = document.getElementById("m1Level1Result");
+const m1Level2CheckBtn = document.getElementById("m1Level2CheckBtn");
+const m1Level2Result = document.getElementById("m1Level2Result");
+
+// Method 2 elements
+const m2TypeToggle = document.getElementById("method2TypeToggle");
+const method2Exercise = document.getElementById("method2Exercise");
+const m2StartBtn = document.getElementById("m2StartBtn");
+const m2NextStepBtn = document.getElementById("m2NextStepBtn");
+const m2CheckBtn = document.getElementById("m2CheckBtn");
+const m2Result = document.getElementById("m2Result");
+
+// Keep track of removal percentage across steps (Method 2)
+let m2CurrentRemoval = 0;  // e.g. 0%, 20%, 40%, etc.
+
+/* =====================================
+   STEP 1 -> STEP 2
+====================================== */
+toStep2Btn.addEventListener("click", () => {
+  const text = userTextArea.value.trim();
+  if (!text) {
+    alert("Please enter some text first!");
+    return;
+  }
+  globalText = text;
+  // Split into words (this is simplistic; you can refine as needed)
+  globalWords = globalText.split(/\s+/);
+
+  step1.classList.add("hidden");
+  step2.classList.remove("hidden");
+});
+
+/* =====================================
+   CHOOSING METHOD 1 OR 2
+====================================== */
+method1Btn.addEventListener("click", () => {
+  step2.classList.add("hidden");
+  method1Container.classList.remove("hidden");
+  method2Container.classList.add("hidden");
+});
+
+method2Btn.addEventListener("click", () => {
+  step2.classList.add("hidden");
+  method2Container.classList.remove("hidden");
+  method1Container.classList.add("hidden");
+});
+
+
+/* =====================================
+   METHOD 1: PROGRESSIVE HIDING
+====================================== */
+
+/** 
+ * HELPER: create partial words by only showing the first letter 
+ * and turning the rest into underscores. 
+ * For example, "Hello" => "H____"
+ */
+function createPartialWord(word) {
+  if (word.length === 1) return word; // single character, can't hide much
+  const first = word.charAt(0);
+  const underscores = "_".repeat(word.length - 1);
+  return first + underscores;
+}
+
+// Show/hide relevant containers
+m1Level1Btn.addEventListener("click", () => {
+  // Show Level 1, hide Level 2
+  m1Level1.classList.remove("hidden");
+  m1Level2.classList.add("hidden");
+  m1Level1Result.textContent = "";
+  generateMethod1Level1();
+});
+
+m1Level2Btn.addEventListener("click", () => {
+  // Show Level 2, hide Level 1
+  m1Level2.classList.remove("hidden");
+  m1Level1.classList.add("hidden");
+  m1Level2Result.textContent = "";
+  generateMethod1Level2();
+});
+
+/* LEVEL 1: Show partial words with optional input fields if 'type' is checked */
+function generateMethod1Level1() {
+  m1Level1Display.innerHTML = "";
+  const userWantsToType = m1TypeToggle.checked;
+
+  globalWords.forEach(word => {
+    // Convert to partial
+    const partial = createPartialWord(word);
+
+    if (!userWantsToType) {
+      // Just show the partial text (no input)
+      const span = document.createElement("span");
+      span.className = "partial-word";
+      span.textContent = partial;
+      m1Level1Display.appendChild(span);
+    } else {
+      // Show partial with an <input> to fill in
+      // We'll keep the correct answer in a data attribute
+      const span = document.createElement("span");
+      span.className = "partial-word";
+      span.textContent = partial + " (";
+      const input = document.createElement("input");
+      input.type = "text";
+      input.dataset.correct = word;
+      span.appendChild(input);
+      span.appendChild(document.createTextNode(")"));
+      m1Level1Display.appendChild(span);
+    }
+  });
+}
+
+/* LEVEL 2: Hide (or almost hide) all words. 
+   We'll either show no text at all or just first letter of each line. 
+   Below is a minimal example. */
+function generateMethod1Level2() {
+  m1Level2Display.innerHTML = "";
+  const userWantsToType = m1TypeToggle.checked;
+
+  globalWords.forEach(word => {
+    const hidden = "_".repeat(word.length); // or just "______" 
+    if (!userWantsToType) {
+      // Show underscores only
+      const span = document.createElement("span");
+      span.className = "partial-word";
+      span.textContent = hidden;
+      m1Level2Display.appendChild(span);
+    } else {
+      // Provide an input for each word
+      const span = document.createElement("span");
+      span.className = "partial-word";
+      span.textContent = hidden + " (";
+      const input = document.createElement("input");
+      input.type = "text";
+      input.dataset.correct = word;
+      span.appendChild(input);
+      span.appendChild(document.createTextNode(")"));
+      m1Level2Display.appendChild(span);
+    }
+  });
+}
+
+/* LEVEL 1: Check button */
+m1Level1CheckBtn.addEventListener("click", () => {
+  if (!m1TypeToggle.checked) {
+    m1Level1Result.textContent = "Typing is disabled. Just recite aloud!";
+    return;
+  }
+  const inputs = m1Level1Display.querySelectorAll("input");
+  let correctCount = 0;
+  inputs.forEach(inp => {
+    const userAnswer = inp.value.trim();
+    const correct = inp.dataset.correct;
+    if (userAnswer.toLowerCase() === correct.toLowerCase()) {
+      inp.classList.add("correct");
+      correctCount++;
+    } else {
+      inp.classList.add("incorrect");
+    }
+  });
+  m1Level1Result.textContent = `You got ${correctCount} / ${inputs.length} correct.`;
+});
+
+/* LEVEL 1: Next Level -> simply show Level 2 */
+m1Level1NextBtn.addEventListener("click", () => {
+  m1Level1.classList.add("hidden");
+  m1Level2.classList.remove("hidden");
+  m1Level2Result.textContent = "";
+  generateMethod1Level2();
+});
+
+/* LEVEL 2: Check button */
+m1Level2CheckBtn.addEventListener("click", () => {
+  if (!m1TypeToggle.checked) {
+    m1Level2Result.textContent = "Typing is disabled. Just recite aloud!";
+    return;
+  }
+  const inputs = m1Level2Display.querySelectorAll("input");
+  let correctCount = 0;
+  inputs.forEach(inp => {
+    const userAnswer = inp.value.trim();
+    const correct = inp.dataset.correct;
+    if (userAnswer.toLowerCase() === correct.toLowerCase()) {
+      inp.classList.add("correct");
+      correctCount++;
+    } else {
+      inp.classList.add("incorrect");
+    }
+  });
+  m1Level2Result.textContent = `You got ${correctCount} / ${inputs.length} correct.`;
+});
+
+
+/* =====================================
+   METHOD 2: RANDOM REMOVAL IN STEPS
+====================================== */
+m2StartBtn.addEventListener("click", () => {
+  // Reset removal level and UI
+  m2CurrentRemoval = 0;
+  method2Exercise.innerHTML = "";
+  m2Result.textContent = "";
+  generateMethod2Exercise();
+});
+
+m2NextStepBtn.addEventListener("click", () => {
+  if (m2CurrentRemoval >= 60) {
+    alert("You've reached quite a high removal level already!");
+  } else {
+    // Increase the percentage removed
+    m2CurrentRemoval += 20; // for example, jump by 20% each step
+    generateMethod2Exercise();
+  }
+});
+
+m2CheckBtn.addEventListener("click", () => {
+  if (!m2TypeToggle.checked) {
+    m2Result.textContent = "Typing is disabled. You’re just reciting aloud!";
+    return;
+  }
+  const inputs = method2Exercise.querySelectorAll("input");
+  let correctCount = 0;
+  inputs.forEach(inp => {
+    const userAnswer = inp.value.trim();
+    const correct = inp.dataset.correctAnswer;
+    if (userAnswer.toLowerCase() === correct.toLowerCase()) {
+      inp.classList.add("correct");
+      correctCount++;
+    } else {
+      inp.classList.add("incorrect");
+    }
+  });
+  m2Result.textContent = `You got ${correctCount} / ${inputs.length} correct.`;
+});
+
+/** Generate the puzzle with the current removal percentage (m2CurrentRemoval). */
+function generateMethod2Exercise() {
+  method2Exercise.innerHTML = "";
+  m2Result.textContent = "";
+
+  const totalWords = globalWords.length;
+  const numToRemove = Math.floor((m2CurrentRemoval / 100) * totalWords);
+
+  // Create an array of indices
+  let indices = globalWords.map((_, i) => i);
+  shuffleArray(indices); // randomize them
+  // select the first "numToRemove" to remove
+  let removedIndices = new Set(indices.slice(0, numToRemove));
+
+  const userWantsToType = m2TypeToggle.checked;
+
+  globalWords.forEach((word, idx) => {
+    const span = document.createElement("span");
+    span.className = "word-box";
+
+    if (removedIndices.has(idx)) {
+      if (userWantsToType) {
+        // Show input
+        const inp = document.createElement("input");
+        inp.type = "text";
+        inp.dataset.correctAnswer = word;
+        span.appendChild(inp);
+      } else {
+        // Show placeholders (underscores)
+        let underscores = "_".repeat(word.length);
+        span.textContent = underscores;
+      }
+    } else {
+      // Show the original word
+      span.textContent = word;
+    }
+    method2Exercise.appendChild(span);
+  });
+}
+
+/* 
+  Helper to shuffle an array in-place 
+*/
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+</script>
+</body>
+</html>
