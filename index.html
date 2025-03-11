@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Script Memorization Tool</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2em;
+      line-height: 1.6;
+      background-color: #f9f9f9;
+    }
+    h1, h2 {
+      color: #333;
+    }
+    textarea, input[type="text"] {
+      width: 100%;
+      padding: 0.5em;
+      margin: 0.5em 0;
+      font-size: 1em;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 0.5em 1em;
+      margin: 0.5em 0.2em;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    #outputSection, #practiceSection {
+      margin-top: 2em;
+      padding: 1em;
+      background-color: #fff;
+      border: 1px solid #ddd;
+    }
+    #card {
+      margin: 1em 0;
+      padding: 1em;
+      border: 1px dashed #888;
+      background-color: #eee;
+    }
+  </style>
+</head>
+<body>
+  <h1>Script Memorization Tool</h1>
+  <p>
+    Paste your theatrical script below and enter your character’s name.
+    The tool will extract your lines (assumes each line starts with the character’s name followed by a colon)
+    and provide a practice mode to help you review and memorize your parts.
+  </p>
+  
+  <div>
+    <textarea id="scriptInput" rows="15" placeholder="Paste your script here..."></textarea>
+  </div>
+  
+  <div>
+    <label for="characterName"><strong>Your Character Name:</strong></label>
+    <input type="text" id="characterName" placeholder="e.g., HAMLET">
+  </div>
+  
+  <div>
+    <button id="extractButton">Extract My Lines</button>
+  </div>
+  
+  <div id="outputSection" style="display: none;">
+    <h2>Extracted Lines</h2>
+    <ul id="linesList"></ul>
+    <button id="practiceButton">Start Practice Mode</button>
+  </div>
+  
+  <div id="practiceSection" style="display: none;">
+    <h2>Practice Mode</h2>
+    <div id="card">
+      <p id="cardText">Press "Reveal" to see the line.</p>
+    </div>
+    <button id="revealButton">Reveal</button>
+    <button id="nextButton">Next</button>
+  </div>
+  
+  <script>
+    // Extract the lines for the given character when button is clicked
+    document.getElementById("extractButton").addEventListener("click", function() {
+      var scriptText = document.getElementById("scriptInput").value;
+      var character = document.getElementById("characterName").value.trim();
+      
+      if (scriptText === "" || character === "") {
+        alert("Please enter both the script and your character name.");
+        return;
+      }
+      
+      // Split the script by newlines
+      var lines = scriptText.split(/\r?\n/);
+      
+      // Use a regular expression to filter lines that start with the character's name followed by a colon
+      var regex = new RegExp("^\\s*" + character + "\\s*:", "i");
+      var extractedLines = lines.filter(function(line) {
+        return regex.test(line);
+      });
+      
+      if (extractedLines.length === 0) {
+        alert("No lines found for the character: " + character);
+        return;
+      }
+      
+      // Display the extracted lines in the output section
+      var list = document.getElementById("linesList");
+      list.innerHTML = "";
+      extractedLines.forEach(function(line) {
+        var li = document.createElement("li");
+        li.textContent = line;
+        list.appendChild(li);
+      });
+      
+      // Save the extracted lines for practice mode
+      window.extractedLines = extractedLines;
+      window.currentLineIndex = 0;
+      
+      document.getElementById("outputSection").style.display = "block";
+      document.getElementById("practiceSection").style.display = "none";
+    });
+    
+    // Start the practice mode
+    document.getElementById("practiceButton").addEventListener("click", function() {
+      document.getElementById("practiceSection").style.display = "block";
+      window.currentLineIndex = 0;
+      showCurrentCard(false);
+    });
+    
+    // Function to display the current flashcard
+    function showCurrentCard(showFull) {
+      var cardText = document.getElementById("cardText");
+      if (window.extractedLines && window.currentLineIndex < window.extractedLines.length) {
+        var line = window.extractedLines[window.currentLineIndex];
+        if (!showFull) {
+          // Hide the line; you can adjust the placeholder to your liking
+          cardText.textContent = "Line " + (window.currentLineIndex + 1) + ": " + "????????????????";
+        } else {
+          cardText.textContent = "Line " + (window.currentLineIndex + 1) + ": " + line;
+        }
+      } else {
+        cardText.textContent = "Practice complete! Well done.";
+      }
+    }
+    
+    // Reveal the full line when the "Reveal" button is clicked
+    document.getElementById("revealButton").addEventListener("click", function() {
+      showCurrentCard(true);
+    });
+    
+    // Move to the next line in the practice mode when "Next" is clicked
+    document.getElementById("nextButton").addEventListener("click", function() {
+      window.currentLineIndex++;
+      if (window.currentLineIndex >= window.extractedLines.length) {
+        alert("You've practiced all your lines!");
+        document.getElementById("cardText").textContent = "Practice complete! Well done.";
+      } else {
+        showCurrentCard(false);
+      }
+    });
+  </script>
+</body>
+</html>
