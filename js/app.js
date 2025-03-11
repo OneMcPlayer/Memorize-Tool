@@ -49,31 +49,19 @@ function renderInputView() {
     <h1>${t.title}</h1>
     <p>${t.description}</p>
     <div class="input-tabs">
-      <button class="tab-btn active" data-tab="paste">📋 ${t.pasteModeTab}</button>
       <button class="tab-btn" data-tab="file">📁 ${t.fileModeTab}</button>
-      <button class="tab-btn" data-tab="library">📚 ${t.libraryModeTab}</button>
-    </div>
-    <div class="tab-content" id="paste-tab">
-      <textarea id="scriptInput" rows="10" placeholder="${t.scriptPlaceholder}"></textarea>
+      <button class="tab-btn active" data-tab="library">📚 ${t.libraryModeTab}</button>
     </div>
     <div class="tab-content hidden" id="file-tab">
-      <input type="file" id="scriptFile" accept=".txt,.script,.md">
+      <input type="file" id="scriptFile" accept=".script">
       <p class="help-text">${t.formatHelp}</p>
     </div>
-    <div class="tab-content hidden" id="library-tab">
+    <div class="tab-content" id="library-tab">
       <select id="scriptLibrary">
         <option value="">${t.selectScript}</option>
       </select>
     </div>
     <input type="text" id="characterName" placeholder="${t.characterPlaceholder}">
-    <div class="format-options">
-      <label>
-        <input type="radio" name="format" value="plain" checked> ${t.plainText}
-      </label>
-      <label>
-        <input type="radio" name="format" value="structured"> ${t.structuredFormat}
-      </label>
-    </div>
     <div class="input-group">
       <input type="number" id="precedingCount" placeholder="${t.contextLinesPlaceholder}" value="1" min="0" max="5">
       <p class="help-text" style="color: #666; font-size: 0.85em; margin: 5px 0 15px;">
@@ -93,7 +81,7 @@ function renderInputView() {
   setupInputHandlers();
 }
 
-function setupInputHandlers() {
+async function setupInputHandlers() {
   const tabs = document.querySelectorAll('.tab-btn');
   const contents = document.querySelectorAll('.tab-content');
   
@@ -127,10 +115,12 @@ function handleFileUpload(event) {
   const reader = new FileReader();
   reader.onload = (e) => {
     const content = e.target.result;
-    if (document.querySelector('input[name="format"]:checked').value === 'structured') {
-      parseStructuredScript(content);
-    } else {
+    try {
+      const script = Script.fromStructuredText(content);
       document.getElementById('scriptInput').value = content;
+    } catch (error) {
+      showToast("Error: Invalid script format");
+      console.error(error);
     }
   };
   reader.readAsText(file);
@@ -139,28 +129,15 @@ function handleFileUpload(event) {
 async function handleLibrarySelection(event) {
   try {
     const selectedScript = await ScriptLibrary.loadScript(event.target.value);
-    if (selectedScript.format === "structured") {
-      document.querySelector('input[value="structured"]').checked = true;
-      parseStructuredScript(selectedScript.content);
-    } else {
-      document.querySelector('input[value="plain"]').checked = true;
-      document.getElementById('scriptInput').value = selectedScript.text;
+    if (!selectedScript) {
+      showToast("Error: Script not found");
+      return;
     }
-    // Switch to paste tab after selection
-    document.querySelector('[data-tab="paste"]').click();
+    // Switch to file tab after selection
+    document.querySelector('[data-tab="file"]').click();
   } catch (error) {
     showToast("Error loading script");
     console.error(error);
-  }
-}
-
-// Update parseStructuredScript to use Script model
-function parseStructuredScript(content) {
-  try {
-    return Script.fromStructuredText(content);
-  } catch (error) {
-    console.error('Error parsing structured script:', error);
-    return null;
   }
 }
 
@@ -322,4 +299,14 @@ function handleKeyPress(e) {
 }
 
 // Finally, start the app by rendering the input view
-renderInputView();
+async function initializeApp() {
+  try {
+    await ScriptLibrary.initialize();
+    renderInputView();
+  } catch (error) {
+    console.error('Failed to initialize app:', error);
+    showToast('Error loading scripts');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', initializeApp);

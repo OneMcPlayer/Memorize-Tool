@@ -323,10 +323,11 @@ body.dark-mode .context-section {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
+  justify-content: center;
 }
 
 .tab-btn {
-  flex: 1;
+  flex: 0 1 200px; /* Changed from flex: 1 to give fixed width */
   padding: 10px;
   border: none;
   border-radius: 8px;
