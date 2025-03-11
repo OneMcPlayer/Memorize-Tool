@@ -14,6 +14,42 @@
       height: 100vh;
       margin: 0;
     }
+
+    /* 
+     * 1) CREATE A HEADER CONTROLS CONTAINER
+     *    This container is positioned at the top and uses flex to space out
+     *    the language select on the left and theme toggle on the right.
+     */
+    .header-controls {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 999; /* Ensure it stays above other elements */
+    }
+
+    /* Move languageSelect and themeToggle styles into the header container */
+    #languageSelect {
+      padding: 8px;
+      border-radius: 15px;
+      border: 2px solid #3498db;
+      background: white;
+      cursor: pointer;
+      font-size: 1em;
+    }
+    #themeToggle {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 10px;
+      color: #2c3e50;
+    }
+
+    /* The main container for your script tool */
     #app {
       background: #fff;
       border: none;
@@ -99,34 +135,39 @@
     #app > * {
       animation: fadeIn 0.5s ease-out;
     }
+
     /* Dark mode styles */
     body.dark-mode {
       background: linear-gradient(135deg, #1a1c1e 0%, #2c3e50 100%);
     }
-    
     body.dark-mode #app {
       background: #2c3e50;
       color: #fff;
       box-shadow: 0 10px 20px rgba(0,0,0,0.3);
     }
-    
     body.dark-mode h1 {
       color: #fff;
     }
-    
     body.dark-mode p {
       color: #ddd;
     }
-    
     body.dark-mode #card {
       background: #34495e;
       color: #fff;
     }
-    
     body.dark-mode #card.revealed {
       background: #2980b9;
     }
-    
+
+    body.dark-mode #languageSelect {
+      background: #2c3e50;
+      color: #fff;
+      border-color: #fff;
+    }
+    body.dark-mode #themeToggle {
+      color: #fff;
+    }
+
     /* Loading spinner */
     .spinner {
       width: 40px;
@@ -138,12 +179,11 @@
       margin: 20px auto;
       display: none;
     }
-    
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-    
+
     /* Toast notification */
     .toast {
       position: fixed;
@@ -157,46 +197,9 @@
       display: none;
       animation: fadeInUp 0.3s ease;
     }
-    
     @keyframes fadeInUp {
       from { transform: translate(-50%, 20px); opacity: 0; }
       to { transform: translate(-50%, 0); opacity: 1; }
-    }
-
-    /* Theme toggle button */
-    #themeToggle {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: none;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      padding: 10px;
-      color: #2c3e50;
-    }
-
-    body.dark-mode #themeToggle {
-      color: #fff;
-    }
-
-    /* Language selector styles */
-    #languageSelect {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      padding: 8px;
-      border-radius: 15px;
-      border: 2px solid #3498db;
-      background: white;
-      cursor: pointer;
-      font-size: 1em;
-    }
-
-    body.dark-mode #languageSelect {
-      background: #2c3e50;
-      color: white;
-      border-color: #fff;
     }
 
     /* Mobile styles */
@@ -206,38 +209,22 @@
         padding: 20px;
         margin: 10px;
       }
-
       h1 {
         font-size: 1.5em;
       }
-
       button {
         width: 100%;
         margin: 5px 0;
       }
-
       .center button {
         width: auto;
         min-width: 120px;
       }
-
-      #themeToggle {
-        top: 10px;
-        right: 10px;
-      }
-
-      #languageSelect {
-        top: 10px;
-        left: 10px;
-        font-size: 0.9em;
-      }
-
       #card {
         font-size: 1.1em;
         padding: 20px;
         min-height: 100px;
       }
-
       textarea {
         max-height: 200px;
       }
@@ -249,7 +236,6 @@
         transform: none;
         box-shadow: none;
       }
-
       button:active {
         transform: scale(0.95);
         background: #2980b9;
@@ -258,14 +244,16 @@
   </style>
 </head>
 <body>
-  <select id="languageSelect">
-    <option value="en">🇬🇧 English</option>
-    <option value="it">🇮🇹 Italiano</option>
-  </select>
-  <button id="themeToggle">🌓</button>
-  <div id="app">
-    <!-- Content is loaded dynamically here -->
+  <!-- 2) WRAP THE LANGUAGE SELECT AND THE THEME TOGGLE IN A SINGLE CONTAINER -->
+  <div class="header-controls">
+    <select id="languageSelect">
+      <option value="en">🇬🇧 English</option>
+      <option value="it">🇮🇹 Italiano</option>
+    </select>
+    <button id="themeToggle">🌓</button>
   </div>
+
+  <div id="app"><!-- Content is loaded dynamically here --></div>
   <div class="spinner"></div>
   <div class="toast"></div>
 
@@ -538,7 +526,6 @@
     function handleSwipeGesture() {
       const swipeThreshold = 50;
       const diff = touchEndX - touchStartX;
-
       if (Math.abs(diff) < swipeThreshold) return;
 
       // In practice mode only
