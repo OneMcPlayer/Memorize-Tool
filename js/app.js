@@ -137,8 +137,12 @@ async function handleLibrarySelection(event) {
       showToast("Error: Script not found");
       return;
     }
-    // Switch to file tab after selection
-    document.querySelector('[data-tab="file"]').click();
+    
+    // Use the content directly rather than switching tabs
+    scriptLines = ScriptProcessor.preProcessScript(
+      selectedScript.content || selectedScript.text
+    );
+    
   } catch (error) {
     showToast("Error loading script");
     console.error(error);
