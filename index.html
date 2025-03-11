@@ -29,7 +29,7 @@
       color: #2c3e50;
       font-size: 2em;
     }
-    textarea, input[type="text"] {
+    textarea, input[type="text"], input[type="number"] {
       width: 100%;
       padding: 12px;
       margin: 10px 0;
@@ -39,7 +39,7 @@
       border-radius: 8px;
       transition: border-color 0.3s ease;
     }
-    textarea:focus, input[type="text"]:focus {
+    textarea:focus, input[type="text"]:focus, input[type="number"]:focus {
       outline: none;
       border-color: #3498db;
     }
@@ -73,6 +73,7 @@
       border-radius: 12px;
       box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
       transition: all 0.3s ease;
+      white-space: pre-line;
     }
     #card.revealed {
       background: #e8f4fc;
@@ -99,6 +100,8 @@
     const app = document.getElementById('app');
     let extractedLines = [];
     let currentLineIndex = 0;
+    let scriptLines = [];
+    let precedingCount = 0;
 
     // Renders the initial input view
     function renderInputView() {
@@ -107,6 +110,7 @@
         <p>Paste your theatrical script and enter your character's name.</p>
         <textarea id="scriptInput" rows="10" placeholder="Paste your script here..."></textarea>
         <input type="text" id="characterName" placeholder="e.g., HAMLET">
+        <input type="number" id="precedingCount" placeholder="Number of preceding lines for context" value="0" min="0">
         <div class="center">
           <button id="extractButton">Extract My Lines</button>
         </div>
@@ -114,7 +118,7 @@
       document.getElementById('extractButton').addEventListener('click', extractLines);
     }
 
-    // Extracts lines for the given character (colon is now optional)
+    // Extracts lines for the given character (colon is now optional) and stores the full script
     function extractLines() {
       const scriptText = document.getElementById('scriptInput').value;
       const character = document.getElementById('characterName').value.trim();
@@ -122,10 +126,17 @@
         alert("Please enter both the script and your character name.");
         return;
       }
-      const lines = scriptText.split(/\r?\n/);
+      scriptLines = scriptText.split(/\r?\n/);
+      precedingCount = parseInt(document.getElementById('precedingCount').value) || 0;
+      
       // Match lines starting with the character name, with an optional colon.
       const regex = new RegExp("^\\s*" + character + "\\b\\s*:?", "i");
-      extractedLines = lines.filter(line => regex.test(line));
+      extractedLines = [];
+      for (let i = 0; i < scriptLines.length; i++) {
+        if (regex.test(scriptLines[i])) {
+          extractedLines.push({ index: i, line: scriptLines[i] });
+        }
+      }
       if (extractedLines.length === 0) {
         alert("No lines found for the character: " + character);
         return;
@@ -138,7 +149,7 @@
     function renderPracticeView() {
       app.innerHTML = `
         <h1>Practice Mode</h1>
-        <div id="card">Press "Reveal" to see the line.</div>
+        <div id="card">Press "Reveal" to see your line with context.</div>
         <div class="center">
           <button id="revealButton">Reveal</button>
           <button id="nextButton">Next</button>
@@ -151,18 +162,26 @@
       showCurrentCard(false);
     }
 
-    // Displays the current flashcard, either hidden or revealed
+    // Displays the current flashcard, showing preceding context lines plus the character's line (hidden or revealed)
     function showCurrentCard(showFull) {
       const card = document.getElementById('card');
       if (currentLineIndex < extractedLines.length) {
-        let line = extractedLines[currentLineIndex];
+        const currentEntry = extractedLines[currentLineIndex];
+        // Get preceding context lines (if available)
+        const startIndex = Math.max(0, currentEntry.index - precedingCount);
+        const contextLines = scriptLines.slice(startIndex, currentEntry.index);
+        let displayText = "";
+        if (contextLines.length > 0) {
+          displayText += "Context:\n" + contextLines.join("\n") + "\n\n";
+        }
         if (!showFull) {
-          card.textContent = `Line ${currentLineIndex + 1}: ` + "????????????????";
+          displayText += `Line ${currentLineIndex + 1}: ` + "????????????????";
           card.classList.remove('revealed');
         } else {
-          card.textContent = `Line ${currentLineIndex + 1}: ` + line;
+          displayText += `Line ${currentLineIndex + 1}: ` + currentEntry.line;
           card.classList.add('revealed');
         }
+        card.textContent = displayText;
       } else {
         card.textContent = "Practice complete! Well done! 🎭";
         card.classList.add('revealed');
