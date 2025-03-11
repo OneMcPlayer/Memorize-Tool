@@ -48,8 +48,32 @@ function renderInputView() {
   app.innerHTML = `
     <h1>${t.title}</h1>
     <p>${t.description}</p>
-    <textarea id="scriptInput" rows="10" placeholder="${t.scriptPlaceholder}"></textarea>
+    <div class="input-tabs">
+      <button class="tab-btn active" data-tab="paste">📋 ${t.pasteModeTab}</button>
+      <button class="tab-btn" data-tab="file">📁 ${t.fileModeTab}</button>
+      <button class="tab-btn" data-tab="library">📚 ${t.libraryModeTab}</button>
+    </div>
+    <div class="tab-content" id="paste-tab">
+      <textarea id="scriptInput" rows="10" placeholder="${t.scriptPlaceholder}"></textarea>
+    </div>
+    <div class="tab-content hidden" id="file-tab">
+      <input type="file" id="scriptFile" accept=".txt,.script,.md">
+      <p class="help-text">${t.formatHelp}</p>
+    </div>
+    <div class="tab-content hidden" id="library-tab">
+      <select id="scriptLibrary">
+        <option value="">${t.selectScript}</option>
+      </select>
+    </div>
     <input type="text" id="characterName" placeholder="${t.characterPlaceholder}">
+    <div class="format-options">
+      <label>
+        <input type="radio" name="format" value="plain" checked> ${t.plainText}
+      </label>
+      <label>
+        <input type="radio" name="format" value="structured"> ${t.structuredFormat}
+      </label>
+    </div>
     <div class="input-group">
       <input type="number" id="precedingCount" placeholder="${t.contextLinesPlaceholder}" value="1" min="0" max="5">
       <p class="help-text" style="color: #666; font-size: 0.85em; margin: 5px 0 15px;">
@@ -66,7 +90,136 @@ function renderInputView() {
       ${t.shortcutRestart}
     </p>
   `;
+  setupInputHandlers();
+}
+
+const sampleLibrary = {
+  hamlet: {
+    title: "Hamlet",
+    text: `HAMLET: To be, or not to be, that is the question...`
+  },
+  macbeth: {
+    title: "Macbeth",
+    text: `MACBETH: Tomorrow, and tomorrow, and tomorrow...`
+  }
+};
+
+function setupInputHandlers() {
+  const tabs = document.querySelectorAll('.tab-btn');
+  const contents = document.querySelectorAll('.tab-content');
+  
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      contents.forEach(c => c.classList.add('hidden'));
+      tab.classList.add('active');
+      document.getElementById(`${tab.dataset.tab}-tab`).classList.remove('hidden');
+    });
+  });
+
+  document.getElementById('scriptFile').addEventListener('change', handleFileUpload);
+  document.getElementById('scriptLibrary').addEventListener('change', handleLibrarySelection);
   document.getElementById('extractButton').addEventListener('click', extractLines);
+
+  // Add sample scripts to library dropdown
+  const librarySelect = document.getElementById('scriptLibrary');
+  Object.entries(sampleLibrary).forEach(([id, script]) => {
+    const option = document.createElement('option');
+    option.value = id;
+    option.textContent = script.title;
+    librarySelect.appendChild(option);
+  });
+}
+
+function handleFileUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const content = e.target.result;
+    if (document.querySelector('input[name="format"]:checked').value === 'structured') {
+      parseStructuredScript(content);
+    } else {
+      document.getElementById('scriptInput').value = content;
+    }
+  };
+  reader.readAsText(file);
+}
+
+function handleLibrarySelection(event) {
+  const selectedScript = sampleLibrary[event.target.value];
+  if (selectedScript) {
+    document.getElementById('scriptInput').value = selectedScript.text;
+    // Switch to paste tab after selection
+    document.querySelector('[data-tab="paste"]').click();
+  }
+}
+
+function parseStructuredScript(content) {
+  try {
+    const script = {
+      metadata: {},
+      roles: [],
+      scenes: []
+    };
+
+    const lines = content.split('\n');
+    let currentSection = null;
+    let currentScene = null;
+
+    lines.forEach(line => {
+      const trimmed = line.trim();
+      if (trimmed.startsWith('@')) {
+        const [tag, ...value] = trimmed.substring(1).split(' ');
+        
+        switch (tag) {
+          case 'title':
+          case 'author':
+          case 'date':
+            script.metadata[tag] = value.join(' ');
+            break;
+          case 'roles':
+            currentSection = 'roles';
+            break;
+          case 'scene':
+            currentScene = { context: '', description: '', dialogue: [] };
+            script.scenes.push(currentScene);
+            currentSection = 'scene';
+            break;
+          case 'action':
+            if (currentScene) {
+              currentScene.dialogue.push({ type: 'action', text: value.join(' ') });
+            }
+            break;
+        }
+      } else if (trimmed && currentSection) {
+        switch (currentSection) {
+          case 'roles':
+            if (trimmed.includes(':')) {
+              const [name, desc] = trimmed.split(':').map(s => s.trim());
+              script.roles.push({ name, description: desc });
+            }
+            break;
+          case 'scene':
+            if (trimmed.includes('":')) {
+              const [character, ...text] = trimmed.split('":');
+              currentScene.dialogue.push({
+                type: 'dialogue',
+                character: character.trim(),
+                text: text.join('":').trim().replace(/^"""|"""$/g, '')
+              });
+            }
+            break;
+        }
+      }
+    });
+
+    return script;
+  } catch (error) {
+    console.error('Error parsing structured script:', error);
+    return null;
+  }
 }
 
 function renderPracticeView() {

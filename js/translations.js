@@ -24,7 +24,14 @@ const translations = {
       copied: "Line copied to clipboard!",
       complete: "Practice complete! Well done! 🎭",
       errorNoInput: "Please enter both the script and your character name.",
-      errorNoLines: "No lines found for the character: "
+      errorNoLines: "No lines found for the character: ",
+      pasteModeTab: "Paste Text",
+      fileModeTab: "Upload File",
+      libraryModeTab: "Script Library",
+      formatHelp: "Upload a script file in plain text or structured format",
+      selectScript: "Select a script from library...",
+      plainText: "Plain Text",
+      structuredFormat: "Structured Format"
     },
     it: {
       title: "Memorizzazione Copione",
@@ -50,6 +57,13 @@ const translations = {
       copied: "Battuta copiata negli appunti!",
       complete: "Pratica completata! Ben fatto! 🎭",
       errorNoInput: "Inserisci sia il copione che il nome del personaggio.",
-      errorNoLines: "Nessuna battuta trovata per il personaggio: "
+      errorNoLines: "Nessuna battuta trovata per il personaggio: ",
+      pasteModeTab: "Incolla Testo",
+      fileModeTab: "Carica File",
+      libraryModeTab: "Libreria Copioni",
+      formatHelp: "Carica un copione in formato testo o strutturato",
+      selectScript: "Seleziona un copione dalla libreria...",
+      plainText: "Testo Semplice",
+      structuredFormat: "Formato Strutturato"
     }
   };
