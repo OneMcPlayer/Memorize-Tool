@@ -2,6 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Interactive Script Memorization Tool</title>
   <style>
     body {
@@ -197,6 +198,63 @@
       color: white;
       border-color: #fff;
     }
+
+    /* Mobile styles */
+    @media (max-width: 768px) {
+      #app {
+        width: 95%;
+        padding: 20px;
+        margin: 10px;
+      }
+
+      h1 {
+        font-size: 1.5em;
+      }
+
+      button {
+        width: 100%;
+        margin: 5px 0;
+      }
+
+      .center button {
+        width: auto;
+        min-width: 120px;
+      }
+
+      #themeToggle {
+        top: 10px;
+        right: 10px;
+      }
+
+      #languageSelect {
+        top: 10px;
+        left: 10px;
+        font-size: 0.9em;
+      }
+
+      #card {
+        font-size: 1.1em;
+        padding: 20px;
+        min-height: 100px;
+      }
+
+      textarea {
+        max-height: 200px;
+      }
+    }
+
+    /* Touch-friendly button states */
+    @media (hover: none) {
+      button:hover {
+        transform: none;
+        box-shadow: none;
+      }
+
+      button:active {
+        transform: scale(0.95);
+        background: #2980b9;
+      }
+    }
   </style>
 </head>
 <body>
@@ -368,6 +426,9 @@
           <button id="nextButton">${t.nextButton}</button>
           <button id="restartButton" style="display: none;">${t.restartButton}</button>
         </div>
+        <p style="font-size: 0.8em; margin-top: 20px; color: #666;">
+          📱 Swipe right to reveal, left for next line
+        </p>
       `;
       document.getElementById('revealButton').addEventListener('click', () => showCurrentCard(true));
       document.getElementById('nextButton').addEventListener('click', nextCard);
@@ -459,6 +520,40 @@
     // Load saved theme preference
     if (localStorage.getItem('darkMode') === 'true') {
       document.body.classList.add('dark-mode');
+    }
+
+    // Add touch gesture support
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    document.addEventListener('touchstart', e => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+
+    document.addEventListener('touchend', e => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipeGesture();
+    });
+
+    function handleSwipeGesture() {
+      const swipeThreshold = 50;
+      const diff = touchEndX - touchStartX;
+
+      if (Math.abs(diff) < swipeThreshold) return;
+
+      // In practice mode only
+      const nextBtn = document.getElementById('nextButton');
+      const revealBtn = document.getElementById('revealButton');
+
+      if (nextBtn && revealBtn) {
+        if (diff > 0) {
+          // Swipe right to reveal
+          revealBtn.click();
+        } else {
+          // Swipe left for next
+          nextBtn.click();
+        }
+      }
     }
 
     // Start with the input view
