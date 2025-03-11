@@ -203,7 +203,13 @@
         and choose the number of preceding lines to view for context.</p>
         <textarea id="scriptInput" rows="10" placeholder="Paste your script here... (Ctrl+V)"></textarea>
         <input type="text" id="characterName" placeholder="Your character's name (e.g., HAMLET)">
-        <input type="number" id="precedingCount" placeholder="Number of context lines" value="1" min="0">
+        <div class="input-group">
+          <input type="number" id="precedingCount" placeholder="Context lines (0-5)" value="1" min="0" max="5">
+          <p class="help-text" style="color: #666; font-size: 0.85em; margin: 5px 0 15px;">
+            💡 This number determines how many lines before your character's line will be shown as context.
+            For example, if you set it to 2, you'll see the two lines spoken by other characters right before your line.
+          </p>
+        </div>
         <div class="center">
           <button id="extractButton">Extract My Lines (Enter)</button>
         </div>
