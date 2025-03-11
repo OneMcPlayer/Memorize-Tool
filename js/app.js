@@ -92,24 +92,37 @@ function renderPracticeView() {
  * CORE LOGIC
  *************************************************************/
 function preProcessScript(scriptText) {
-  // First, normalize line endings
-  let text = scriptText.replace(/\r\n/g, '\n');
+  // First, normalize line endings and remove multiple empty lines
+  let text = scriptText.replace(/\r\n/g, '\n')
+                      .replace(/\n{3,}/g, '\n\n');
   
   let lines = text.split('\n');
   let processedLines = [];
   let currentLine = '';
   let lastCharacterName = '';
+  let isStageDirection = false;
 
   for (let i = 0; i < lines.length; i++) {
     let line = lines[i].trim();
     
     // Skip empty lines
-    if (!line) continue;
+    if (!line) {
+      if (currentLine) {
+        processedLines.push(currentLine);
+        currentLine = '';
+      }
+      continue;
+    }
 
-    // Check if this line starts with a character name (all caps, possibly followed by colon)
+    // Check for stage directions (text in parentheses)
+    if (line.startsWith('(')) {
+      isStageDirection = true;
+    }
+
+    // Check if this line starts with a character name (all caps)
     const characterMatch = line.match(/^([A-Z][A-Z\s]+)(?:\s*:?\s*)(.*)/);
     
-    if (characterMatch) {
+    if (characterMatch && !isStageDirection) {
       // If we have a pending line, save it
       if (currentLine) {
         processedLines.push(currentLine);
@@ -119,19 +132,24 @@ function preProcessScript(scriptText) {
       lastCharacterName = characterMatch[1].trim();
       currentLine = `${lastCharacterName}: ${characterMatch[2]}`;
     } else {
-      // If line starts with lowercase or doesn't match character pattern,
-      // it's probably a continuation of the previous line
+      // If line is part of stage direction or previous dialogue
       if (currentLine) {
-        // Add space only if the current line doesn't end with hyphen
-        const connector = currentLine.endsWith('-') ? '' : ' ';
+        // Add space only if needed
+        const connector = currentLine.endsWith('-') ? '' : 
+                        (currentLine.endsWith('(') || line.startsWith(')')) ? '' : ' ';
         currentLine += connector + line;
-      } else if (lastCharacterName) {
+      } else if (lastCharacterName && !isStageDirection) {
         // If we have a last known character but no current line
         currentLine = `${lastCharacterName}: ${line}`;
       } else {
-        // If we can't associate it with any character, store as is
+        // Store stage directions or other text as is
         currentLine = line;
       }
+    }
+
+    // Reset stage direction flag if line ends with ')'
+    if (line.endsWith(')')) {
+      isStageDirection = false;
     }
   }
 
