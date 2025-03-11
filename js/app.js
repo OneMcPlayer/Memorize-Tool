@@ -93,17 +93,6 @@ function renderInputView() {
   setupInputHandlers();
 }
 
-const sampleLibrary = {
-  hamlet: {
-    title: "Hamlet",
-    text: `HAMLET: To be, or not to be, that is the question...`
-  },
-  macbeth: {
-    title: "Macbeth",
-    text: `MACBETH: Tomorrow, and tomorrow, and tomorrow...`
-  }
-};
-
 function setupInputHandlers() {
   const tabs = document.querySelectorAll('.tab-btn');
   const contents = document.querySelectorAll('.tab-content');
@@ -121,12 +110,12 @@ function setupInputHandlers() {
   document.getElementById('scriptLibrary').addEventListener('change', handleLibrarySelection);
   document.getElementById('extractButton').addEventListener('click', extractLines);
 
-  // Add sample scripts to library dropdown
+  // Update library script loading
   const librarySelect = document.getElementById('scriptLibrary');
-  Object.entries(sampleLibrary).forEach(([id, script]) => {
+  ScriptLibrary.getAvailableScripts().forEach(({id, title, format}) => {
     const option = document.createElement('option');
     option.value = id;
-    option.textContent = script.title;
+    option.textContent = `${title} (${format})`;
     librarySelect.appendChild(option);
   });
 }
@@ -147,75 +136,28 @@ function handleFileUpload(event) {
   reader.readAsText(file);
 }
 
-function handleLibrarySelection(event) {
-  const selectedScript = sampleLibrary[event.target.value];
-  if (selectedScript) {
-    document.getElementById('scriptInput').value = selectedScript.text;
+async function handleLibrarySelection(event) {
+  try {
+    const selectedScript = await ScriptLibrary.loadScript(event.target.value);
+    if (selectedScript.format === "structured") {
+      document.querySelector('input[value="structured"]').checked = true;
+      parseStructuredScript(selectedScript.content);
+    } else {
+      document.querySelector('input[value="plain"]').checked = true;
+      document.getElementById('scriptInput').value = selectedScript.text;
+    }
     // Switch to paste tab after selection
     document.querySelector('[data-tab="paste"]').click();
+  } catch (error) {
+    showToast("Error loading script");
+    console.error(error);
   }
 }
 
+// Update parseStructuredScript to use Script model
 function parseStructuredScript(content) {
   try {
-    const script = {
-      metadata: {},
-      roles: [],
-      scenes: []
-    };
-
-    const lines = content.split('\n');
-    let currentSection = null;
-    let currentScene = null;
-
-    lines.forEach(line => {
-      const trimmed = line.trim();
-      if (trimmed.startsWith('@')) {
-        const [tag, ...value] = trimmed.substring(1).split(' ');
-        
-        switch (tag) {
-          case 'title':
-          case 'author':
-          case 'date':
-            script.metadata[tag] = value.join(' ');
-            break;
-          case 'roles':
-            currentSection = 'roles';
-            break;
-          case 'scene':
-            currentScene = { context: '', description: '', dialogue: [] };
-            script.scenes.push(currentScene);
-            currentSection = 'scene';
-            break;
-          case 'action':
-            if (currentScene) {
-              currentScene.dialogue.push({ type: 'action', text: value.join(' ') });
-            }
-            break;
-        }
-      } else if (trimmed && currentSection) {
-        switch (currentSection) {
-          case 'roles':
-            if (trimmed.includes(':')) {
-              const [name, desc] = trimmed.split(':').map(s => s.trim());
-              script.roles.push({ name, description: desc });
-            }
-            break;
-          case 'scene':
-            if (trimmed.includes('":')) {
-              const [character, ...text] = trimmed.split('":');
-              currentScene.dialogue.push({
-                type: 'dialogue',
-                character: character.trim(),
-                text: text.join('":').trim().replace(/^"""|"""$/g, '')
-              });
-            }
-            break;
-        }
-      }
-    });
-
-    return script;
+    return Script.fromStructuredText(content);
   } catch (error) {
     console.error('Error parsing structured script:', error);
     return null;
@@ -244,76 +186,6 @@ function renderPracticeView() {
 /*************************************************************
  * CORE LOGIC
  *************************************************************/
-function preProcessScript(scriptText) {
-  // First, normalize line endings and remove multiple empty lines
-  let text = scriptText.replace(/\r\n/g, '\n')
-                      .replace(/\n{3,}/g, '\n\n');
-  
-  let lines = text.split('\n');
-  let processedLines = [];
-  let currentLine = '';
-  let lastCharacterName = '';
-  let isStageDirection = false;
-
-  for (let i = 0; i < lines.length; i++) {
-    let line = lines[i].trim();
-    
-    // Skip empty lines
-    if (!line) {
-      if (currentLine) {
-        processedLines.push(currentLine);
-        currentLine = '';
-      }
-      continue;
-    }
-
-    // Check for stage directions (text in parentheses)
-    if (line.startsWith('(')) {
-      isStageDirection = true;
-    }
-
-    // Check if this line starts with a character name (all caps)
-    const characterMatch = line.match(/^([A-Z][A-Z\s]+)(?:\s*:?\s*)(.*)/);
-    
-    if (characterMatch && !isStageDirection) {
-      // If we have a pending line, save it
-      if (currentLine) {
-        processedLines.push(currentLine);
-      }
-      
-      // Start new line with character name
-      lastCharacterName = characterMatch[1].trim();
-      currentLine = `${lastCharacterName}: ${characterMatch[2]}`;
-    } else {
-      // If line is part of stage direction or previous dialogue
-      if (currentLine) {
-        // Add space only if needed
-        const connector = currentLine.endsWith('-') ? '' : 
-                        (currentLine.endsWith('(') || line.startsWith(')')) ? '' : ' ';
-        currentLine += connector + line;
-      } else if (lastCharacterName && !isStageDirection) {
-        // If we have a last known character but no current line
-        currentLine = `${lastCharacterName}: ${line}`;
-      } else {
-        // Store stage directions or other text as is
-        currentLine = line;
-      }
-    }
-
-    // Reset stage direction flag if line ends with ')'
-    if (line.endsWith(')')) {
-      isStageDirection = false;
-    }
-  }
-
-  // Don't forget the last line
-  if (currentLine) {
-    processedLines.push(currentLine);
-  }
-
-  return processedLines;
-}
-
 function extractLines() {
   const t = translations[currentLang];
   const scriptText = document.getElementById('scriptInput').value;
@@ -324,20 +196,10 @@ function extractLines() {
     return;
   }
   
-  // Pre-process the script to handle broken lines
-  scriptLines = preProcessScript(scriptText);
+  scriptLines = ScriptProcessor.preProcessScript(scriptText);
   precedingCount = parseInt(document.getElementById('precedingCount').value) || 0;
 
-  // Escape special characters in character name for regex
-  const escapedCharacter = character.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const regex = new RegExp(`^\\s*${escapedCharacter}\\b\\s*:?`, "i");
-  
-  extractedLines = [];
-  for (let i = 0; i < scriptLines.length; i++) {
-    if (regex.test(scriptLines[i])) {
-      extractedLines.push({ index: i, line: scriptLines[i] });
-    }
-  }
+  extractedLines = ScriptProcessor.extractCharacterLines(scriptLines, character, precedingCount);
 
   if (extractedLines.length === 0) {
     showToast(t.errorNoLines + character);
