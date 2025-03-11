@@ -178,9 +178,32 @@
     body.dark-mode #themeToggle {
       color: #fff;
     }
+
+    /* Language selector styles */
+    #languageSelect {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      padding: 8px;
+      border-radius: 15px;
+      border: 2px solid #3498db;
+      background: white;
+      cursor: pointer;
+      font-size: 1em;
+    }
+
+    body.dark-mode #languageSelect {
+      background: #2c3e50;
+      color: white;
+      border-color: #fff;
+    }
   </style>
 </head>
 <body>
+  <select id="languageSelect">
+    <option value="en">🇬🇧 English</option>
+    <option value="it">🇮🇹 Italiano</option>
+  </select>
   <button id="themeToggle">🌓</button>
   <div id="app">
     <!-- Content is loaded dynamically here -->
@@ -195,29 +218,91 @@
     let scriptLines = [];
     let precedingCount = 0;
 
+    // Add language strings
+    const translations = {
+      en: {
+        title: "Script Memorization",
+        description: "Paste your theatrical script, enter your character's name,<br>and choose the number of preceding lines to view for context.",
+        scriptPlaceholder: "Paste your script here... (Ctrl+V)",
+        characterPlaceholder: "Your character's name (e.g., HAMLET)",
+        contextLinesPlaceholder: "Context lines (0-5)",
+        contextHelp: "💡 This number determines how many lines before your character's line will be shown as context. For example, if you set it to 2, you'll see the two lines spoken by other characters right before your line.",
+        extractButton: "Extract My Lines (Enter)",
+        shortcuts: "Keyboard shortcuts:",
+        shortcutExtract: "Enter - Extract/Next Line",
+        shortcutReveal: "Space - Reveal Line",
+        shortcutRestart: "Esc - Restart",
+        practiceMode: "Practice Mode",
+        pressReveal: "Press \"Reveal\" to see your line with context.",
+        revealButton: "Reveal",
+        nextButton: "Next",
+        restartButton: "Restart",
+        context: "Context:",
+        line: "Line",
+        copied: "Line copied to clipboard!",
+        complete: "Practice complete! Well done! 🎭",
+        errorNoInput: "Please enter both the script and your character name.",
+        errorNoLines: "No lines found for the character: "
+      },
+      it: {
+        title: "Memorizzazione Copione",
+        description: "Incolla il tuo copione, inserisci il nome del tuo personaggio,<br>e scegli quante battute precedenti vuoi vedere come contesto.",
+        scriptPlaceholder: "Incolla qui il tuo copione... (Ctrl+V)",
+        characterPlaceholder: "Nome del personaggio (es. AMLETO)",
+        contextLinesPlaceholder: "Linee di contesto (0-5)",
+        contextHelp: "💡 Questo numero determina quante battute prima della tua verranno mostrate come contesto. Per esempio, se lo imposti a 2, vedrai le due battute dette dagli altri personaggi prima della tua.",
+        extractButton: "Estrai le Mie Battute (Invio)",
+        shortcuts: "Scorciatoie da tastiera:",
+        shortcutExtract: "Invio - Estrai/Prossima Battuta",
+        shortcutReveal: "Spazio - Rivela Battuta",
+        shortcutRestart: "Esc - Ricomincia",
+        practiceMode: "Modalità Pratica",
+        pressReveal: "Premi \"Rivela\" per vedere la tua battuta con il contesto.",
+        revealButton: "Rivela",
+        nextButton: "Avanti",
+        restartButton: "Ricomincia",
+        context: "Contesto:",
+        line: "Battuta",
+        copied: "Battuta copiata negli appunti!",
+        complete: "Pratica completata! Ben fatto! 🎭",
+        errorNoInput: "Inserisci sia il copione che il nome del personaggio.",
+        errorNoLines: "Nessuna battuta trovata per il personaggio: "
+      }
+    };
+
+    let currentLang = localStorage.getItem('lang') || 'en';
+
+    // Update language selector and add event listener
+    const langSelect = document.getElementById('languageSelect');
+    langSelect.value = currentLang;
+    langSelect.addEventListener('change', (e) => {
+      currentLang = e.target.value;
+      localStorage.setItem('lang', currentLang);
+      renderInputView();
+    });
+
     // Render the initial input view
     function renderInputView() {
+      const t = translations[currentLang];
       app.innerHTML = `
-        <h1>Script Memorization</h1>
-        <p>Paste your theatrical script, enter your character's name,<br>
-        and choose the number of preceding lines to view for context.</p>
-        <textarea id="scriptInput" rows="10" placeholder="Paste your script here... (Ctrl+V)"></textarea>
-        <input type="text" id="characterName" placeholder="Your character's name (e.g., HAMLET)">
+        <h1>${t.title}</h1>
+        <p>${t.description}</p>
+        <textarea id="scriptInput" rows="10" placeholder="${t.scriptPlaceholder}"></textarea>
+        <input type="text" id="characterName" placeholder="${t.characterPlaceholder}">
         <div class="input-group">
-          <input type="number" id="precedingCount" placeholder="Context lines (0-5)" value="1" min="0" max="5">
+          <input type="number" id="precedingCount" placeholder="${t.contextLinesPlaceholder}" value="1" min="0" max="5">
           <p class="help-text" style="color: #666; font-size: 0.85em; margin: 5px 0 15px;">
-            💡 This number determines how many lines before your character's line will be shown as context.
-            For example, if you set it to 2, you'll see the two lines spoken by other characters right before your line.
+            ${t.contextHelp}
           </p>
         </div>
         <div class="center">
-          <button id="extractButton">Extract My Lines (Enter)</button>
+          <button id="extractButton">${t.extractButton}</button>
         </div>
         <p style="font-size: 0.8em; margin-top: 20px;">
-          Keyboard shortcuts:<br>
-          Enter - Extract/Next Line<br>
-          Space - Reveal Line<br>
-          Esc - Restart
+          ${t.shortcuts}<br>
+          ${t.shortcutExtract}<br>
+          ${t.shortcutReveal}<br>
+          ${t.shortcutRestart}
         </p>
       `;
       document.getElementById('extractButton').addEventListener('click', extractLines);
@@ -245,10 +330,11 @@
 
     // Extract lines for the given character (colon is optional) and store the full script
     function extractLines() {
+      const t = translations[currentLang];
       const scriptText = document.getElementById('scriptInput').value;
       const character = document.getElementById('characterName').value.trim();
       if (!scriptText || !character) {
-        alert("Please enter both the script and your character name.");
+        alert(t.errorNoInput);
         return;
       }
       scriptLines = scriptText.split(/\r?\n/);
@@ -263,7 +349,7 @@
         }
       }
       if (extractedLines.length === 0) {
-        alert("No lines found for the character: " + character);
+        alert(t.errorNoLines + character);
         return;
       }
       currentLineIndex = 0;
@@ -272,14 +358,15 @@
 
     // Render the practice view with a progress indicator and interactive flashcard
     function renderPracticeView() {
+      const t = translations[currentLang];
       app.innerHTML = `
-        <h1>Practice Mode</h1>
+        <h1>${t.practiceMode}</h1>
         <div id="progressIndicator" class="center"></div>
-        <div id="card">Press "Reveal" to see your line with context.</div>
+        <div id="card">${t.pressReveal}</div>
         <div class="center">
-          <button id="revealButton">Reveal</button>
-          <button id="nextButton">Next</button>
-          <button id="restartButton" style="display: none;">Restart</button>
+          <button id="revealButton">${t.revealButton}</button>
+          <button id="nextButton">${t.nextButton}</button>
+          <button id="restartButton" style="display: none;">${t.restartButton}</button>
         </div>
       `;
       document.getElementById('revealButton').addEventListener('click', () => showCurrentCard(true));
@@ -308,6 +395,7 @@
 
     // Display the current flashcard with preceding context and the character's line (hidden or revealed)
     function showCurrentCard(showFull) {
+      const t = translations[currentLang];
       const card = document.getElementById('card');
       if (currentLineIndex < extractedLines.length) {
         const currentEntry = extractedLines[currentLineIndex];
@@ -315,13 +403,13 @@
         const contextLines = scriptLines.slice(startIndex, currentEntry.index);
         let displayText = "";
         if (contextLines.length > 0) {
-          displayText += "Context:\n" + contextLines.join("\n") + "\n\n";
+          displayText += `${t.context}\n` + contextLines.join("\n") + "\n\n";
         }
         if (!showFull) {
-          displayText += `Line ${currentLineIndex + 1}: ` + "????????????????";
+          displayText += `${t.line} ${currentLineIndex + 1}: ` + "????????????????";
           card.classList.remove('revealed');
         } else {
-          displayText += `Line ${currentLineIndex + 1}: ` + currentEntry.line;
+          displayText += `${t.line} ${currentLineIndex + 1}: ` + currentEntry.line;
           card.classList.add('revealed');
           const copyBtn = document.createElement('button');
           copyBtn.textContent = '📋';
@@ -330,14 +418,14 @@
           copyBtn.style.top = '10px';
           copyBtn.onclick = () => {
             navigator.clipboard.writeText(currentEntry.line)
-              .then(() => showToast('Line copied to clipboard!'));
+              .then(() => showToast(t.copied));
           };
           card.appendChild(copyBtn);
         }
         updateCardContent(displayText);
         updateProgress();
       } else {
-        updateCardContent("Practice complete! Well done! 🎭");
+        updateCardContent(t.complete);
         card.classList.add('revealed');
         document.getElementById('revealButton').style.display = 'none';
         document.getElementById('nextButton').style.display = 'none';
