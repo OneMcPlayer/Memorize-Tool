@@ -44,7 +44,7 @@
   <h1>Script Memorization Tool</h1>
   <p>
     Paste your theatrical script below and enter your character’s name.
-    The tool will extract your lines (assumes each line starts with the character’s name followed by a colon)
+    The tool will extract your lines (it now works whether or not a colon follows your character's name)
     and provide a practice mode to help you review and memorize your parts.
   </p>
   
@@ -90,8 +90,9 @@
       // Split the script by newlines
       var lines = scriptText.split(/\r?\n/);
       
-      // Use a regular expression to filter lines that start with the character's name followed by a colon
-      var regex = new RegExp("^\\s*" + character + "\\s*:", "i");
+      // Use a regular expression to filter lines that start with the character's name.
+      // The colon after the name is now optional.
+      var regex = new RegExp("^\\s*" + character + "\\b\\s*:?", "i");
       var extractedLines = lines.filter(function(line) {
         return regex.test(line);
       });
