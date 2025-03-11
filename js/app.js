@@ -132,17 +132,23 @@ function handleFileUpload(event) {
 
 async function handleLibrarySelection(event) {
   try {
-    const selectedScript = await ScriptLibrary.loadScript(event.target.value);
+    const scriptId = event.target.value;
+    if (!scriptId) return;
+
+    const selectedScript = await ScriptLibrary.loadScript(scriptId);
     if (!selectedScript) {
       showToast("Error: Script not found");
       return;
     }
-    
-    // Use the content directly rather than switching tabs
-    scriptLines = ScriptProcessor.preProcessScript(
-      selectedScript.content || selectedScript.text
-    );
-    
+
+    // Store the script content and preprocess it
+    const content = selectedScript.content || selectedScript.text;
+    if (!content) {
+      showToast("Error: Script has no content");
+      return;
+    }
+
+    scriptLines = ScriptProcessor.preProcessScript(content);
   } catch (error) {
     showToast("Error loading script");
     console.error(error);
@@ -177,46 +183,51 @@ function extractLines() {
   const scriptFile = document.getElementById('scriptFile');
   const scriptLibrary = document.getElementById('scriptLibrary');
   const character = document.getElementById('characterName').value.trim();
+
+  if (!character) {
+    showToast(t.errorNoInput);
+    return;
+  }
+
+  let currentLines = scriptLines;
   
-  let scriptText = '';
-  
-  // Get text from active tab
-  if (!document.getElementById('paste-tab').classList.contains('hidden')) {
-    scriptText = scriptInput.value;
-  } else if (!document.getElementById('file-tab').classList.contains('hidden')) {
-    // Handle structured format from file
-    if (!scriptFile.files[0]) {
-      showToast(t.errorNoInput);
-      return;
-    }
-    const reader = new FileReader();
-    reader.readAsText(scriptFile.files[0]);
-    scriptText = reader.result;
-  } else {
-    // Library mode is active
+  // Only process text if we're not using preprocessed lines from library
+  if (!document.getElementById('library-tab').classList.contains('hidden')) {
+    // Library mode - use existing scriptLines
     if (!scriptLibrary.value) {
       showToast(t.errorNoInput);
       return;
     }
-    const selectedScript = ScriptLibrary.scripts.get(scriptLibrary.value);
-    scriptText = selectedScript.content;
+  } else if (!document.getElementById('paste-tab').classList.contains('hidden')) {
+    // Paste mode
+    if (!scriptInput.value) {
+      showToast(t.errorNoInput);
+      return;
+    }
+    currentLines = ScriptProcessor.preProcessScript(scriptInput.value);
+  } else {
+    // File mode
+    if (!scriptFile.files[0]) {
+      showToast(t.errorNoInput);
+      return;
+    }
+    currentLines = ScriptProcessor.preProcessScript(scriptFile.value);
   }
 
-  if (!scriptText || !character) {
+  if (!currentLines || currentLines.length === 0) {
     showToast(t.errorNoInput);
     return;
   }
-  
-  scriptLines = ScriptProcessor.preProcessScript(scriptText);
-  precedingCount = parseInt(document.getElementById('precedingCount').value) || 0;
 
+  scriptLines = currentLines;
+  precedingCount = parseInt(document.getElementById('precedingCount').value) || 0;
   extractedLines = ScriptProcessor.extractCharacterLines(scriptLines, character, precedingCount);
 
   if (extractedLines.length === 0) {
     showToast(t.errorNoLines + character);
     return;
   }
-  
+
   currentLineIndex = 0;
   renderPracticeView();
 }
