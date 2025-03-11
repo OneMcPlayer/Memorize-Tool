@@ -15,13 +15,8 @@ const sampleLibrary = {
     title: "L'INVENTORE DEL CAVALLO",
     format: "structured",
     content: {
-      "id": "inventore-cavallo",
-      "title": "L'INVENTORE DEL CAVALLO",
-      "author": "Your Name",
-      "date": "Data di composizione sconosciuta",
-      "description": "Atto unico ambientato nell'Accademia di Immortali, dove l'Inventore del cavallo presenta la sua creazione (che però… esiste già!). Testo satirico e teatrale.",
-      "format": "structured",
-      "content": "@title \"L'INVENTORE DEL CAVALLO\"\n@author \"Your Name\"\n@date \"Data di composizione sconosciuta\"\n@description \"Atto unico ambientato nell'Accademia di Immortali, dove l'Inventore del cavallo presenta la sua creazione (che però… esiste già!). Testo satirico e teatrale.\"\n\n@roles\n  - [L'INVENTORE del cavallo]: \"Studioso che sostiene di aver creato un 'nuovo' animale.\"\n  - [Il POETA maledetto]: \"Poeta infelice che non sa fare rime (né versi sciolti).\"\n// ...rest of the script content..."
+      format: "structured",
+      text: await fetch('js/data/scripts/inventore-cavallo.script').then(r => r.text())
     }
   }
 };
@@ -30,9 +25,10 @@ class ScriptLibrary {
   static async loadScript(scriptId) {
     const script = sampleLibrary[scriptId];
     if (!script) throw new Error('Script not found');
-
+    
     if (script.format === "structured") {
-      return script.content;
+      // For structured scripts, process the DSL format
+      return Script.fromStructuredText(script.content.text);
     }
     
     return script;

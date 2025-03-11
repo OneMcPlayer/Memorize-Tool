@@ -3,61 +3,61 @@ class Script {
     this.metadata = {};
     this.roles = [];
     this.scenes = [];
+    this.text = '';
   }
 
   static fromStructuredText(content) {
     const script = new Script();
     const lines = content.split('\n');
     let currentSection = null;
-    let currentScene = null;
+    let currentContent = [];
 
-    lines.forEach(line => {
-      const trimmed = line.trim();
-      if (trimmed.startsWith('@')) {
-        const [tag, ...value] = trimmed.substring(1).split(' ');
-        
-        switch (tag) {
-          case 'title':
-          case 'author':
-          case 'date':
-            script.metadata[tag] = value.join(' ');
-            break;
-          case 'roles':
-            currentSection = 'roles';
-            break;
-          case 'scene':
-            currentScene = { context: '', description: '', dialogue: [] };
-            script.scenes.push(currentScene);
-            currentSection = 'scene';
-            break;
-          case 'action':
-            if (currentScene) {
-              currentScene.dialogue.push({ type: 'action', text: value.join(' ') });
-            }
-            break;
-        }
-      } else if (trimmed && currentSection) {
-        switch (currentSection) {
-          case 'roles':
-            if (trimmed.includes(':')) {
-              const [name, desc] = trimmed.split(':').map(s => s.trim());
-              script.roles.push({ name, description: desc });
-            }
-            break;
-          case 'scene':
-            if (trimmed.includes('":')) {
-              const [character, ...text] = trimmed.split('":');
-              currentScene.dialogue.push({
-                type: 'dialogue',
-                character: character.trim(),
-                text: text.join('":').trim().replace(/^"""|"""$/g, '')
-              });
-            }
-            break;
-        }
+    const processMetadata = (line) => {
+      const match = line.match(/@(\w+)\s+"([^"]+)"/);
+      if (match) {
+        script.metadata[match[1]] = match[2];
       }
-    });
+    };
 
+    const processRoles = (line) => {
+      const roleMatch = line.match(/\s*-\s*\[(.*?)\]:\s*"([^"]+)"/);
+      if (roleMatch) {
+        script.roles.push({
+          name: roleMatch[1],
+          description: roleMatch[2]
+        });
+      }
+    };
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      
+      if (!line) continue;
+
+      if (line.startsWith('@roles')) {
+        currentSection = 'roles';
+        continue;
+      } else if (line === '@endroles') {
+        currentSection = null;
+        continue;
+      } else if (line.startsWith('@text')) {
+        currentSection = 'text';
+        continue;
+      }
+
+      switch (currentSection) {
+        case 'roles':
+          processRoles(line);
+          break;
+        case 'text':
+          currentContent.push(line);
+          break;
+        default:
+          processMetadata(line);
+      }
+    }
+
+    script.text = currentContent.join('\n');
     return script;
   }
 }
