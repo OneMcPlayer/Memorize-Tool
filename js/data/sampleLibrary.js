@@ -1,73 +1,65 @@
-const sampleLibrary = {
-  // Legacy plain text samples
-  hamlet: {
+const scriptCatalog = {
+  // Basic info about available scripts
+  "hamlet": {
     title: "Hamlet",
-    text: `HAMLET: To be, or not to be, that is the question...`,
-    format: "plain"
+    format: "plain",
+    path: "js/data/scripts/hamlet.script"
   },
-  macbeth: {
-    title: "Macbeth", 
-    text: `MACBETH: Tomorrow, and tomorrow, and tomorrow...`,
-    format: "plain"
+  "macbeth": {
+    title: "Macbeth",
+    format: "plain", 
+    path: "js/data/scripts/macbeth.script"
   },
   "inventore-cavallo": {
     title: "L'INVENTORE DEL CAVALLO",
     format: "structured",
-    content: {
-      format: "structured",
-      text: `@title "L'INVENTORE DEL CAVALLO"
-@author "Your Name"
-@date "Data di composizione sconosciuta"
-@description "Atto unico ambientato nell'Accademia di Immortali, dove l'Inventore del cavallo presenta la sua creazione (che però… esiste già!). Testo satirico e teatrale."
-
-@roles
-  - [L'INVENTORE del cavallo]: "Studioso che sostiene di aver creato un 'nuovo' animale."
-  - [Il POETA maledetto]: "Poeta infelice che non sa fare rime (né versi sciolti)."
-  - [Il PRESIDENTE]: "Presidente dell'Accademia, incline a scampanellare e interrompere gli altri."
-  - [Lo SCIENZIATO]: "Sordo, tende a fraintendere annunci di morte o guarigione."
-  - [Il SEGRETARIO perpetuo]: "Figura burocratica, cura i verbali dell'Accademia."
-  - [L'USCIERE]: "Inserviente che compare a consegnare telegrammi e sorreggere il Segretario."
-  - [L'ENCICLOPEDICA]: "Accademica che conosce tutte le date… ma non i fatti."
-  - [FOTOGRAFO]: "Appare durante la cerimonia, con la sua macchina fotografica e assistente."
-  - [Il CLINICO]: "Medico che chiama 'benattìe' le malattie, perché dopo si può guarire (o morire)."
-  - [MINISTRO della P. I.]: "Ministro della Pubblica Istruzione, presente per onorare l'invenzione."
-@endroles
-
-@text
-PRESIDENTE: (scampanella) Segretario, date lettura dell'ordine del giorno.`
-    }
+    path: "js/data/scripts/inventore-cavallo.script"
   }
 };
 
 class ScriptLibrary {
   static initialized = false;
+  static scripts = new Map();
 
   static async initialize() {
     if (this.initialized) return;
+    
+    // Load all scripts in parallel
+    const loadPromises = Object.entries(scriptCatalog).map(async ([id, info]) => {
+      try {
+        const response = await fetch(info.path);
+        const content = await response.text();
+        this.scripts.set(id, {
+          ...info,
+          content: info.format === 'structured' ? content : { text: content }
+        });
+      } catch (error) {
+        console.error(`Failed to load script ${id}:`, error);
+      }
+    });
+
+    await Promise.all(loadPromises);
     this.initialized = true;
-    // No need to fetch anything now, data is embedded
   }
 
   static async loadScript(scriptId) {
-    const script = sampleLibrary[scriptId];
+    const script = this.scripts.get(scriptId);
     if (!script) throw new Error('Script not found');
     
     if (script.format === "structured") {
-      // For structured scripts, process the DSL format
-      return Script.fromStructuredText(script.content.text);
+      return Script.fromStructuredText(script.content);
     }
     
     return script;
   }
 
   static getAvailableScripts() {
-    return Object.entries(sampleLibrary).map(([id, script]) => ({
+    return Object.entries(scriptCatalog).map(([id, info]) => ({
       id,
-      title: script.title,
-      format: script.format
-    })); 
+      title: info.title,
+      format: info.format
+    }));
   }
 }
 
-window.sampleLibrary = sampleLibrary;
 window.ScriptLibrary = ScriptLibrary;

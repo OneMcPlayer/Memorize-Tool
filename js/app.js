@@ -49,8 +49,12 @@ function renderInputView() {
     <h1>${t.title}</h1>
     <p>${t.description}</p>
     <div class="input-tabs">
+      <button class="tab-btn" data-tab="paste">📝 ${t.pasteModeTab}</button>
       <button class="tab-btn" data-tab="file">📁 ${t.fileModeTab}</button>
       <button class="tab-btn active" data-tab="library">📚 ${t.libraryModeTab}</button>
+    </div>
+    <div class="tab-content hidden" id="paste-tab">
+      <textarea id="scriptInput" rows="10" placeholder="${t.scriptPlaceholder}"></textarea>
     </div>
     <div class="tab-content hidden" id="file-tab">
       <input type="file" id="scriptFile" accept=".script">
@@ -165,9 +169,35 @@ function renderPracticeView() {
  *************************************************************/
 function extractLines() {
   const t = translations[currentLang];
-  const scriptText = document.getElementById('scriptInput').value;
+  const scriptInput = document.getElementById('scriptInput');
+  const scriptFile = document.getElementById('scriptFile');
+  const scriptLibrary = document.getElementById('scriptLibrary');
   const character = document.getElementById('characterName').value.trim();
   
+  let scriptText = '';
+  
+  // Get text from active tab
+  if (!document.getElementById('paste-tab').classList.contains('hidden')) {
+    scriptText = scriptInput.value;
+  } else if (!document.getElementById('file-tab').classList.contains('hidden')) {
+    // Handle structured format from file
+    if (!scriptFile.files[0]) {
+      showToast(t.errorNoInput);
+      return;
+    }
+    scriptText = scriptFile.files[0].text;
+  } else {
+    // Library mode is active
+    if (!scriptLibrary.value) {
+      showToast(t.errorNoInput);
+      return;
+    }
+    const selectedScript = sampleLibrary[scriptLibrary.value];
+    scriptText = selectedScript.format === 'structured' ? 
+                 selectedScript.content.text : 
+                 selectedScript.text;
+  }
+
   if (!scriptText || !character) {
     showToast(t.errorNoInput);
     return;
@@ -185,6 +215,11 @@ function extractLines() {
   
   currentLineIndex = 0;
   renderPracticeView();
+}
+
+function getPlainText(line) {
+  // Remove HTML tags and trim whitespace
+  return line.replace(/<[^>]*>/g, '').trim();
 }
 
 function showCurrentCard(showFull) {
@@ -253,7 +288,8 @@ function showCurrentCard(showFull) {
     copyBtn.style.right = '10px';
     copyBtn.style.top = '10px';
     copyBtn.onclick = () => {
-      navigator.clipboard.writeText(currentEntry.line)
+      // Use the original line text for copying
+      navigator.clipboard.writeText(getPlainText(currentEntry.line))
         .then(() => showToast(t.copied));
     };
     card.appendChild(copyBtn);
