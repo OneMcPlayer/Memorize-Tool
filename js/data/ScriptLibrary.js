@@ -1,4 +1,4 @@
-class ScriptLibrary {
+export class ScriptLibrary {
   #scripts = new Map();
   #initialized = false;
 
