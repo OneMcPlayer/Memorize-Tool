@@ -7,18 +7,28 @@ export class ScriptLibrary {
   async initialize() {
     if (this.#initialized) return;
 
-    const catalog = await CatalogManager.loadCatalog();
-    
-    if (catalog) {
-      await this.#loadFromCatalog(catalog);
-    } else {
-      await this.#scanDirectory();
+    try {
+      const catalog = await CatalogManager.loadCatalog();
+      
+      if (catalog) {
+        await this.#loadFromCatalog(catalog);
+      } else {
+        console.warn('No catalog found, attempting directory scan');
+        await this.#scanDirectory();
+      }
+    } catch (error) {
+      console.error('Failed to initialize script library:', error);
+    } finally {
+      this.#initialized = true;
     }
-
-    this.#initialized = true;
   }
 
   async #loadFromCatalog(catalog) {
+    if (!catalog || Object.keys(catalog).length === 0) {
+      console.warn('Catalog is empty');
+      return;
+    }
+
     const loadPromises = Object.entries(catalog)
       .filter(([_, info]) => CatalogManager.validateCatalogEntry(info))
       .map(async ([id, info]) => {
@@ -26,7 +36,7 @@ export class ScriptLibrary {
           const content = await this.#loadScriptFile(info.path);
           return [id, { ...info, content }];
         } catch (error) {
-          console.error(`Failed to load script ${id}:`, error);
+          console.warn(`Script ${id} not found or inaccessible:`, error);
           return null;
         }
       });

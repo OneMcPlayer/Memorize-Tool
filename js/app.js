@@ -147,22 +147,44 @@ async function setupInputHandlers() {
       tabs.forEach(t => t.classList.remove('active'));
       contents.forEach(c => c.classList.add('hidden'));
       tab.classList.add('active');
-      document.getElementById(`${tab.dataset.tab}-tab`).classList.remove('hidden');
+      document.getElementById(`${tab.dataset.tab}-tab`)?.classList.remove('hidden');
     });
   });
 
-  document.getElementById('scriptFile').addEventListener('change', handleFileUpload);
-  document.getElementById('scriptLibrary').addEventListener('change', handleLibrarySelection);
-  document.getElementById('extractButton').addEventListener('click', extractLines);
+  const fileInput = document.getElementById('scriptFile');
+  if (fileInput) {
+    fileInput.addEventListener('change', handleFileUpload);
+  }
 
-  // Update library script loading
   const librarySelect = document.getElementById('scriptLibrary');
-  ScriptLibrary.getAvailableScripts().forEach(({id, title, format}) => {
-    const option = document.createElement('option');
-    option.value = id;
-    option.textContent = `${title} (${format})`;
-    librarySelect.appendChild(option);
-  });
+  if (librarySelect) {
+    librarySelect.addEventListener('change', handleLibrarySelection);
+  }
+
+  const extractButton = document.getElementById('extractButton');
+  if (extractButton) {
+    extractButton.addEventListener('click', extractLines);
+  }
+
+  // Update library script loading only if we have scripts and a select element
+  if (librarySelect) {
+    const scripts = ScriptLibrary.getAvailableScripts();
+    if (scripts && scripts.length) {
+      scripts.forEach(({id, title, format}) => {
+        const option = document.createElement('option');
+        option.value = id;
+        option.textContent = `${title} (${format})`;
+        librarySelect.appendChild(option);
+      });
+    } else {
+      // Add a disabled option if no scripts are available
+      const option = document.createElement('option');
+      option.value = "";
+      option.textContent = "No scripts available";
+      option.disabled = true;
+      librarySelect.appendChild(option);
+    }
+  }
 }
 
 function handleFileUpload(event) {

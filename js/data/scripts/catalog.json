@@ -1,14 +1,4 @@
 {
-  "hamlet": {
-    "title": "Hamlet",
-    "format": "plain",
-    "path": "js/data/scripts/hamlet.script"
-  },
-  "macbeth": {
-    "title": "Macbeth", 
-    "format": "plain",
-    "path": "js/data/scripts/macbeth.script"
-  },
   "inventore-cavallo": {
     "title": "L'INVENTORE DEL CAVALLO",
     "format": "structured",
