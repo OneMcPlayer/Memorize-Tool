@@ -1,3 +1,5 @@
+import { CatalogManager } from '/Memorize-Tool/js/data/CatalogManager.js';
+
 export class ScriptLibrary {
   #scripts = new Map();
   #initialized = false;
