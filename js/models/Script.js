@@ -8,6 +8,7 @@ export class Script {
 
   static fromStructuredText(content) {
     const script = new Script();
+    // Filter out comment lines starting with "//"
     const lines = content.split('\n');
     let currentSection = null;
     let currentContent = [];
@@ -30,10 +31,12 @@ export class Script {
     };
 
     for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
+      let line = lines[i].trim();
       
       if (!line) continue;
-
+      // Skip comment lines (e.g "#code")
+      if (line.startsWith('//')) continue;
+      
       if (line.startsWith('@roles')) {
         currentSection = 'roles';
         continue;
@@ -57,8 +60,9 @@ export class Script {
       }
     }
 
-    // Fallback: if no text was gathered, use the full content
-    script.text = currentContent.join('\n').trim() || content.trim();
+    // Fallback: if no text was gathered, use the full content minus comments
+    script.text = currentContent.join('\n').trim() || 
+                  lines.filter(l => !l.trim().startsWith('//')).join('\n').trim();
     return script;
   }
 }
