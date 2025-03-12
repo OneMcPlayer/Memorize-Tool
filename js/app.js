@@ -168,7 +168,8 @@ async function setupInputHandlers() {
 
   // Update library script loading only if we have scripts and a select element
   if (librarySelect) {
-    const scripts = ScriptLibrary.getAvailableScripts();
+    // Replace ScriptLibrary.getAvailableScripts() with scriptLibrary.getAvailableScripts()
+    const scripts = scriptLibrary.getAvailableScripts();
     if (scripts && scripts.length) {
       scripts.forEach(({id, title, format}) => {
         const option = document.createElement('option');
