@@ -1,4 +1,4 @@
-class CatalogManager {
+export class CatalogManager {
   static async loadCatalog() {
     try {
       const response = await fetch('js/data/scripts/catalog.json');
