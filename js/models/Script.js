@@ -1,4 +1,4 @@
-class Script {
+export class Script {
   constructor() {
     this.metadata = {};
     this.roles = [];
@@ -61,5 +61,3 @@ class Script {
     return script;
   }
 }
-
-window.Script = Script;

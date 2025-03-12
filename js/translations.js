@@ -1,5 +1,4 @@
-// Make translations globally available
-const translations = {
+export const translations = {
     en: {
       title: "Script Memorization",
       description:

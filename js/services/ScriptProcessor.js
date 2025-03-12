@@ -1,4 +1,4 @@
-class ScriptProcessor {
+export class ScriptProcessor {
   static preProcessScript(scriptText) {
     let text = scriptText.replace(/\r\n/g, '\n')
                         .replace(/\n{3,}/g, '\n\n');
@@ -72,5 +72,3 @@ class ScriptProcessor {
     return extractedLines;
   }
 }
-
-window.ScriptProcessor = ScriptProcessor;

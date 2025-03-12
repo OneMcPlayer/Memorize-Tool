@@ -1,5 +1,5 @@
 // Make functions globally available
-function showToast(message, duration = 2000) {
+export function showToast(message, duration = 2000) {
     const toast = document.querySelector('.toast');
     toast.textContent = message;
     toast.style.display = 'block';
@@ -8,7 +8,7 @@ function showToast(message, duration = 2000) {
     }, duration);
   }
   
-  function handleSwipeGesture(touchStartX, touchEndX, callbacks) {
+export function handleSwipeGesture(touchStartX, touchEndX, callbacks) {
     const swipeThreshold = 50;
     const diff = touchEndX - touchStartX;
     if (Math.abs(diff) < swipeThreshold) return;

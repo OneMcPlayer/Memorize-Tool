@@ -1,3 +1,7 @@
+import './utils.js';
+import './translations.js';
+import './models/Script.js';
+import './services/ScriptProcessor.js';
 import scriptLibrary from './data/scriptLibraryInstance.js';
 
 const app = document.getElementById('app');
