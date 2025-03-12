@@ -57,7 +57,8 @@ export class Script {
       }
     }
 
-    script.text = currentContent.join('\n');
+    // Fallback: if no text was gathered, use the full content
+    script.text = currentContent.join('\n').trim() || content.trim();
     return script;
   }
 }
