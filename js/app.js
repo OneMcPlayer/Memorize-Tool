@@ -3,6 +3,7 @@ let extractedLines = [];
 let currentLineIndex = 0;
 let scriptLines = [];
 let precedingCount = 0;
+let isAdvancedMode = localStorage.getItem('advancedMode') === 'true';
 
 // Load saved language and theme from localStorage
 let currentLang = localStorage.getItem('lang') || 'en';
@@ -21,9 +22,47 @@ langSelect.addEventListener('change', (e) => {
   renderInputView();
 });
 
+// NEW: Options menu toggle logic
+const optionsToggle = document.getElementById('optionsToggle');
+const optionsMenu = document.getElementById('optionsMenu');
+
+optionsToggle.addEventListener('click', () => {
+  if (optionsMenu.style.display === 'none' || optionsMenu.style.display === '') {
+    optionsMenu.style.display = 'block';
+  } else {
+    optionsMenu.style.display = 'none';
+  }
+});
+
+// Optionally hide the menu if clicking outside
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#optionsToggle') && !e.target.closest('#optionsMenu')) {
+    optionsMenu.style.display = 'none';
+  }
+});
+
 themeToggle.addEventListener('click', () => {
   document.body.classList.toggle('dark-mode');
   localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+});
+
+document.getElementById('optionsMenu').innerHTML = `
+  <ul>
+    <li id="optionAdvanced">
+      <label>
+        <input type="checkbox" id="advancedModeToggle" ${isAdvancedMode ? 'checked' : ''}>
+        ${translations[currentLang].advancedMode}
+      </label>
+    </li>
+    <li id="optionAbout">About</li>
+    <li id="optionHelp">Help</li>
+  </ul>
+`;
+
+document.getElementById('advancedModeToggle').addEventListener('change', (e) => {
+  isAdvancedMode = e.target.checked;
+  localStorage.setItem('advancedMode', isAdvancedMode);
+  renderInputView();
 });
 
 let touchStartX = 0;
@@ -47,12 +86,19 @@ function renderInputView() {
   const t = translations[currentLang];
   app.innerHTML = `
     <h1>${t.title}</h1>
-    <p>${t.description}</p>
+    <p>${isAdvancedMode ? t.descriptionAdvanced : t.descriptionBasic}</p>
+    ${isAdvancedMode ? `
     <div class="input-tabs">
       <button class="tab-btn" data-tab="paste">📝 ${t.pasteModeTab}</button>
       <button class="tab-btn" data-tab="file">📁 ${t.fileModeTab}</button>
       <button class="tab-btn active" data-tab="library">📚 ${t.libraryModeTab}</button>
     </div>
+    ` : `
+    <div class="input-tabs">
+      <button class="tab-btn active" data-tab="library">📚 ${t.libraryModeTab}</button>
+    </div>
+    `}
+    ${isAdvancedMode ? `
     <div class="tab-content hidden" id="paste-tab">
       <textarea id="scriptInput" rows="10" placeholder="${t.scriptPlaceholder}"></textarea>
     </div>
@@ -60,6 +106,7 @@ function renderInputView() {
       <input type="file" id="scriptFile" accept=".script">
       <p class="help-text">${t.formatHelp}</p>
     </div>
+    ` : ''}
     <div class="tab-content" id="library-tab">
       <select id="scriptLibrary">
         <option value="">${t.selectScript}</option>

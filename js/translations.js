@@ -4,6 +4,10 @@ const translations = {
       title: "Script Memorization",
       description:
         "Paste your theatrical script, enter your character's name,<br>and choose the number of preceding lines to view for context.",
+      descriptionAdvanced:
+        "Paste your theatrical script, enter your character's name,<br>and choose the number of preceding lines to view for context.",
+      descriptionBasic:
+        "Select a script from the library, enter your character's name,<br>and choose the number of preceding lines to view for context.",
       scriptPlaceholder: "Paste your script here... (Ctrl+V)",
       characterPlaceholder: "Your character's name (e.g., HAMLET)",
       contextLinesPlaceholder: "Context lines (0-5)",
@@ -31,12 +35,18 @@ const translations = {
       formatHelp: "Upload a script file in plain text or structured format",
       selectScript: "Select a script from library...",
       plainText: "Plain Text",
-      structuredFormat: "Structured Format"
+      structuredFormat: "Structured Format",
+      advancedMode: "Advanced Mode",
+      basicMode: "Basic Mode (Library Only)"
     },
     it: {
       title: "Memorizzazione Copione",
       description:
         "Incolla il tuo copione, inserisci il nome del tuo personaggio,<br>e scegli quante battute precedenti vuoi vedere come contesto.",
+      descriptionAdvanced:
+        "Incolla il tuo copione, inserisci il nome del tuo personaggio,<br>e scegli quante battute precedenti vuoi vedere come contesto.",
+      descriptionBasic:
+        "Seleziona un copione dalla libreria, inserisci il nome del tuo personaggio,<br>e scegli quante battute precedenti vuoi vedere come contesto.",
       scriptPlaceholder: "Incolla qui il tuo copione... (Ctrl+V)",
       characterPlaceholder: "Nome del personaggio (es. AMLETO)",
       contextLinesPlaceholder: "Linee di contesto (0-5)",
@@ -64,6 +74,8 @@ const translations = {
       formatHelp: "Carica un copione in formato testo o strutturato",
       selectScript: "Seleziona un copione dalla libreria...",
       plainText: "Testo Semplice",
-      structuredFormat: "Formato Strutturato"
+      structuredFormat: "Formato Strutturato",
+      advancedMode: "Modalità Avanzata",
+      basicMode: "Modalità Base (Solo Libreria)"
     }
   };
