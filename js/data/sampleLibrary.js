@@ -23,20 +23,78 @@ class ScriptLibrary {
   static async initialize() {
     if (this.initialized) return;
     
-    // Load all scripts from catalog
-    for (const [id, info] of Object.entries(scriptCatalog)) {
-      try {
-        const content = await this.loadScriptFile(info.path);
-        this.scripts.set(id, {
-          ...info,
-          content
-        });
-      } catch (error) {
-        console.error(`Failed to load script ${id}:`, error);
+    try {
+      // First load the script catalog
+      const response = await fetch('js/data/scripts/catalog.json');
+      if (!response.ok) {
+        // If catalog doesn't exist, scan the scripts directory
+        await this.scanScriptsDirectory();
+      } else {
+        const catalog = await response.json();
+        // Load scripts from catalog
+        for (const [id, info] of Object.entries(catalog)) {
+          try {
+            const content = await this.loadScriptFile(info.path);
+            this.scripts.set(id, {
+              ...info,
+              content
+            });
+          } catch (error) {
+            console.error(`Failed to load script ${id}:`, error);
+          }
+        }
       }
+    } catch (error) {
+      console.error('Failed to initialize script library:', error);
+      // Fallback to scanning directory if catalog fails
+      await this.scanScriptsDirectory();
     }
 
     this.initialized = true;
+  }
+
+  static async scanScriptsDirectory() {
+    try {
+      // Fetch list of scripts from the directory
+      const response = await fetch('js/data/scripts/');
+      const files = await response.text();
+      
+      // Parse HTML response to get script files
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(files, 'text/html');
+      const scriptFiles = Array.from(doc.querySelectorAll('a'))
+        .filter(a => a.href.endsWith('.script'))
+        .map(a => a.href);
+
+      // Load each script file
+      for (const url of scriptFiles) {
+        try {
+          const filename = url.split('/').pop();
+          const id = filename.replace('.script', '');
+          const content = await this.loadScriptFile(`js/data/scripts/${filename}`);
+          
+          // Try to parse metadata from content
+          const title = this.extractTitleFromContent(content) || id;
+          const format = content.includes('@title') ? 'structured' : 'plain';
+          
+          this.scripts.set(id, {
+            title,
+            format,
+            path: `js/data/scripts/${filename}`,
+            content
+          });
+        } catch (error) {
+          console.error(`Failed to load script ${url}:`, error);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to scan scripts directory:', error);
+    }
+  }
+
+  static extractTitleFromContent(content) {
+    const titleMatch = content.match(/@title\s+"([^"]+)"/);
+    return titleMatch ? titleMatch[1] : null;
   }
 
   static async loadScriptFile(path) {

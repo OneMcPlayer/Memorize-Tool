@@ -1,3 +1,5 @@
+import scriptLibrary from './data/scriptLibraryInstance.js';
+
 const app = document.getElementById('app');
 let extractedLines = [];
 let currentLineIndex = 0;
@@ -399,7 +401,7 @@ function handleKeyPress(e) {
 // Finally, start the app by rendering the input view
 async function initializeApp() {
   try {
-    await ScriptLibrary.initialize();
+    await scriptLibrary.initialize();
     renderInputView();
   } catch (error) {
     console.error('Failed to initialize app:', error);
