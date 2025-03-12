@@ -211,7 +211,8 @@ async function handleLibrarySelection(event) {
     const scriptId = event.target.value;
     if (!scriptId) return;
 
-    const selectedScript = await ScriptLibrary.loadScript(scriptId);
+    // Replace ScriptLibrary with the imported instance scriptLibrary
+    const selectedScript = await scriptLibrary.loadScript(scriptId);
     if (!selectedScript) {
       showToast("Error: Script not found");
       return;
