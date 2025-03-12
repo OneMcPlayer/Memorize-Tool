@@ -1,8 +1,8 @@
-import './utils.js';
-import './translations.js';
-import './models/Script.js';
-import './services/ScriptProcessor.js';
-import scriptLibrary from './data/scriptLibraryInstance.js';
+import { showToast, handleSwipeGesture } from '/Memorize-Tool/js/utils.js';
+import { translations } from '/Memorize-Tool/js/translations.js';
+import { Script } from '/Memorize-Tool/js/models/Script.js';
+import { ScriptProcessor } from '/Memorize-Tool/js/services/ScriptProcessor.js';
+import scriptLibrary from '/Memorize-Tool/js/data/scriptLibraryInstance.js';
 
 const app = document.getElementById('app');
 let extractedLines = [];

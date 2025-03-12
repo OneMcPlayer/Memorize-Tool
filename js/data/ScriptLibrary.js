@@ -90,7 +90,10 @@ class ScriptLibrary {
   }
 
   async #loadScriptFile(path) {
-    const response = await fetch(path);
+    // Add base path for GitHub Pages
+    const basePath = '/Memorize-Tool/';
+    const fullPath = basePath + path;
+    const response = await fetch(fullPath);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
