@@ -119,9 +119,15 @@ export class ScriptLibrary {
       throw new Error('Script not found');
     }
     
-    return script.format === "structured" 
+    console.debug("Loaded raw script:", script);
+    
+    const loadedScript = script.format === "structured" 
       ? Script.fromStructuredText(script.content)
       : script;
+    
+    console.debug("Final loaded script:", loadedScript);
+    
+    return loadedScript;
   }
 
   getAvailableScripts() {
