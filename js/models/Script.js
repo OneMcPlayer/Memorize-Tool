@@ -7,62 +7,169 @@ export class Script {
   }
 
   static fromStructuredText(content) {
-    const script = new Script();
-    // Filter out comment lines starting with "//"
-    const lines = content.split('\n');
-    let currentSection = null;
-    let currentContent = [];
+    // New parser function
+    function parseUniScript(dslText) {
+      const lines = dslText.split('\n');
+      const script = {
+        header: {},
+        roles: [],
+        scenes: []
+      };
 
-    const processMetadata = (line) => {
-      const match = line.match(/@(\w+)\s+"([^"]+)"/);
-      if (match) {
-        script.metadata[match[1]] = match[2];
-      }
-    };
+      let currentSection = null; // "roles", "scene", "dialogue", or "multiline"
+      let currentScene = null;
+      let multiLineBuffer = [];
+      let multiLineKey = null; // e.g., "description"
 
-    const processRoles = (line) => {
-      const roleMatch = line.match(/\s*-\s*\[(.*?)\]:\s*"([^"]+)"/);
-      if (roleMatch) {
-        script.roles.push({
-          name: roleMatch[1],
-          description: roleMatch[2]
-        });
-      }
-    };
-
-    for (let i = 0; i < lines.length; i++) {
-      let line = lines[i].trim();
-      
-      if (!line) continue;
-      // Skip comment lines (e.g "#code")
-      if (line.startsWith('//')) continue;
-      
-      if (line.startsWith('@roles')) {
-        currentSection = 'roles';
-        continue;
-      } else if (line === '@endroles') {
-        currentSection = null;
-        continue;
-      } else if (line.startsWith('@text')) {
-        currentSection = 'text';
-        continue;
+      // Helper to finish multiline block
+      function finishMultiline() {
+        return multiLineBuffer.join('\n').trim();
       }
 
-      switch (currentSection) {
-        case 'roles':
-          processRoles(line);
-          break;
-        case 'text':
-          currentContent.push(line);
-          break;
-        default:
-          processMetadata(line);
+      for (let i = 0; i < lines.length; i++) {
+        let line = lines[i].trim();
+        if (!line) continue; // skip empty lines
+
+        // HEADER TAGS
+        if (line.startsWith('@title')) {
+          const match = line.match(/@title\s+"([^"]+)"/);
+          if (match) script.header.title = match[1];
+          continue;
+        }
+        if (line.startsWith('@author')) {
+          const match = line.match(/@author\s+"([^"]+)"/);
+          if (match) script.header.author = match[1];
+          continue;
+        }
+        if (line.startsWith('@date')) {
+          const match = line.match(/@date\s+"([^"]+)"/);
+          if (match) script.header.date = match[1];
+          continue;
+        }
+        if (line.startsWith('@description')) {
+          const match = line.match(/@description\s+"([^"]+)"/);
+          if (match) script.header.description = match[1];
+          continue;
+        }
+
+        // ROLES SECTION
+        if (line.startsWith('@roles')) {
+          currentSection = 'roles';
+          continue;
+        }
+        if (line.startsWith('@endroles')) {
+          currentSection = null;
+          continue;
+        }
+        if (currentSection === 'roles') {
+          // Role line format: - [Role]: "Description"
+          const match = line.match(/-\s*\[([^\]]+)\]:\s*"([^"]+)"/);
+          if (match) {
+            script.roles.push({ role: match[1], description: match[2] });
+          }
+          continue;
+        }
+
+        // SCENE START
+        if (line.startsWith('@scene')) {
+          const match = line.match(/@scene\s+"([^"]+)"/);
+          if (match) {
+            if (currentScene) {
+              script.scenes.push(currentScene);
+            }
+            currentScene = { title: match[1], context: {}, dialogue: {} };
+            currentSection = 'scene';
+          }
+          continue;
+        }
+
+        // End of a scene block
+        if (line === '}') {
+          if (currentSection === 'scene' && currentScene) {
+            script.scenes.push(currentScene);
+            currentScene = null;
+            currentSection = null;
+          }
+          continue;
+        }
+
+        // Within a scene block
+        if (currentSection === 'scene') {
+          if (line.startsWith('location:')) {
+            currentScene.context.location = line.replace('location:', '').trim().replace(/"/g, '');
+            continue;
+          }
+          if (line.startsWith('time:')) {
+            currentScene.context.time = line.replace('time:', '').trim().replace(/"/g, '');
+            continue;
+          }
+          if (line.startsWith('mood:')) {
+            currentScene.context.mood = line.replace('mood:', '').trim().replace(/"/g, '');
+            continue;
+          }
+          if (line.startsWith('description:')) {
+            if (line.includes('"""')) {
+              const tripleQuotes = line.match(/"""/g);
+              if (tripleQuotes && tripleQuotes.length >= 2) {
+                const match = line.match(/description:\s*"""(.*)"""/);
+                if (match) {
+                  currentScene.description = match[1].trim();
+                }
+              } else {
+                multiLineBuffer = [];
+                multiLineKey = 'description';
+                const startIdx = line.indexOf('"""') + 3;
+                multiLineBuffer.push(line.substring(startIdx));
+                currentSection = 'multiline';
+              }
+            }
+            continue;
+          }
+          if (line.startsWith('dialogue {')) {
+            currentSection = 'dialogue';
+            continue;
+          }
+        }
+
+        if (currentSection === 'dialogue') {
+          if (line === '}') {
+            currentSection = 'scene';
+            continue;
+          }
+          const match = line.match(/"([^"]+)":\s*"""(.*)"""/);
+          if (match) {
+            const speaker = match[1];
+            const text = match[2].trim();
+            currentScene.dialogue[speaker] = text;
+          }
+          continue;
+        }
+
+        if (currentSection === 'multiline') {
+          if (line.includes('"""')) {
+            const endIdx = line.indexOf('"""');
+            multiLineBuffer.push(line.substring(0, endIdx));
+            if (multiLineKey === 'description') {
+              currentScene.description = finishMultiline();
+            }
+            multiLineBuffer = [];
+            multiLineKey = null;
+            currentSection = 'scene';
+          } else {
+            multiLineBuffer.push(line);
+          }
+          continue;
+        }
       }
+      return script;
     }
 
-    // Fallback: if no text was gathered, use the full content minus comments
-    script.text = currentContent.join('\n').trim() || 
-                  lines.filter(l => !l.trim().startsWith('//')).join('\n').trim();
+    const parsed = parseUniScript(content);
+    const script = new Script();
+    script.metadata = parsed.header;
+    script.roles = parsed.roles;
+    script.scenes = parsed.scenes;
+    // Optionally, combine scenes text if needed
     return script;
   }
 }
