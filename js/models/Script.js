@@ -3,7 +3,7 @@ export class Script {
     this.metadata = {};
     this.roles = [];
     this.scenes = [];
-    this.text = '';
+    this.text = ''; // will hold original script text
   }
 
   static fromStructuredText(content) {
@@ -169,7 +169,7 @@ export class Script {
     script.metadata = parsed.header;
     script.roles = parsed.roles;
     script.scenes = parsed.scenes;
-    // Optionally, combine scenes text if needed
+    script.text = content; // Save original content
     return script;
   }
 }
