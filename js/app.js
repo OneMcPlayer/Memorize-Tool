@@ -196,14 +196,16 @@ function populateRoleSelect(roles) {
   const roleSelect = document.getElementById('roleSelect');
   roleSelect.innerHTML = `<option value="">${translations[currentLang].selectRole}</option>`;
   
-  roles.forEach(role => {
+  roles.forEach((role, index) => {
     const option = document.createElement('option');
-    // Use the primary name for display
     option.textContent = role.primaryName;
-    // Store all aliases as data attribute for extraction
-    option.dataset.aliases = JSON.stringify(role.aliases);
-    // Use first alias as value
-    option.value = role.aliases[0];
+    // Store the role index as value for easy lookup
+    option.value = index;
+    // Store full role data as a data attribute
+    option.dataset.roleData = JSON.stringify({
+      primaryName: role.primaryName,
+      aliases: role.aliases
+    });
     roleSelect.appendChild(option);
   });
 }
@@ -296,8 +298,8 @@ async function extractLines() {
     return;
   }
 
-  // Get all aliases for the selected role
-  const aliases = JSON.parse(selectedOption.dataset.aliases);
+  // Get the full role data including all aliases
+  const roleData = JSON.parse(selectedOption.dataset.roleData);
 
   let currentLines = scriptLines;
   
@@ -331,10 +333,12 @@ async function extractLines() {
 
   scriptLines = currentLines;
   precedingCount = parseInt(document.getElementById('precedingCount').value) || 0;
-  extractedLines = ScriptProcessor.extractCharacterLines(scriptLines, aliases, precedingCount);
+  
+  // Pass the full role data object to extractCharacterLines
+  extractedLines = ScriptProcessor.extractCharacterLines(scriptLines, roleData, precedingCount);
 
   if (extractedLines.length === 0) {
-    showToast(t.errorNoLines + selectedOption.textContent);
+    showToast(t.errorNoLines + roleData.primaryName);
     return;
   }
 

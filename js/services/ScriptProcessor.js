@@ -58,9 +58,21 @@ export class ScriptProcessor {
     return processedLines;
   }
 
-  static extractCharacterLines(scriptLines, character, precedingCount) {
-    // Create a regex that matches any of the character's aliases
-    const characterAliases = Array.isArray(character) ? character : [character];
+  static extractCharacterLines(scriptLines, characterData, precedingCount) {
+    // Handle either string, array, or object with aliases
+    let characterAliases;
+    if (typeof characterData === 'string') {
+      characterAliases = [characterData];
+    } else if (Array.isArray(characterData)) {
+      characterAliases = characterData;
+    } else if (characterData?.aliases) {
+      // If passed a role object, use all its aliases including primary name
+      characterAliases = [characterData.primaryName, ...characterData.aliases];
+    } else {
+      throw new Error('Invalid character data provided');
+    }
+
+    // Create regex pattern that matches any alias
     const escapedAliases = characterAliases.map(alias => 
       alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     );
@@ -70,7 +82,11 @@ export class ScriptProcessor {
     const extractedLines = [];
     for (let i = 0; i < scriptLines.length; i++) {
       if (regex.test(scriptLines[i])) {
-        extractedLines.push({ index: i, line: scriptLines[i] });
+        extractedLines.push({ 
+          index: i, 
+          line: scriptLines[i],
+          speaker: scriptLines[i].match(/^([^:]+):/)?.[1]?.trim() || ''
+        });
       }
     }
     return extractedLines;
