@@ -1,3 +1,5 @@
+import { parseRolesBlock } from '/Memorize-Tool/js/utils/rolesHelper.js';
+
 export class Script {
   constructor() {
     this.metadata = {};
@@ -62,10 +64,10 @@ export class Script {
           continue;
         }
         if (currentSection === 'roles') {
-          // Role line format: - [Role]: "Description"
-          const match = line.match(/-\s*\[([^\]]+)\]:\s*"([^"]+)"/);
-          if (match) {
-            script.roles.push({ role: match[1], description: match[2] });
+          // Use the rolesHelper function instead of inline regex parsing.
+          const roleData = parseRolesBlock(line);
+          if(roleData.aliases.length > 0) {
+            script.roles.push(roleData);
           }
           continue;
         }

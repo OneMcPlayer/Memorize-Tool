@@ -8,13 +8,14 @@
   - [Il POETA maledetto]: "Poeta infelice che non sa fare rime (né versi sciolti)."
   - [Il PRESIDENTE]: "Presidente dell’Accademia, incline a scampanellare e interrompere gli altri."
   - [Lo SCIENZIATO]: "Sordo, tende a fraintendere annunci di morte o guarigione."
-  - [Il SEGRETARIO perpetuo]: "Figura burocratica, cura i verbali dell’Accademia."
+  - [Il SEGRETARIO perpetuo | SEGRETARIO]: "Figura burocratica, cura i verbali dell’Accademia."
   - [L'USCIERE]: "Inserviente che compare a consegnare telegrammi e sorreggere il Segretario."
   - [L'ENCICLOPEDICA]: "Accademica che conosce tutte le date… ma non i fatti."
   - [FOTOGRAFO]: "Appare durante la cerimonia, con la sua macchina fotografica e assistente."
   - [Il CLINICO]: "Medico che chiama 'benattìe' le malattie, perché dopo si può guarire (o morire)."
   - [MINISTRO della P. I.]: "Ministro della Pubblica Istruzione, presente per onorare l’invenzione."
 @endroles
+
 
 @scene "Accademia di Immortali"
 {
