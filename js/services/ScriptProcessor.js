@@ -66,7 +66,7 @@ export class ScriptProcessor {
     } else if (Array.isArray(characterData)) {
       characterAliases = characterData;
     } else if (characterData?.aliases) {
-      // If passed a role object, use all its aliases including primary name
+      // Use all aliases including primary name
       characterAliases = [characterData.primaryName, ...characterData.aliases];
     } else {
       throw new Error('Invalid character data provided');
