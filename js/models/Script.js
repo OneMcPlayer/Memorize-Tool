@@ -18,13 +18,13 @@ export class Script {
         scenes: []
       };
 
-      let currentSection = null; // "roles", "scene", "dialogue", or "multiline"
+      let currentSection = null; // "roles", "scene", "dialogue", "multiline", "multi-dialogue"
       let currentScene = null;
       let multiLineBuffer = [];
-      let multiLineKey = null;  // e.g., "description", or "dialogue-speech"
+      let multiLineKey = null;  // e.g., "description" or "dialogue-speech"
       let currentSpeaker = null;
 
-      // Helper to finish multiline block
+      // Helper to join and trim the multi-line buffer
       function finishMultiline() {
         return multiLineBuffer.join('\n').trim();
       }
@@ -69,7 +69,7 @@ export class Script {
           continue;
         }
         if (currentSection === 'roles') {
-          // Use the rolesHelper function
+          // Parse each role line using the helper function
           const roleData = parseRolesBlock(line);
           if (roleData.aliases.length > 0) {
             script.roles.push(roleData);
@@ -83,7 +83,7 @@ export class Script {
         if (line.startsWith('@scene')) {
           const match = line.match(/@scene\s+"([^"]+)"/);
           if (match) {
-            // If there was a previous scene, push it
+            // Push previous scene if exists
             if (currentScene) {
               script.scenes.push(currentScene);
             }
@@ -93,7 +93,7 @@ export class Script {
           continue;
         }
 
-        // End of a scene block
+        // End of a scene block or dialogue/multiline block
         if (line === '}') {
           if (currentSection === 'scene' && currentScene) {
             script.scenes.push(currentScene);
@@ -103,11 +103,10 @@ export class Script {
             // End dialogue block, return to scene scope
             currentSection = 'scene';
           } else if (currentSection === 'multiline') {
-            // We were reading a multiline description or dialogue - finalize
+            // Finalize a multiline description or dialogue block
             if (multiLineKey === 'description') {
               currentScene.description = finishMultiline();
             } else if (multiLineKey === 'dialogue-speech') {
-              // finalize this speaker's text
               const finalText = finishMultiline();
               if (!currentScene.dialogue[currentSpeaker]) {
                 currentScene.dialogue[currentSpeaker] = [];
@@ -117,6 +116,17 @@ export class Script {
             multiLineBuffer = [];
             multiLineKey = null;
             currentSection = 'scene';
+          } else if (currentSection === 'multi-dialogue') {
+            // <-- New branch: finalize multi-line dialogue if scene closes unexpectedly
+            const finalText = finishMultiline();
+            if (!currentScene.dialogue[currentSpeaker]) {
+              currentScene.dialogue[currentSpeaker] = [];
+            }
+            currentScene.dialogue[currentSpeaker].push(finalText);
+            multiLineBuffer = [];
+            multiLineKey = null;
+            currentSpeaker = null;
+            currentSection = 'scene';
           }
           continue;
         }
@@ -125,7 +135,7 @@ export class Script {
         // WITHIN A SCENE BLOCK
         // ========================
         if (currentSection === 'scene') {
-          // Basic context lines
+          // Process basic context properties
           if (line.startsWith('location:')) {
             currentScene.context.location = line.replace('location:', '').trim().replace(/"/g, '');
             continue;
@@ -139,10 +149,9 @@ export class Script {
             continue;
           }
 
-          // Possibly a multi-line description
+          // Handle multi-line description
           if (line.startsWith('description:')) {
             if (line.includes('"""')) {
-              // If it begins and ends in the same line
               const tripleQuotes = line.match(/"""/g);
               if (tripleQuotes && tripleQuotes.length >= 2) {
                 const match = line.match(/description:\s*"""(.*)"""/);
@@ -150,7 +159,7 @@ export class Script {
                   currentScene.description = match[1].trim();
                 }
               } else {
-                // Start multiline description
+                // Start a multi-line description block
                 multiLineBuffer = [];
                 multiLineKey = 'description';
                 const startIdx = line.indexOf('"""') + 3;
@@ -161,7 +170,7 @@ export class Script {
             continue;
           }
 
-          // Start of dialogue block
+          // Begin dialogue block
           if (line.startsWith('dialogue {')) {
             currentSection = 'dialogue';
             continue;
@@ -172,8 +181,7 @@ export class Script {
         // DIALOGUE SECTION
         // ========================
         if (currentSection === 'dialogue') {
-          // 1) Attempt to match a single-line dialogue: 
-          //    "SPEAKER": """Some text"""
+          // Attempt a single-line dialogue: "SPEAKER": """Some text"""
           let singleLineMatch = line.match(/^"([^"]+)":\s*"""(.*?)"""\s*$/);
           if (singleLineMatch) {
             let speaker = singleLineMatch[1];
@@ -185,33 +193,28 @@ export class Script {
             continue;
           }
 
-          // 2) Attempt to match start of a multi-line dialogue:
-          //    "SPEAKER": """
-          //    (some lines)
-          //    """
+          // Check for the start of a multi-line dialogue: "SPEAKER": """
           let multiLineStart = line.match(/^"([^"]+)":\s*"""(.*)$/);
           if (multiLineStart) {
             currentSpeaker = multiLineStart[1];
-            // The line may have partial text after """ on the same line
             let afterTriple = multiLineStart[2] || '';
             multiLineBuffer = [];
             if (afterTriple.includes('"""')) {
-              // Edge case: it might open and close on same line
+              // Edge case: opening and closing on the same line
               let endIdx = afterTriple.indexOf('"""');
               let leftover = afterTriple.substring(0, endIdx).trim();
               multiLineBuffer.push(leftover);
-              // finalize
               const finalText = finishMultiline();
               if (!currentScene.dialogue[currentSpeaker]) {
                 currentScene.dialogue[currentSpeaker] = [];
               }
               currentScene.dialogue[currentSpeaker].push(finalText);
-              currentSection = 'dialogue'; // remain in dialogue
+              currentSection = 'dialogue';
               multiLineBuffer = [];
               multiLineKey = null;
               currentSpeaker = null;
             } else {
-              // Normal multi-line
+              // Start accumulating multi-line dialogue
               multiLineBuffer.push(afterTriple);
               multiLineKey = 'dialogue-speech';
               currentSection = 'multi-dialogue';
@@ -226,75 +229,63 @@ export class Script {
         if (currentSection === 'multi-dialogue') {
           let endIdx = line.indexOf('"""');
           if (endIdx !== -1) {
-            // We found the closing triple quotes
-            // push everything before """
+            // Found the closing triple quotes; capture any text before them
             let leftover = line.substring(0, endIdx).trim();
             multiLineBuffer.push(leftover);
-
-            let finalText = finishMultiline();
+            const finalText = finishMultiline();
             if (!currentScene.dialogue[currentSpeaker]) {
               currentScene.dialogue[currentSpeaker] = [];
             }
             currentScene.dialogue[currentSpeaker].push(finalText);
-
-            // Cleanup
             multiLineBuffer = [];
             multiLineKey = null;
             currentSpeaker = null;
-            // return to normal dialogue mode
             currentSection = 'dialogue';
           } else {
-            // no triple quotes, just accumulate
+            // Continue accumulating dialogue lines
             multiLineBuffer.push(line);
           }
           continue;
         }
 
         // ========================
-        // MULTILINE DESCRIPTION
-        // (already partly handled above)
+        // MULTILINE DESCRIPTION MODE
         // ========================
         if (currentSection === 'multiline') {
-          // Check if we reached the closing """ on this line
           let endIdx = line.indexOf('"""');
           if (endIdx !== -1) {
-            // close multiline
+            // End the multi-line description block
             multiLineBuffer.push(line.substring(0, endIdx));
             const final = finishMultiline();
             if (multiLineKey === 'description') {
               currentScene.description = final;
             }
-            // cleanup
             multiLineBuffer = [];
             multiLineKey = null;
-            // back to scene context
             currentSection = 'scene';
           } else {
-            // continue reading the description
+            // Keep accumulating the description lines
             multiLineBuffer.push(line);
           }
           continue;
         }
       }
 
-      // If a scene was open and not closed
+      // Push any unclosed scene at the end
       if (currentScene) {
         script.scenes.push(currentScene);
       }
       return script;
     }
 
-    // ========================
-    // DO THE PARSE
-    // ========================
+    // Parse the DSL content and populate the Script object
     const parsed = parseUniScript(content);
 
-    // Instantiate our Script object
     const script = new Script();
     script.metadata = parsed.header;
     script.roles = parsed.roles;
     script.scenes = parsed.scenes;
-    script.text = content; // original content
+    script.text = content;
 
     return script;
   }
