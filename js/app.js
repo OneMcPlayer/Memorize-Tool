@@ -118,6 +118,10 @@ function renderInputView() {
         <option value="">${t.selectScript}</option>
       </select>
     </div>
+    <!-- New role select to choose from available roles -->
+    <select id="roleSelect">
+      <option value="">Select Role</option>
+    </select>
     <input type="text" id="characterName" placeholder="${t.characterPlaceholder}">
     <div class="input-group">
       <input type="number" id="precedingCount" placeholder="${t.contextLinesPlaceholder}" value="1" min="0" max="5">
@@ -188,6 +192,18 @@ async function setupInputHandlers() {
   }
 }
 
+function populateRoleSelect(roles) {
+  const roleSelect = document.getElementById('roleSelect');
+  roleSelect.innerHTML = '<option value="">Select Role</option>';
+  roles.forEach(role => {
+    const option = document.createElement('option');
+    // Use the first alias as the role value and list all aliases as the label.
+    option.value = role.aliases[0];
+    option.textContent = role.aliases.join(' / ');
+    roleSelect.appendChild(option);
+  });
+}
+
 function handleFileUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -226,6 +242,10 @@ async function handleLibrarySelection(event) {
     }
 
     scriptLines = ScriptProcessor.preProcessScript(content);
+    // If the script has roles, update the role select list.
+    if (selectedScript.roles && selectedScript.roles.length) {
+      populateRoleSelect(selectedScript.roles);
+    }
   } catch (error) {
     showToast("Error loading script");
     console.error(error);
@@ -258,8 +278,12 @@ function extractLines() {
   const t = translations[currentLang];
   const scriptInput = document.getElementById('scriptInput');
   const scriptFile = document.getElementById('scriptFile');
-  const scriptLibrary = document.getElementById('scriptLibrary');
-  const character = document.getElementById('characterName').value.trim();
+  const scriptLibraryEl = document.getElementById('scriptLibrary');
+  // Read character from roleSelect first (if chosen) otherwise from text input.
+  const roleSelect = document.getElementById('roleSelect');
+  const characterFromSelect = roleSelect ? roleSelect.value.trim() : "";
+  const characterFromInput = document.getElementById('characterName').value.trim();
+  const character = characterFromSelect || characterFromInput;
 
   if (!character) {
     showToast(t.errorNoInput);
@@ -271,7 +295,7 @@ function extractLines() {
   // Only process text if we're not using preprocessed lines from library
   if (!document.getElementById('library-tab').classList.contains('hidden')) {
     // Library mode - use existing scriptLines
-    if (!scriptLibrary.value) {
+    if (!scriptLibraryEl.value) {
       showToast(t.errorNoInput);
       return;
     }
