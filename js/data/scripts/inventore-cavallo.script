@@ -4,17 +4,18 @@
 @description "Atto unico ambientato nell'Accademia di Immortali, dove l’Inventore del cavallo presenta la sua creazione (che però… esiste già!). Testo satirico e teatrale."
 
 @roles
-  - [L'INVENTORE del cavallo]: "Studioso che sostiene di aver creato un 'nuovo' animale."
-  - [Il POETA maledetto]: "Poeta infelice che non sa fare rime (né versi sciolti)."
-  - [Il PRESIDENTE]: "Presidente dell’Accademia, incline a scampanellare e interrompere gli altri."
-  - [Lo SCIENZIATO]: "Sordo, tende a fraintendere annunci di morte o guarigione."
+  - [L'INVENTORE del cavallo | INVENTORE]: "Studioso che sostiene di aver creato un 'nuovo' animale."
+  - [Il POETA maledetto | POETA]: "Poeta infelice che non sa fare rime (né versi sciolti)."
+  - [Il PRESIDENTE | PRESIDENTE]: "Presidente dell’Accademia, incline a scampanellare e interrompere gli altri."
+  - [Lo SCIENZIATO | SCIENZIATO]: "Sordo, tende a fraintendere annunci di morte o guarigione."
   - [Il SEGRETARIO perpetuo | SEGRETARIO]: "Figura burocratica, cura i verbali dell’Accademia."
-  - [L'USCIERE]: "Inserviente che compare a consegnare telegrammi e sorreggere il Segretario."
-  - [L'ENCICLOPEDICA]: "Accademica che conosce tutte le date… ma non i fatti."
-  - [FOTOGRAFO]: "Appare durante la cerimonia, con la sua macchina fotografica e assistente."
-  - [Il CLINICO]: "Medico che chiama 'benattìe' le malattie, perché dopo si può guarire (o morire)."
-  - [MINISTRO della P. I.]: "Ministro della Pubblica Istruzione, presente per onorare l’invenzione."
+  - [L'USCIERE | USCIERE]: "Inserviente che compare a consegnare telegrammi e sorreggere il Segretario."
+  - [L'ENCICLOPEDICA | ENCICLOPEDICA]: "Accademica che conosce tutte le date… ma non i fatti."
+  - [FOTOGRAFO | FOTOGRAFO]: "Appare durante la cerimonia, con la sua macchina fotografica e assistente."
+  - [Il CLINICO | CLINICO]: "Medico che chiama 'benattìe' le malattie, perché dopo si può guarire (o morire)."
+  - [MINISTRO della P. I. | MINISTRO]: "Ministro della Pubblica Istruzione, presente per onorare l’invenzione."
 @endroles
+
 
 
 @scene "Accademia di Immortali"
