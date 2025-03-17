@@ -118,9 +118,11 @@ function renderInputView() {
         <option value="">${t.selectScript}</option>
       </select>
     </div>
-    <select id="roleSelect">
-      <option value="">${t.selectRole}</option>
-    </select>
+    <div id="roleSelectContainer" style="display: none;">
+      <select id="roleSelect">
+        <option value="">${t.selectRole}</option>
+      </select>
+    </div>
     <div class="input-group">
       <input type="number" id="precedingCount" placeholder="${t.contextLinesPlaceholder}" value="1" min="0" max="5">
       <p class="help-text" style="color: #666; font-size: 0.85em; margin: 5px 0 15px;">
@@ -223,26 +225,32 @@ function handleFileUpload(event) {
 async function handleLibrarySelection(event) {
   try {
     const scriptId = event.target.value;
-    if (!scriptId) return;
-
-    // Replace ScriptLibrary with the imported instance scriptLibrary
-    const selectedScript = await scriptLibrary.loadScript(scriptId);
-    if (!selectedScript) {
-      showToast("Error: Script not found");
+    const roleSelectContainer = document.getElementById('roleSelectContainer');
+    
+    if (!scriptId) {
+      roleSelectContainer.style.display = 'none';
       return;
     }
 
-    // Store the script content and preprocess it
+    const selectedScript = await scriptLibrary.loadScript(scriptId);
+    if (!selectedScript) {
+      showToast("Error: Script not found");
+      roleSelectContainer.style.display = 'none';
+      return;
+    }
+
     const content = selectedScript.content || selectedScript.text;
     if (!content) {
       showToast("Error: Script has no content");
+      roleSelectContainer.style.display = 'none';
       return;
     }
 
     scriptLines = ScriptProcessor.preProcessScript(content);
-    // If the script has roles, update the role select list.
+    
     if (selectedScript.roles && selectedScript.roles.length) {
       populateRoleSelect(selectedScript.roles);
+      roleSelectContainer.style.display = 'block';
     }
   } catch (error) {
     showToast("Error loading script");
