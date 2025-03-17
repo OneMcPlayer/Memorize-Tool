@@ -59,9 +59,13 @@ export class ScriptProcessor {
   }
 
   static extractCharacterLines(scriptLines, character, precedingCount) {
-    // Make the matching case-insensitive and more flexible
-    const escapedCharacter = character.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(`^\\s*${escapedCharacter}\\s*:?`, "i");
+    // Create a regex that matches any of the character's aliases
+    const characterAliases = Array.isArray(character) ? character : [character];
+    const escapedAliases = characterAliases.map(alias => 
+      alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    );
+    const regexPattern = `^\\s*(${escapedAliases.join('|')})\\s*:?`;
+    const regex = new RegExp(regexPattern, "i");
     
     const extractedLines = [];
     for (let i = 0; i < scriptLines.length; i++) {

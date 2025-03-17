@@ -194,12 +194,16 @@ async function setupInputHandlers() {
 
 function populateRoleSelect(roles) {
   const roleSelect = document.getElementById('roleSelect');
-  roleSelect.innerHTML = '<option value="">Select Role</option>';
+  roleSelect.innerHTML = `<option value="">${translations[currentLang].selectRole}</option>`;
+  
   roles.forEach(role => {
     const option = document.createElement('option');
-    // Use the first alias as the role value and list all aliases as the label.
+    // Use the primary name for display
+    option.textContent = role.primaryName;
+    // Store all aliases as data attribute for extraction
+    option.dataset.aliases = JSON.stringify(role.aliases);
+    // Use first alias as value
     option.value = role.aliases[0];
-    option.textContent = role.aliases.join(' / ');
     roleSelect.appendChild(option);
   });
 }
@@ -280,18 +284,20 @@ function renderPracticeView() {
 /*************************************************************
  * CORE LOGIC
  *************************************************************/
-function extractLines() {
+async function extractLines() {
   const t = translations[currentLang];
   const scriptInput = document.getElementById('scriptInput');
   const scriptFile = document.getElementById('scriptFile');
   const scriptLibraryEl = document.getElementById('scriptLibrary');
   const roleSelect = document.getElementById('roleSelect');
-  const character = roleSelect.value.trim();
-
-  if (!character) {
+  const selectedOption = roleSelect.selectedOptions[0];
+  if (!selectedOption || !selectedOption.value) {
     showToast(t.errorSelectRole);
     return;
   }
+
+  // Get all aliases for the selected role
+  const aliases = JSON.parse(selectedOption.dataset.aliases);
 
   let currentLines = scriptLines;
   
@@ -325,10 +331,10 @@ function extractLines() {
 
   scriptLines = currentLines;
   precedingCount = parseInt(document.getElementById('precedingCount').value) || 0;
-  extractedLines = ScriptProcessor.extractCharacterLines(scriptLines, character, precedingCount);
+  extractedLines = ScriptProcessor.extractCharacterLines(scriptLines, aliases, precedingCount);
 
   if (extractedLines.length === 0) {
-    showToast(t.errorNoLines + character);
+    showToast(t.errorNoLines + selectedOption.textContent);
     return;
   }
 

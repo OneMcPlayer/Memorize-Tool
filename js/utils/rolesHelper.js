@@ -6,6 +6,11 @@ function getBracketContent(text) {
   return match ? match[1] : '';
 }
 
+function getPrimaryName(aliases) {
+  // First alias is always the primary display name
+  return aliases[0] || '';
+}
+
 function getRoleDescription(text) {
   // Returns the text after the colon, stripping out quotes.
   const colonIndex = text.indexOf(':');
@@ -23,7 +28,8 @@ export function parseRolesBlock(rolesText) {
   const aliases = bracketContent.split('|').map(s => s.trim());
   // 3. Return an object with these aliases and the role description.
   return {
-    aliases,
+    primaryName: getPrimaryName(aliases),
+    aliases: aliases,
     description: getRoleDescription(rolesText)
   };
 }
@@ -33,10 +39,8 @@ export function findRoleByName(name, rolesList) {
   const search = name.toUpperCase();
   // Check each role's aliases.
   for (const role of rolesList) {
-    for (const alias of role.aliases) {
-      if (alias.toUpperCase() === search) {
-        return role; // Found a match.
-      }
+    if (role.aliases.some(alias => alias.toUpperCase() === search)) {
+      return role;
     }
   }
   // If not found, return null.
