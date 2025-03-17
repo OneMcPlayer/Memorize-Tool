@@ -118,11 +118,9 @@ function renderInputView() {
         <option value="">${t.selectScript}</option>
       </select>
     </div>
-    <!-- New role select to choose from available roles -->
     <select id="roleSelect">
-      <option value="">Select Role</option>
+      <option value="">${t.selectRole}</option>
     </select>
-    <input type="text" id="characterName" placeholder="${t.characterPlaceholder}">
     <div class="input-group">
       <input type="number" id="precedingCount" placeholder="${t.contextLinesPlaceholder}" value="1" min="0" max="5">
       <p class="help-text" style="color: #666; font-size: 0.85em; margin: 5px 0 15px;">
@@ -279,14 +277,11 @@ function extractLines() {
   const scriptInput = document.getElementById('scriptInput');
   const scriptFile = document.getElementById('scriptFile');
   const scriptLibraryEl = document.getElementById('scriptLibrary');
-  // Read character from roleSelect first (if chosen) otherwise from text input.
   const roleSelect = document.getElementById('roleSelect');
-  const characterFromSelect = roleSelect ? roleSelect.value.trim() : "";
-  const characterFromInput = document.getElementById('characterName').value.trim();
-  const character = characterFromSelect || characterFromInput;
+  const character = roleSelect.value.trim();
 
   if (!character) {
-    showToast(t.errorNoInput);
+    showToast(t.errorSelectRole);
     return;
   }
 

@@ -36,7 +36,9 @@ export const translations = {
       plainText: "Plain Text",
       structuredFormat: "Structured Format",
       advancedMode: "Advanced Mode",
-      basicMode: "Basic Mode (Library Only)"
+      basicMode: "Basic Mode (Library Only)",
+      selectRole: "Select your character...",
+      errorSelectRole: "Please select your character from the list."
     },
     it: {
       title: "Memorizzazione Copione",
@@ -75,6 +77,8 @@ export const translations = {
       plainText: "Testo Semplice",
       structuredFormat: "Formato Strutturato",
       advancedMode: "Modalità Avanzata",
-      basicMode: "Modalità Base (Solo Libreria)"
+      basicMode: "Modalità Base (Solo Libreria)",
+      selectRole: "Seleziona il tuo personaggio...",
+      errorSelectRole: "Seleziona il tuo personaggio dalla lista."
     }
   };
