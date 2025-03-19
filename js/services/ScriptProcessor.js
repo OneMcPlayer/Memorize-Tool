@@ -91,4 +91,24 @@ export class ScriptProcessor {
     }
     return extractedLines;
   }
+
+  static extractRolesFromPlainText(scriptLines) {
+    const roles = new Map();
+    
+    scriptLines.forEach(line => {
+      const match = line.match(/^([A-Z][A-Za-z\s]+):/);
+      if (match) {
+        const name = match[1].trim();
+        if (!roles.has(name)) {
+          roles.set(name, {
+            primaryName: name,
+            aliases: [name],
+            description: ''
+          });
+        }
+      }
+    });
+
+    return Array.from(roles.values());
+  }
 }

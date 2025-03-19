@@ -190,6 +190,45 @@ async function setupInputHandlers() {
       librarySelect.appendChild(option);
     }
   }
+
+  const scriptInput = document.getElementById('scriptInput');
+  if (scriptInput) {
+    scriptInput.addEventListener('input', () => {
+      const text = scriptInput.value;
+      if (text) {
+        const preprocessed = ScriptProcessor.preProcessScript(text);
+        const roles = ScriptProcessor.extractRolesFromPlainText(preprocessed);
+        if (roles.length) {
+          populateRoleSelect(roles);
+          document.getElementById('roleSelectContainer').style.display = 'block';
+        }
+      }
+    });
+  }
+
+  const tabButtons = document.querySelectorAll('.tab-btn');
+  tabButtons.forEach(tab => {
+    tab.addEventListener('click', () => {
+      // ...existing tab switching code...
+
+      // Reset role selection when switching tabs
+      const roleSelectContainer = document.getElementById('roleSelectContainer');
+      if (tab.dataset.tab === 'paste') {
+        // For paste tab, check if there's already text to parse roles from
+        const scriptInput = document.getElementById('scriptInput');
+        if (scriptInput && scriptInput.value) {
+          const preprocessed = ScriptProcessor.preProcessScript(scriptInput.value);
+          const roles = ScriptProcessor.extractRolesFromPlainText(preprocessed);
+          if (roles.length) {
+            populateRoleSelect(roles);
+            roleSelectContainer.style.display = 'block';
+            return;
+          }
+        }
+      }
+      roleSelectContainer.style.display = 'none';
+    });
+  });
 }
 
 function populateRoleSelect(roles) {
