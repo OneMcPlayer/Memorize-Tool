@@ -100,30 +100,50 @@ export class ScriptProcessor {
    */
   static extractRolesFromPlainText(scriptLines) {
     const roles = new Map();
-    const namePattern = /^([A-Z][A-Z\s''.\-]+)(?:\s*:|\s*$)/;
     
-    for (const line of scriptLines) {
-      // Skip stage directions and scene descriptions
-      if (line.startsWith('(') || line.toLowerCase().startsWith('entra') || 
-          line.toLowerCase().startsWith('detti') || line.toLowerCase().startsWith('la scena')) {
+    const skipPatterns = [
+      /^\(.*\)$/,
+      /^(?:entra|esce|detti)/i,
+      /^la scena/i,
+      /^(?:sipario|atto|scena)/i,
+    ];
+
+    const addRole = (name) => {
+      const cleanName = name.trim().replace(/\s+/g, ' ');
+      if (!roles.has(cleanName) && cleanName.length > 1) {
+        roles.set(cleanName, {
+          primaryName: cleanName,
+          aliases: [cleanName],
+          description: ''
+        });
+      }
+    };
+
+    for (let i = 0; i < scriptLines.length; i++) {
+      const line = scriptLines[i].trim();
+      if (!line || skipPatterns.some(pattern => pattern.test(line))) {
         continue;
       }
 
-      const match = line.match(namePattern);
-      if (match) {
-        const name = match[1].trim();
-        // Skip common theatrical terms that might be mistaken for characters
-        if (!name.match(/^(ATTO|SCENA|SIPARIO)$/)) {
-          if (!roles.has(name)) {
-            roles.set(name, {
-              primaryName: name,
-              aliases: [name],
-              description: ''
-            });
+      const namePatterns = [
+        /^([A-Z][A-Z\s''.\-]+)(?=:)/,  // Name before colon
+        /^([A-Z][A-Z\s''.\-]+)$/,       // Standalone all-caps name
+        /^([A-Z][A-Z\s''.\-]+(?:\s*(?:,|e)\s*[A-Z][A-Z\s''.\-]+)+)$/ // List of names
+      ];
+
+      for (const pattern of namePatterns) {
+        const match = line.match(pattern);
+        if (match) {
+          if (match[1].includes(',') || match[1].includes(' e ')) {
+            match[1].split(/(?:\s*,\s*|\s+e\s+)/).forEach(name => addRole(name));
+          } else {
+            addRole(match[1]);
           }
+          break;
         }
       }
     }
+    
     return roles;
   }
 }
