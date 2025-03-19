@@ -92,23 +92,38 @@ export class ScriptProcessor {
     return extractedLines;
   }
 
+  /**
+   * Extracts roles from an array of script lines.
+   * 
+   * @param {string[]} scriptLines - An array of strings representing lines from the script.
+   * @returns {Map<string, {primaryName: string, aliases: string[]}>} - A map where keys are role names and values are objects containing the primary name and aliases.
+   */
   static extractRolesFromPlainText(scriptLines) {
     const roles = new Map();
+    const namePattern = /^([A-Z][A-Z\s''.\-]+)(?:\s*:|\s*$)/;
     
-    scriptLines.forEach(line => {
-      const match = line.match(/^([A-Z][A-Za-z\s]+):/);
+    for (const line of scriptLines) {
+      // Skip stage directions and scene descriptions
+      if (line.startsWith('(') || line.toLowerCase().startsWith('entra') || 
+          line.toLowerCase().startsWith('detti') || line.toLowerCase().startsWith('la scena')) {
+        continue;
+      }
+
+      const match = line.match(namePattern);
       if (match) {
         const name = match[1].trim();
-        if (!roles.has(name)) {
-          roles.set(name, {
-            primaryName: name,
-            aliases: [name],
-            description: ''
-          });
+        // Skip common theatrical terms that might be mistaken for characters
+        if (!name.match(/^(ATTO|SCENA|SIPARIO)$/)) {
+          if (!roles.has(name)) {
+            roles.set(name, {
+              primaryName: name,
+              aliases: [name],
+              description: ''
+            });
+          }
         }
       }
-    });
-
-    return Array.from(roles.values());
+    }
+    return roles;
   }
 }
