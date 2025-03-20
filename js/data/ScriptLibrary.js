@@ -1,5 +1,5 @@
-import { CatalogManager } from '/Memorize-Tool/js/data/CatalogManager.js';
-import { Script } from '/Memorize-Tool/js/models/Script.js';
+import { CatalogManager } from './CatalogManager.js';
+import { Script } from '../models/Script.js';
 
 export class ScriptLibrary {
   #scripts = new Map();
@@ -103,10 +103,8 @@ export class ScriptLibrary {
   }
 
   async #loadScriptFile(path) {
-    // Add base path for GitHub Pages
-    const basePath = '/Memorize-Tool/';
-    const fullPath = basePath + path;
-    const response = await fetch(fullPath);
+    // Let the base tag handle the prefixing instead of adding it manually
+    const response = await fetch(path);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
