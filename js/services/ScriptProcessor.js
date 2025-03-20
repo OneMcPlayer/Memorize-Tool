@@ -116,7 +116,13 @@ export class ScriptProcessor {
     const escapedAliases = characterAliases.map(alias => 
       alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     );
-    const regexPattern = `^\\s*(${escapedAliases.join('|')})\\s*:?`;
+    
+    // Determine if the script uses a structured format with quoted character names
+    const isStructured = scriptLines.some(line => line.match(/^"[^"]+"\s*:\s*"""/));
+    const regexPattern = isStructured
+        ? `^"(${escapedAliases.join('|')})"\\s*:\\s*"""` // Pattern for structured scripts
+        : `^\\s*(${escapedAliases.join('|')})\\s*:?`;    // Pattern for plain text scripts
+    
     const regex = new RegExp(regexPattern, "i");
     
     console.debug(`Character regex pattern: ${regexPattern}`);
@@ -127,7 +133,9 @@ export class ScriptProcessor {
         extractedLines.push({ 
           index: i, 
           line: scriptLines[i],
-          speaker: scriptLines[i].match(/^([^:]+):/)?.[1]?.trim() || ''
+          speaker: isStructured 
+            ? scriptLines[i].match(/^"([^"]+)"/)?.[1]?.trim() 
+            : scriptLines[i].match(/^([^:]+):/)?.[1]?.trim() || ''
         });
       }
     }
