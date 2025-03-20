@@ -39,7 +39,34 @@ export const translations = {
       advancedMode: "Advanced Mode",
       basicMode: "Basic Mode (Library Only)",
       selectRole: "Select your character...",
-      errorSelectRole: "Please select your character from the list."
+      errorSelectRole: "Please select your character from the list.",
+
+      // Script Converter Translations
+      converter: {
+        title: "Script Converter",
+        description: "Convert plain text scripts to structured format for improved parsing and memorization.",
+        inputLabel: "Input Plain Text Script",
+        inputPlaceholder: "Paste your plain text script here...",
+        parseButton: "Parse Script",
+        outputLabel: "Structured Format Output",
+        metadataTitle: "Script Metadata",
+        titleLabel: "Title",
+        authorLabel: "Author",
+        dateLabel: "Date",
+        descriptionLabel: "Description",
+        rolesTitle: "Character Roles",
+        roleName: "Character Name",
+        roleAliases: "Aliases (comma separated)",
+        roleDescription: "Description",
+        addRoleButton: "Add Character",
+        exportButton: "Export Structured Script",
+        copyButton: "Copy to Clipboard",
+        downloadButton: "Download as File",
+        backButton: "Back to Main",
+        successParse: "Script parsed successfully!",
+        successExport: "Script exported successfully!",
+        errorParse: "Error parsing script. Please check the format."
+      }
     },
     it: {
       title: "Memorizzazione Copione",
@@ -81,6 +108,33 @@ export const translations = {
       advancedMode: "Modalità Avanzata",
       basicMode: "Modalità Base (Solo Libreria)",
       selectRole: "Seleziona il tuo personaggio...",
-      errorSelectRole: "Seleziona il tuo personaggio dalla lista."
+      errorSelectRole: "Seleziona il tuo personaggio dalla lista.",
+
+      // Script Converter Translations
+      converter: {
+        title: "Convertitore Copioni",
+        description: "Converti copioni in formato testo semplice in formato strutturato per un migliore parsing e memorizzazione.",
+        inputLabel: "Copione in Formato Testo",
+        inputPlaceholder: "Incolla qui il tuo copione in formato testo...",
+        parseButton: "Analizza Copione",
+        outputLabel: "Output in Formato Strutturato",
+        metadataTitle: "Metadati Copione",
+        titleLabel: "Titolo",
+        authorLabel: "Autore",
+        dateLabel: "Data",
+        descriptionLabel: "Descrizione",
+        rolesTitle: "Personaggi",
+        roleName: "Nome Personaggio",
+        roleAliases: "Alias (separati da virgola)",
+        roleDescription: "Descrizione",
+        addRoleButton: "Aggiungi Personaggio",
+        exportButton: "Esporta Copione Strutturato",
+        copyButton: "Copia negli Appunti",
+        downloadButton: "Scarica come File",
+        backButton: "Torna alla Pagina Principale",
+        successParse: "Copione analizzato con successo!",
+        successExport: "Copione esportato con successo!",
+        errorParse: "Errore nell'analisi del copione. Controlla il formato."
+      }
     }
   };

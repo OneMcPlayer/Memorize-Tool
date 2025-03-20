@@ -18,7 +18,7 @@
 
 
 
-@scene "Accademia di Immortali"
+@scene "Atto unico"
 {
   location: "Sala dove gli Accademici sono seduti su scranni imponenti."
   time: "Atto unico"
@@ -37,20 +37,11 @@
     """
 
     "SEGRETARIO": """
-    (prende posto e legge) Ordine del giorno della seduta straordinaria dell'Accademia di Scienze, Lettere ed Arti: 
-    ricevimento e nomina ad Accademico onorario del professor Bolibine, Inventore del cavallo. 
-    Presentazione ai membri dell'Accademia e discorso illustrativo del professor Bolibine sull'invenzione del cavallo.
+    (prende posto e legge) Ordine del giorno della seduta straordi naria dell'Accademia di Scienze, Lettere ed Arti: ricevimento e nomina ad Accademico onorario del professor Bolibine, Inventore del cavallo. Presentazione ai membri dell'Accademia e di scorso illustrativo del professor Bolibine sul l'invenzione del cavallo.
     """
 
     "PRESIDENTE": """
-    (scampanella e s’alza) Illustri colleghi! 
-    Tra poco sarà in mezzo a noi l'illustre professor Bolibine, che, con la preziosa invenzione del cavallo, 
-    ha dato nuovo lustro a tutto il mondo civile, rendendo un inestimabile servizio alla causa del progresso 
-    che noi tutti serviamo. Pensate: aver inventato il cavallo! Un animale così utile e così nobile! 
-    Noi non esitiamo a proclamare il Bolibine un benemerito dell'umanità. 
-    A questa seduta eccezionale è assicurato l'intervento di S. E. il Ministro della Pubblica Istruzione, 
-    il quale, con la sua presenza, renderà più solenne la tornata. È superfluo che vi esorti... 
-    (resta a bocca aperta e non può continuare. Tutti gli si affollano intorno e gli picchiano le spalle)
+     (scampanella e s'alza) Illustri colleghi! Tra poco sarà in mezzo a noi l'illustre profes sor Bolibine, che, con la preziosa invenzione del cavallo, ha dato nuovo lustro a tutto il mondo civile, rendendo un inestimabile servizio alla causa del progresso che noi tutti serviamo. Pensate: aver inventato il cavallo! Un animale così utile e così nobile! Noi non esitiamo a proclamare il Bolibine, un benemerito dell'u manità. A questa seduta ecce zionale è assicurato l'intervento di S. E. il Mini stro della pubblica Istruzione, il quale, con la sua presenza, renderà più solenne la tornata. È superfluo che vi esorti... (resta a bocca aperta e non può continuare. Tutti gli si affollano intorno e gli picchiano le spalle)  
     """
 
     "SEGRETARIO": """
@@ -58,37 +49,27 @@
     """
 
     "ENCICLOPEDICA": """
-    Non ci faccia spaventare, Presidente!
-    (il PRESIDENTE indica la bocca)
+    Non ci faccia spaventare, Presi dente!  (il PRESIDENTE indica la bocca)
     """
 
     "USCIERE": """
-    (accorrendo) Non è niente. Gli è rimasta la dentiera attraverso.
-    (gli accomoda la dentiera con un pugno)
+    (accorrendo) Non è niente. Gli è ri masta la dentiera attraverso. (gli accomoda la dentiera con un pugno)
     """
 
     "PRESIDENTE": """
-    L'incidente è chiuso. (scampanella) È superfluo, dicevo, che vi esorti ad accogliere coi dovuti onori 
-    l'insigne Inventore del cavallo. (prende sul tavolo una lettera) 
-    Intanto, comunico all'Assemblea che il nostro illustre collega prof. Boltke, il quale da lungo tempo 
-    era ammalato, s'è completamente ristabilito e domani tornerà fra noi.
+     L'incidente è chiuso. (scampanella) È superfluo, dicevo, che vi esorti ad accogliere coi dovuti onori l'insigne Inventore del cavallo. (pausa: prende sul tavolo una lettera) Intanto, comunico all'Assemblea che il nostro illustre collega prof. Boltke, il quale da lungo tempo era ammalato, s'è completamente ristabilito e do mani tornerà fra noi. (segni di compiacimento generale) 
     """
 
-    "@action": "(segni di compiacimento generale)"
-
     "SCIENZIATO": """
-    (sordissimo, ha seguito il discorso con la mano dietro l'orecchio) Domando la parola!
+    (sordissimo ha seguito il discorso con la mano dietro l'orecchio) Domando la parola! 
     """
 
     "PRESIDENTE": """
-    La parola al professor Poziakoff.
+    La parola al professor Poziakoff. 
     """
 
     "SCIENZIATO": """
-    (s'alza, cava di tasca uno scartafaccio e legge) 
-    La dolorosa notizia della morte dell'illustre collega professor Boltke mi riempie di cordoglio. 
-    Scompare con lui una figura...
-    (i vicini lo tirano per la giacca, ma lui continua imperterrito)
+    (s'alza, cava di tasca uno scartafaccio e legge) La dolorosa notizia della morte dell'il lustre collega professor Boltke (i vicini lo tirano per la giacca, ma lui continua) mi riempie di cordoglio. Scompare con lui una figura... 
     """
 
     "ENCICLOPEDICA": """
@@ -104,27 +85,23 @@
     """
 
     "SCIENZIATO": """
-    Ah! 
-    (intasca lo scartafaccio e si rimette a sedere)
+    Ah! ( intasca lo scarta faccio e si rimette a sedere).
     """
 
     "PRESIDENTE": """
-    (scampanella) L'incidente è chiuso. 
-    Continuano ad arrivare telegrammi inneggianti all’inventore del cavallo. 
-    E poiché manca ancora del tempo al suo arrivo... (guarda l'orologio e s’interrompe)
+    (scampanella) L'incidente è chiuso. Conti nuano ad arrivare telegrammi inneggianti all'in ventore del cavallo E poiché manca ancora del tempo al suo arrivo... (guarda l'orologio e s'inter rompe) 
     """
 
     "ENCICLOPEDICA": """
-    Che è? Un'altra volta la dentiera attraverso?
+    Che è? Un'altra volta la dentiera at traverso?
     """
 
     "PRESIDENTE": """
-    Disdetta! Il mio orologio è fermo!
-    (il PRESIDENTE scuote l'orologio e lo porta all’orecchio)
+    Disdetta! Il mio orologio è fermo! (Il PRESIDENTE scuote l'orologio e lo porta all'orecchio)
     """
 
     "SEGRETARIO": """
-    Forse è guasta la spirale. (prende l'orologio e l'esamina)
+    Forse è guasta la spirale. (prende l'orologio e l'esamina) 
     """
 
     "ENCICLOPEDICA": """
@@ -132,15 +109,15 @@
     """
 
     "POETA": """
-    (prende l'orologio) Oppure è necessario riparare la molla.
+    (prende l'orologio) Oppure è necessario riparare la molla. 
     """
 
     "USCIERE": """
-    Forse bisogna caricarlo.
+    Forse bisogna cari carlo.
     """
 
     "PRESIDENTE": """
-    Oh! Proviamo. (carica l'orologio e lo porta all'orecchio) Cammina!
+    Proviamo. (carica l'orologio e lo porta all'orecchio) Cammina!
     """
 
     "@action": "(Tutti: «Oh!»)"
@@ -153,12 +130,10 @@
     Mezzanotte!
     """
 
-    "Tutti": """
-    Eh?!
-    """
+    "@action": "(Tutti: «Eh?!»)"
 
     "POETA": """
-    (c.s.) Mezzanotte!
+    (c. s.) Mezzanotte! 
     """
 
     "PRESIDENTE": """
@@ -170,29 +145,23 @@
     """
 
     "SEGRETARIO": """
-    E l’Inventore del cavallo, che doveva venire nel pomeriggio?
+    E l’Inventore del cavallo, che doveva ve nire nel pomeriggio?
     """
 
     "POETA": """
     Che stupido!
     """
 
-    "Tutti": """
-    Eh?...
-    """
+    "@action": "(Tutti: «Eh?...»)"
 
     "POETA": """
     Ho sbagliato: non è mezzanotte! È mezzogiorno!
     """
 
-    "Tutti": """
-    Ah!...
-    """
+    "@action": "(Tutti: «Ah!... »)"
 
     "PRESIDENTE": """
-    (suona il campanello) L'incidente è chiuso. Facciano silenzio, illustri colleghi. 
-    E, giacché è ancora presto, possiamo far tesoro del tempo in attesa che arrivi l'insigne Inventore del cavallo. 
-    Checco!
+    (suona il campanello) L'incidente è chiuso. Facciano silenzio, illustri colleghi. E, giacché è ancora presto, possiamo far tesoro del tempo in attesa che arrivi l'insigne Inventore del cavallo. Checco!
     """
 
     "CLINICO": """
@@ -208,14 +177,11 @@
     """
 
     "PRESIDENTE": """
-    Allora cominciamo subito. Segretario, verbalizzate. Che preferisci, l'estate o l'inverno?
+    Allora cominciamo subito. Segretario, verbalizzate. Che preferisci, l'estate o l'inverno? 
     """
 
     "CLINICO": """
-    (tace, come per raccogliere le idee) Che vuoi, il freddo è freddo, e il caldo è caldo. 
-    Viene Natale, Pasqua, Ferragosto; poi un altro Natale, un'altra Pasqua, un altro Ferragosto. 
-    Passano i mesi, le stagioni, gli anni; sopraggiunge la vecchiaia. 
-    Dopo un secolo ne viene un altro e la storia si rinnova sempre.
+     (tace, come per raccogliere le idee) Che vuoi, il freddo è freddo, e il caldo è caldo. Viene Natale, Pasqua, Ferragosto; poi un altro Natale, un'altra Pasqua, un altro Fer ragosto. Passano i mesi, le stagioni, gli anni; sopraggiunge le vecchiaia. Dopo un secolo ne viene un altro e la storia si rinnova sempre. 
     """
 
     "PRESIDENTE": """
@@ -223,8 +189,7 @@
     """
 
     "CLINICO": """
-    Quanto alla ricchezza, non va considerata un bene sotto tutti i riguardi.
-    (approvazioni)
+    Quanto alla ricchezza, non va considerata un bene sotto tutti i riguardi. (approvazioni) 
     """
 
     "PRESIDENTE": """
@@ -232,7 +197,7 @@
     """
 
     "CLINICO": """
-    Sai chi è felice? Chi non ha niente. Si sono visti tanti milionari ridotti al suicidio. Perché?
+    Sai chi è felice? Chi non ha niente. Si sono visti tanti milionari ridotti al suicidio. Perché? 
     """
 
     "PRESIDENTE": """

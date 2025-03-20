@@ -3,6 +3,7 @@ import { translations } from '/Memorize-Tool/js/translations.js';
 import { Script } from '/Memorize-Tool/js/models/Script.js';
 import { ScriptProcessor } from '/Memorize-Tool/js/services/ScriptProcessor.js';
 import scriptLibrary from '/Memorize-Tool/js/data/scriptLibraryInstance.js';
+import { ScriptConverter } from '/Memorize-Tool/js/services/ScriptConverter.js';
 
 const app = document.getElementById('app');
 let extractedLines = [];
@@ -60,10 +61,17 @@ document.getElementById('optionsMenu').innerHTML = `
         ${translations[currentLang].advancedMode}
       </label>
     </li>
+    <li id="optionConverter">Script Converter</li>
     <li id="optionAbout">About</li>
     <li id="optionHelp">Help</li>
   </ul>
 `;
+
+// Add event listener for the converter option
+document.getElementById('optionConverter').addEventListener('click', () => {
+  renderConverterView();
+  optionsMenu.style.display = 'none';
+});
 
 document.getElementById('advancedModeToggle').addEventListener('change', (e) => {
   isAdvancedMode = e.target.checked;
@@ -491,21 +499,21 @@ function showCurrentCard(showFull) {
     const copyBtn = document.createElement('button');
     copyBtn.textContent = '📋';
     copyBtn.style.position = 'absolute';
-    copyBtn.style.right = '10px';
+    copyBtn.style.right = '10px'; 
     copyBtn.style.top = '10px';
-    copyBtn.onclick = () => {
+    copyBtn.addEventListener('click', () => {
       // Use the original line text for copying
       navigator.clipboard.writeText(getPlainText(currentEntry.line))
         .then(() => showToast(t.copied));
-    };
+    });
     card.appendChild(copyBtn);
   }
-  updateProgress();
 }
 
 function nextCard() {
   currentLineIndex++;
   showCurrentCard(false);
+  updateProgress();
 }
 
 function updateProgress() {

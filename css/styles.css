@@ -561,3 +561,150 @@ body.dark-mode input:focus,
 body.dark-mode select:focus {
   outline-color: #5dade2;
 }
+
+/* Script Converter Styles */
+.converter-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.converter-input,
+.converter-metadata,
+.converter-roles,
+.converter-output {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 10px;
+}
+
+body.dark-mode .converter-input,
+body.dark-mode .converter-metadata,
+body.dark-mode .converter-roles,
+body.dark-mode .converter-output {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.full-width {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.roles-table-container {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 15px;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 4px;
+}
+
+body.dark-mode .roles-table-container {
+  border-color: rgba(255,255,255,0.1);
+}
+
+.roles-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.roles-table th {
+  position: sticky;
+  top: 0;
+  background: #f0f0f0;
+  padding: 10px;
+  text-align: left;
+}
+
+body.dark-mode .roles-table th {
+  background: #34495e;
+}
+
+.roles-table td {
+  padding: 8px 5px;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+body.dark-mode .roles-table td {
+  border-bottom-color: rgba(255,255,255,0.05);
+}
+
+.roles-table input {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+body.dark-mode .roles-table input {
+  border-color: #485e74;
+  background: #2c3e50;
+  color: white;
+}
+
+.export-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.primary-button {
+  background-color: #3498db;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.primary-button:hover {
+  background-color: #2980b9;
+}
+
+.secondary-button {
+  background-color: #95a5a6;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.secondary-button:hover {
+  background-color: #7f8c8d;
+}
+
+.delete-role-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #e74c3c;
+}
+
+.delete-role-btn:hover {
+  color: #c0392b;
+}
+
+@media (max-width: 768px) {
+  .roles-table th:nth-child(3),
+  .roles-table td:nth-child(3) {
+    display: none; /* Hide description column on small screens */
+  }
+  
+  .export-buttons {
+    flex-direction: column;
+  }
+}
