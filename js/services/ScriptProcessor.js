@@ -33,32 +33,59 @@ export class ScriptProcessor {
         isMultilineStageDirection = !line.includes(')');
       }
 
-      // More robust character name matching with improved handling for uppercase names
-      // This pattern looks for uppercase character names followed by a colon or continuing dialog
-      const characterMatch = line.match(/^([A-Z][A-Za-z0-9_\s''\-]+)(?:\s*:?\s*)(.*)/);
-      
-      if (characterMatch && !isStageDirection) {
+      // New handling for structured format with quoted character names
+      const structuredMatch = line.match(/^"([^"]+)":\s*"""(.*)$/);
+      if (structuredMatch && !isStageDirection) {
         if (currentLine) {
           processedLines.push(currentLine);
         }
         
-        lastCharacterName = characterMatch[1].trim();
-        currentLine = `${lastCharacterName}: ${characterMatch[2]}`;
-      } else {
-        if (currentLine) {
-          // Improved line joining logic
-          const shouldAddSpace = 
-            !currentLine.endsWith('-') && 
-            !currentLine.endsWith('(') && 
-            !line.startsWith(')') &&
-            !currentLine.endsWith(' ');
-            
-          const connector = shouldAddSpace ? ' ' : '';
-          currentLine += connector + line;
-        } else if (lastCharacterName && !isStageDirection) {
-          currentLine = `${lastCharacterName}: ${line}`;
+        lastCharacterName = structuredMatch[1].trim();
+        // Create a simplified format line instead of preserving quotes
+        currentLine = `${lastCharacterName}: ${structuredMatch[2].replace(/"""/g, '')}`;
+      } 
+      // More robust character name matching with improved handling for uppercase names
+      // This pattern looks for uppercase character names followed by a colon or continuing dialog
+      else {
+        const characterMatch = line.match(/^([A-Z][A-Za-z0-9_\s''\-]+)(?:\s*:?\s*)(.*)/);
+        
+        if (characterMatch && !isStageDirection) {
+          if (currentLine) {
+            processedLines.push(currentLine);
+          }
+          
+          lastCharacterName = characterMatch[1].trim();
+          currentLine = `${lastCharacterName}: ${characterMatch[2]}`;
         } else {
-          currentLine = line;
+          if (currentLine) {
+            // Improved line joining logic
+            const shouldAddSpace = 
+              !currentLine.endsWith('-') && 
+              !currentLine.endsWith('(') && 
+              !line.startsWith(')') &&
+              !currentLine.endsWith(' ');
+              
+            const connector = shouldAddSpace ? ' ' : '';
+            
+            // Handle terminating triple quotes in structured format
+            if (line.includes('"""') && !line.startsWith('"""')) {
+              // Only include text before the closing quotes
+              const textBeforeClosing = line.split('"""')[0];
+              currentLine += connector + textBeforeClosing;
+              processedLines.push(currentLine);
+              currentLine = '';
+            } else if (line === '"""') {
+              // If the line is just closing quotes, finish the current line
+              processedLines.push(currentLine);
+              currentLine = '';
+            } else {
+              currentLine += connector + line;
+            }
+          } else if (lastCharacterName && !isStageDirection) {
+            currentLine = `${lastCharacterName}: ${line}`;
+          } else {
+            currentLine = line;
+          }
         }
       }
 
@@ -90,81 +117,81 @@ export class ScriptProcessor {
       console.warn('No character data provided for extraction');
       return [];
     }
-    
+    on
     // Handle either string, array, or object with aliases
-    let characterAliases;
+    let characterAliases;apedAliases.join('|')})\\s*:`;
     if (typeof characterData === 'string') {
       characterAliases = [characterData];
     } else if (Array.isArray(characterData)) {
-      characterAliases = characterData;
+      characterAliases = characterData;gexPattern}`);
     } else if (characterData?.aliases) {
       // Use all aliases including primary name
-      characterAliases = [characterData.primaryName, ...characterData.aliases];
-    } else {
+      characterAliases = [characterData.primaryName, ...characterData.aliases];for (let i = 0; i < scriptLines.length; i++) {
+    } else {es[i])) {
       throw new Error('Invalid character data provided');
     }
-    
-    // Filter out empty aliases
+    ,
+    // Filter out empty aliasescriptLines[i].match(/^([^:]+):/)?.[1]?.trim() || ''
     characterAliases = characterAliases.filter(alias => alias && typeof alias === 'string');
     
     if (!characterAliases.length) {
       console.warn('No valid character aliases found');
-      return [];
-    }
+      return [];.debug(`Extracted ${extractedLines.length} lines for character`);
+    }urn extractedLines;
 
     // Create regex pattern that matches any alias
     const escapedAliases = characterAliases.map(alias => 
-      alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    );
-    
-    // Determine if the script uses a structured format with quoted character names
+      alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')n array of script lines.
+    );* 
+       * @param {string[]} scriptLines - An array of strings representing lines from the script.
+    // Determine if the script uses a structured format with quoted character names@returns {Array<{primaryName: string, aliases: string[], description: string}>} - An array of role objects
     const isStructured = scriptLines.some(line => line.match(/^"[^"]+"\s*:\s*"""/));
-    const regexPattern = isStructured
+    const regexPattern = isStructuredtic extractRolesFromPlainText(scriptLines) {
         ? `^"(${escapedAliases.join('|')})"\\s*:\\s*"""` // Pattern for structured scripts
         : `^\\s*(${escapedAliases.join('|')})\\s*:?`;    // Pattern for plain text scripts
-    
+     return [];
     const regex = new RegExp(regexPattern, "i");
     
     console.debug(`Character regex pattern: ${regexPattern}`);
     
-    const extractedLines = [];
-    for (let i = 0; i < scriptLines.length; i++) {
-      if (regex.test(scriptLines[i])) {
-        extractedLines.push({ 
-          index: i, 
-          line: scriptLines[i],
+    const extractedLines = [];onst skipPatterns = [
+    for (let i = 0; i < scriptLines.length; i++) {  /^\(.*\)$/,                      // Stage directions
+      if (regex.test(scriptLines[i])) {        // Stage directions in Italian
+        extractedLines.push({   /^la scena/i,                    // Scene descriptions in Italian
+          index: i, ena)/i,      // Act/scene markers in Italian
+          line: scriptLines[i],s in English
           speaker: isStructured 
             ? scriptLines[i].match(/^"([^"]+)"/)?.[1]?.trim() 
             : scriptLines[i].match(/^([^:]+):/)?.[1]?.trim() || ''
         });
       }
-    }
-    
-    console.debug(`Extracted ${extractedLines.length} lines for character`);
+    }if (!rolesMap.has(cleanName) && cleanName.length > 1) {
+            rolesMap.set(cleanName, {
+    console.debug(`Extracted ${extractedLines.length} lines for character`);e,
     return extractedLines;
   }
 
   /**
    * Extracts roles from an array of script lines.
    * 
-   * @param {string[]} scriptLines - An array of strings representing lines from the script.
-   * @returns {Array<{primaryName: string, aliases: string[], description: string}>} - An array of role objects
-   */
-  static extractRolesFromPlainText(scriptLines) {
+   * @param {string[]} scriptLines - An array of strings representing lines from the script.t i = 0; i < scriptLines.length; i++) {
+   * @returns {Array<{primaryName: string, aliases: string[], description: string}>} - An array of role objectsonst line = scriptLines[i].trim();
+   */if (!line || skipPatterns.some(pattern => pattern.test(line))) {
+  static extractRolesFromPlainText(scriptLines) {        continue;
     if (!scriptLines || !scriptLines.length) {
       console.warn('No script lines provided for role extraction');
       return [];
-    }
-    
-    const rolesMap = new Map();
+    }A-Za-z0-9_\s''.\-]+)(?=:)/,  // Name before colon
+     /^([A-Z][A-Za-z0-9_\s''.\-]+)$/,      // Standalone all-caps name
+    const rolesMap = new Map();        /^([A-Z][A-Za-z0-9_\s''.\-]+(?:\s*(?:,|e|and)\s*[A-Z][A-Za-z0-9_\s''.\-]+)+)$/ // List of names
     
     const skipPatterns = [
       /^\(.*\)$/,                      // Stage directions
       /^(?:entra|esce|detti)/i,        // Stage directions in Italian
-      /^la scena/i,                    // Scene descriptions in Italian
-      /^(?:sipario|atto|scena)/i,      // Act/scene markers in Italian
-      /^act|scene/i,                   // Act/scene markers in English
-      /^enter|exit/i,                  // Enter/exit in English
+      /^la scena/i,                    // Scene descriptions in Italianif (match) {
+      /^(?:sipario|atto|scena)/i,      // Act/scene markers in Italian          // Check for multiple names (separated by commas, 'e', or 'and')
+      /^act|scene/i,                   // Act/scene markers in Englishch[1].includes(' e ') || match[1].includes(' and ')) {
+      /^enter|exit/i,                  // Enter/exit in Englishe\s+|\s+and\s+)/).forEach(name => addRole(name));
     ];
 
     const addRole = (name) => {
@@ -173,15 +200,11 @@ export class ScriptProcessor {
         rolesMap.set(cleanName, {
           primaryName: cleanName,
           aliases: [cleanName],
-          description: ''
-        });
+          description: ''nvert map to array for compatibility with existing code
+        });urn Array.from(rolesMap.values());
       }
     };
-
-    for (let i = 0; i < scriptLines.length; i++) {
-      const line = scriptLines[i].trim();
-      if (!line || skipPatterns.some(pattern => pattern.test(line))) {
-        continue;
+    for (let i = 0; i < scriptLines.length; i++) {      const line = scriptLines[i].trim();      if (!line || skipPatterns.some(pattern => pattern.test(line))) {        continue;
       }
 
       const namePatterns = [
