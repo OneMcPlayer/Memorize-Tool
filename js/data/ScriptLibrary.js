@@ -3,11 +3,20 @@ import { Script } from '../models/Script.js';
 
 export class ScriptLibrary {
   #scripts = new Map();
+  #scriptCache = new Map(); // Cache for loaded script content
   #initialized = false;
+  #initPromise = null;
 
   async initialize() {
-    if (this.#initialized) return;
-
+    // Prevent multiple initialization calls from running in parallel
+    if (this.#initPromise) return this.#initPromise;
+    if (this.#initialized) return Promise.resolve();
+    
+    this.#initPromise = this.#performInitialization();
+    return this.#initPromise;
+  }
+  
+  async #performInitialization() {
     try {
       const catalog = await CatalogManager.loadCatalog();
       
@@ -21,6 +30,7 @@ export class ScriptLibrary {
       console.error('Failed to initialize script library:', error);
     } finally {
       this.#initialized = true;
+      this.#initPromise = null;
     }
   }
 
@@ -30,6 +40,7 @@ export class ScriptLibrary {
       return;
     }
 
+    // Create an array of promises for concurrent loading
     const loadPromises = Object.entries(catalog)
       .filter(([_, info]) => CatalogManager.validateCatalogEntry(info))
       .map(async ([id, info]) => {
@@ -37,7 +48,7 @@ export class ScriptLibrary {
           const content = await this.#loadScriptFile(info.path);
           return [id, { ...info, content }];
         } catch (error) {
-          console.warn(`Script ${id} not found or inaccessible:`, error);
+          console.warn(`Script ${id} (${info.path}) not found or inaccessible:`, error);
           return null;
         }
       });
@@ -49,11 +60,14 @@ export class ScriptLibrary {
         const [id, scriptData] = result.value;
         this.#scripts.set(id, scriptData);
       });
+    
+    console.debug(`Loaded ${this.#scripts.size} scripts from catalog`);
   }
 
   async #scanDirectory() {
     try {
       const files = await this.#getScriptFiles();
+      console.debug(`Found ${files.length} script files in directory scan`);
       
       await Promise.all(
         files.map(async file => {
@@ -72,17 +86,26 @@ export class ScriptLibrary {
   }
 
   async #getScriptFiles() {
-    const response = await fetch('js/data/scripts/');
-    const html = await response.text();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-    
-    return Array.from(doc.querySelectorAll('a'))
-      .filter(a => a.href.endsWith('.script'))
-      .map(a => ({
-        id: a.href.split('/').pop().replace('.script', ''),
-        path: `js/data/scripts/${a.href.split('/').pop()}`
-      }));
+    try {
+      const response = await fetch('js/data/scripts/');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const html = await response.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      
+      return Array.from(doc.querySelectorAll('a'))
+        .filter(a => a.href.endsWith('.script'))
+        .map(a => ({
+          id: a.href.split('/').pop().replace('.script', ''),
+          path: `js/data/scripts/${a.href.split('/').pop()}`
+        }));
+    } catch (error) {
+      console.error('Error scanning directory:', error);
+      return [];
+    }
   }
 
   #parseScriptData(content, file) {
@@ -103,29 +126,55 @@ export class ScriptLibrary {
   }
 
   async #loadScriptFile(path) {
-    // Let the base tag handle the prefixing instead of adding it manually
-    const response = await fetch(path);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    // Check cache first
+    if (this.#scriptCache.has(path)) {
+      console.debug(`Using cached script: ${path}`);
+      return this.#scriptCache.get(path);
     }
-    return response.text();
+    
+    // Fetch the script
+    try {
+      const response = await fetch(path);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const content = await response.text();
+      
+      // Cache the content for future use
+      this.#scriptCache.set(path, content);
+      
+      return content;
+    } catch (error) {
+      console.error(`Error loading script ${path}:`, error);
+      throw error;
+    }
   }
 
   async loadScript(scriptId) {
+    if (!this.#initialized) {
+      await this.initialize();
+    }
+    
     const script = this.#scripts.get(scriptId);
     if (!script) {
-      throw new Error('Script not found');
+      throw new Error(`Script not found: ${scriptId}`);
     }
     
     console.debug("Loaded raw script:", script);
     
-    const loadedScript = script.format === "structured" 
-      ? Script.fromStructuredText(script.content)
-      : script;
-    
-    console.debug("Final loaded script:", loadedScript);
-    
-    return loadedScript;
+    try {
+      const loadedScript = script.format === "structured" 
+        ? Script.fromStructuredText(script.content)
+        : script;
+      
+      console.debug("Final loaded script:", loadedScript);
+      
+      return loadedScript;
+    } catch (error) {
+      console.error(`Error parsing script ${scriptId}:`, error);
+      throw new Error(`Failed to parse script: ${error.message}`);
+    }
   }
 
   getAvailableScripts() {
@@ -134,5 +183,10 @@ export class ScriptLibrary {
       title: info.title,
       format: info.format
     }));
+  }
+  
+  clearCache() {
+    this.#scriptCache.clear();
+    console.debug('Script cache cleared');
   }
 }

@@ -257,8 +257,27 @@ function handleFileUpload(event) {
   reader.onload = (e) => {
     const content = e.target.result;
     try {
-      const script = Script.fromStructuredText(content);
-      document.getElementById('scriptInput').value = content;
+      // Try to parse as structured script first
+      try {
+        const script = Script.fromStructuredText(content);
+        scriptLines = ScriptProcessor.preProcessScript(content);
+        
+        if (script.roles && script.roles.length) {
+          populateRoleSelect(script.roles);
+          document.getElementById('roleSelectContainer').style.display = 'block';
+        }
+      } catch (structuredError) {
+        // If that fails, treat as plain text
+        console.log("Not a structured script, treating as plain text");
+        scriptLines = ScriptProcessor.preProcessScript(content);
+        
+        // Extract roles from plain text
+        const roles = ScriptProcessor.extractRolesFromPlainText(scriptLines);
+        if (roles.length) {
+          populateRoleSelect(roles);
+          document.getElementById('roleSelectContainer').style.display = 'block';
+        }
+      }
     } catch (error) {
       showToast("Error: Invalid script format");
       console.error(error);
@@ -349,20 +368,29 @@ async function extractLines() {
       showToast(t.errorNoInput);
       return;
     }
-  } else if (!document.getElementById('paste-tab').classList.contains('hidden')) {
+  } else if (!document.getElementById('paste-tab') || !document.getElementById('paste-tab').classList.contains('hidden')) {
     // Paste mode
-    if (!scriptInput.value) {
+    if (!scriptInput || !scriptInput.value) {
       showToast(t.errorNoInput);
       return;
     }
     currentLines = ScriptProcessor.preProcessScript(scriptInput.value);
   } else {
     // File mode
-    if (!scriptFile.files[0]) {
+    if (!scriptFile || !scriptFile.files || !scriptFile.files[0]) {
       showToast(t.errorNoInput);
       return;
     }
-    currentLines = ScriptProcessor.preProcessScript(scriptFile.value);
+    
+    // Fix: read file content properly using FileReader
+    try {
+      const fileContent = await readFileContent(scriptFile.files[0]);
+      currentLines = ScriptProcessor.preProcessScript(fileContent);
+    } catch (error) {
+      showToast(t.errorReadingFile || "Error reading file");
+      console.error('Error reading file:', error);
+      return;
+    }
   }
 
   if (!currentLines || currentLines.length === 0) {
@@ -383,6 +411,16 @@ async function extractLines() {
 
   currentLineIndex = 0;
   renderPracticeView();
+}
+
+// Add helper function to properly read file content
+function readFileContent(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = event => resolve(event.target.result);
+    reader.onerror = error => reject(error);
+    reader.readAsText(file);
+  });
 }
 
 function getPlainText(line) {
