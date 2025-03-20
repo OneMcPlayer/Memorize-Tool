@@ -1,117 +1,132 @@
+import { ScriptProcessor } from './ScriptProcessor.js';
+
 /**
- * Utility class to convert plain text scripts to structured format
+ * Utility class for converting between script formats
  */
 export class ScriptConverter {
   /**
-   * Convert a plain text script to structured format
-   * @param {string} plainText - The plain text script
-   * @param {Object} metadata - Script metadata (title, author, etc.)
-   * @param {Array} roles - Array of role objects
-   * @returns {string} - Structured format script
+   * Parse a basic script into structured components
+   * @param {string} scriptText - The plain text script
+   * @returns {Object} - Parsed script components
    */
-  static convertToStructured(plainText, metadata, roles) {
-    if (!plainText) return '';
-    
-    let structuredScript = '';
-    
-    // Add metadata
-    if (metadata.title) {
-      structuredScript += `@title "${metadata.title}"\n`;
-    }
-    if (metadata.author) {
-      structuredScript += `@author "${metadata.author}"\n`;
-    }
-    if (metadata.date) {
-      structuredScript += `@date "${metadata.date}"\n`;
-    }
-    if (metadata.description) {
-      structuredScript += `@description "${metadata.description}"\n`;
+  static parseBasicScript(scriptText) {
+    if (!scriptText) {
+      throw new Error('No script text provided');
     }
     
-    structuredScript += '\n';
+    // Process the script to normalize it
+    const processedLines = ScriptProcessor.preProcessScript(scriptText);
     
-    // Add roles section
-    structuredScript += '@roles\n';
-    roles.forEach(role => {
-      const aliasText = role.aliases.length > 1 
-        ? role.aliases.join(' | ')
-        : role.primaryName;
-      
-      structuredScript += `  - [${aliasText}]: "${role.description}"\n`;
-    });
-    structuredScript += '@endroles\n\n';
+    // Extract roles
+    const roles = ScriptProcessor.extractRolesFromPlainText(processedLines);
     
-    // Add a default scene
-    structuredScript += '@scene "Scene 1"\n{\n';
-    structuredScript += '  location: "Default location"\n';
-    structuredScript += '  time: "Default time"\n';
-    structuredScript += '  mood: "Default mood"\n\n';
+    // Extract basic metadata
+    const metadata = this.#extractBasicMetadata(scriptText);
     
-    // Add description
-    structuredScript += '  description: """\n';
-    structuredScript += '    Scene description goes here.\n';
-    structuredScript += '  """\n\n';
-    
-    // Add dialogue section
-    structuredScript += '  dialogue {\n';
-    
-    // Process the plain text into dialogue
-    const lines = plainText.split('\n');
-    let currentCharacter = null;
-    let currentDialogue = [];
-    
-    const processCurrentDialogue = () => {
-      if (currentCharacter && currentDialogue.length > 0) {
-        structuredScript += `    "${currentCharacter}": """\n`;
-        currentDialogue.forEach(line => {
-          structuredScript += `      ${line}\n`;
-        });
-        structuredScript += `    """\n\n`;
-        currentDialogue = [];
-      }
+    return {
+      ...metadata,
+      roles,
+      processedLines
     };
-    
-    lines.forEach(line => {
-      line = line.trim();
-      if (!line) return;
-      
-      // Check if line starts with a character name
-      const characterMatch = line.match(/^([^:]+):\s*(.*)$/);
-      
-      if (characterMatch) {
-        // Process previous dialogue if any
-        processCurrentDialogue();
-        
-        currentCharacter = characterMatch[1].trim();
-        const dialogueLine = characterMatch[2].trim();
-        
-        if (dialogueLine) {
-          currentDialogue.push(dialogueLine);
-        }
-      } else if (line.startsWith('(') && line.endsWith(')')) {
-        // Stage direction
-        structuredScript += `    "@action": "${line}"\n\n`;
-      } else if (currentCharacter) {
-        // Continuation of previous character's dialogue
-        currentDialogue.push(line);
-      }
-    });
-    
-    // Process any remaining dialogue
-    processCurrentDialogue();
-    
-    // Close dialogue and scene
-    structuredScript += '  }\n}\n';
-    
-    return structuredScript;
   }
   
   /**
-   * Extract metadata from a plain text script
-   * @param {string} plainText - The plain text script
+   * Generate a structured script in DSL format
+   * @param {string} sourceText - Original script text
+   * @param {Object} metadata - Script metadata
+   * @param {Array} roles - Character roles
+   * @returns {string} - Structured script text
+   */
+  static generateStructuredScript(sourceText, metadata, roles) {
+    if (!sourceText) {
+      throw new Error('No source text provided');
+    }
+    
+    // Process the script to normalize it
+    const processedLines = ScriptProcessor.preProcessScript(sourceText);
+    
+    let output = '';
+    
+    // Add header section
+    output += `@title "${metadata.title || 'Untitled Script'}"\n`;
+    if (metadata.author) output += `@title "${metadata.author}"\n`;
+    if (metadata.date) output += `@date "${metadata.date}"\n`;
+    if (metadata.description) output += `@description "${metadata.description}"\n`;
+    
+    output += '\n';
+    
+    // Add roles section
+    output += '@roles\n';
+    roles.forEach(role => {
+      let roleLine = role.primaryName;
+      
+      // Add aliases if any
+      if (role.aliases && role.aliases.length) {
+        roleLine += ` [${role.aliases.join(', ')}]`;
+      }
+      
+      // Add description if any
+      if (role.description) {
+        roleLine += `: ${role.description}`;
+      }
+      
+      output += `${roleLine}\n`;
+    });
+    output += '@endroles\n\n';
+    
+    // Parse the script into scenes
+    const scenes = this.#extractScenes(processedLines);
+    
+    // Add scenes
+    scenes.forEach(scene => {
+      output += `@scene "${scene.title}"\n`;
+      
+      // Add scene context if available
+      if (scene.location) output += `location: "${scene.location}"\n`;
+      if (scene.time) output += `time: "${scene.time}"\n`;
+      
+      // Add scene description if available
+      if (scene.description) {
+        output += `description: """${scene.description}"""\n`;
+      }
+      
+      output += '\n';
+      
+      // Add dialogue
+      scene.lines.forEach(line => {
+        // Handle stage directions
+        if (line.startsWith('(') && line.endsWith(')')) {
+          output += `${line}\n`;
+          return;
+        }
+        
+        // Parse character and line text
+        const match = line.match(/^([^:]+):\s*(.+)$/);
+        if (match) {
+          const character = match[1].trim();
+          const text = match[2].trim();
+          
+          // Use triple-quote format for dialogue
+          output += `"${character}": """${text}"""\n\n`;
+        } else {
+          // Just add the line as-is if it doesn't match the pattern
+          output += `${line}\n`;
+        }
+      });
+      
+      output += '@endscene\n\n';
+    });
+    
+    return output;
+  }
+  
+  /**
+   * Extract basic metadata from script text
+   * @private
+   * @param {string} scriptText - The script text
    * @returns {Object} - Extracted metadata
    */
-  static extractMetadata(plainText) {
+  static #extractBasicMetadata(scriptText) {
     const metadata = {
       title: '',
       author: '',
@@ -119,15 +134,88 @@ export class ScriptConverter {
       description: ''
     };
     
-    // Try to extract title from first line if it looks like a title
-    const lines = plainText.split('\n');
+    // Try to extract title from first line
+    const lines = scriptText.split('\n');
     if (lines.length > 0) {
-      const firstLine = lines[0].trim();
-      if (firstLine === firstLine.toUpperCase() && firstLine.length < 100) {
-        metadata.title = firstLine;
+      const potentialTitle = lines[0].trim();
+      if (potentialTitle && !potentialTitle.includes(':')) {
+        metadata.title = potentialTitle;
       }
     }
     
     return metadata;
+  }
+  
+  /**
+   * Extract scenes from processed script lines
+   * @private
+   * @param {string[]} processedLines - Processed script lines
+   * @returns {Array} - Extracted scenes
+   */
+  static #extractScenes(processedLines) {
+    // Look for scene markers like "ACT I", "SCENE 1", etc.
+    const sceneMarkerRegex = /^(ACT|SCENE|ACT \w+,? SCENE \w+)/i;
+    
+    let scenes = [];
+    let currentScene = {
+      title: 'Scene 1',
+      location: '',
+      time: '',
+      description: '',
+      lines: []
+    };
+    
+    // Look for settings lines that might indicate location/time
+    const settingRegex = /^(SETTING|LOCATION|TIME|PLACE):\s*(.+)$/i;
+    
+    processedLines.forEach(line => {
+      // Check if it's a scene marker
+      const sceneMatch = line.match(sceneMarkerRegex);
+      if (sceneMatch) {
+        // Save current scene if it has content
+        if (currentScene.lines.length > 0) {
+          scenes.push(currentScene);
+        }
+        
+        // Start a new scene
+        currentScene = {
+          title: line.trim(),
+          location: '',
+          time: '',
+          description: '',
+          lines: []
+        };
+        return;
+      }
+      
+      // Check if it's a setting line
+      const settingMatch = line.match(settingRegex);
+      if (settingMatch) {
+        const settingType = settingMatch[1].toLowerCase();
+        const value = settingMatch[2].trim();
+        
+        if (settingType === 'setting' || settingType === 'location' || settingType === 'place') {
+          currentScene.location = value;
+        } else if (settingType === 'time') {
+          currentScene.time = value;
+        }
+        return;
+      }
+      
+      // Otherwise, add to current scene
+      currentScene.lines.push(line);
+    });
+    
+    // Add the final scene if it has content
+    if (currentScene.lines.length > 0) {
+      scenes.push(currentScene);
+    }
+    
+    // If no scenes were explicitly marked, treat the whole script as one scene
+    if (scenes.length === 0 && currentScene.lines.length > 0) {
+      scenes = [currentScene];
+    }
+    
+    return scenes;
   }
 }
