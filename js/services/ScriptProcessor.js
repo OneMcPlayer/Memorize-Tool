@@ -117,81 +117,77 @@ export class ScriptProcessor {
       console.warn('No character data provided for extraction');
       return [];
     }
-    on
+    
     // Handle either string, array, or object with aliases
-    let characterAliases;apedAliases.join('|')})\\s*:`;
+    let characterAliases;
     if (typeof characterData === 'string') {
       characterAliases = [characterData];
     } else if (Array.isArray(characterData)) {
-      characterAliases = characterData;gexPattern}`);
+      characterAliases = characterData;
     } else if (characterData?.aliases) {
       // Use all aliases including primary name
-      characterAliases = [characterData.primaryName, ...characterData.aliases];for (let i = 0; i < scriptLines.length; i++) {
-    } else {es[i])) {
+      characterAliases = [characterData.primaryName, ...characterData.aliases];
+    } else {
       throw new Error('Invalid character data provided');
     }
-    ,
-    // Filter out empty aliasescriptLines[i].match(/^([^:]+):/)?.[1]?.trim() || ''
+    
+    // Filter out empty aliases
     characterAliases = characterAliases.filter(alias => alias && typeof alias === 'string');
     
     if (!characterAliases.length) {
       console.warn('No valid character aliases found');
-      return [];.debug(`Extracted ${extractedLines.length} lines for character`);
-    }urn extractedLines;
+      return [];
+    }
 
     // Create regex pattern that matches any alias
     const escapedAliases = characterAliases.map(alias => 
-      alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')n array of script lines.
-    );* 
-       * @param {string[]} scriptLines - An array of strings representing lines from the script.
-    // Determine if the script uses a structured format with quoted character names@returns {Array<{primaryName: string, aliases: string[], description: string}>} - An array of role objects
-    const isStructured = scriptLines.some(line => line.match(/^"[^"]+"\s*:\s*"""/));
-    const regexPattern = isStructuredtic extractRolesFromPlainText(scriptLines) {
-        ? `^"(${escapedAliases.join('|')})"\\s*:\\s*"""` // Pattern for structured scripts
-        : `^\\s*(${escapedAliases.join('|')})\\s*:?`;    // Pattern for plain text scripts
-     return [];
+      alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    );
+    
+    // Simplified pattern - now we just look for the character name followed by colon
+    // regardless of script format
+    const regexPattern = `^\\s*(${escapedAliases.join('|')})\\s*:`;
+    
     const regex = new RegExp(regexPattern, "i");
     
     console.debug(`Character regex pattern: ${regexPattern}`);
     
-    const extractedLines = [];onst skipPatterns = [
-    for (let i = 0; i < scriptLines.length; i++) {  /^\(.*\)$/,                      // Stage directions
-      if (regex.test(scriptLines[i])) {        // Stage directions in Italian
-        extractedLines.push({   /^la scena/i,                    // Scene descriptions in Italian
-          index: i, ena)/i,      // Act/scene markers in Italian
-          line: scriptLines[i],s in English
-          speaker: isStructured 
-            ? scriptLines[i].match(/^"([^"]+)"/)?.[1]?.trim() 
-            : scriptLines[i].match(/^([^:]+):/)?.[1]?.trim() || ''
+    const extractedLines = [];
+    for (let i = 0; i < scriptLines.length; i++) {
+      if (regex.test(scriptLines[i])) {
+        extractedLines.push({ 
+          index: i, 
+          line: scriptLines[i],
+          speaker: scriptLines[i].match(/^([^:]+):/)?.[1]?.trim() || ''
         });
       }
-    }if (!rolesMap.has(cleanName) && cleanName.length > 1) {
-            rolesMap.set(cleanName, {
-    console.debug(`Extracted ${extractedLines.length} lines for character`);e,
+    }
+    
+    console.debug(`Extracted ${extractedLines.length} lines for character`);
     return extractedLines;
   }
 
   /**
    * Extracts roles from an array of script lines.
    * 
-   * @param {string[]} scriptLines - An array of strings representing lines from the script.t i = 0; i < scriptLines.length; i++) {
-   * @returns {Array<{primaryName: string, aliases: string[], description: string}>} - An array of role objectsonst line = scriptLines[i].trim();
-   */if (!line || skipPatterns.some(pattern => pattern.test(line))) {
-  static extractRolesFromPlainText(scriptLines) {        continue;
+   * @param {string[]} scriptLines - An array of strings representing lines from the script.
+   * @returns {Array<{primaryName: string, aliases: string[], description: string}>} - An array of role objects
+   */
+  static extractRolesFromPlainText(scriptLines) {
     if (!scriptLines || !scriptLines.length) {
       console.warn('No script lines provided for role extraction');
       return [];
-    }A-Za-z0-9_\s''.\-]+)(?=:)/,  // Name before colon
-     /^([A-Z][A-Za-z0-9_\s''.\-]+)$/,      // Standalone all-caps name
-    const rolesMap = new Map();        /^([A-Z][A-Za-z0-9_\s''.\-]+(?:\s*(?:,|e|and)\s*[A-Z][A-Za-z0-9_\s''.\-]+)+)$/ // List of names
+    }
+
+    const rolesMap = new Map();
     
     const skipPatterns = [
       /^\(.*\)$/,                      // Stage directions
       /^(?:entra|esce|detti)/i,        // Stage directions in Italian
-      /^la scena/i,                    // Scene descriptions in Italianif (match) {
-      /^(?:sipario|atto|scena)/i,      // Act/scene markers in Italian          // Check for multiple names (separated by commas, 'e', or 'and')
-      /^act|scene/i,                   // Act/scene markers in Englishch[1].includes(' e ') || match[1].includes(' and ')) {
-      /^enter|exit/i,                  // Enter/exit in Englishe\s+|\s+and\s+)/).forEach(name => addRole(name));
+      /^la scena/i,                    // Scene descriptions in Italian
+      /^(?:sipario|atto|scena)/i,      // Act/scene markers in Italian
+      /^act|scene/i,                   // Act/scene markers in English
+      /^enter|exit/i,                  // Enter/exit in English
     ];
 
     const addRole = (name) => {
@@ -200,11 +196,14 @@ export class ScriptProcessor {
         rolesMap.set(cleanName, {
           primaryName: cleanName,
           aliases: [cleanName],
-          description: ''nvert map to array for compatibility with existing code
-        });urn Array.from(rolesMap.values());
+          description: ''
+        });
       }
     };
-    for (let i = 0; i < scriptLines.length; i++) {      const line = scriptLines[i].trim();      if (!line || skipPatterns.some(pattern => pattern.test(line))) {        continue;
+    for (let i = 0; i < scriptLines.length; i++) {
+      const line = scriptLines[i].trim();
+      if (!line || skipPatterns.some(pattern => pattern.test(line))) {
+        continue;
       }
 
       const namePatterns = [
