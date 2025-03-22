@@ -38,24 +38,21 @@ export class ScriptConverter {
    * @returns {string} - Structured script text
    */
   static generateStructuredScript(sourceText, metadata, roles) {
-    if (!sourceText) {
-      throw new Error('No source text provided');
-    }
-    
-    // Process the script to normalize it
+    // 1. Pre-process the script text
     const processedLines = ScriptProcessor.preProcessScript(sourceText);
-    
+
+    // 2. Extract scenes
+    const scenes = this.#extractScenes(processedLines);
+
+    // 3. Initialize output with metadata
     let output = '';
-    
-    // Add header section
     output += `@title "${metadata.title || 'Untitled Script'}"\n`;
     if (metadata.author) output += `@title "${metadata.author}"\n`;
     if (metadata.date) output += `@date "${metadata.date}"\n`;
     if (metadata.description) output += `@description "${metadata.description}"\n`;
-    
     output += '\n';
-    
-    // Add roles section
+
+    // 4. Add roles
     output += '@roles\n';
     roles.forEach(role => {
       let roleLine = role.primaryName;
@@ -73,11 +70,8 @@ export class ScriptConverter {
       output += `${roleLine}\n`;
     });
     output += '@endroles\n\n';
-    
-    // Parse the script into scenes
-    const scenes = this.#extractScenes(processedLines);
-    
-    // Add scenes
+
+    // 5. Append scenes with dialogue
     scenes.forEach(scene => {
       output += `@scene "${scene.title}"\n`;
       
@@ -116,7 +110,7 @@ export class ScriptConverter {
       
       output += '@endscene\n\n';
     });
-    
+
     return output;
   }
   
