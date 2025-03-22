@@ -65,7 +65,14 @@ export const translations = {
         backButton: "Back to Main",
         successParse: "Script parsed successfully!",
         successExport: "Script exported successfully!",
-        errorParse: "Error parsing script. Please check the format."
+        errorParse: "Error parsing script. Please check the format.",
+        stepInsert: "1. Insert Script",
+        stepEdit: "2. Edit Details",
+        stepOutput: "3. Get Output",
+        continueButton: "Continue →",
+        backButton: "← Back",
+        editMoreButton: "← Edit More", 
+        finishButton: "Finish"
       }
     },
     it: {
@@ -134,7 +141,14 @@ export const translations = {
         backButton: "Torna alla Pagina Principale",
         successParse: "Copione analizzato con successo!",
         successExport: "Copione esportato con successo!",
-        errorParse: "Errore nell'analisi del copione. Controlla il formato."
+        errorParse: "Errore nell'analisi del copione. Controlla il formato.",
+        stepInsert: "1. Inserisci Copione",
+        stepEdit: "2. Modifica Dettagli",
+        stepOutput: "3. Ottieni Output",
+        continueButton: "Continua →",
+        backButton: "← Indietro", 
+        editMoreButton: "← Modifica Ancora",
+        finishButton: "Finito"
       }
     }
   };

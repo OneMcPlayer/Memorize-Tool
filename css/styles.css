@@ -708,3 +708,59 @@ body.dark-mode .roles-table input {
     flex-direction: column;
   }
 }
+
+/* Step Indicator Styles */
+.steps-indicator {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 0 10px;
+}
+
+.step-indicator {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  margin: 0 5px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  position: relative;
+  transition: all 0.3s ease;
+  opacity: 0.7;
+}
+
+.step-indicator.active {
+  background: rgba(93, 173, 226, 0.2);
+  opacity: 1;
+  font-weight: bold;
+}
+
+.step-indicator::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -10px;
+  width: 20px;
+  height: 2px;
+  background: #ccc;
+  transform: translateY(-50%);
+}
+
+.step-indicator:last-child::after {
+  display: none;
+}
+
+body.dark-mode .step-indicator.active {
+  background: rgba(93, 173, 226, 0.3);
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.button-group.center {
+  justify-content: center;
+  gap: 10px;
+}

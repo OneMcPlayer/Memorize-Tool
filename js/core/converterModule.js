@@ -5,6 +5,10 @@ import { currentLang } from './settings.js';
 import { renderInputView } from './views.js';
 import { createValidId } from './utils.js';
 
+// Track current step in the conversion process
+let currentStep = 1;
+let parseResult = null;
+
 /**
  * Setup event handlers for the converter view
  */
@@ -39,6 +43,61 @@ export function setupConverterHandlers() {
   if (backButton) {
     backButton.addEventListener('click', renderInputView);
   }
+  
+  // Setup step navigation
+  document.querySelectorAll('.step-container').forEach(container => {
+    container.style.display = 'none';
+  });
+  
+  // Show initial step
+  showStep(1);
+  
+  // Add step navigation handlers
+  const nextStepButtons = document.querySelectorAll('.next-step-btn');
+  nextStepButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const targetStep = parseInt(button.dataset.target);
+      if (targetStep === 2) {
+        // Going from step 1 to 2 requires parsing
+        parseScript();
+      } else {
+        showStep(targetStep);
+      }
+    });
+  });
+  
+  const prevStepButtons = document.querySelectorAll('.prev-step-btn');
+  prevStepButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const targetStep = parseInt(button.dataset.target);
+      showStep(targetStep);
+    });
+  });
+}
+
+/**
+ * Show a specific step and hide others
+ */
+function showStep(stepNumber) {
+  currentStep = stepNumber;
+  
+  document.querySelectorAll('.step-container').forEach(container => {
+    container.style.display = 'none';
+  });
+  
+  const currentContainer = document.getElementById(`step${stepNumber}-container`);
+  if (currentContainer) {
+    currentContainer.style.display = 'block';
+  }
+  
+  // Update step indicator
+  document.querySelectorAll('.step-indicator').forEach((indicator, index) => {
+    if (index + 1 === stepNumber) {
+      indicator.classList.add('active');
+    } else {
+      indicator.classList.remove('active');
+    }
+  });
 }
 
 /**
@@ -54,21 +113,21 @@ function parseScript() {
   }
   
   try {
-    const result = ScriptConverter.parseBasicScript(inputText);
+    parseResult = ScriptConverter.parseBasicScript(inputText);
     
     // Update metadata fields
-    document.getElementById('scriptTitle').value = result.title || '';
-    document.getElementById('scriptAuthor').value = result.author || '';
-    document.getElementById('scriptDate').value = result.date || '';
-    document.getElementById('scriptDescription').value = result.description || '';
+    document.getElementById('scriptTitle').value = parseResult.title || '';
+    document.getElementById('scriptAuthor').value = parseResult.author || '';
+    document.getElementById('scriptDate').value = parseResult.date || '';
+    document.getElementById('scriptDescription').value = parseResult.description || '';
     
     // Clear existing roles
     const rolesContainer = document.getElementById('rolesContainer');
     rolesContainer.innerHTML = '';
     
     // Add roles from parse result
-    if (result.roles && result.roles.length) {
-      result.roles.forEach(role => addRoleField(role));
+    if (parseResult.roles && parseResult.roles.length) {
+      parseResult.roles.forEach(role => addRoleField(role));
     } else {
       // Add at least one empty role field
       addRoleField();
@@ -77,8 +136,8 @@ function parseScript() {
     // Show success message
     showToast(t.successParse, 2000, 'success');
     
-    // Enable export section
-    document.getElementById('exportSection').classList.remove('hidden');
+    // Move to step 2
+    showStep(2);
     
   } catch (error) {
     console.error('Error parsing script:', error);
@@ -173,6 +232,9 @@ function exportScript() {
     
     // Show success message
     showToast(t.successExport, 2000, 'success');
+    
+    // Move to final step
+    showStep(3);
     
   } catch (error) {
     console.error('Error exporting script:', error);

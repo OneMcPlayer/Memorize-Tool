@@ -202,53 +202,73 @@ export function renderConverterView() {
     <h1>${t.title || 'Script Converter'}</h1>
     <p>${t.description || 'Convert plain text scripts to structured format'}</p>
     
+    <div class="steps-indicator">
+      <div class="step-indicator active" data-step="1">${t.stepInsert || '1. Insert Script'}</div>
+      <div class="step-indicator" data-step="2">${t.stepEdit || '2. Edit Details'}</div>
+      <div class="step-indicator" data-step="3">${t.stepOutput || '3. Get Output'}</div>
+    </div>
+    
     <div class="converter-container">
-      <div class="converter-input">
-        <h2>${t.inputTitle || 'Input Script'}</h2>
-        <textarea id="converterInput" rows="12" placeholder="${t.inputPlaceholder || 'Paste your script here...'}"></textarea>
-        <div class="center">
-          <button id="parseButton">${t.parseButton || 'Parse Script'}</button>
+      <!-- Step 1: Script Input -->
+      <div id="step1-container" class="step-container">
+        <div class="converter-input">
+          <h2>${t.inputTitle || 'Input Script'}</h2>
+          <textarea id="converterInput" rows="12" placeholder="${t.inputPlaceholder || 'Paste your script here...'}"></textarea>
+          <div class="center">
+            <button class="next-step-btn" data-target="2">${t.continueButton || 'Continue'}</button>
+          </div>
         </div>
       </div>
       
-      <div class="converter-metadata">
-        <h2>${t.metadataTitle || 'Script Metadata'}</h2>
-        <div class="form-group">
-          <label>${t.titleLabel || 'Title'}</label>
-          <input type="text" id="scriptTitle">
+      <!-- Step 2: Edit Metadata & Roles -->
+      <div id="step2-container" class="step-container" style="display:none">
+        <div class="converter-metadata">
+          <h2>${t.metadataTitle || 'Script Metadata'}</h2>
+          <div class="form-group">
+            <label>${t.titleLabel || 'Title'}</label>
+            <input type="text" id="scriptTitle">
+          </div>
+          <div class="form-group">
+            <label>${t.authorLabel || 'Author'}</label>
+            <input type="text" id="scriptAuthor">
+          </div>
+          <div class="form-group">
+            <label>${t.dateLabel || 'Date'}</label>
+            <input type="text" id="scriptDate">
+          </div>
+          <div class="form-group">
+            <label>${t.descriptionLabel || 'Description'}</label>
+            <input type="text" id="scriptDescription">
+          </div>
         </div>
-        <div class="form-group">
-          <label>${t.authorLabel || 'Author'}</label>
-          <input type="text" id="scriptAuthor">
+        
+        <div class="converter-roles">
+          <h2>${t.rolesTitle || 'Characters'}</h2>
+          <div id="rolesContainer"></div>
+          <button type="button" id="addRoleButton">${t.addRoleButton || 'Add Character'}</button>
         </div>
-        <div class="form-group">
-          <label>${t.dateLabel || 'Date'}</label>
-          <input type="text" id="scriptDate">
-        </div>
-        <div class="form-group">
-          <label>${t.descriptionLabel || 'Description'}</label>
-          <input type="text" id="scriptDescription">
-        </div>
-      </div>
-      
-      <div class="converter-roles">
-        <h2>${t.rolesTitle || 'Characters'}</h2>
-        <div id="rolesContainer"></div>
-        <button type="button" id="addRoleButton">${t.addRoleButton || 'Add Character'}</button>
-      </div>
-      
-      <div id="exportSection" class="converter-output hidden">
-        <h2>${t.outputLabel || 'Structured Output'}</h2>
-        <textarea id="converterOutput" rows="12" readonly></textarea>
-        <div class="button-group center">
-          <button id="exportButton">${t.exportButton || 'Generate Script'}</button>
-          <button id="copyButton">${t.copyButton || 'Copy to Clipboard'}</button>
-          <button id="downloadButton">${t.downloadButton || 'Download File'}</button>
+        
+        <div class="button-group">
+          <button class="prev-step-btn" data-target="1">${t.backButton || 'Back'}</button>
+          <button id="exportButton" class="next-step-btn" data-target="3">${t.exportButton || 'Generate Script'}</button>
         </div>
       </div>
       
-      <div class="center">
-        <button id="converterBackButton">${t.backButton || 'Back to Main Page'}</button>
+      <!-- Step 3: Output Results -->
+      <div id="step3-container" class="step-container" style="display:none">
+        <div class="converter-output">
+          <h2>${t.outputLabel || 'Structured Output'}</h2>
+          <textarea id="converterOutput" rows="12" readonly></textarea>
+          <div class="button-group center">
+            <button id="copyButton">${t.copyButton || 'Copy to Clipboard'}</button>
+            <button id="downloadButton">${t.downloadButton || 'Download File'}</button>
+          </div>
+        </div>
+        
+        <div class="button-group">
+          <button class="prev-step-btn" data-target="2">${t.editMoreButton || 'Edit More'}</button>
+          <button id="converterBackButton">${t.finishButton || 'Finish'}</button>
+        </div>
       </div>
     </div>
   `;
