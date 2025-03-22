@@ -72,7 +72,11 @@ export const translations = {
         continueButton: "Continue →",
         backButton: "← Back",
         editMoreButton: "← Edit More", 
-        finishButton: "Finish"
+        finishButton: "Finish",
+        removeRole: "Remove this character",
+        roleAliasesPlaceholder: "E.g. BOB, Robert (comma-separated)",
+        roleDescriptionPlaceholder: "Brief character description",
+        errorNoRoles: "Please add at least one character with a name"
       }
     },
     it: {
@@ -148,7 +152,11 @@ export const translations = {
         continueButton: "Continua →",
         backButton: "← Indietro", 
         editMoreButton: "← Modifica Ancora",
-        finishButton: "Finito"
+        finishButton: "Finito",
+        removeRole: "Rimuovi questo personaggio",
+        roleAliasesPlaceholder: "Es. BOB, Roberto (separati da virgola)",
+        roleDescriptionPlaceholder: "Breve descrizione del personaggio",
+        errorNoRoles: "Aggiungi almeno un personaggio con un nome"
       }
     }
   };

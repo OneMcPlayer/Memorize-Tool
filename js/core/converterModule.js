@@ -156,19 +156,23 @@ function addRoleField(roleData = {}) {
   
   const roleHtml = `
     <div class="role-field" id="${roleId}">
-      <div class="form-group">
-        <label>${t.roleName}</label>
-        <input type="text" class="role-name" value="${roleData.primaryName || ''}">
+      <div class="role-header">
+        <input type="text" class="role-name" value="${roleData.primaryName || ''}" 
+               placeholder="${t.roleName || 'Character Name'}" required>
+        <button type="button" class="remove-role" title="${t.removeRole || 'Remove'}" aria-label="${t.removeRole || 'Remove'}">×</button>
       </div>
-      <div class="form-group">
-        <label>${t.roleAliases}</label>
-        <input type="text" class="role-aliases" value="${(roleData.aliases || []).join(', ')}">
+      <div class="role-details">
+        <div class="form-group">
+          <label>${t.roleAliases || 'Aliases'}</label>
+          <input type="text" class="role-aliases" value="${(roleData.aliases || []).join(', ')}" 
+                 placeholder="${t.roleAliasesPlaceholder || 'E.g. JOHN, Johnny (comma-separated)'}">
+        </div>
+        <div class="form-group">
+          <label>${t.roleDescription || 'Description'}</label>
+          <input type="text" class="role-description" value="${roleData.description || ''}" 
+                 placeholder="${t.roleDescriptionPlaceholder || 'Brief character description'}">
+        </div>
       </div>
-      <div class="form-group">
-        <label>${t.roleDescription}</label>
-        <input type="text" class="role-description" value="${roleData.description || ''}">
-      </div>
-      <button type="button" class="remove-role">❌</button>
     </div>
   `;
   
@@ -178,8 +182,24 @@ function addRoleField(roleData = {}) {
   const removeButton = rolesContainer.querySelector(`#${roleId} .remove-role`);
   if (removeButton) {
     removeButton.addEventListener('click', () => {
-      document.getElementById(roleId).remove();
+      const roleElement = document.getElementById(roleId);
+      // Add fade-out animation before removing
+      roleElement.classList.add('fade-out');
+      // Remove after animation completes
+      setTimeout(() => {
+        roleElement.remove();
+        // If no roles left, add an empty one
+        if (rolesContainer.querySelectorAll('.role-field').length === 0) {
+          addRoleField();
+        }
+      }, 300);
     });
+  }
+  
+  // Auto-focus the name field if it's empty
+  const nameField = rolesContainer.querySelector(`#${roleId} .role-name`);
+  if (nameField && !nameField.value) {
+    nameField.focus();
   }
 }
 
@@ -188,6 +208,14 @@ function addRoleField(roleData = {}) {
  */
 function addNewRoleField() {
   addRoleField();
+  
+  // Scroll to the bottom of the roles container with animation
+  const rolesContainer = document.getElementById('rolesContainer');
+  const lastRole = rolesContainer.lastElementChild;
+  
+  if (lastRole) {
+    lastRole.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }
 }
 
 /**
@@ -207,9 +235,12 @@ function exportScript() {
     
     // Get roles
     const roles = [];
+    let hasValidRoles = false;
+    
     document.querySelectorAll('.role-field').forEach(field => {
       const nameInput = field.querySelector('.role-name');
       if (nameInput && nameInput.value.trim()) {
+        hasValidRoles = true;
         roles.push({
           primaryName: nameInput.value.trim(),
           aliases: field.querySelector('.role-aliases').value
@@ -218,8 +249,17 @@ function exportScript() {
             .filter(Boolean),
           description: field.querySelector('.role-description').value.trim()
         });
+      } else if (nameInput) {
+        // Highlight empty required fields
+        nameInput.classList.add('field-error');
+        setTimeout(() => nameInput.classList.remove('field-error'), 2000);
       }
     });
+    
+    if (!hasValidRoles) {
+      showToast(t.errorNoRoles || 'Please add at least one character with a name', 3000, 'error');
+      return;
+    }
     
     // Get original input text
     const inputText = document.getElementById('converterInput').value;

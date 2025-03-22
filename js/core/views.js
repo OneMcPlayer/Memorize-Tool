@@ -242,11 +242,11 @@ export function renderConverterView() {
           </div>
         </div>
         
+        <h2>${t.rolesTitle || 'Characters'}</h2>
         <div class="converter-roles">
-          <h2>${t.rolesTitle || 'Characters'}</h2>
           <div id="rolesContainer"></div>
-          <button type="button" id="addRoleButton">${t.addRoleButton || 'Add Character'}</button>
         </div>
+        <button type="button" id="addRoleButton">${t.addRoleButton || 'Add Character'}</button>
         
         <div class="button-group">
           <button class="prev-step-btn" data-target="1">${t.backButton || 'Back'}</button>
