@@ -115,7 +115,12 @@ function parseScript() {
   try {
     parseResult = ScriptConverter.parseBasicScript(inputText);
     
-    // Update metadata fields
+    // Update metadata fields - add title field with required indicator
+    const titleLabel = document.querySelector('label[for="scriptTitle"]');
+    if (titleLabel) {
+      titleLabel.innerHTML = `${translations[currentLang].converter.titleLabel} <span class="required-field">*</span>`;
+    }
+    
     document.getElementById('scriptTitle').value = parseResult.title || '';
     document.getElementById('scriptAuthor').value = parseResult.author || '';
     document.getElementById('scriptDate').value = parseResult.date || '';
@@ -232,6 +237,14 @@ function exportScript() {
       date: document.getElementById('scriptDate').value,
       description: document.getElementById('scriptDescription').value
     };
+    
+    // Validate title is provided
+    if (!metadata.title.trim()) {
+      document.getElementById('scriptTitle').classList.add('field-error');
+      showToast(t.errorNoTitle || 'Please enter a script title', 3000, 'error');
+      setTimeout(() => document.getElementById('scriptTitle').classList.remove('field-error'), 2000);
+      return;
+    }
     
     // Get roles
     const roles = [];

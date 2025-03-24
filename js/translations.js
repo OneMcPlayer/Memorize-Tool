@@ -76,7 +76,8 @@ export const translations = {
         removeRole: "Remove this character",
         roleAliasesPlaceholder: "E.g. BOB, Robert (comma-separated)",
         roleDescriptionPlaceholder: "Brief character description",
-        errorNoRoles: "Please add at least one character with a name"
+        errorNoRoles: "Please add at least one character with a name",
+        errorNoTitle: "Please enter a script title"
       }
     },
     it: {
@@ -156,7 +157,8 @@ export const translations = {
         removeRole: "Rimuovi questo personaggio",
         roleAliasesPlaceholder: "Es. BOB, Roberto (separati da virgola)",
         roleDescriptionPlaceholder: "Breve descrizione del personaggio",
-        errorNoRoles: "Aggiungi almeno un personaggio con un nome"
+        errorNoRoles: "Aggiungi almeno un personaggio con un nome",
+        errorNoTitle: "Inserisci un titolo per il copione"
       }
     }
   };
