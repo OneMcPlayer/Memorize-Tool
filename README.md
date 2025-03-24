@@ -1,41 +1,70 @@
-# Script Memorization Tool
+# 🎭 Script Memorization Tool
 
-A web-based tool to help actors memorize their lines by practicing them in context. Built with pure JavaScript, CSS and HTML.
+A modern, browser-based application designed to help actors effectively memorize their lines by practicing them in context. Built with vanilla JavaScript, CSS, and HTML for maximum portability.
 
-## Features
+![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
 
-- 🎭 Load scripts from a built-in library or paste your own
-- 🔄 Display lines in context with adjustable preceding lines
-- 🌐 Multi-language support (English and Italian)
-- 🌓 Light/Dark theme
-- ⌨️ Keyboard shortcuts for efficient practice
-- 📱 Mobile-friendly with touch gestures
-- 📝 Support for both plain text and structured script formats
+## ✨ Features
 
-## Usage
+- **Script Management**
+  - 📚 Load from built-in script library
+  - 📝 Paste your own script text
+  - 📁 Upload script files
+  - 🔄 Support for both plain text and structured script formats
 
-1. Open `index.html` in a web browser
-2. Choose a script:
-   - Select from the library
-   - In advanced mode, you can also:
-     - Paste text directly
-     - Upload a script file
-3. Select your character from the role list
+- **Practice Tools**
+  - 👥 Select your character from detected roles
+  - 🔎 Automatically extract your lines
+  - 📊 Display lines in context with adjustable preceding lines (0-5)
+  - 📋 Copy lines to clipboard with one click
+
+- **User Experience**
+  - 🌐 Multi-language support (English and Italian)
+  - 🌓 Light/Dark theme toggle
+  - ⌨️ Keyboard shortcuts for efficient practice
+  - 📱 Mobile-friendly with touch gestures
+  - 💾 Remembers your preferences
+
+- **Advanced Features**
+  - 🔄 Script converter to transform plain text scripts to structured format
+  - 📊 Character role management with aliases and descriptions
+
+## 🚀 Getting Started
+
+### Installation
+
+1. Clone the repository or download the ZIP file
+2. No build process required - it's pure HTML, CSS, and JavaScript
+3. Simply open `index.html` in any modern web browser
+
+### Using the Tool
+
+1. Open `index.html` in your web browser
+2. Choose a script using one of these methods:
+   - Select from the built-in library
+   - Paste your script text (in Advanced Mode)
+   - Upload a script file (in Advanced Mode)
+3. Select your character from the detected role list
 4. Set how many context lines you want to see (0-5)
 5. Click "Extract My Lines" to begin practicing
+6. Use the "Reveal" button to see your current line and "Next" to move to the next line
 
-## Keyboard Shortcuts
+## ⌨️ Keyboard Shortcuts
 
-- `Enter` - Extract lines / Go to next line
-- `Space` - Reveal current line
-- `Esc` - Restart practice session
+| Key | Action |
+|-----|--------|
+| `Enter` | Extract lines / Go to next line |
+| `Space` | Reveal current line |
+| `Esc` | Restart practice session |
 
-## Touch Gestures
+## 📱 Touch Gestures
 
-- Swipe left - Next line
-- Swipe right - Reveal line
+| Gesture | Action |
+|---------|--------|
+| Swipe left | Next line |
+| Swipe right | Reveal line |
 
-## Script Formats
+## 📜 Script Formats
 
 The tool supports two script formats:
 
@@ -59,7 +88,7 @@ ANOTHER CHARACTER: Response
       Their line of dialogue
     """
   }
-}s
+}
 ```
 
 ## Development
