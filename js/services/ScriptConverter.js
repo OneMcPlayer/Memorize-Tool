@@ -1,5 +1,5 @@
 import { ScriptProcessor } from './ScriptProcessor.js';
-import CharacterDictionary from '../models/CharacterDictionary';
+import CharacterDictionary from '../models/CharacterDictionary.js';
 
 /**
  * Utility class for converting between script formats
