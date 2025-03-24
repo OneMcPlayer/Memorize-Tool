@@ -289,4 +289,8 @@ export class Script {
 
     return script;
   }
+
+  getUniqueSpeakers() {
+    return Array.from(new Set(this.lines.map(line => line.speaker)));
+  }
 }

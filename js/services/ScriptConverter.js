@@ -1,9 +1,17 @@
 import { ScriptProcessor } from './ScriptProcessor.js';
+import CharacterDictionary from '../models/CharacterDictionary';
 
 /**
  * Utility class for converting between script formats
  */
 export class ScriptConverter {
+  constructor() {
+    this.characterDictionary = new CharacterDictionary();
+    // Preload some known characters and aliases
+    this.characterDictionary.addCharacter('John', ['Johnny', 'J']);
+    this.characterDictionary.addCharacter('Elizabeth', ['Liz', 'Beth']);
+  }
+
   /**
    * Parse a basic script into structured components
    * @param {string} scriptText - The plain text script
@@ -212,4 +220,31 @@ export class ScriptConverter {
     
     return scenes;
   }
+
+  processScript(script) {
+    // ...existing code...
+    script.lines.forEach(line => {
+      const speaker = this.identifySpeaker(line.speaker);
+      // ...existing code to process the line...
+    });
+    // ...existing code...
+  }
+
+  identifySpeaker(speaker) {
+    const mainCharacter = this.characterDictionary.findCharacterByAlias(speaker);
+    return mainCharacter || speaker; // Return the main character or the original speaker
+  }
+
+  validateCharacters(script) {
+    const uniqueSpeakers = new Set(script.lines.map(line => line.speaker));
+    uniqueSpeakers.forEach(speaker => {
+      const mainCharacter = this.characterDictionary.findCharacterByAlias(speaker);
+      if (!mainCharacter) {
+        console.log(`Unrecognized speaker: ${speaker}`);
+        // Optionally prompt user for validation
+      }
+    });
+  }
 }
+
+export default ScriptConverter;
