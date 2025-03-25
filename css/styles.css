@@ -899,6 +899,82 @@ body.dark-mode .role-field:hover {
 
 .back-button {
   padding: 8px 15px;
+  background-color: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  color: #333;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+}
+
+.back-button:hover {
+  background-color: #eaeaea;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+}
+
+.back-button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode styles for back button */
+body.dark-mode .back-button {
+  background-color: #2a2a2a;
+  border-color: #3a3a3a;
+  color: #ddd;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .back-button:hover {
+  background-color: #333;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+}
+
+/* Style for the bottom converter back button */
+#converterBackButton {
+  padding: 10px 20px;
+  background-color: #5dade2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#converterBackButton:hover {
+  background-color: #4a8bc2;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+body.dark-mode #converterBackButton {
+  background-color: #2980b9;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode #converterBackButton:hover {
+  background-color: #3498db;
+}
+
+.converter-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.converter-header h1 {
+  margin: 0 auto;
+}
+
+.back-button {
+  padding: 8px 15px;
   background-color: #f0f0f0;
   border: 1px solid #ccc;
   border-radius: 4px;

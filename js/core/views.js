@@ -200,7 +200,13 @@ export function renderConverterView() {
   
   app.innerHTML = `
     <div class="converter-header">
-      <button id="converterTopBackButton" class="back-button">&larr; ${t.backToMain || 'Back to Main'}</button>
+      <button id="converterTopBackButton" class="back-button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M19 12H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        ${t.backToMain || 'Back to Main'}
+      </button>
       <h1>${t.title || 'Script Converter'}</h1>
     </div>
     <p>${t.description || 'Convert plain text scripts to structured format'}</p>
@@ -270,7 +276,9 @@ export function renderConverterView() {
         
         <div class="button-group">
           <button class="prev-step-btn" data-target="2">${t.editMoreButton || 'Edit More'}</button>
-          <button id="converterBackButton">${t.finishButton || 'Finish'}</button>
+          <button id="converterBackButton">
+            ${t.finishButton || 'Finish'}
+          </button>
         </div>
       </div>
     </div>
