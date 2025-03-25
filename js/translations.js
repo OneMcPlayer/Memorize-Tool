@@ -77,7 +77,9 @@ export const translations = {
         roleAliasesPlaceholder: "E.g. BOB, Robert (comma-separated)",
         roleDescriptionPlaceholder: "Brief character description",
         errorNoRoles: "Please add at least one character with a name",
-        errorNoTitle: "Please enter a script title"
+        errorNoTitle: "Please enter a script title",
+        backToMain: "Back to Main",
+        confirmLeave: "Leave converter? Your changes will be lost."
       }
     },
     it: {
@@ -158,7 +160,9 @@ export const translations = {
         roleAliasesPlaceholder: "Es. BOB, Roberto (separati da virgola)",
         roleDescriptionPlaceholder: "Breve descrizione del personaggio",
         errorNoRoles: "Aggiungi almeno un personaggio con un nome",
-        errorNoTitle: "Inserisci un titolo per il copione"
+        errorNoTitle: "Inserisci un titolo per il copione",
+        backToMain: "Torna al Menu",
+        confirmLeave: "Uscire dal convertitore? Le modifiche andranno perse."
       }
     }
   };

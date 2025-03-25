@@ -19,6 +19,7 @@ export function setupConverterHandlers() {
   const downloadButton = document.getElementById('downloadButton');
   const addRoleButton = document.getElementById('addRoleButton');
   const backButton = document.getElementById('converterBackButton');
+  const topBackButton = document.getElementById('converterTopBackButton');
   
   if (parseButton) {
     parseButton.addEventListener('click', parseScript);
@@ -40,8 +41,31 @@ export function setupConverterHandlers() {
     addRoleButton.addEventListener('click', addNewRoleField);
   }
   
+  // Set up back button handlers
   if (backButton) {
-    backButton.addEventListener('click', renderInputView);
+    backButton.addEventListener('click', () => {
+      // Clear any state if needed
+      parseResult = null;
+      currentStep = 1;
+      renderInputView();
+    });
+  }
+  
+  if (topBackButton) {
+    topBackButton.addEventListener('click', () => {
+      // Ask for confirmation if user has made changes
+      if (parseResult || currentStep > 1) {
+        if (confirm(translations[currentLang].confirmLeave || 'Leave converter? Your changes will be lost.')) {
+          parseResult = null;
+          currentStep = 1;
+          renderInputView();
+        }
+      } else {
+        parseResult = null;
+        currentStep = 1;
+        renderInputView();
+      }
+    });
   }
   
   // Setup step navigation

@@ -199,7 +199,10 @@ export function renderConverterView() {
   const t = translations[currentLang].converter || {};
   
   app.innerHTML = `
-    <h1>${t.title || 'Script Converter'}</h1>
+    <div class="converter-header">
+      <button id="converterTopBackButton" class="back-button">&larr; ${t.backToMain || 'Back to Main'}</button>
+      <h1>${t.title || 'Script Converter'}</h1>
+    </div>
     <p>${t.description || 'Convert plain text scripts to structured format'}</p>
     
     <div class="steps-indicator">
