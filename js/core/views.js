@@ -213,8 +213,9 @@ export function renderConverterView() {
     
     <div class="steps-indicator">
       <div class="step-indicator active" data-step="1">${t.stepInsert || '1. Insert Script'}</div>
-      <div class="step-indicator" data-step="2">${t.stepEdit || '2. Edit Details'}</div>
-      <div class="step-indicator" data-step="3">${t.stepOutput || '3. Get Output'}</div>
+      <div class="step-indicator" data-step="2">${t.stepClean || '2. Clean Script'}</div>
+      <div class="step-indicator" data-step="3">${t.stepEdit || '3. Edit Details'}</div>
+      <div class="step-indicator" data-step="4">${t.stepOutput || '4. Get Output'}</div>
     </div>
     
     <div class="converter-container">
@@ -224,13 +225,45 @@ export function renderConverterView() {
           <h2>${t.inputTitle || 'Input Script'}</h2>
           <textarea id="converterInput" rows="12" placeholder="${t.inputPlaceholder || 'Paste your script here...'}"></textarea>
           <div class="center">
-            <button class="next-step-btn" data-target="2">${t.continueButton || 'Continue'}</button>
+            <button id="parseButton" class="next-step-btn" data-target="2">${t.parseButton || 'Parse Script'}</button>
           </div>
         </div>
       </div>
       
-      <!-- Step 2: Edit Metadata & Roles -->
+      <!-- Step 2: Clean Script (NEW) -->
       <div id="step2-container" class="step-container" style="display:none">
+        <div class="converter-clean">
+          <h2>${t.cleanTitle || 'Clean & Prepare Script'}</h2>
+          <p class="help-text">${t.cleanHelp || 'Review how your script is being parsed. Character lines are highlighted.'}</p>
+          
+          <div class="clean-options">
+            <button id="autoDetectButton" class="secondary-button">
+              ${t.autoDetectButton || 'Auto-Detect Characters'}
+            </button>
+            <button id="mergeButton" class="secondary-button">
+              ${t.mergeButton || 'Merge Selected Lines'}
+            </button>
+            <button id="splitButton" class="secondary-button">
+              ${t.splitButton || 'Split at Cursor'}
+            </button>
+          </div>
+          
+          <div id="scriptPreview" class="script-preview"></div>
+          
+          <div class="detection-summary">
+            <h3>${t.detectedCharacters || 'Detected Characters'}</h3>
+            <div id="detectedCharactersList" class="detected-characters-list"></div>
+          </div>
+          
+          <div class="button-group">
+            <button class="prev-step-btn" data-target="1">${t.backButton || '← Back'}</button>
+            <button class="next-step-btn" data-target="3">${t.continueButton || 'Continue →'}</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Step 3: Edit Metadata & Roles (Previously Step 2) -->
+      <div id="step3-container" class="step-container" style="display:none">
         <div class="converter-metadata">
           <h2>${t.metadataTitle || 'Script Metadata'}</h2>
           <div class="form-group">
@@ -258,13 +291,13 @@ export function renderConverterView() {
         <button type="button" id="addRoleButton">${t.addRoleButton || 'Add Character'}</button>
         
         <div class="button-group">
-          <button class="prev-step-btn" data-target="1">${t.backButton || 'Back'}</button>
-          <button id="exportButton" class="next-step-btn" data-target="3">${t.exportButton || 'Generate Script'}</button>
+          <button class="prev-step-btn" data-target="2">${t.backButton || '← Back'}</button>
+          <button id="exportButton" class="next-step-btn" data-target="4">${t.exportButton || 'Generate Script'}</button>
         </div>
       </div>
       
-      <!-- Step 3: Output Results -->
-      <div id="step3-container" class="step-container" style="display:none">
+      <!-- Step 4: Output Results (Previously Step 3) -->
+      <div id="step4-container" class="step-container" style="display:none">
         <div class="converter-output">
           <h2>${t.outputLabel || 'Structured Output'}</h2>
           <textarea id="converterOutput" rows="12" readonly></textarea>
@@ -275,7 +308,7 @@ export function renderConverterView() {
         </div>
         
         <div class="button-group">
-          <button class="prev-step-btn" data-target="2">${t.editMoreButton || 'Edit More'}</button>
+          <button class="prev-step-btn" data-target="3">${t.editMoreButton || 'Edit More'}</button>
           <button id="converterBackButton">
             ${t.finishButton || 'Finish'}
           </button>

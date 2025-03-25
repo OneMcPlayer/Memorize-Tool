@@ -996,3 +996,163 @@ body.dark-mode .back-button {
 body.dark-mode .back-button:hover {
   background-color: #444;
 }
+
+/* Script Cleaning Step Styles */
+.converter-clean {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.clean-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.secondary-button {
+  padding: 8px 15px;
+  background-color: #95a5a6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.secondary-button:hover {
+  background-color: #7f8c8d;
+}
+
+.script-preview {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin: 15px 0;
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.script-lines {
+  font-family: monospace;
+  line-height: 1.5;
+}
+
+.script-line {
+  padding: 3px 5px;
+  margin: 2px 0;
+  border-radius: 3px;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.2s;
+}
+
+.script-line:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.script-line.selected {
+  background-color: rgba(52, 152, 219, 0.2);
+  border-left: 3px solid #3498db;
+}
+
+.character-name {
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.dialogue-text {
+  color: inherit;
+}
+
+.stage-direction {
+  font-style: italic;
+  color: #95a5a6;
+}
+
+.detection-summary {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.detected-characters-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.character-item {
+  padding: 5px 10px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.line-count {
+  font-size: 0.85em;
+  opacity: 0.8;
+}
+
+.help-text {
+  font-size: 0.9em;
+  color: #95a5a6;
+  margin: 10px 0;
+}
+
+/* Dark mode adjustments */
+body.dark-mode .converter-clean {
+  background-color: rgba(0, 0, 0, 0.15);
+}
+
+body.dark-mode .script-preview {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-color: #444;
+}
+
+body.dark-mode .script-line:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .script-line.selected {
+  background-color: rgba(52, 152, 219, 0.15);
+}
+
+body.dark-mode .stage-direction {
+  color: #7f8c8d;
+}
+
+body.dark-mode .detection-summary {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .character-item {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Mobile adjustments for script cleaning */
+@media (max-width: 768px) {
+  .clean-options {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .secondary-button {
+    width: 100%;
+  }
+  
+  .script-preview {
+    max-height: 300px;
+  }
+  
+  .detected-characters-list {
+    flex-direction: column;
+  }
+}

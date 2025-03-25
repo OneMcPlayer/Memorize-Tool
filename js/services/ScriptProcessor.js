@@ -1,5 +1,5 @@
 export class ScriptProcessor {
-  static preProcessScript(scriptText) {
+  static preProcessScript(scriptText, options = {}) {
     if (!scriptText) {
       console.warn('Empty script text provided to preprocessor');
       return [];
@@ -15,6 +15,12 @@ export class ScriptProcessor {
     let lastCharacterName = '';
     let isStageDirection = false;
     let isMultilineStageDirection = false;
+    
+    // Enhanced detection when aggressive mode is enabled
+    const aggressiveDetection = options.aggressiveDetection || false;
+    
+    // Additional patterns for aggressive detection mode
+    const aggressiveCharacterPattern = /^([A-Z][A-Za-z0-9_\s''\-\.]+)(?:\s*)(?:\(.*\))?$/;
 
     for (let i = 0; i < lines.length; i++) {
       let line = lines[i].trim();
@@ -33,6 +39,19 @@ export class ScriptProcessor {
         isMultilineStageDirection = !line.includes(')');
       }
 
+      if (isStageDirection) {
+        if (currentLine) {
+          processedLines.push(currentLine);
+          currentLine = '';
+        }
+        processedLines.push(line);
+        
+        if (line.endsWith(')')) {
+          isStageDirection = false;
+        }
+        continue;
+      }
+
       // New handling for structured format with quoted character names
       const structuredMatch = line.match(/^"([^"]+)":\s*"""(.*)$/);
       if (structuredMatch && !isStageDirection) {
@@ -47,15 +66,59 @@ export class ScriptProcessor {
       // More robust character name matching with improved handling for uppercase names
       // This pattern looks for uppercase character names followed by a colon or continuing dialog
       else {
-        const characterMatch = line.match(/^([A-Z][A-Za-z0-9_\s''\-]+)(?:\s*:?\s*)(.*)/);
+        const characterMatch = line.match(/^([A-Z][A-Za-z0-9_\s''\-\.]+)(?:\s*:?\s*)(.*)/);
         
-        if (characterMatch && !isStageDirection) {
+        // For aggressive mode, check for standalone uppercase names without colon
+        const aggressiveMatch = aggressiveDetection && !characterMatch ? 
+          line.match(aggressiveCharacterPattern) : null;
+        
+        if ((characterMatch || aggressiveMatch) && !isStageDirection) {
           if (currentLine) {
             processedLines.push(currentLine);
           }
           
-          lastCharacterName = characterMatch[1].trim();
-          currentLine = `${lastCharacterName}: ${characterMatch[2]}`;
+          if (characterMatch) {
+            lastCharacterName = characterMatch[1].trim();
+            // For lines with a clear character: dialogue format
+            if (characterMatch[2].trim() || line.includes(':')) {
+              currentLine = `${lastCharacterName}: ${characterMatch[2].trim()}`;
+            } else {
+              // This is likely just a character name alone on a line
+              // In aggressive mode, we'll treat the next line as dialogue if it's not a character name
+              currentLine = lastCharacterName;
+              
+              // Look ahead to see if next line continues the dialogue
+              if (aggressiveDetection && i + 1 < lines.length) {
+                const nextLine = lines[i + 1].trim();
+                // If next line doesn't match a character pattern, treat it as dialogue for this character
+                if (nextLine && !nextLine.match(/^[A-Z][A-Za-z0-9_\s''\-\.]+(?:\s*:)/) 
+                    && !nextLine.startsWith('(') && !nextLine.startsWith('"')) {
+                  currentLine = `${lastCharacterName}: ${nextLine}`;
+                  i++; // Skip the next line since we've used it
+                }
+              }
+            }
+          } else if (aggressiveMatch) {
+            // Treat standalone uppercase line as a character name
+            lastCharacterName = aggressiveMatch[1].trim();
+            
+            // Look ahead to see if next line is the dialogue
+            if (i + 1 < lines.length) {
+              const nextLine = lines[i + 1].trim();
+              // If next line doesn't look like a character name, treat it as dialogue
+              if (nextLine && !nextLine.match(/^[A-Z][A-Za-z0-9_\s''\-\.]+(?:\s*:)/) 
+                  && !nextLine.startsWith('(') && !nextLine.startsWith('"')) {
+                currentLine = `${lastCharacterName}: ${nextLine}`;
+                i++; // Skip the next line since we've used it
+              } else {
+                // Just save the character name with empty dialogue
+                currentLine = `${lastCharacterName}: `;
+              }
+            } else {
+              // End of script, just save the character name
+              currentLine = `${lastCharacterName}: `;
+            }
+          }
         } else {
           if (currentLine) {
             // Improved line joining logic
