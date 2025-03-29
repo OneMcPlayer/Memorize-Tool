@@ -30,6 +30,7 @@ export class Script {
     let currentCharacter = null;
     let currentDialog = [];
 
+    // First pass to extract title and roles
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
       if (!line) continue;
@@ -47,25 +48,57 @@ export class Script {
       }
 
       // Parse character definitions
-      if (currentSection === 'characters') {
-        // Check if we've moved past the characters section
+      if (currentSection === 'characters' && !line.match(/^ACT|^SCENE/)) {
+        // Parse character definition (NAME - Description)
+        const match = line.match(/^([A-Z]+)(?:\s*-\s*(.+))?$/);
+        if (match) {
+          result.roles.push({
+            name: match[1],
+            description: match[2] || ''
+          });
+        }
+      }
+    }
+
+    // Reset for second pass to handle lines in proper order
+    currentSection = null;
+
+    // Second pass to process all lines in order
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+
+      // Skip title and character definition lines that we've already processed
+      if (line.startsWith('TITLE:') || line === 'CHARACTERS:' || 
+          (currentSection === 'characters' && !line.match(/^ACT|^SCENE/))) {
         if (line.match(/^ACT|^SCENE/)) {
           currentSection = null;
         } else {
-          // Parse character definition (NAME - Description)
-          const match = line.match(/^([A-Z]+)(?:\s*-\s*(.+))?$/);
-          if (match) {
-            result.roles.push({
-              name: match[1],
-              description: match[2] || ''
-            });
-          }
           continue;
         }
       }
 
-      // Check for scene headings
+      // Check for characters section
+      if (line === 'CHARACTERS:') {
+        currentSection = 'characters';
+        continue;
+      }
+
+      // Check for scene headings - both ACT # and SCENE #
       if (line.match(/^ACT\s+\d+$/) || line.match(/^SCENE\s+\d+$/)) {
+        // Flush any accumulated dialog before adding a new scene heading
+        if (currentCharacter && currentDialog.length > 0) {
+          result.lines.push({
+            character: currentCharacter,
+            text: currentDialog.join(' ').trim(),
+            dialog: currentDialog.join(' ').trim(),
+            isSceneHeading: false,
+            isDirection: false
+          });
+          currentDialog = [];
+          currentCharacter = null;
+        }
+        
         result.lines.push({
           character: null,
           text: line,
@@ -77,6 +110,19 @@ export class Script {
 
       // Check for stage directions
       if (line.startsWith('[') && line.endsWith(']')) {
+        // Flush any accumulated dialog before adding a stage direction
+        if (currentCharacter && currentDialog.length > 0) {
+          result.lines.push({
+            character: currentCharacter,
+            text: currentDialog.join(' ').trim(),
+            dialog: currentDialog.join(' ').trim(),
+            isSceneHeading: false,
+            isDirection: false
+          });
+          currentDialog = [];
+          currentCharacter = null;
+        }
+        
         result.lines.push({
           character: null,
           text: line,
