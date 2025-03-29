@@ -203,6 +203,60 @@ function prepareCleaningView() {
 }
 
 /**
+ * Update the list of detected characters in the script
+ */
+function updateDetectedCharactersList() {
+  const detectedCharactersList = document.getElementById('detectedCharactersList');
+  if (!detectedCharactersList) return;
+  
+  detectedCharactersList.innerHTML = '';
+  
+  // Count occurrences of each character
+  const characters = {};
+  
+  cleanedScriptLines.forEach(line => {
+    const charMatch = line.match(/^([^:]+):/);
+    if (charMatch) {
+      const character = charMatch[1].trim();
+      if (characters[character]) {
+        characters[character]++;
+      } else {
+        characters[character] = 1;
+      }
+    }
+  });
+  
+  // Create character items in the list
+  Object.entries(characters)
+    .sort((a, b) => b[1] - a[1]) // Sort by line count (descending)
+    .forEach(([character, count]) => {
+      const characterItem = document.createElement('div');
+      characterItem.className = 'character-item';
+      
+      // Create a distinct color for each character
+      const hash = Array.from(character).reduce((acc, char) => char.charCodeAt(0) + acc, 0);
+      const hue = hash % 360;
+      const color = `hsl(${hue}, 70%, 60%)`;
+      
+      characterItem.innerHTML = `
+        <span style="color: ${color}; font-weight: bold;">${character}</span>
+        <span class="line-count">(${count} ${count === 1 ? 'line' : 'lines'})</span>
+      `;
+      
+      detectedCharactersList.appendChild(characterItem);
+    });
+  
+  // Add message if no characters detected
+  if (Object.keys(characters).length === 0) {
+    detectedCharactersList.innerHTML = `
+      <div class="character-item" style="font-style: italic; opacity: 0.7;">
+        No characters detected. Try adding character names followed by a colon.
+      </div>
+    `;
+  }
+}
+
+/**
  * Set up the interactive editor for real-time script editing and parsing
  */
 function setupInteractiveEditor() {

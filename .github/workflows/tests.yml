@@ -22,9 +22,14 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+        cache-dependency-path: package.json
     
     - name: Install dependencies
-      run: npm ci
+      run: |
+        # First regular install to generate lock file if it doesn't exist
+        npm install
+        # Then use ci for consistent installation
+        npm ci || npm install
       
     - name: Run tests
       run: npm test
