@@ -7,40 +7,73 @@ document.body.removeChild = jest.fn();
 
 // Tests for showToast function
 describe('showToast', () => {
+  // Mock toast element
+  const mockToastElement = {
+    classList: { add: jest.fn() },
+    style: { display: 'none' },
+    textContent: ''
+  };
+
   beforeEach(() => {
-    // Setup
-    document.getElementById = jest.fn(() => null);
-    document.createElement = jest.fn(() => ({
-      classList: { add: jest.fn() },
-      style: {},
-      appendChild: jest.fn()
-    }));
+    // Reset mocks
+    jest.clearAllMocks();
+    
+    // Set up document.querySelector to return our mock toast element
+    document.querySelector = jest.fn().mockImplementation(selector => {
+      if (selector === '.toast') {
+        return mockToastElement;
+      }
+      return null;
+    });
+    
+    // Mock setTimeout properly
+    jest.useFakeTimers();
   });
 
-  test('should create a toast element with the provided message', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  test('should set the toast message and display it', () => {
     const message = 'Test message';
     showToast(message);
     
-    expect(document.createElement).toHaveBeenCalledWith('div');
-    const createdElement = document.createElement.mock.results[0].value;
-    expect(createdElement.textContent).toBe(message);
-  });
-
-  test('should use default duration if not provided', () => {
-    jest.useFakeTimers();
-    showToast('Test');
+    // Check if the message was set
+    expect(mockToastElement.textContent).toBe(message);
     
+    // Check if the toast was made visible
+    expect(mockToastElement.style.display).toBe('block');
+
+    // Check if setTimeout was called to hide the toast
     expect(setTimeout).toHaveBeenCalledTimes(1);
     expect(setTimeout).toHaveBeenLastCalledWith(expect.any(Function), 2000);
+  });
+
+  test('should use custom duration if provided', () => {
+    const customDuration = 5000;
+    showToast('Test', customDuration);
     
-    jest.useRealTimers();
+    expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), customDuration);
   });
 
   test('should apply the specified type class to the toast', () => {
     showToast('Test', 2000, 'success');
     
-    const toastElement = document.createElement.mock.results[0].value;
-    expect(toastElement.classList.add).toHaveBeenCalledWith('toast-success');
+    expect(mockToastElement.classList.add).toHaveBeenCalledWith('toast-success');
+  });
+
+  test('should do nothing if toast element is not found', () => {
+    // Make document.querySelector return null for this test
+    document.querySelector.mockReturnValueOnce(null);
+    
+    const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+    showToast('Test');
+    
+    // Should log a warning
+    expect(consoleSpy).toHaveBeenCalledWith('Toast element not found');
+    
+    // Cleanup
+    consoleSpy.mockRestore();
   });
 });
 

@@ -14,6 +14,7 @@ global.document = {
     style: {}
   })),
   querySelectorAll: jest.fn(() => []),
+  querySelector: jest.fn(),
   body: {
     appendChild: jest.fn(),
     removeChild: jest.fn()
@@ -31,8 +32,14 @@ global.window = {
   URL: {
     createObjectURL: jest.fn(),
     revokeObjectURL: jest.fn()
-  },
-  setTimeout: jest.fn()
+  }
+};
+
+// Mock console to suppress warnings during tests
+global.console = {
+  ...console,
+  warn: jest.fn(),
+  error: jest.fn()
 };
 
 // Clear all mocks between tests
