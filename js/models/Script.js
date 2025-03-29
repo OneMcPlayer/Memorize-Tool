@@ -9,33 +9,118 @@ export class Script {
     this.lines = []; // simplified representation of all lines
   }
 
-  // Add the parse method for the tests
+  // Update the parse method to match test expectations
   static parse(input) {
-    const lines = [];
+    if (!input) {
+      return {
+        title: '',
+        roles: [],
+        lines: []
+      };
+    }
+
+    const result = {
+      title: '',
+      roles: [],
+      lines: []
+    };
+
+    const lines = input.split('\n');
+    let currentSection = null;
     let currentCharacter = null;
     let currentDialog = [];
 
-    input.split('\n').forEach(line => {
-      const characterMatch = line.match(/^([A-Z]+):/);
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+
+      // Check for title
+      if (line.startsWith('TITLE:')) {
+        result.title = line.substring(6).trim();
+        continue;
+      }
+
+      // Check for characters section
+      if (line === 'CHARACTERS:') {
+        currentSection = 'characters';
+        continue;
+      }
+
+      // Parse character definitions
+      if (currentSection === 'characters') {
+        // Check if we've moved past the characters section
+        if (line.match(/^ACT|^SCENE/)) {
+          currentSection = null;
+        } else {
+          // Parse character definition (NAME - Description)
+          const match = line.match(/^([A-Z]+)(?:\s*-\s*(.+))?$/);
+          if (match) {
+            result.roles.push({
+              name: match[1],
+              description: match[2] || ''
+            });
+          }
+          continue;
+        }
+      }
+
+      // Check for scene headings
+      if (line.match(/^ACT\s+\d+$/) || line.match(/^SCENE\s+\d+$/)) {
+        result.lines.push({
+          character: null,
+          text: line,
+          isSceneHeading: true,
+          isDirection: false
+        });
+        continue;
+      }
+
+      // Check for stage directions
+      if (line.startsWith('[') && line.endsWith(']')) {
+        result.lines.push({
+          character: null,
+          text: line,
+          isSceneHeading: false,
+          isDirection: true
+        });
+        continue;
+      }
+
+      // Check for character dialog
+      const characterMatch = line.match(/^([A-Z]+):(.*)/);
       if (characterMatch) {
         // Save the previous dialog if any
         if (currentCharacter && currentDialog.length > 0) {
-          lines.push({ character: currentCharacter, dialog: currentDialog.join(' ') });
+          result.lines.push({
+            character: currentCharacter,
+            text: currentDialog.join(' ').trim(),
+            dialog: currentDialog.join(' ').trim(),
+            isSceneHeading: false,
+            isDirection: false
+          });
+          currentDialog = [];
         }
+        
         currentCharacter = characterMatch[1];
-        currentDialog = [line.replace(characterMatch[0], '').trim()];
-      } else if (currentCharacter) {
+        currentDialog = [characterMatch[2].trim()];
+      } else if (currentCharacter && line) {
         // Append to the current dialog for multiline
-        currentDialog.push(line.trim());
+        currentDialog.push(line);
       }
-    });
+    }
 
     // Add the last dialog if any
     if (currentCharacter && currentDialog.length > 0) {
-      lines.push({ character: currentCharacter, dialog: currentDialog.join(' ') });
+      result.lines.push({
+        character: currentCharacter,
+        text: currentDialog.join(' ').trim(),
+        dialog: currentDialog.join(' ').trim(),
+        isSceneHeading: false,
+        isDirection: false
+      });
     }
 
-    return { lines };
+    return result;
   }
 
   static fromStructuredText(content) {
