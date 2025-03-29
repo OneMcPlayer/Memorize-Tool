@@ -6,12 +6,14 @@ global.document = {
   createElement: jest.fn(() => ({
     innerHTML: '',
     appendChild: jest.fn(),
+    className: '',
     classList: {
       add: jest.fn(),
       remove: jest.fn()
     },
     addEventListener: jest.fn(),
-    style: {}
+    style: {},
+    dataset: {} // Add dataset property to created elements
   })),
   querySelectorAll: jest.fn(() => []),
   querySelector: jest.fn(),
@@ -34,6 +36,12 @@ global.window = {
     revokeObjectURL: jest.fn()
   }
 };
+
+// Mock global timers
+global.setTimeout = jest.fn((cb) => {
+  return Math.floor(Math.random() * 10000); // Return a "fake" timeout ID
+});
+global.clearTimeout = jest.fn();
 
 // Mock console to suppress warnings during tests
 global.console = {

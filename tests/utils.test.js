@@ -7,16 +7,24 @@ document.body.removeChild = jest.fn();
 
 // Tests for showToast function
 describe('showToast', () => {
-  // Mock toast element
+  // Mock toast element with dataset property
   const mockToastElement = {
     classList: { add: jest.fn() },
     style: { display: 'none' },
-    textContent: ''
+    textContent: '',
+    className: 'toast',
+    dataset: { timeoutId: undefined }
   };
 
   beforeEach(() => {
     // Reset mocks
     jest.clearAllMocks();
+    
+    // Reset mock element state
+    mockToastElement.style.display = 'none';
+    mockToastElement.textContent = '';
+    mockToastElement.className = 'toast';
+    mockToastElement.dataset.timeoutId = undefined;
     
     // Set up document.querySelector to return our mock toast element
     document.querySelector = jest.fn().mockImplementation(selector => {
@@ -26,8 +34,9 @@ describe('showToast', () => {
       return null;
     });
     
-    // Mock setTimeout properly
+    // Mock setTimeout and clearTimeout
     jest.useFakeTimers();
+    global.clearTimeout = jest.fn();
   });
 
   afterEach(() => {
