@@ -44,6 +44,14 @@ export function initEventListeners() {
 }
 
 /**
+ * Check if the device is mobile based on screen width
+ * @returns {boolean} true if the device is mobile
+ */
+function isMobileDevice() {
+  return window.innerWidth < 1024; // Consider under 1024px as mobile/tablet
+}
+
+/**
  * Set up the options menu
  */
 function setupOptionsMenu() {
@@ -79,13 +87,34 @@ function setupOptionsMenu() {
     // Converter option
     const optionConverter = document.getElementById('optionConverter');
     if (optionConverter) {
+      // Hide converter option on mobile devices
+      if (isMobileDevice()) {
+        optionConverter.style.display = 'none';
+      }
+      
       optionConverter.addEventListener('click', () => {
+        if (isMobileDevice()) {
+          showToast(translations[currentLang].converter.mobileNotSupported || 'Converter is only available on desktop devices', 3000, 'warning');
+          return;
+        }
         renderConverterView();
         optionsMenu.style.display = 'none';
       });
     }
   }
 }
+
+// Listen for window resize to hide/show converter option
+window.addEventListener('resize', () => {
+  const optionConverter = document.getElementById('optionConverter');
+  if (optionConverter) {
+    if (isMobileDevice()) {
+      optionConverter.style.display = 'none';
+    } else {
+      optionConverter.style.display = 'list-item';
+    }
+  }
+});
 
 /**
  * Handle keyboard shortcuts

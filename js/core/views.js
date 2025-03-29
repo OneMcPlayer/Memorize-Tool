@@ -193,38 +193,50 @@ export function updateProgress() {
 }
 
 /**
+ * Check if the device is mobile based on screen width
+ * @returns {boolean} true if the device is mobile
+ */
+function isMobileDevice() {
+  return window.innerWidth < 1024; // Consider under 1024px as mobile/tablet
+}
+
+/**
  * Render the converter view
  */
 export function renderConverterView() {
   const t = translations[currentLang].converter || {};
   
+  // If mobile device, show notice and return to main view
+  if (isMobileDevice()) {
+    showToast(t.mobileNotSupported || 'Converter is only available on desktop devices', 3000, 'warning');
+    renderInputView();
+    return;
+  }
+  
+  // Add desktop converter class to body for special styling
+  document.body.classList.add('converter-view');
+  
   app.innerHTML = `
     <div class="converter-header">
       <button id="converterTopBackButton" class="back-button">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M19 12H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        ${t.backToMain || 'Back to Main'}
+        ← ${t.backToMain || 'Back to Main'}
       </button>
       <h1>${t.title || 'Script Converter'}</h1>
     </div>
-    <p>${t.description || 'Convert plain text scripts to structured format'}</p>
     
     <div class="steps-indicator">
-      <div class="step-indicator active" data-step="1">${t.stepInsert || '1. Insert Script'}</div>
-      <div class="step-indicator" data-step="2">${t.stepClean || '2. Clean Script'}</div>
-      <div class="step-indicator" data-step="3">${t.stepEdit || '3. Edit Details'}</div>
-      <div class="step-indicator" data-step="4">${t.stepOutput || '4. Get Output'}</div>
+      <div class="step-indicator active">${t.stepInsert || '1. Insert Script'}</div>
+      <div class="step-indicator">${t.stepClean || '2. Clean Script'}</div>
+      <div class="step-indicator">${t.stepEdit || '3. Edit Details'}</div>
+      <div class="step-indicator">${t.stepOutput || '4. Get Output'}</div>
     </div>
     
     <div class="converter-container">
-      <!-- Step 1: Script Input -->
+      <!-- Step 1: Insert Script -->
       <div id="step1-container" class="step-container">
         <div class="converter-input">
-          <h2>${t.inputTitle || 'Input Script'}</h2>
           <textarea id="converterInput" rows="12" placeholder="${t.inputPlaceholder || 'Paste your script here...'}"></textarea>
-          <div class="center">
+          <div class="button-group center">
             <button id="parseButton" class="next-step-btn" data-target="2">${t.parseButton || 'Parse Script'}</button>
           </div>
         </div>
@@ -234,7 +246,7 @@ export function renderConverterView() {
       <div id="step2-container" class="step-container" style="display:none">
         <div class="converter-clean">
           <h2>${t.cleanTitle || 'Clean & Prepare Script'}</h2>
-          <p class="help-text">${t.cleanHelp || 'Review how your script is being parsed. Character lines are highlighted.'}</p>
+          <p class="help-text">${t.cleanHelp || 'Review how your script is being parsed. Character dialogues are highlighted.'}</p>
           
           <div class="clean-options">
             <button id="autoDetectButton" class="secondary-button">
@@ -267,50 +279,50 @@ export function renderConverterView() {
         <div class="converter-metadata">
           <h2>${t.metadataTitle || 'Script Metadata'}</h2>
           <div class="form-group">
-            <label>${t.titleLabel || 'Title'}</label>
-            <input type="text" id="scriptTitle">
+            <label for="scriptTitle">${t.titleLabel || 'Title'}</label>
+            <input type="text" id="scriptTitle" class="full-width" required>
           </div>
           <div class="form-group">
-            <label>${t.authorLabel || 'Author'}</label>
-            <input type="text" id="scriptAuthor">
+            <label for="scriptAuthor">${t.authorLabel || 'Author'}</label>
+            <input type="text" id="scriptAuthor" class="full-width">
           </div>
           <div class="form-group">
-            <label>${t.dateLabel || 'Date'}</label>
-            <input type="text" id="scriptDate">
+            <label for="scriptDate">${t.dateLabel || 'Date'}</label>
+            <input type="text" id="scriptDate" class="full-width">
           </div>
           <div class="form-group">
-            <label>${t.descriptionLabel || 'Description'}</label>
-            <input type="text" id="scriptDescription">
+            <label for="scriptDescription">${t.descriptionLabel || 'Description'}</label>
+            <input type="text" id="scriptDescription" class="full-width">
           </div>
         </div>
         
-        <h2>${t.rolesTitle || 'Characters'}</h2>
         <div class="converter-roles">
+          <h2>${t.rolesTitle || 'Character Roles'}</h2>
+          <p class="help-text">${t.rolesHelp || 'Add all characters in your script including any aliases they might have'}</p>
+          
           <div id="rolesContainer"></div>
+          
+          <button id="addRoleButton">${t.addRoleButton || 'Add Character'}</button>
         </div>
-        <button type="button" id="addRoleButton">${t.addRoleButton || 'Add Character'}</button>
         
         <div class="button-group">
           <button class="prev-step-btn" data-target="2">${t.backButton || '← Back'}</button>
-          <button id="exportButton" class="next-step-btn" data-target="4">${t.exportButton || 'Generate Script'}</button>
+          <button class="next-step-btn" data-target="4">${t.exportButton || 'Export Structured Script'}</button>
         </div>
       </div>
       
-      <!-- Step 4: Output Results (Previously Step 3) -->
+      <!-- Step 4: Output (Previously Step 3) -->
       <div id="step4-container" class="step-container" style="display:none">
         <div class="converter-output">
-          <h2>${t.outputLabel || 'Structured Output'}</h2>
           <textarea id="converterOutput" rows="12" readonly></textarea>
+          
           <div class="button-group center">
             <button id="copyButton">${t.copyButton || 'Copy to Clipboard'}</button>
-            <button id="downloadButton">${t.downloadButton || 'Download File'}</button>
+            <button id="downloadButton">${t.downloadButton || 'Download as File'}</button>
           </div>
-        </div>
-        
-        <div class="button-group">
-          <button class="prev-step-btn" data-target="3">${t.editMoreButton || 'Edit More'}</button>
+          
           <button id="converterBackButton">
-            ${t.finishButton || 'Finish'}
+            ${t.backToMain || 'Back to Main'}
           </button>
         </div>
       </div>
@@ -318,4 +330,10 @@ export function renderConverterView() {
   `;
   
   setupConverterHandlers();
+}
+
+// Add cleanup when leaving converter view
+export function leaveConverterView() {
+  document.body.classList.remove('converter-view');
+  renderInputView();
 }

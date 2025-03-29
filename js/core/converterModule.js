@@ -3,7 +3,7 @@ import { showToast } from '/Memorize-Tool/js/utils.js';
 import { ScriptConverter } from '/Memorize-Tool/js/services/ScriptConverter.js';
 import { ScriptProcessor } from '/Memorize-Tool/js/services/ScriptProcessor.js';
 import { currentLang } from './settings.js';
-import { renderInputView } from './views.js';
+import { renderInputView, leaveConverterView } from './views.js';
 import { createValidId } from './utils.js';
 
 // Track current step in the conversion process
@@ -68,7 +68,7 @@ export function setupConverterHandlers() {
       parseResult = null;
       cleanedScriptLines = [];
       currentStep = 1;
-      renderInputView();
+      leaveConverterView();
     });
   }
   
@@ -76,17 +76,17 @@ export function setupConverterHandlers() {
     topBackButton.addEventListener('click', () => {
       // Ask for confirmation if user has made changes
       if (parseResult || currentStep > 1) {
-        if (confirm(translations[currentLang].confirmLeave || 'Leave converter? Your changes will be lost.')) {
+        if (confirm(translations[currentLang].converter.confirmLeave || 'Leave converter? Your changes will be lost.')) {
           parseResult = null;
           cleanedScriptLines = [];
           currentStep = 1;
-          renderInputView();
+          leaveConverterView();
         }
       } else {
         parseResult = null;
         cleanedScriptLines = [];
         currentStep = 1;
-        renderInputView();
+        leaveConverterView();
       }
     });
   }
