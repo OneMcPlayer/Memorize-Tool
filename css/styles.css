@@ -1156,3 +1156,73 @@ body.dark-mode .character-item {
     flex-direction: column;
   }
 }
+
+/* Interactive Script Editor Styles */
+.editor-preview-container {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.editor-container, 
+.preview-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.script-editor {
+  width: 100%;
+  height: 400px;
+  font-family: monospace;
+  line-height: 1.5;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: inherit;
+  resize: vertical;
+}
+
+.parsing-preview {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  height: 400px;
+  overflow-y: auto;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.script-line {
+  padding: 3px 5px;
+  margin: 2px 0;
+  border-radius: 3px;
+  transition: background-color 0.2s;
+}
+
+.script-line:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Mobile styles for the editor */
+@media (max-width: 768px) {
+  .editor-preview-container {
+    flex-direction: column;
+  }
+  
+  .script-editor, 
+  .parsing-preview {
+    height: 300px;
+  }
+}
+
+/* Dark mode adjustments */
+body.dark-mode .script-editor {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-color: #444;
+}
+
+body.dark-mode .parsing-preview {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-color: #444;
+}

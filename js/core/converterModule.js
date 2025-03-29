@@ -195,25 +195,92 @@ function prepareCleaningView() {
   // Store initial processed lines
   cleanedScriptLines = [...parseResult.processedLines];
   
-  // Render the script preview with character detection
-  renderScriptPreview();
+  // Set up the interactive editor
+  setupInteractiveEditor();
   
   // Show detected characters summary
   updateDetectedCharactersList();
 }
 
 /**
- * Render the script preview with character detection highlighting
+ * Set up the interactive editor for real-time script editing and parsing
  */
-function renderScriptPreview() {
+function setupInteractiveEditor() {
   const scriptPreview = document.getElementById('scriptPreview');
+  const t = translations[currentLang];
+  
   if (!scriptPreview) return;
   
-  scriptPreview.innerHTML = '';
+  // Create a split view with editor and preview
+  scriptPreview.innerHTML = `
+    <div class="editor-preview-container">
+      <div class="editor-container">
+        <h4>${t.editScriptTitle || 'Edit Script'}</h4>
+        <p class="help-text">${t.editScriptHelp || 'Edit the script and see parsing updates in real-time'}</p>
+        <textarea id="scriptEditor" class="script-editor"></textarea>
+      </div>
+      <div class="preview-container">
+        <h4>${t.previewTitle || 'Parsing Preview'}</h4>
+        <p class="help-text">${t.previewHelp || 'Character dialogues are highlighted by color'}</p>
+        <div id="parsingPreview" class="script-lines"></div>
+      </div>
+    </div>
+  `;
   
-  // Create a container for lines that allows selection
-  const linesContainer = document.createElement('div');
-  linesContainer.className = 'script-lines';
+  const scriptEditor = document.getElementById('scriptEditor');
+  
+  // Populate the editor with the raw script text
+  scriptEditor.value = cleanedScriptLines.join('\n');
+  
+  // Add event listener for real-time parsing
+  scriptEditor.addEventListener('input', debounceScriptParsing);
+  
+  // Initial render of the preview
+  renderParsingPreview();
+}
+
+/**
+ * Debounce the script parsing to avoid excessive updates
+ */
+function debounceScriptParsing() {
+  if (this.parseTimeout) {
+    clearTimeout(this.parseTimeout);
+  }
+  
+  this.parseTimeout = setTimeout(() => {
+    updateScriptParsing();
+  }, 300); // 300ms debounce
+}
+
+/**
+ * Update the script parsing based on the current editor content
+ */
+function updateScriptParsing() {
+  const scriptEditor = document.getElementById('scriptEditor');
+  if (!scriptEditor) return;
+  
+  const rawText = scriptEditor.value;
+  
+  // Parse the updated script
+  try {
+    cleanedScriptLines = ScriptProcessor.preProcessScript(rawText, { aggressiveDetection: true });
+    
+    // Update the preview and character list
+    renderParsingPreview();
+    updateDetectedCharactersList();
+  } catch (error) {
+    console.error('Error parsing script:', error);
+  }
+}
+
+/**
+ * Render the parsing preview with character detection highlighting
+ */
+function renderParsingPreview() {
+  const parsingPreview = document.getElementById('parsingPreview');
+  if (!parsingPreview) return;
+  
+  parsingPreview.innerHTML = '';
   
   // Track lines by character for coloring
   const characterColors = {};
@@ -251,80 +318,69 @@ function renderScriptPreview() {
       lineElement.innerHTML = `<span class="stage-direction">${line}</span>`;
     }
     
-    // Make line selectable
-    lineElement.addEventListener('click', (e) => {
-      if (e.ctrlKey || e.metaKey) {
-        // Add to selection with Ctrl/Cmd key
-        lineElement.classList.toggle('selected');
-      } else {
-        // Clear selection and select just this line
-        document.querySelectorAll('.script-line.selected').forEach(el => {
-          el.classList.remove('selected');
-        });
-        lineElement.classList.add('selected');
-      }
-    });
-    
-    linesContainer.appendChild(lineElement);
+    parsingPreview.appendChild(lineElement);
   });
-  
-  scriptPreview.appendChild(linesContainer);
+}
+
+// Replace the existing renderScriptPreview function with our new interactive version
+function renderScriptPreview() {
+  setupInteractiveEditor();
 }
 
 /**
- * Update the list of detected characters in the script
+ * Finalize the cleaned script before moving to metadata editing
  */
-function updateDetectedCharactersList() {
-  const charactersList = document.getElementById('detectedCharactersList');
-  if (!charactersList) return;
+function finalizeCleanedScript() {
+  const scriptEditor = document.getElementById('scriptEditor');
+  const t = translations[currentLang];
   
-  // Extract all characters from script lines
+  if (scriptEditor) {
+    // Get the final edited script and re-parse it
+    try {
+      const rawText = scriptEditor.value;
+      cleanedScriptLines = ScriptProcessor.preProcessScript(rawText, { aggressiveDetection: true });
+      
+      // Proceed to the next step
+      showStep(3);
+      
+      // Pre-populate roles from detected characters
+      prepareRolesFromDetectedCharacters();
+      
+      showToast(t.cleanSuccess || 'Script cleaned successfully', 2000, 'success');
+    } catch (error) {
+      console.error('Error finalizing script:', error);
+      showToast(t.errorClean || 'Error processing cleaned script', 3000, 'error');
+    }
+  } else {
+    // Fallback to current cleanedScriptLines if editor not found
+    showStep(3);
+  }
+}
+
+/**
+ * Prepare roles fields based on detected characters
+ */
+function prepareRolesFromDetectedCharacters() {
+  // Extract all unique characters
   const characters = new Set();
   cleanedScriptLines.forEach(line => {
     const match = line.match(/^([^:]+):/);
-    if (match) {
-      characters.add(match[1].trim());
-    }
+    if (match) characters.add(match[1].trim());
   });
   
-  // Create the character list with count of lines
-  charactersList.innerHTML = '';
-  if (characters.size === 0) {
-    charactersList.innerHTML = '<p>No character dialogues detected</p>';
-    return;
-  }
+  // Clear existing role fields
+  const rolesContainer = document.getElementById('scriptRolesContainer');
+  if (!rolesContainer) return;
+  rolesContainer.innerHTML = '';
   
-  const characterCounts = {};
-  cleanedScriptLines.forEach(line => {
-    const match = line.match(/^([^:]+):/);
-    if (match) {
-      const character = match[1].trim();
-      characterCounts[character] = (characterCounts[character] || 0) + 1;
-    }
+  // Add a role field for each detected character
+  characters.forEach(character => {
+    addRoleField({
+      primaryName: character,
+      aliases: [character],
+      description: ''
+    });
   });
-  
-  // Sort characters by line count
-  const sortedCharacters = Array.from(characters).sort((a, b) => {
-    return characterCounts[b] - characterCounts[a];
-  });
-  
-  // Create list items
-  sortedCharacters.forEach(character => {
-    const characterItem = document.createElement('div');
-    characterItem.className = 'character-item';
-    characterItem.innerHTML = `
-      <span class="character-name">${character}</span>
-      <span class="line-count">(${characterCounts[character]} ${characterCounts[character] === 1 ? 'line' : 'lines'})</span>
-    `;
-    charactersList.appendChild(characterItem);
-  });
-}
-
-/**
- * Set up event listeners for the script preview
- */
-function setupScriptPreviewEvents() {
-  // Setup will be automatic once the script preview is rendered
 }
 
 /**
@@ -431,54 +487,6 @@ function mergeSelectedLines() {
 function splitAtCursor() {
   const t = translations[currentLang];
   alert(t.splitFeatureNotAvailable || 'Line splitting functionality will be implemented in a future update. For now, please edit your script manually before pasting.');
-}
-
-/**
- * Finalize the cleaned script before moving to metadata editing
- */
-function finalizeCleanedScript() {
-  const t = translations[currentLang];
-  
-  if (cleanedScriptLines.length === 0) {
-    showToast(t.errorNoLines || 'No script lines to process', 3000, 'error');
-    return;
-  }
-  
-  try {
-    // Update the parseResult to use our cleaned script lines
-    parseResult.processedLines = cleanedScriptLines;
-    
-    // Re-detect roles based on the cleaned script
-    parseResult.roles = ScriptProcessor.extractRolesFromPlainText(cleanedScriptLines);
-    
-    // Update metadata fields
-    document.getElementById('scriptTitle').value = parseResult.title || '';
-    document.getElementById('scriptAuthor').value = parseResult.author || '';
-    document.getElementById('scriptDate').value = parseResult.date || '';
-    document.getElementById('scriptDescription').value = parseResult.description || '';
-    
-    // Clear existing roles
-    const rolesContainer = document.getElementById('rolesContainer');
-    rolesContainer.innerHTML = '';
-    
-    // Add roles from parse result
-    if (parseResult.roles && parseResult.roles.length) {
-      parseResult.roles.forEach(role => addRoleField(role));
-    } else {
-      // Add at least one empty role field
-      addRoleField();
-    }
-    
-    // Show success message
-    showToast(t.cleanSuccess || 'Script cleaned successfully', 2000, 'success');
-    
-    // Move to step 3 (metadata editing)
-    showStep(3);
-    
-  } catch (error) {
-    console.error('Error finalizing cleaned script:', error);
-    showToast(t.errorClean || 'Error processing cleaned script', 3000, 'error');
-  }
 }
 
 /**

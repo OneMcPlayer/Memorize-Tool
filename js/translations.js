@@ -81,7 +81,6 @@ export const translations = {
         errorNoTitle: "Please enter a script title",
         backToMain: "Back to Main",
         confirmLeave: "Leave converter? Your changes will be lost.",
-        // New translations for cleaning step
         cleanTitle: "Clean & Prepare Script",
         cleanHelp: "Review how your script is being parsed. Character dialogues are highlighted by color.",
         autoDetectButton: "Auto-Detect Characters",
@@ -97,7 +96,12 @@ export const translations = {
         errorNoLines: "No script lines to process",
         cleanSuccess: "Script cleaned successfully",
         errorClean: "Error processing cleaned script",
-        enterCharacterName: "Enter character name for merged lines:"
+        enterCharacterName: "Enter character name for merged lines:",
+        // New translations for interactive editor
+        editScriptTitle: "Edit Script",
+        editScriptHelp: "Edit the script text here. Your changes will update the preview in real-time.",
+        previewTitle: "Parsing Preview",
+        previewHelp: "This shows how your script will be parsed with character detection."
       }
     },
     it: {
@@ -197,7 +201,12 @@ export const translations = {
         errorNoLines: "Nessuna riga del copione da elaborare",
         cleanSuccess: "Copione pulito con successo",
         errorClean: "Errore nell'elaborazione del copione pulito",
-        enterCharacterName: "Inserisci il nome del personaggio per le righe unite:"
+        enterCharacterName: "Inserisci il nome del personaggio per le righe unite:",
+        // New translations for interactive editor
+        editScriptTitle: "Modifica Copione",
+        editScriptHelp: "Modifica il testo del copione qui. Le modifiche aggiorneranno l'anteprima in tempo reale.",
+        previewTitle: "Anteprima Parsing",
+        previewHelp: "Mostra come il tuo copione verrà interpretato con rilevamento dei personaggi."
       }
     }
   };
