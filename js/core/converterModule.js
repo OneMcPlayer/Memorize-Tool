@@ -182,25 +182,188 @@ function setupInteractiveEditor(initialText = '') {
   if (!scriptPreview) return;
   
   scriptPreview.innerHTML = `
+    <div class="editor-tools">
+      <div class="editor-tools-left">
+        <button type="button" class="tool-button" title="${t.toolBold || 'Bold'}" data-action="bold"><i class="fas fa-bold"></i></button>
+        <button type="button" class="tool-button" title="${t.toolItalic || 'Italic'}" data-action="italic"><i class="fas fa-italic"></i></button>
+        <button type="button" class="tool-button" title="${t.toolUppercase || 'UPPERCASE'}" data-action="uppercase"><i class="fas fa-font"></i></button>
+        <span class="editor-divider"></span>
+        <button type="button" class="tool-button" title="${t.toolAddCharacter || 'Add Character Name'}" data-action="add-character"><i class="fas fa-user-plus"></i></button>
+      </div>
+      <div class="editor-tools-right">
+        <div class="script-stats">
+          <span id="scriptStats"></span>
+        </div>
+      </div>
+    </div>
     <div class="editor-preview-container">
       <div class="editor-container">
         <h4>${t.editScriptTitle || 'Edit Script'}</h4>
         <p class="help-text">${t.editScriptHelp || 'Edit the script and see parsing updates in real-time'}</p>
-        <textarea id="scriptEditor" class="script-editor"></textarea>
+        <div class="editor-wrapper">
+          <textarea id="scriptEditor" class="script-editor" placeholder="${t.editorPlaceholder || 'Enter your script here...'}" spellcheck="true"></textarea>
+          <div class="editor-footer">
+            <div class="editor-hint-permanent">${t.editorHint || 'Tip: Character names should be followed by a colon (e.g. HAMLET: To be or not to be)'}</div>
+          </div>
+        </div>
       </div>
       <div class="preview-container">
         <h4>${t.previewTitle || 'Parsing Preview'}</h4>
-        <p class="help-text">${t.previewHelp || 'Character dialogues are highlighted by color'}</p>
+        <p class="help-text">${t.previewHelp || 'Character dialogues are highlighted by color. Click any line to edit.'}</p>
         <div id="parsingPreview" class="script-lines"></div>
+        <div class="preview-footer">
+          <span class="preview-status">${t.previewStatus || 'Preview updates as you type'}</span>
+        </div>
       </div>
+    </div>
+    <div class="detection-summary card-style">
+      <h4><i class="fas fa-users"></i> ${t.detectedCharacters || 'Detected Characters'}</h4>
+      <div id="detectedCharactersList" class="detected-characters-list"></div>
+    </div>
+    <div class="editing-tips card-style">
+      <h4><i class="fas fa-lightbulb"></i> ${t.editingTips || 'Editing Tips'}</h4>
+      <ul class="tips-list">
+        <li>${t.tipCharacterFormat || 'Format character lines as "CHARACTER: Dialogue text"'}</li>
+        <li>${t.tipStageDirections || 'Stage directions can be wrapped in parentheses (like this)'}</li>
+        <li>${t.tipSelection || 'Click a line in the preview to locate it in the editor'}</li>
+        <li>${t.tipCtrlClick || 'Use Ctrl+Click to select multiple lines for merging'}</li>
+      </ul>
     </div>
   `;
   
   const scriptEditor = document.getElementById('scriptEditor');
   scriptEditor.value = initialText;
   scriptEditor.addEventListener('input', debounceScriptParsing);
+  scriptEditor.addEventListener('keydown', handleEditorKeydown);
+  
+  // Set up toolbar buttons
+  document.querySelectorAll('.tool-button').forEach(button => {
+    button.addEventListener('click', () => handleToolAction(button.dataset.action));
+  });
+  
   updateScriptParsing(); // Call this instead of renderParsingPreview to process the editor content
   setupScriptPreviewEvents();
+  updateScriptStats();
+}
+
+/**
+ * Update script statistics
+ */
+function updateScriptStats() {
+  const scriptEditor = document.getElementById('scriptEditor');
+  const statsElement = document.getElementById('scriptStats');
+  
+  if (!scriptEditor || !statsElement) return;
+  
+  const text = scriptEditor.value;
+  const characters = text.length;
+  const words = text.split(/\s+/).filter(Boolean).length;
+  const lines = text.split('\n').filter(Boolean).length;
+  
+  const t = translations[currentLang];
+  statsElement.innerHTML = `
+    <i class="fas fa-align-left"></i> ${lines} ${t.statsLines || 'lines'} &nbsp;
+    <i class="fas fa-font"></i> ${words} ${t.statsWords || 'words'} &nbsp;
+    <i class="fas fa-keyboard"></i> ${characters} ${t.statsChars || 'chars'}
+  `;
+}
+
+/**
+ * Handle editor keydown events
+ * @param {KeyboardEvent} e - The keyboard event
+ */
+function handleEditorKeydown(e) {
+  // Tab key functionality - insert spaces instead of changing focus
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const editor = e.target;
+    const start = editor.selectionStart;
+    const end = editor.selectionEnd;
+    
+    // Insert 2 spaces at cursor position
+    editor.value = editor.value.substring(0, start) + '  ' + editor.value.substring(end);
+    
+    // Put cursor after the inserted spaces
+    editor.selectionStart = editor.selectionEnd = start + 2;
+  }
+  
+  // Update stats on key events
+  setTimeout(updateScriptStats, 100);
+}
+
+/**
+ * Handle toolbar button actions
+ * @param {string} action - The action to perform
+ */
+function handleToolAction(action) {
+  const editor = document.getElementById('scriptEditor');
+  if (!editor) return;
+  
+  const start = editor.selectionStart;
+  const end = editor.selectionEnd;
+  const selectedText = editor.value.substring(start, end);
+  
+  switch(action) {
+    case 'bold':
+      // This is just a visual cue since plain text doesn't support formatting
+      insertTextAround(editor, '**', '**');
+      break;
+    case 'italic':
+      insertTextAround(editor, '_', '_');
+      break;
+    case 'uppercase':
+      if (selectedText) {
+        const newText = selectedText.toUpperCase();
+        editor.value = editor.value.substring(0, start) + newText + editor.value.substring(end);
+        editor.selectionStart = start;
+        editor.selectionEnd = start + newText.length;
+        updateScriptParsing();
+      }
+      break;
+    case 'add-character':
+      const t = translations[currentLang];
+      const characterName = prompt(t.enterCharacterName || 'Enter character name:');
+      if (characterName) {
+        const formattedText = `${characterName.trim()}: `;
+        insertTextAtCursor(editor, formattedText);
+      }
+      break;
+  }
+  
+  editor.focus();
+}
+
+/**
+ * Insert text around the selection
+ * @param {HTMLElement} editor - The editor element
+ * @param {string} before - Text to insert before selection
+ * @param {string} after - Text to insert after selection
+ */
+function insertTextAround(editor, before, after) {
+  const start = editor.selectionStart;
+  const end = editor.selectionEnd;
+  const selectedText = editor.value.substring(start, end);
+  
+  if (selectedText) {
+    editor.value = editor.value.substring(0, start) + 
+                   before + selectedText + after + 
+                   editor.value.substring(end);
+    editor.selectionStart = start;
+    editor.selectionEnd = end + before.length + after.length;
+    updateScriptParsing();
+  }
+}
+
+/**
+ * Insert text at cursor position
+ * @param {HTMLElement} editor - The editor element
+ * @param {string} text - Text to insert
+ */
+function insertTextAtCursor(editor, text) {
+  const start = editor.selectionStart;
+  editor.value = editor.value.substring(0, start) + text + editor.value.substring(start);
+  editor.selectionStart = editor.selectionEnd = start + text.length;
+  updateScriptParsing();
 }
 
 /**
@@ -218,32 +381,9 @@ function updateScriptParsing() {
     cleanedScriptLines = ScriptProcessor.preProcessScript(rawText, { aggressiveDetection: true });
     renderParsingPreview();
     updateDetectedCharactersList();
+    updateScriptStats();
   } catch (error) {
     console.error('Error parsing script:', error);
-  }
-}
-
-/**
- * Finalize the cleaned script before moving to metadata editing
- */
-function finalizeCleanedScript() {
-  const scriptEditor = document.getElementById('scriptEditor');
-  const t = translations[currentLang];
-  
-  if (scriptEditor) {
-    try {
-      const rawText = scriptEditor.value;
-      // Process the raw editor text for the final step
-      cleanedScriptLines = ScriptProcessor.preProcessScript(rawText, { aggressiveDetection: true });
-      showStep(3);
-      prepareRolesFromDetectedCharacters();
-      showToast(t.cleanSuccess || 'Script cleaned successfully', 2000, 'success');
-    } catch (error) {
-      console.error('Error finalizing script:', error);
-      showToast(t.errorClean || 'Error processing cleaned script', 3000, 'error');
-    }
-  } else {
-    showStep(3);
   }
 }
 
@@ -270,6 +410,39 @@ function updateDetectedCharactersList() {
     }
   });
   
+  // Count number of unique characters
+  const characterCount = Object.keys(characters).length;
+  const t = translations[currentLang];
+  
+  // Add a summary header
+  const summary = document.createElement('div');
+  summary.className = 'characters-summary';
+  summary.innerHTML = `
+    <div class="character-count">
+      <span class="count-number">${characterCount}</span>
+      <span class="count-label">${characterCount === 1 ? t.characterSingular || 'Character' : t.characterPlural || 'Characters'}</span>
+    </div>
+  `;
+  detectedCharactersList.appendChild(summary);
+  
+  // Add character list wrapper
+  const characterListWrapper = document.createElement('div');
+  characterListWrapper.className = 'character-list-wrapper';
+  detectedCharactersList.appendChild(characterListWrapper);
+  
+  if (characterCount === 0) {
+    characterListWrapper.innerHTML = `
+      <div class="no-characters-detected">
+        <i class="fas fa-exclamation-circle"></i>
+        <p>${t.noCharactersDetected || 'No characters detected. Try adding character names followed by a colon.'}</p>
+        <div class="example-format">
+          <code>CHARACTER: Dialogue text</code>
+        </div>
+      </div>
+    `;
+    return;
+  }
+  
   Object.entries(characters)
     .sort((a, b) => b[1] - a[1])
     .forEach(([character, count]) => {
@@ -281,161 +454,47 @@ function updateDetectedCharactersList() {
       const color = `hsl(${hue}, 70%, 60%)`;
       
       characterItem.innerHTML = `
-        <span style="color: ${color}; font-weight: bold;">${character}</span>
-        <span class="line-count">(${count} ${count === 1 ? 'line' : 'lines'})</span>
+        <div class="character-color" style="background-color: ${color}"></div>
+        <span class="character-name" style="color: ${color}">${character}</span>
+        <span class="line-count">${count} ${count === 1 ? t.lineSingular || 'line' : t.linePlural || 'lines'}</span>
+        <button class="character-action" title="${t.editCharacter || 'Edit this character'}" data-character="${character}">
+          <i class="fas fa-pencil-alt"></i>
+        </button>
       `;
       
-      detectedCharactersList.appendChild(characterItem);
+      characterListWrapper.appendChild(characterItem);
     });
-  
-  if (Object.keys(characters).length === 0) {
-    detectedCharactersList.innerHTML = `
-      <div class="character-item" style="font-style: italic; opacity: 0.7;">
-        No characters detected. Try adding character names followed by a colon.
-      </div>
-    `;
-  }
-}
-
-/**
- * Set up event listeners for the script preview
- */
-function setupScriptPreviewEvents() {
-  const parsingPreview = document.getElementById('parsingPreview');
-  const scriptEditor = document.getElementById('scriptEditor');
-  
-  if (parsingPreview && scriptEditor) {
-    parsingPreview.addEventListener('click', (e) => {
-      const lineElement = e.target.closest('.script-line');
-      if (!lineElement) return;
-      
-      // Handle line selection for merge operations
-      if (e.ctrlKey || e.metaKey) {
-        lineElement.classList.toggle('selected');
-      } else {
-        document.querySelectorAll('.script-line.selected').forEach(el => {
-          el.classList.remove('selected');
-        });
-        lineElement.classList.add('selected');
-        
-        // Get the line index and text
-        const lineIndex = parseInt(lineElement.dataset.index);
-        if (!isNaN(lineIndex) && lineIndex >= 0 && lineIndex < cleanedScriptLines.length) {
-          // Position in editor
-          focusEditorOnLine(scriptEditor, lineIndex);
-          
-          // Show tooltip hint
-          showEditorHint(lineElement);
-        }
+    
+  // Add event listeners to character action buttons
+  document.querySelectorAll('.character-action').forEach(button => {
+    button.addEventListener('click', () => {
+      const character = button.dataset.character;
+      if (character) {
+        promptEditCharacter(character);
       }
     });
-  }
+  });
 }
 
 /**
- * Focus the editor on a specific line
- * @param {HTMLElement} editor - The editor element
- * @param {number} lineIndex - The index of the line to focus on
+ * Show a dialog to edit a character name
+ * @param {string} oldName - The current character name
  */
-function focusEditorOnLine(editor, lineIndex) {
-  if (!editor) return;
-  
-  // Calculate position for the specified line
-  const lines = editor.value.split('\n');
-  let position = 0;
-  
-  // Sum the lengths of all lines before the target line
-  for (let i = 0; i < lineIndex; i++) {
-    if (i < lines.length) {
-      position += lines[i].length + 1; // +1 for the newline character
-    }
-  }
-  
-  // Set cursor position and selection range
-  editor.focus();
-  editor.setSelectionRange(position, position + (lines[lineIndex] ? lines[lineIndex].length : 0));
-  
-  // Calculate the line height in the editor (approximately)
-  const lineHeight = 20; // A reasonable default line height in pixels
-  
-  // Calculate where the line should be in the editor
-  const linePosition = lineIndex * lineHeight;
-  
-  // We want to scroll to position the line in the middle of the visible area
-  const editorMiddle = editor.clientHeight / 2;
-  const scrollPosition = linePosition - editorMiddle;
-  
-  // Scroll to the line, ensuring it's in the middle of the view
-  editor.scrollTop = Math.max(0, scrollPosition);
-  
-  // Ensure text cursor is visible by ensuring it's in view
-  // This makes the browser automatically scroll horizontally if needed
-  setTimeout(() => {
-    editor.blur(); // Temporarily remove focus
-    editor.focus(); // Re-focus to trigger browser's scroll-into-view behavior
-  }, 50);
-  
-  // Highlight effect
-  highlightEditorLine(editor);
-}
-
-/**
- * Add a temporary highlight effect to the selected line in the editor
- * @param {HTMLElement} editor - The editor element
- */
-function highlightEditorLine(editor) {
-  // Add the highlight class
-  editor.classList.add('highlight-line');
-  
-  // Remove the highlight class after a short delay
-  setTimeout(() => {
-    editor.classList.remove('highlight-line');
-  }, 1500);
-}
-
-/**
- * Show a tooltip hint when clicking on a line in the preview
- * @param {HTMLElement} element - The element to show the hint near
- */
-function showEditorHint(element) {
+function promptEditCharacter(oldName) {
   const t = translations[currentLang];
-  const hintText = t.clickToEditHint || 'Text highlighted in editor';
+  const newName = prompt(t.editCharacterPrompt || 'Edit character name:', oldName);
   
-  // Create or get the hint element
-  let hint = document.getElementById('editor-hint');
-  if (!hint) {
-    hint = document.createElement('div');
-    hint.id = 'editor-hint';
-    hint.className = 'editor-hint';
-    document.body.appendChild(hint);
-  }
+  if (!newName || newName === oldName) return;
   
-  // Position the hint near the clicked element
-  const rect = element.getBoundingClientRect();
-  hint.style.top = `${rect.top + window.scrollY - 30}px`;
-  hint.style.left = `${rect.left + window.scrollX}px`;
-  hint.textContent = hintText;
+  const scriptEditor = document.getElementById('scriptEditor');
+  if (!scriptEditor) return;
   
-  // Show the hint
-  hint.classList.add('show');
+  // Replace all occurrences of the character name in the script
+  const regex = new RegExp(`^${oldName}:`, 'gm');
+  scriptEditor.value = scriptEditor.value.replace(regex, `${newName}:`);
   
-  // Hide the hint after a short delay
-  setTimeout(() => {
-    hint.classList.remove('show');
-  }, 2000);
-}
-
-/**
- * Debounce the script parsing to avoid excessive updates
- */
-function debounceScriptParsing() {
-  if (this.parseTimeout) {
-    clearTimeout(this.parseTimeout);
-  }
-  
-  this.parseTimeout = setTimeout(() => {
-    updateScriptParsing();
-  }, 300);
+  updateScriptParsing();
+  showToast(t.characterRenamed || 'Character renamed successfully', 2000, 'success');
 }
 
 /**
@@ -454,32 +513,119 @@ function renderParsingPreview() {
     '#1abc9c', '#d35400', '#34495e', '#16a085', '#c0392b'
   ];
   
+  // Group by scene if we detect scene markers
+  let currentScene = null;
+  let sceneContainer = null;
+  
   cleanedScriptLines.forEach((line, index) => {
+    // Check for scene markers (patterns like "SCENE 1" or "ACT I")
+    const sceneMatch = line.match(/^(ACT|SCENE)\s+([IVX0-9]+)|^ACT\s+([IVX0-9]+),?\s+SCENE\s+([IVX0-9]+)/i);
+    
+    if (sceneMatch) {
+      currentScene = line;
+      sceneContainer = document.createElement('div');
+      sceneContainer.className = 'script-scene';
+      
+      const sceneHeader = document.createElement('div');
+      sceneHeader.className = 'scene-header';
+      sceneHeader.innerHTML = `<i class="fas fa-theater-masks"></i> ${line}`;
+      
+      sceneContainer.appendChild(sceneHeader);
+      parsingPreview.appendChild(sceneContainer);
+      return;
+    }
+    
+    // Create line element
     const lineElement = document.createElement('div');
     lineElement.className = 'script-line';
     lineElement.dataset.index = index;
     
+    // If we're in a scene, add to scene container
+    const container = sceneContainer || parsingPreview;
+    
+    // Process character lines
     const charMatch = line.match(/^([^:]+):\s*(.+)$/);
     if (charMatch) {
       const character = charMatch[1].trim();
       const dialogue = charMatch[2].trim();
       
       if (!characterColors[character]) {
-        characterColors[character] = colors[colorIndex % colors.length];
+        const hash = Array.from(character).reduce((acc, char) => char.charCodeAt(0) + acc, 0);
+        const hue = hash % 360;
+        characterColors[character] = `hsl(${hue}, 70%, 60%)`;
         colorIndex++;
       }
       
       lineElement.innerHTML = `
         <span class="character-name" style="color: ${characterColors[character]}">${character}:</span>
         <span class="dialogue-text">${dialogue}</span>
+        <div class="line-actions">
+          <button class="line-action-button" title="${translations[currentLang].editLine || 'Edit this line'}">
+            <i class="fas fa-pencil-alt"></i>
+          </button>
+        </div>
       `;
       lineElement.dataset.character = character;
+    } else if (line.startsWith('(') && line.endsWith(')')) {
+      // Stage direction
+      lineElement.innerHTML = `
+        <span class="stage-direction">${line}</span>
+        <div class="line-actions">
+          <button class="line-action-button" title="${translations[currentLang].editDirection || 'Edit direction'}">
+            <i class="fas fa-pencil-alt"></i>
+          </button>
+        </div>
+      `;
+      lineElement.classList.add('direction-line');
     } else {
-      lineElement.innerHTML = `<span class="stage-direction">${line}</span>`;
+      lineElement.innerHTML = `
+        <span class="plain-text">${line}</span>
+        <div class="line-actions">
+          <button class="line-action-button" title="${translations[currentLang].editLine || 'Edit this line'}">
+            <i class="fas fa-pencil-alt"></i>
+          </button>
+        </div>
+      `;
     }
     
-    parsingPreview.appendChild(lineElement);
+    container.appendChild(lineElement);
   });
+  
+  // Add event listeners for line action buttons
+  document.querySelectorAll('.line-action-button').forEach(button => {
+    button.addEventListener('click', (e) => {
+      e.stopPropagation();  // Prevent triggering the parent click event
+      const lineElement = button.closest('.script-line');
+      if (lineElement) {
+        const lineIndex = parseInt(lineElement.dataset.index);
+        focusEditorOnLine(document.getElementById('scriptEditor'), lineIndex);
+      }
+    });
+  });
+}
+
+/**
+ * Finalize the cleaned script before moving to metadata editing
+ */
+function finalizeCleanedScript() {
+  const scriptEditor = document.getElementById('scriptEditor');
+  const t = translations[currentLang];
+  
+  if (scriptEditor) {
+    try {
+      const rawText = scriptEditor.value;
+      // Process the raw editor text for the final step
+      cleanedScriptLines = ScriptProcessor.preProcessScript(rawText, { aggressiveDetection: true });
+      showStep(3);
+      prepareRolesFromDetectedCharacters();
+      showToast(t.cleanSuccess || 'Script cleaned successfully', 2000, 'success');
+    } catch (error) {
+      console.error('Error finalizing script:', error);
+      showToast(t.errorClean || 'Error processing cleaned script', 3000, 'error');
+    }
+  } else {
+    showStep(3);
+  }
 }
 
 /**

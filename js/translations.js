@@ -103,7 +103,40 @@ export const translations = {
         previewTitle: "Parsing Preview",
         previewHelp: "This shows how your script will be parsed with character detection.",
         clickToEditHint: "Line highlighted in editor",
-        mobileNotSupported: "The script converter is only available on desktop devices due to the complexity of the task."
+        mobileNotSupported: "The script converter is only available on desktop devices due to the complexity of the task.",
+        
+        // Editor tool translations
+        toolBold: "Bold",
+        toolItalic: "Italic",
+        toolUppercase: "UPPERCASE",
+        toolAddCharacter: "Add Character Name",
+        editorPlaceholder: "Enter your script here...",
+        editorHint: "Tip: Character names should be followed by a colon (e.g., HAMLET: To be or not to be)",
+        previewStatus: "Preview updates as you type",
+        
+        // Character statistics
+        characterSingular: "Character",
+        characterPlural: "Characters",
+        lineSingular: "line",
+        linePlural: "lines",
+        statsLines: "lines",
+        statsWords: "words",
+        statsChars: "chars",
+        
+        // Script editing
+        editLine: "Edit this line",
+        editDirection: "Edit stage direction",
+        editCharacter: "Edit character",
+        editCharacterPrompt: "Edit character name:",
+        characterRenamed: "Character renamed successfully",
+        noCharactersDetected: "No characters detected. Try adding character names followed by a colon.",
+        
+        // Tips section
+        editingTips: "Editing Tips",
+        tipCharacterFormat: "Format character lines as \"CHARACTER: Dialogue text\"",
+        tipStageDirections: "Stage directions can be wrapped in parentheses (like this)",
+        tipSelection: "Click a line in the preview to locate it in the editor",
+        tipCtrlClick: "Use Ctrl+Click to select multiple lines for merging"
       }
     },
     it: {
@@ -210,7 +243,40 @@ export const translations = {
         previewTitle: "Anteprima Parsing",
         previewHelp: "Mostra come il tuo copione verrà interpretato con rilevamento dei personaggi.",
         clickToEditHint: "Riga evidenziata nell'editor",
-        mobileNotSupported: "Il convertitore di copioni è disponibile solo su dispositivi desktop a causa della complessità dell'operazione."
+        mobileNotSupported: "Il convertitore di copioni è disponibile solo su dispositivi desktop a causa della complessità dell'operazione.",
+        
+        // Editor tool translations
+        toolBold: "Grassetto",
+        toolItalic: "Corsivo",
+        toolUppercase: "MAIUSCOLO",
+        toolAddCharacter: "Aggiungi Nome Personaggio",
+        editorPlaceholder: "Inserisci il tuo copione qui...",
+        editorHint: "Suggerimento: I nomi dei personaggi devono essere seguiti da due punti (es. AMLETO: Essere o non essere)",
+        previewStatus: "L'anteprima si aggiorna mentre scrivi",
+        
+        // Character statistics
+        characterSingular: "Personaggio",
+        characterPlural: "Personaggi",
+        lineSingular: "battuta",
+        linePlural: "battute",
+        statsLines: "righe",
+        statsWords: "parole",
+        statsChars: "caratteri",
+        
+        // Script editing
+        editLine: "Modifica questa riga",
+        editDirection: "Modifica indicazione scenica",
+        editCharacter: "Modifica personaggio",
+        editCharacterPrompt: "Modifica nome personaggio:",
+        characterRenamed: "Nome personaggio modificato con successo",
+        noCharactersDetected: "Nessun personaggio rilevato. Prova ad aggiungere nomi di personaggi seguiti da due punti.",
+        
+        // Tips section
+        editingTips: "Suggerimenti per la Modifica",
+        tipCharacterFormat: "Formatta le battute come \"PERSONAGGIO: Testo dialogo\"",
+        tipStageDirections: "Le indicazioni sceniche possono essere racchiuse tra parentesi (come questa)",
+        tipSelection: "Clicca su una riga nell'anteprima per trovarla nell'editor",
+        tipCtrlClick: "Usa Ctrl+Click per selezionare più righe da unire"
       }
     }
   };
