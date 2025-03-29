@@ -1182,6 +1182,13 @@ body.dark-mode .character-item {
   background-color: rgba(255, 255, 255, 0.05);
   color: inherit;
   resize: vertical;
+  caret-color: #3498db; /* Make the text cursor more visible */
+}
+
+body.dark-mode .script-editor {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-color: #444;
+  caret-color: #5dade2;
 }
 
 .parsing-preview {
@@ -1260,17 +1267,6 @@ body.dark-mode .editor-hint {
   .parsing-preview {
     height: 300px;
   }
-}
-
-/* Dark mode adjustments */
-body.dark-mode .script-editor {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-color: #444;
-}
-
-body.dark-mode .parsing-preview {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-color: #444;
 }
 
 /* Converter Desktop-Only Styles */

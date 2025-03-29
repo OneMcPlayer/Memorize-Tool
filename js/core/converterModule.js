@@ -302,12 +302,29 @@ function focusEditorOnLine(editor, lineIndex) {
     }
   }
   
-  // Set cursor position
+  // Set cursor position and selection range
   editor.focus();
   editor.setSelectionRange(position, position + (lines[lineIndex] ? lines[lineIndex].length : 0));
   
-  // Scroll to the position
-  editor.scrollTop = lineIndex * (editor.scrollHeight / lines.length) - (editor.clientHeight / 2);
+  // Calculate the line height in the editor (approximately)
+  const lineHeight = 20; // A reasonable default line height in pixels
+  
+  // Calculate where the line should be in the editor
+  const linePosition = lineIndex * lineHeight;
+  
+  // We want to scroll to position the line in the middle of the visible area
+  const editorMiddle = editor.clientHeight / 2;
+  const scrollPosition = linePosition - editorMiddle;
+  
+  // Scroll to the line, ensuring it's in the middle of the view
+  editor.scrollTop = Math.max(0, scrollPosition);
+  
+  // Ensure text cursor is visible by ensuring it's in view
+  // This makes the browser automatically scroll horizontally if needed
+  setTimeout(() => {
+    editor.blur(); // Temporarily remove focus
+    editor.focus(); // Re-focus to trigger browser's scroll-into-view behavior
+  }, 50);
   
   // Highlight effect
   highlightEditorLine(editor);
