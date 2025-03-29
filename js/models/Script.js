@@ -10,94 +10,32 @@ export class Script {
   }
 
   // Add the parse method for the tests
-  static parse(content) {
-    if (!content) {
-      return {
-        title: '',
-        roles: [],
-        lines: []
-      };
-    }
+  static parse(input) {
+    const lines = [];
+    let currentCharacter = null;
+    let currentDialog = [];
 
-    const script = {
-      title: '',
-      roles: [],
-      lines: []
-    };
-
-    const lines = content.split('\n');
-    let rolesSection = false;
-
-    for (const line of lines) {
-      const trimmedLine = line.trim();
-      if (!trimmedLine) continue;
-
-      // Parse title
-      if (trimmedLine.startsWith('TITLE:')) {
-        script.title = trimmedLine.substring(6).trim();
-        continue;
-      }
-
-      // Parse roles section
-      if (trimmedLine === 'CHARACTERS:') {
-        rolesSection = true;
-        continue;
-      }
-      if (rolesSection && !trimmedLine.match(/^(ACT|SCENE)/)) {
-        const roleMatch = trimmedLine.match(/^([A-Z][A-Z\s]+)(?:\s*-\s*(.+))?$/);
-        if (roleMatch) {
-          script.roles.push({
-            name: roleMatch[1].trim(),
-            description: roleMatch[2] ? roleMatch[2].trim() : ''
-          });
+    input.split('\n').forEach(line => {
+      const characterMatch = line.match(/^([A-Z]+):/);
+      if (characterMatch) {
+        // Save the previous dialog if any
+        if (currentCharacter && currentDialog.length > 0) {
+          lines.push({ character: currentCharacter, dialog: currentDialog.join(' ') });
         }
-        continue;
+        currentCharacter = characterMatch[1];
+        currentDialog = [line.replace(characterMatch[0], '').trim()];
+      } else if (currentCharacter) {
+        // Append to the current dialog for multiline
+        currentDialog.push(line.trim());
       }
+    });
 
-      // Parse scene headings
-      if (trimmedLine.match(/^(ACT|SCENE)\s+\d+/i)) {
-        rolesSection = false;
-        script.lines.push({
-          character: null,
-          text: trimmedLine,
-          isSceneHeading: true
-        });
-        continue;
-      }
-
-      // Parse stage directions
-      if (trimmedLine.startsWith('[') && trimmedLine.endsWith(']')) {
-        script.lines.push({
-          character: null,
-          text: trimmedLine,
-          isDirection: true
-        });
-        continue;
-      }
-
-      // Parse character dialogue
-      const dialogueMatch = trimmedLine.match(/^([A-Z][A-Z\s]+):\s*(.+)$/);
-      if (dialogueMatch) {
-        script.lines.push({
-          character: dialogueMatch[1].trim(),
-          text: dialogueMatch[2].trim()
-        });
-        continue;
-      }
-
-      // Handle multiline dialogue continuation
-      if (
-        script.lines.length > 0 &&
-        script.lines[script.lines.length - 1].character &&
-        !trimmedLine.startsWith('[') &&
-        !trimmedLine.match(/^(ACT|SCENE)/)
-      ) {
-        const prevLine = script.lines[script.lines.length - 1];
-        prevLine.text += ' ' + trimmedLine;
-      }
+    // Add the last dialog if any
+    if (currentCharacter && currentDialog.length > 0) {
+      lines.push({ character: currentCharacter, dialog: currentDialog.join(' ') });
     }
 
-    return script;
+    return { lines };
   }
 
   static fromStructuredText(content) {

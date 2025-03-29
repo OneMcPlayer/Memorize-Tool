@@ -78,28 +78,22 @@ ALICE: Thank you for watching!`;
     });
 
     it('should handle multiline dialog', () => {
-      const script = `TITLE: Multiline Test
-CHARACTERS:
-HAMLET
-
-HAMLET: To be, or not to be, that is the question:
+      const input = `
+HAMLET: To be, or not to be: that is the question:
 Whether 'tis nobler in the mind to suffer
 The slings and arrows of outrageous fortune,
 Or to take arms against a sea of troubles
-And by opposing end them.`;
+And by opposing end them.
+`;
+      const result = Script.parse(input);
 
-      const result = Script.parse(script);
-      
-      // The current implementation may not be supporting multiline dialogs
-      // Fix the Script.parse implementation to recognize multiline dialog
-      
-      // Update to create a custom matcher for this test
       expect(result.lines.length).toBeGreaterThan(0);
-      
-      // Find the HAMLET line
+
       const hamletLine = result.lines.find(line => line.character === 'HAMLET');
       expect(hamletLine).toBeDefined();
-      expect(hamletLine.text).toContain('To be, or not to be');
+      expect(hamletLine.dialog).toBe(
+        "To be, or not to be: that is the question: Whether 'tis nobler in the mind to suffer The slings and arrows of outrageous fortune, Or to take arms against a sea of troubles And by opposing end them."
+      );
     });
 
     it('should handle empty or invalid input', () => {
