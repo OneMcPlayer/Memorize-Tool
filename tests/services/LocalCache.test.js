@@ -1,25 +1,32 @@
 import { LocalCache } from '../../js/services/LocalCache';
 
-// Mock localStorage
-const localStorageMock = (() => {
-  let store = {};
-  return {
-    getItem: jest.fn(key => store[key] || null),
-    setItem: jest.fn((key, value) => {
-      store[key] = value.toString();
-    }),
-    removeItem: jest.fn(key => {
-      delete store[key];
-    }),
-    clear: jest.fn(() => {
-      store = {};
-    }),
-    _getStore: () => store // Helper for tests
-  };
-})();
-
-// Replace the global localStorage with our mock
-global.localStorage = localStorageMock;
+// Mock localStorage properly for jest
+beforeEach(() => {
+  // Clear all instances and calls to constructor and all methods:
+  jest.clearAllMocks();
+  
+  // Mock implementation
+  const store = {};
+  
+  Object.defineProperty(global, 'localStorage', {
+    value: {
+      getItem: jest.fn((key) => store[key] || null),
+      setItem: jest.fn((key, value) => {
+        store[key] = String(value);
+      }),
+      removeItem: jest.fn((key) => {
+        delete store[key];
+      }),
+      clear: jest.fn(() => {
+        Object.keys(store).forEach(key => {
+          delete store[key];
+        });
+      }),
+      _getStore: () => store  // Helper for tests
+    },
+    writable: true
+  });
+});
 
 describe('LocalCache', () => {
   beforeEach(() => {

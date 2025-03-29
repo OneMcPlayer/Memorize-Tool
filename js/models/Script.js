@@ -6,6 +6,75 @@ export class Script {
     this.roles = [];
     this.scenes = [];
     this.text = ''; // will hold original script text
+    this.lines = []; // simplified representation of all lines
+  }
+
+  // Add the parse method for the tests
+  static parse(content) {
+    if (!content) {
+      return {
+        title: '',
+        roles: [],
+        lines: []
+      };
+    }
+    
+    const lines = content.split('\n');
+    const result = {
+      title: '',
+      roles: [],
+      lines: []
+    };
+    
+    let currentSection = '';
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+      
+      if (line.startsWith('TITLE:')) {
+        result.title = line.substring(6).trim();
+      } else if (line === 'CHARACTERS:') {
+        currentSection = 'characters';
+      } else if (line.startsWith('ACT') || line.startsWith('SCENE')) {
+        currentSection = 'script';
+        result.lines.push({
+          character: null,
+          text: line,
+          isSceneHeading: true,
+          isDirection: false
+        });
+      } else if (currentSection === 'characters') {
+        if (line.includes('-')) {
+          const [name, desc] = line.split('-').map(s => s.trim());
+          result.roles.push({
+            name,
+            description: desc || '',
+            aliases: []
+          });
+        }
+      } else if (currentSection === 'script') {
+        if (line.startsWith('[') && line.endsWith(']')) {
+          // Stage direction
+          result.lines.push({
+            character: null,
+            text: line,
+            isSceneHeading: false,
+            isDirection: true
+          });
+        } else if (line.includes(':')) {
+          const [character, text] = line.split(':').map(s => s.trim());
+          result.lines.push({
+            character,
+            text,
+            isSceneHeading: false,
+            isDirection: false
+          });
+        }
+      }
+    }
+    
+    return result;
   }
 
   static fromStructuredText(content) {

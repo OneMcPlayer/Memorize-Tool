@@ -21,28 +21,52 @@ function getRoleDescription(text) {
 }
 
 export function parseRolesBlock(rolesText) {
-  // Example input: "- [SEGRETARIO | Il SEGRETARIO perpetuo]: "Figura burocratica...""  
-  // 1. Extract the bracket content: "SEGRETARIO | Il SEGRETARIO perpetuo"
-  const bracketContent = getBracketContent(rolesText);
-  // 2. Split on the pipe symbol and trim each alias.
-  const aliases = bracketContent.split('|').map(s => s.trim());
-  // 3. Return an object with these aliases and the role description.
-  return {
-    primaryName: getPrimaryName(aliases),
-    aliases: aliases,
-    description: getRoleDescription(rolesText)
-  };
+  if (!rolesText) return []; // Return empty array for null/undefined/empty
+  
+  // Split the text by lines and parse each character line
+  const lines = rolesText.split('\n');
+  const roles = [];
+  
+  for (const line of lines) {
+    if (line.trim() && !line.includes('CHARACTERS:')) {
+      const match = line.match(/([A-Z]+)(?:\s*\[([^\]]+)\])?\s*-?\s*(.*)/);
+      if (match) {
+        const name = match[1].trim();
+        const aliasStr = match[2] || '';
+        const description = match[3].trim();
+        const aliases = aliasStr ? aliasStr.split(',').map(a => a.trim()) : [];
+        
+        roles.push({
+          name,
+          aliases,
+          description
+        });
+      }
+    }
+  }
+  
+  return roles;
 }
 
 export function findRoleByName(name, rolesList) {
+  // Handle null/undefined inputs
+  if (!name || !rolesList) return null;
+  
   // Convert user input to uppercase for case-insensitive matching.
   const search = name.toUpperCase();
-  // Check each role's aliases.
+  
+  // Check each role's name first
   for (const role of rolesList) {
+    if (role.name.toUpperCase() === search) {
+      return role;
+    }
+    
+    // Then check aliases
     if (role.aliases.some(alias => alias.toUpperCase() === search)) {
       return role;
     }
   }
+  
   // If not found, return null.
   return null;
 }

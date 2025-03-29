@@ -4,6 +4,9 @@
  * @returns {string} - The plain text content
  */
 export function getPlainText(line) {
+  // Handle null or undefined
+  if (line == null) return '';
+  
   // Remove HTML tags and trim whitespace
   return line.replace(/<[^>]*>/g, '').trim();
 }
@@ -14,5 +17,6 @@ export function getPlainText(line) {
  * @returns {string} - A valid DOM ID
  */
 export function createValidId(str) {
-  return str.toLowerCase().replace(/[^a-z0-9]/g, '-');
+  if (!str) return '';
+  return str.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
 }

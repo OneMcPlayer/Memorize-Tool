@@ -5,27 +5,28 @@ export class LocalCache {
   /**
    * Get an item from the cache
    * @param {string} key - Cache key
+   * @param {any} fallback - Optional fallback value if not found
    * @returns {any|null} - Cached value or null if not found/expired
    */
-  static get(key) {
+  static get(key, fallback = null) {
     try {
       const cacheKey = `cache_${key}`;
       const cachedData = localStorage.getItem(cacheKey);
       
-      if (!cachedData) return null;
+      if (!cachedData) return fallback;
       
       const { value, expiry } = JSON.parse(cachedData);
       
       // Check if cache has expired
       if (expiry && expiry < Date.now()) {
         localStorage.removeItem(cacheKey);
-        return null;
+        return fallback;
       }
       
       return value;
     } catch (error) {
-      console.warn(`Error retrieving from cache: ${key}`, error);
-      return null;
+      console.warn(`Cache retrieval error: ${key}`, error);
+      return fallback;
     }
   }
   
@@ -48,7 +49,7 @@ export class LocalCache {
       
       return true;
     } catch (error) {
-      console.warn(`Error storing in cache: ${key}`, error);
+      console.warn(`Cache error: ${key}`, error);
       return false;
     }
   }

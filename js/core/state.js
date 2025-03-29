@@ -67,8 +67,8 @@ export function getCurrentLineData() {
   const contextLines = scriptLines.slice(startIndex, currentEntry.index);
   
   return {
-    currentEntry,
-    contextLines,
+    current: currentEntry,
+    context: contextLines,
     isLastLine: currentLineIndex === extractedLines.length - 1
   };
 }
