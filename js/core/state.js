@@ -43,14 +43,12 @@ export function setPrecedingCount(count) {
 
 /**
  * Advance to the next line
- * @returns {boolean} - Whether there are more lines
  */
 export function nextLine() {
+  // Don't increment beyond the last line
   if (currentLineIndex < extractedLines.length - 1) {
     currentLineIndex++;
-    return true;
   }
-  return false;
 }
 
 /**
