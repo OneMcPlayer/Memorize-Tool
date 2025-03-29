@@ -103,8 +103,6 @@ export function setupConverterHandlers() {
       showStep(targetStep);
     });
   });
-  
-  setupScriptPreviewEvents();
 }
 
 /**
@@ -242,7 +240,6 @@ function setupInteractiveEditor(initialText = '') {
   });
   
   updateScriptParsing(); // Call this instead of renderParsingPreview to process the editor content
-  setupScriptPreviewEvents();
   updateScriptStats();
 }
 
