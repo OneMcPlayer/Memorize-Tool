@@ -253,12 +253,14 @@ function setupInteractiveEditor() {
  */
 function setupScriptPreviewEvents() {
   const parsingPreview = document.getElementById('parsingPreview');
+  const scriptEditor = document.getElementById('scriptEditor');
   
-  if (parsingPreview) {
+  if (parsingPreview && scriptEditor) {
     parsingPreview.addEventListener('click', (e) => {
       const lineElement = e.target.closest('.script-line');
       if (!lineElement) return;
       
+      // Handle line selection for merge operations
       if (e.ctrlKey || e.metaKey) {
         lineElement.classList.toggle('selected');
       } else {
@@ -266,9 +268,95 @@ function setupScriptPreviewEvents() {
           el.classList.remove('selected');
         });
         lineElement.classList.add('selected');
+        
+        // Get the line index and text
+        const lineIndex = parseInt(lineElement.dataset.index);
+        if (!isNaN(lineIndex) && lineIndex >= 0 && lineIndex < cleanedScriptLines.length) {
+          // Position in editor
+          focusEditorOnLine(scriptEditor, lineIndex);
+          
+          // Show tooltip hint
+          showEditorHint(lineElement);
+        }
       }
     });
   }
+}
+
+/**
+ * Focus the editor on a specific line
+ * @param {HTMLElement} editor - The editor element
+ * @param {number} lineIndex - The index of the line to focus on
+ */
+function focusEditorOnLine(editor, lineIndex) {
+  if (!editor) return;
+  
+  // Calculate position for the specified line
+  const lines = editor.value.split('\n');
+  let position = 0;
+  
+  // Sum the lengths of all lines before the target line
+  for (let i = 0; i < lineIndex; i++) {
+    if (i < lines.length) {
+      position += lines[i].length + 1; // +1 for the newline character
+    }
+  }
+  
+  // Set cursor position
+  editor.focus();
+  editor.setSelectionRange(position, position + (lines[lineIndex] ? lines[lineIndex].length : 0));
+  
+  // Scroll to the position
+  editor.scrollTop = lineIndex * (editor.scrollHeight / lines.length) - (editor.clientHeight / 2);
+  
+  // Highlight effect
+  highlightEditorLine(editor);
+}
+
+/**
+ * Add a temporary highlight effect to the selected line in the editor
+ * @param {HTMLElement} editor - The editor element
+ */
+function highlightEditorLine(editor) {
+  // Add the highlight class
+  editor.classList.add('highlight-line');
+  
+  // Remove the highlight class after a short delay
+  setTimeout(() => {
+    editor.classList.remove('highlight-line');
+  }, 1500);
+}
+
+/**
+ * Show a tooltip hint when clicking on a line in the preview
+ * @param {HTMLElement} element - The element to show the hint near
+ */
+function showEditorHint(element) {
+  const t = translations[currentLang];
+  const hintText = t.clickToEditHint || 'Text highlighted in editor';
+  
+  // Create or get the hint element
+  let hint = document.getElementById('editor-hint');
+  if (!hint) {
+    hint = document.createElement('div');
+    hint.id = 'editor-hint';
+    hint.className = 'editor-hint';
+    document.body.appendChild(hint);
+  }
+  
+  // Position the hint near the clicked element
+  const rect = element.getBoundingClientRect();
+  hint.style.top = `${rect.top + window.scrollY - 30}px`;
+  hint.style.left = `${rect.left + window.scrollX}px`;
+  hint.textContent = hintText;
+  
+  // Show the hint
+  hint.classList.add('show');
+  
+  // Hide the hint after a short delay
+  setTimeout(() => {
+    hint.classList.remove('show');
+  }, 2000);
 }
 
 /**

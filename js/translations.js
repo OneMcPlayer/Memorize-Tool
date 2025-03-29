@@ -102,6 +102,7 @@ export const translations = {
         editScriptHelp: "Edit the script text here. Your changes will update the preview in real-time.",
         previewTitle: "Parsing Preview",
         previewHelp: "This shows how your script will be parsed with character detection.",
+        clickToEditHint: "Line highlighted in editor",
         mobileNotSupported: "The script converter is only available on desktop devices due to the complexity of the task."
       }
     },
@@ -208,6 +209,7 @@ export const translations = {
         editScriptHelp: "Modifica il testo del copione qui. Le modifiche aggiorneranno l'anteprima in tempo reale.",
         previewTitle: "Anteprima Parsing",
         previewHelp: "Mostra come il tuo copione verrà interpretato con rilevamento dei personaggi.",
+        clickToEditHint: "Riga evidenziata nell'editor",
         mobileNotSupported: "Il convertitore di copioni è disponibile solo su dispositivi desktop a causa della complessità dell'operazione."
       }
     }

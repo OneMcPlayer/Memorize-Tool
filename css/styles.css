@@ -1051,7 +1051,7 @@ body.dark-mode .back-button:hover {
 }
 
 .script-line:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.15);
 }
 
 .script-line.selected {
@@ -1201,7 +1201,53 @@ body.dark-mode .character-item {
 }
 
 .script-line:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Editor highlight effect */
+.script-editor.highlight-line {
+  background-color: rgba(255, 235, 59, 0.2);
+  transition: background-color 0.5s ease;
+}
+
+/* Editor hint tooltip */
+.editor-hint {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s, transform 0.3s;
+  max-width: 200px;
+  text-align: center;
+}
+
+.editor-hint.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Adjust for dark mode */
+body.dark-mode .script-editor.highlight-line {
+  background-color: rgba(255, 235, 59, 0.15);
+}
+
+body.dark-mode .editor-hint {
+  background-color: rgba(255, 255, 255, 0.8);
+  color: #333;
+}
+
+/* Mobile responsiveness for the hint */
+@media (max-width: 768px) {
+  .editor-hint {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
 }
 
 /* Mobile styles for the editor */
