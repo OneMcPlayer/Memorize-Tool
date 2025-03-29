@@ -3,6 +3,14 @@
 A modern, browser-based application designed to help actors effectively memorize their lines by practicing them in context. Built with vanilla JavaScript, CSS, and HTML for maximum portability.
 
 ![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
+![Tests](https://img.shields.io/badge/tests-54_tests-blue.svg)
+
+## 🚦 Project Status
+
+This project is **under active development**:
+- 🔄 Ongoing improvements to code quality and usability
+- 📊 Support for different script formats is implemented
+- 🔧 Bug fixes are being addressed through test-driven development
 
 ## ✨ Features
 
@@ -91,7 +99,7 @@ ANOTHER CHARACTER: Response
 }
 ```
 
-## Development
+## 🧪 Development
 
 The project is structured as follows:
 
@@ -101,3 +109,21 @@ The project is structured as follows:
   - `/models` - Script model classes
   - `/services` - Script processing logic
   - `/utils` - Helper functions
+- `/tests` - Test suite
+  - Unit tests for core functionality
+  - Service tests
+  - Model tests
+
+### Running Tests
+
+This project uses Jest for testing. To run the tests:
+
+1. Make sure you have Node.js installed
+2. Install dependencies with `npm install`
+3. Run tests with `npm test`
+
+The test suite verifies critical functionality like:
+- Script parsing and processing
+- State management
+- Caching functionality
+- UI utility functions

@@ -35,12 +35,15 @@ describe('showToast', () => {
     });
     
     // Mock setTimeout and clearTimeout
-    jest.useFakeTimers(); // Use Jest's fake timers
+    jest.useFakeTimers();
+    global.setTimeout = jest.fn().mockImplementation((cb, delay) => {
+      return 123; // Mock ID
+    });
     global.clearTimeout = jest.fn();
   });
 
   afterEach(() => {
-    jest.useRealTimers(); // Restore real timers after each test
+    jest.useRealTimers();
   });
 
   test('should set the toast message and display it', () => {
