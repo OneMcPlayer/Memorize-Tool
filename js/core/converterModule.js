@@ -170,6 +170,20 @@ function prepareCleaningView(originalText = '') {
 }
 
 /**
+ * Debounce the script parsing to avoid excessive updates
+ * Creates a delay to prevent the script parsing from running too frequently when typing
+ */
+function debounceScriptParsing() {
+  if (this.parseTimeout) {
+    clearTimeout(this.parseTimeout);
+  }
+  
+  this.parseTimeout = setTimeout(() => {
+    updateScriptParsing();
+  }, 300); // 300ms delay before executing the actual parsing
+}
+
+/**
  * Set up the interactive editor for real-time script editing and parsing
  * @param {string} initialText - The initial text to show in the editor
  */
