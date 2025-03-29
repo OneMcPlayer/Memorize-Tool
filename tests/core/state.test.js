@@ -47,7 +47,10 @@ jest.mock('../../js/core/state', () => {
       return originalModule.setPrecedingCount(count);
     },
     nextLine: () => {
-      mockState.currentLineIndex++;
+      // Only increment if not at the end of the array
+      if (mockState.currentLineIndex < mockState.extractedLines.length - 1) {
+        mockState.currentLineIndex++;
+      }
       return originalModule.nextLine();
     },
     getCurrentLineData: originalModule.getCurrentLineData
