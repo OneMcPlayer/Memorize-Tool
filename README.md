@@ -22,6 +22,7 @@ This project is **under active development**:
 - 📊 Support for different script formats is fully implemented
 - 🔧 Bug fixes are being addressed through test-driven development
 - 📱 Mobile-friendly functionality with touch gestures
+- 🤖 Actively exploring new AI-assisted enhancement opportunities
 
 ## ✨ Features
 
@@ -165,3 +166,25 @@ The test suite verifies critical functionality like:
 - State management
 - Caching functionality
 - UI utility functions
+
+## Why Vibe Coding?
+
+This project combines my passion for theater education with modern AI-assisted development to create a practical tool that solves a real problem for actors and theater students.
+
+### About This Development Approach
+
+1. **Domain-First Focus**: As a theater enthusiast, I prioritized creating a tool that genuinely helps with line memorization rather than getting caught in technical complexities.
+
+2. **Rapid Prototyping**: AI assistance allowed for quick iteration through ideas, helping me test different approaches to script parsing and practice interfaces with actual theater scripts.
+
+3. **Learning Through Building**: This project became a practical way to explore web development concepts while creating something immediately useful for my theater work.
+
+4. **Community Contribution**: By sharing this tool and development approach, I hope to inspire other domain experts to consider how they might use AI-assisted development to create tools for their fields.
+
+5. **Practical Experimentation**: The project demonstrates what's possible when combining human creativity and domain knowledge with modern development tools - resulting in a tool that was completed more efficiently while still reflecting my design vision.
+
+This approach acknowledges that valuable software can emerge from the intersection of domain expertise and modern development tools. Whether you're a theater enthusiast interested in using this tool or a curious developer exploring new development workflows, I hope you find something valuable here.
+
+## License
+
+This project is available under the MIT-AI Assisted Vibe Coding License. See the LICENSE file for details.
