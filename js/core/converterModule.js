@@ -146,7 +146,7 @@ function parseScript() {
   try {
     parseResult = ScriptConverter.parseBasicScript(inputText);
     showStep(2);
-    prepareCleaningView();
+    prepareCleaningView(inputText);
   } catch (error) {
     console.error('Error parsing script:', error);
     showToast(t.errorParse || 'Error parsing script', 3000, 'error');
@@ -155,16 +155,96 @@ function parseScript() {
 
 /**
  * Prepare the script cleaning view with the parsed script
+ * @param {string} originalText - The original unprocessed input text
  */
-function prepareCleaningView() {
+function prepareCleaningView(originalText = '') {
   if (!parseResult || !parseResult.processedLines) {
     showToast(translations[currentLang].errorParse || 'Invalid script data', 3000, 'error');
     return;
   }
   
+  // Store the processed lines for the preview pane
   cleanedScriptLines = [...parseResult.processedLines];
-  setupInteractiveEditor();
+  
+  // Use the original text for the editor if provided
+  setupInteractiveEditor(originalText || cleanedScriptLines.join('\n'));
   updateDetectedCharactersList();
+}
+
+/**
+ * Set up the interactive editor for real-time script editing and parsing
+ * @param {string} initialText - The initial text to show in the editor
+ */
+function setupInteractiveEditor(initialText = '') {
+  const scriptPreview = document.getElementById('scriptPreview');
+  const t = translations[currentLang];
+  
+  if (!scriptPreview) return;
+  
+  scriptPreview.innerHTML = `
+    <div class="editor-preview-container">
+      <div class="editor-container">
+        <h4>${t.editScriptTitle || 'Edit Script'}</h4>
+        <p class="help-text">${t.editScriptHelp || 'Edit the script and see parsing updates in real-time'}</p>
+        <textarea id="scriptEditor" class="script-editor"></textarea>
+      </div>
+      <div class="preview-container">
+        <h4>${t.previewTitle || 'Parsing Preview'}</h4>
+        <p class="help-text">${t.previewHelp || 'Character dialogues are highlighted by color'}</p>
+        <div id="parsingPreview" class="script-lines"></div>
+      </div>
+    </div>
+  `;
+  
+  const scriptEditor = document.getElementById('scriptEditor');
+  scriptEditor.value = initialText;
+  scriptEditor.addEventListener('input', debounceScriptParsing);
+  updateScriptParsing(); // Call this instead of renderParsingPreview to process the editor content
+  setupScriptPreviewEvents();
+}
+
+/**
+ * Update the script parsing based on the current editor content
+ */
+function updateScriptParsing() {
+  const scriptEditor = document.getElementById('scriptEditor');
+  if (!scriptEditor) return;
+  
+  const rawText = scriptEditor.value;
+  
+  try {
+    // Process the raw editor text for the preview only
+    // This keeps the original text intact in the editor
+    cleanedScriptLines = ScriptProcessor.preProcessScript(rawText, { aggressiveDetection: true });
+    renderParsingPreview();
+    updateDetectedCharactersList();
+  } catch (error) {
+    console.error('Error parsing script:', error);
+  }
+}
+
+/**
+ * Finalize the cleaned script before moving to metadata editing
+ */
+function finalizeCleanedScript() {
+  const scriptEditor = document.getElementById('scriptEditor');
+  const t = translations[currentLang];
+  
+  if (scriptEditor) {
+    try {
+      const rawText = scriptEditor.value;
+      // Process the raw editor text for the final step
+      cleanedScriptLines = ScriptProcessor.preProcessScript(rawText, { aggressiveDetection: true });
+      showStep(3);
+      prepareRolesFromDetectedCharacters();
+      showToast(t.cleanSuccess || 'Script cleaned successfully', 2000, 'success');
+    } catch (error) {
+      console.error('Error finalizing script:', error);
+      showToast(t.errorClean || 'Error processing cleaned script', 3000, 'error');
+    }
+  } else {
+    showStep(3);
+  }
 }
 
 /**
@@ -215,37 +295,6 @@ function updateDetectedCharactersList() {
       </div>
     `;
   }
-}
-
-/**
- * Set up the interactive editor for real-time script editing and parsing
- */
-function setupInteractiveEditor() {
-  const scriptPreview = document.getElementById('scriptPreview');
-  const t = translations[currentLang];
-  
-  if (!scriptPreview) return;
-  
-  scriptPreview.innerHTML = `
-    <div class="editor-preview-container">
-      <div class="editor-container">
-        <h4>${t.editScriptTitle || 'Edit Script'}</h4>
-        <p class="help-text">${t.editScriptHelp || 'Edit the script and see parsing updates in real-time'}</p>
-        <textarea id="scriptEditor" class="script-editor"></textarea>
-      </div>
-      <div class="preview-container">
-        <h4>${t.previewTitle || 'Parsing Preview'}</h4>
-        <p class="help-text">${t.previewHelp || 'Character dialogues are highlighted by color'}</p>
-        <div id="parsingPreview" class="script-lines"></div>
-      </div>
-    </div>
-  `;
-  
-  const scriptEditor = document.getElementById('scriptEditor');
-  scriptEditor.value = cleanedScriptLines.join('\n');
-  scriptEditor.addEventListener('input', debounceScriptParsing);
-  renderParsingPreview();
-  setupScriptPreviewEvents();
 }
 
 /**
@@ -390,24 +439,6 @@ function debounceScriptParsing() {
 }
 
 /**
- * Update the script parsing based on the current editor content
- */
-function updateScriptParsing() {
-  const scriptEditor = document.getElementById('scriptEditor');
-  if (!scriptEditor) return;
-  
-  const rawText = scriptEditor.value;
-  
-  try {
-    cleanedScriptLines = ScriptProcessor.preProcessScript(rawText, { aggressiveDetection: true });
-    renderParsingPreview();
-    updateDetectedCharactersList();
-  } catch (error) {
-    console.error('Error parsing script:', error);
-  }
-}
-
-/**
  * Render the parsing preview with character detection highlighting
  */
 function renderParsingPreview() {
@@ -449,29 +480,6 @@ function renderParsingPreview() {
     
     parsingPreview.appendChild(lineElement);
   });
-}
-
-/**
- * Finalize the cleaned script before moving to metadata editing
- */
-function finalizeCleanedScript() {
-  const scriptEditor = document.getElementById('scriptEditor');
-  const t = translations[currentLang];
-  
-  if (scriptEditor) {
-    try {
-      const rawText = scriptEditor.value;
-      cleanedScriptLines = ScriptProcessor.preProcessScript(rawText, { aggressiveDetection: true });
-      showStep(3);
-      prepareRolesFromDetectedCharacters();
-      showToast(t.cleanSuccess || 'Script cleaned successfully', 2000, 'success');
-    } catch (error) {
-      console.error('Error finalizing script:', error);
-      showToast(t.errorClean || 'Error processing cleaned script', 3000, 'error');
-    }
-  } else {
-    showStep(3);
-  }
 }
 
 /**
