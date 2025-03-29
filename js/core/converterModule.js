@@ -237,6 +237,37 @@ function setupInteractiveEditor() {
   
   // Initial render of the preview
   renderParsingPreview();
+  
+  // Setup line selection events
+  setupScriptPreviewEvents();
+}
+
+/**
+ * Set up event listeners for the script preview
+ */
+function setupScriptPreviewEvents() {
+  // For the interactive editor version, we need to set up selection events
+  // on the parsing preview instead of the script preview
+  const parsingPreview = document.getElementById('parsingPreview');
+  
+  if (parsingPreview) {
+    // Add event listener to handle line selection within the parsing preview
+    parsingPreview.addEventListener('click', (e) => {
+      const lineElement = e.target.closest('.script-line');
+      if (!lineElement) return;
+      
+      if (e.ctrlKey || e.metaKey) {
+        // Add to selection with Ctrl/Cmd key
+        lineElement.classList.toggle('selected');
+      } else {
+        // Clear selection and select just this line
+        document.querySelectorAll('.script-line.selected').forEach(el => {
+          el.classList.remove('selected');
+        });
+        lineElement.classList.add('selected');
+      }
+    });
+  }
 }
 
 /**
