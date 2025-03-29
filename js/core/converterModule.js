@@ -23,11 +23,6 @@ export function setupConverterHandlers() {
   const backButton = document.getElementById('converterBackButton');
   const topBackButton = document.getElementById('converterTopBackButton');
   
-  // New cleaning step buttons
-  const autoDetectButton = document.getElementById('autoDetectButton');
-  const mergeButton = document.getElementById('mergeButton');
-  const splitButton = document.getElementById('splitButton');
-  
   if (parseButton) {
     parseButton.addEventListener('click', parseScript);
   }
@@ -48,23 +43,9 @@ export function setupConverterHandlers() {
     addRoleButton.addEventListener('click', addNewRoleField);
   }
   
-  // Set up cleaning step buttons
-  if (autoDetectButton) {
-    autoDetectButton.addEventListener('click', () => autoDetectCharacters());
-  }
-  
-  if (mergeButton) {
-    mergeButton.addEventListener('click', () => mergeSelectedLines());
-  }
-  
-  if (splitButton) {
-    splitButton.addEventListener('click', () => splitAtCursor());
-  }
-  
   // Set up back button handlers
   if (backButton) {
     backButton.addEventListener('click', () => {
-      // Clear any state if needed
       parseResult = null;
       cleanedScriptLines = [];
       currentStep = 1;
@@ -74,7 +55,6 @@ export function setupConverterHandlers() {
   
   if (topBackButton) {
     topBackButton.addEventListener('click', () => {
-      // Ask for confirmation if user has made changes
       if (parseResult || currentStep > 1) {
         if (confirm(translations[currentLang].converter.confirmLeave || 'Leave converter? Your changes will be lost.')) {
           parseResult = null;
@@ -105,13 +85,10 @@ export function setupConverterHandlers() {
     button.addEventListener('click', () => {
       const targetStep = parseInt(button.dataset.target);
       if (targetStep === 2) {
-        // Going from step 1 to 2 - parse script and prepare cleaning UI
         prepareCleaningView();
       } else if (targetStep === 3) {
-        // Going from step 2 to 3 - finalize the cleaned script
         finalizeCleanedScript();
       } else if (targetStep === 4) {
-        // Going from step 3 to 4 (previously step 2 to 3)
         exportScript();
       } else {
         showStep(targetStep);
@@ -127,7 +104,6 @@ export function setupConverterHandlers() {
     });
   });
   
-  // Set up line selection in the script preview
   setupScriptPreviewEvents();
 }
 
@@ -146,7 +122,6 @@ function showStep(stepNumber) {
     currentContainer.style.display = 'block';
   }
   
-  // Update step indicator
   document.querySelectorAll('.step-indicator').forEach((indicator, index) => {
     if (index + 1 === stepNumber) {
       indicator.classList.add('active');
@@ -170,13 +145,8 @@ function parseScript() {
   
   try {
     parseResult = ScriptConverter.parseBasicScript(inputText);
-    
-    // Move to the cleaning step
     showStep(2);
-    
-    // Initialize the script cleaning view
     prepareCleaningView();
-    
   } catch (error) {
     console.error('Error parsing script:', error);
     showToast(t.errorParse || 'Error parsing script', 3000, 'error');
@@ -192,13 +162,8 @@ function prepareCleaningView() {
     return;
   }
   
-  // Store initial processed lines
   cleanedScriptLines = [...parseResult.processedLines];
-  
-  // Set up the interactive editor
   setupInteractiveEditor();
-  
-  // Show detected characters summary
   updateDetectedCharactersList();
 }
 
@@ -211,7 +176,6 @@ function updateDetectedCharactersList() {
   
   detectedCharactersList.innerHTML = '';
   
-  // Count occurrences of each character
   const characters = {};
   
   cleanedScriptLines.forEach(line => {
@@ -226,14 +190,12 @@ function updateDetectedCharactersList() {
     }
   });
   
-  // Create character items in the list
   Object.entries(characters)
-    .sort((a, b) => b[1] - a[1]) // Sort by line count (descending)
+    .sort((a, b) => b[1] - a[1])
     .forEach(([character, count]) => {
       const characterItem = document.createElement('div');
       characterItem.className = 'character-item';
       
-      // Create a distinct color for each character
       const hash = Array.from(character).reduce((acc, char) => char.charCodeAt(0) + acc, 0);
       const hue = hash % 360;
       const color = `hsl(${hue}, 70%, 60%)`;
@@ -246,7 +208,6 @@ function updateDetectedCharactersList() {
       detectedCharactersList.appendChild(characterItem);
     });
   
-  // Add message if no characters detected
   if (Object.keys(characters).length === 0) {
     detectedCharactersList.innerHTML = `
       <div class="character-item" style="font-style: italic; opacity: 0.7;">
@@ -265,7 +226,6 @@ function setupInteractiveEditor() {
   
   if (!scriptPreview) return;
   
-  // Create a split view with editor and preview
   scriptPreview.innerHTML = `
     <div class="editor-preview-container">
       <div class="editor-container">
@@ -282,17 +242,9 @@ function setupInteractiveEditor() {
   `;
   
   const scriptEditor = document.getElementById('scriptEditor');
-  
-  // Populate the editor with the raw script text
   scriptEditor.value = cleanedScriptLines.join('\n');
-  
-  // Add event listener for real-time parsing
   scriptEditor.addEventListener('input', debounceScriptParsing);
-  
-  // Initial render of the preview
   renderParsingPreview();
-  
-  // Setup line selection events
   setupScriptPreviewEvents();
 }
 
@@ -300,21 +252,16 @@ function setupInteractiveEditor() {
  * Set up event listeners for the script preview
  */
 function setupScriptPreviewEvents() {
-  // For the interactive editor version, we need to set up selection events
-  // on the parsing preview instead of the script preview
   const parsingPreview = document.getElementById('parsingPreview');
   
   if (parsingPreview) {
-    // Add event listener to handle line selection within the parsing preview
     parsingPreview.addEventListener('click', (e) => {
       const lineElement = e.target.closest('.script-line');
       if (!lineElement) return;
       
       if (e.ctrlKey || e.metaKey) {
-        // Add to selection with Ctrl/Cmd key
         lineElement.classList.toggle('selected');
       } else {
-        // Clear selection and select just this line
         document.querySelectorAll('.script-line.selected').forEach(el => {
           el.classList.remove('selected');
         });
@@ -334,7 +281,7 @@ function debounceScriptParsing() {
   
   this.parseTimeout = setTimeout(() => {
     updateScriptParsing();
-  }, 300); // 300ms debounce
+  }, 300);
 }
 
 /**
@@ -346,11 +293,8 @@ function updateScriptParsing() {
   
   const rawText = scriptEditor.value;
   
-  // Parse the updated script
   try {
     cleanedScriptLines = ScriptProcessor.preProcessScript(rawText, { aggressiveDetection: true });
-    
-    // Update the preview and character list
     renderParsingPreview();
     updateDetectedCharactersList();
   } catch (error) {
@@ -367,7 +311,6 @@ function renderParsingPreview() {
   
   parsingPreview.innerHTML = '';
   
-  // Track lines by character for coloring
   const characterColors = {};
   let colorIndex = 0;
   const colors = [
@@ -380,36 +323,27 @@ function renderParsingPreview() {
     lineElement.className = 'script-line';
     lineElement.dataset.index = index;
     
-    // Check if this is a character line
     const charMatch = line.match(/^([^:]+):\s*(.+)$/);
     if (charMatch) {
       const character = charMatch[1].trim();
       const dialogue = charMatch[2].trim();
       
-      // Assign color to character if not already assigned
       if (!characterColors[character]) {
         characterColors[character] = colors[colorIndex % colors.length];
         colorIndex++;
       }
       
-      // Create styled elements for character and dialogue
       lineElement.innerHTML = `
         <span class="character-name" style="color: ${characterColors[character]}">${character}:</span>
         <span class="dialogue-text">${dialogue}</span>
       `;
       lineElement.dataset.character = character;
     } else {
-      // This is likely a stage direction or other non-dialogue text
       lineElement.innerHTML = `<span class="stage-direction">${line}</span>`;
     }
     
     parsingPreview.appendChild(lineElement);
   });
-}
-
-// Replace the existing renderScriptPreview function with our new interactive version
-function renderScriptPreview() {
-  setupInteractiveEditor();
 }
 
 /**
@@ -420,24 +354,17 @@ function finalizeCleanedScript() {
   const t = translations[currentLang];
   
   if (scriptEditor) {
-    // Get the final edited script and re-parse it
     try {
       const rawText = scriptEditor.value;
       cleanedScriptLines = ScriptProcessor.preProcessScript(rawText, { aggressiveDetection: true });
-      
-      // Proceed to the next step
       showStep(3);
-      
-      // Pre-populate roles from detected characters
       prepareRolesFromDetectedCharacters();
-      
       showToast(t.cleanSuccess || 'Script cleaned successfully', 2000, 'success');
     } catch (error) {
       console.error('Error finalizing script:', error);
       showToast(t.errorClean || 'Error processing cleaned script', 3000, 'error');
     }
   } else {
-    // Fallback to current cleanedScriptLines if editor not found
     showStep(3);
   }
 }
@@ -446,19 +373,16 @@ function finalizeCleanedScript() {
  * Prepare roles fields based on detected characters
  */
 function prepareRolesFromDetectedCharacters() {
-  // Extract all unique characters
   const characters = new Set();
   cleanedScriptLines.forEach(line => {
     const match = line.match(/^([^:]+):/);
     if (match) characters.add(match[1].trim());
   });
   
-  // Clear existing role fields
   const rolesContainer = document.getElementById('scriptRolesContainer');
   if (!rolesContainer) return;
   rolesContainer.innerHTML = '';
   
-  // Add a role field for each detected character
   characters.forEach(character => {
     addRoleField({
       primaryName: character,
@@ -466,112 +390,6 @@ function prepareRolesFromDetectedCharacters() {
       description: ''
     });
   });
-}
-
-/**
- * Auto-detect characters in the script more aggressively
- */
-function autoDetectCharacters() {
-  const t = translations[currentLang];
-  
-  try {
-    // Re-process the script with more aggressive character detection
-    const inputText = cleanedScriptLines.join('\n');
-    const processedLines = ScriptProcessor.preProcessScript(inputText, { aggressiveDetection: true });
-    
-    // Confirm with user before replacing
-    if (confirm(t.confirmAutoDetect || 'Replace current script with auto-detected character lines?')) {
-      cleanedScriptLines = processedLines;
-      renderScriptPreview();
-      updateDetectedCharactersList();
-      showToast(t.autoDetectSuccess || 'Character detection improved', 2000, 'success');
-    }
-  } catch (error) {
-    console.error('Error in auto-detection:', error);
-    showToast(t.errorAutoDetect || 'Error in character detection', 3000, 'error');
-  }
-}
-
-/**
- * Merge selected lines into a single character dialogue
- */
-function mergeSelectedLines() {
-  const t = translations[currentLang];
-  const selectedLines = document.querySelectorAll('.script-line.selected');
-  
-  if (selectedLines.length < 2) {
-    showToast(t.errorMergeSelection || 'Select at least two lines to merge', 3000, 'error');
-    return;
-  }
-  
-  // Get the indices of selected lines
-  const indices = Array.from(selectedLines).map(line => parseInt(line.dataset.index)).sort((a, b) => a - b);
-  
-  // Determine which character to use (default to first line's character)
-  let targetCharacter = null;
-  const firstLine = cleanedScriptLines[indices[0]];
-  const charMatch = firstLine.match(/^([^:]+):/);
-  if (charMatch) {
-    targetCharacter = charMatch[1].trim();
-  } else {
-    // If first line doesn't have a character, prompt to select one
-    const characterOptions = new Set();
-    indices.forEach(idx => {
-      const match = cleanedScriptLines[idx].match(/^([^:]+):/);
-      if (match) characterOptions.add(match[1].trim());
-    });
-    
-    if (characterOptions.size > 0) {
-      // Use the first available character
-      targetCharacter = Array.from(characterOptions)[0];
-    } else {
-      // No characters found, ask user to input one
-      targetCharacter = prompt(t.enterCharacterName || 'Enter character name for merged lines:');
-      if (!targetCharacter) return; // User cancelled
-    }
-  }
-  
-  // Gather dialogue parts from all selected lines
-  let mergedDialogue = '';
-  indices.forEach(idx => {
-    const line = cleanedScriptLines[idx];
-    const dialogueMatch = line.match(/^([^:]+):\s*(.+)$/);
-    
-    if (dialogueMatch) {
-      // Line already has character:dialogue format
-      mergedDialogue += ' ' + dialogueMatch[2].trim();
-    } else {
-      // Add whole line as dialogue
-      mergedDialogue += ' ' + line.trim();
-    }
-  });
-  
-  mergedDialogue = mergedDialogue.trim();
-  
-  // Create new merged line
-  const mergedLine = `${targetCharacter}: ${mergedDialogue}`;
-  
-  // Replace the first occurrence with the merged line and remove the rest
-  cleanedScriptLines[indices[0]] = mergedLine;
-  
-  // Remove the other lines (in reverse order to avoid index shifting)
-  for (let i = indices.length - 1; i > 0; i--) {
-    cleanedScriptLines.splice(indices[i], 1);
-  }
-  
-  // Update the view
-  renderScriptPreview();
-  updateDetectedCharactersList();
-  
-  showToast(t.mergeSuccess || 'Lines merged successfully', 2000, 'success');
-}
-
-/**
- * Split a line at the cursor position into two lines
- */
-function splitAtCursor() {
-  const t = translations[currentLang];
-  alert(t.splitFeatureNotAvailable || 'Line splitting functionality will be implemented in a future update. For now, please edit your script manually before pasting.');
 }
 
 /**
@@ -607,17 +425,13 @@ function addRoleField(roleData = {}) {
   
   rolesContainer.insertAdjacentHTML('beforeend', roleHtml);
   
-  // Add event listener to the remove button
   const removeButton = rolesContainer.querySelector(`#${roleId} .remove-role`);
   if (removeButton) {
     removeButton.addEventListener('click', () => {
       const roleElement = document.getElementById(roleId);
-      // Add fade-out animation before removing
       roleElement.classList.add('fade-out');
-      // Remove after animation completes
       setTimeout(() => {
         roleElement.remove();
-        // If no roles left, add an empty one
         if (rolesContainer.querySelectorAll('.role-field').length === 0) {
           addRoleField();
         }
@@ -625,7 +439,6 @@ function addRoleField(roleData = {}) {
     });
   }
   
-  // Auto-focus the name field if it's empty
   const nameField = rolesContainer.querySelector(`#${roleId} .role-name`);
   if (nameField && !nameField.value) {
     nameField.focus();
@@ -638,7 +451,6 @@ function addRoleField(roleData = {}) {
 function addNewRoleField() {
   addRoleField();
   
-  // Scroll to the bottom of the roles container with animation
   const rolesContainer = document.getElementById('rolesContainer');
   const lastRole = rolesContainer.lastElementChild;
   
@@ -654,7 +466,6 @@ function exportScript() {
   const t = translations[currentLang];
   
   try {
-    // Get metadata
     const metadata = {
       title: document.getElementById('scriptTitle').value,
       author: document.getElementById('scriptAuthor').value,
@@ -662,7 +473,6 @@ function exportScript() {
       description: document.getElementById('scriptDescription').value
     };
     
-    // Validate title is provided
     if (!metadata.title.trim()) {
       document.getElementById('scriptTitle').classList.add('field-error');
       showToast(t.errorNoTitle || 'Please enter a script title', 3000, 'error');
@@ -670,7 +480,6 @@ function exportScript() {
       return;
     }
     
-    // Get roles
     const roles = [];
     let hasValidRoles = false;
     
@@ -687,7 +496,6 @@ function exportScript() {
           description: field.querySelector('.role-description').value.trim()
         });
       } else if (nameInput) {
-        // Highlight empty required fields
         nameInput.classList.add('field-error');
         setTimeout(() => nameInput.classList.remove('field-error'), 2000);
       }
@@ -698,19 +506,11 @@ function exportScript() {
       return;
     }
     
-    // Get original input text
     const inputText = document.getElementById('converterInput').value;
-    
-    // Generate structured format
     const structuredScript = ScriptConverter.generateStructuredScript(inputText, metadata, roles);
     
-    // Update output area
     document.getElementById('converterOutput').value = structuredScript;
-    
-    // Show success message
     showToast(t.successExport, 2000, 'success');
-    
-    // Move to final step
     showStep(3);
     
   } catch (error) {
@@ -752,11 +552,9 @@ function downloadScript() {
     return;
   }
   
-  // Get title from metadata or use a default
   const title = document.getElementById('scriptTitle').value.trim() || 'script';
   const safeTitle = title.replace(/[^a-z0-9]/gi, '-').toLowerCase();
   
-  // Create download link
   const blob = new Blob([outputText], {type: 'text/plain'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -768,11 +566,102 @@ function downloadScript() {
   document.body.appendChild(a);
   a.click();
   
-  // Clean up
   setTimeout(() => {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }, 100);
   
   showToast(t.successDownload || 'Script downloaded!', 2000, 'success');
+}
+
+/**
+ * Auto-detect characters in the script more aggressively
+ */
+function autoDetectCharacters() {
+  const t = translations[currentLang];
+  
+  try {
+    const inputText = cleanedScriptLines.join('\n');
+    const processedLines = ScriptProcessor.preProcessScript(inputText, { aggressiveDetection: true });
+    
+    if (confirm(t.confirmAutoDetect || 'Replace current script with auto-detected character lines?')) {
+      cleanedScriptLines = processedLines;
+      renderScriptPreview();
+      updateDetectedCharactersList();
+      showToast(t.autoDetectSuccess || 'Character detection improved', 2000, 'success');
+    }
+  } catch (error) {
+    console.error('Error in auto-detection:', error);
+    showToast(t.errorAutoDetect || 'Error in character detection', 3000, 'error');
+  }
+}
+
+/**
+ * Merge selected lines into a single character dialogue
+ */
+function mergeSelectedLines() {
+  const t = translations[currentLang];
+  const selectedLines = document.querySelectorAll('.script-line.selected');
+  
+  if (selectedLines.length < 2) {
+    showToast(t.errorMergeSelection || 'Select at least two lines to merge', 3000, 'error');
+    return;
+  }
+  
+  const indices = Array.from(selectedLines).map(line => parseInt(line.dataset.index)).sort((a, b) => a - b);
+  
+  let targetCharacter = null;
+  const firstLine = cleanedScriptLines[indices[0]];
+  const charMatch = firstLine.match(/^([^:]+):/);
+  if (charMatch) {
+    targetCharacter = charMatch[1].trim();
+  } else {
+    const characterOptions = new Set();
+    indices.forEach(idx => {
+      const match = cleanedScriptLines[idx].match(/^([^:]+):/);
+      if (match) characterOptions.add(match[1].trim());
+    });
+    
+    if (characterOptions.size > 0) {
+      targetCharacter = Array.from(characterOptions)[0];
+    } else {
+      targetCharacter = prompt(t.enterCharacterName || 'Enter character name for merged lines:');
+      if (!targetCharacter) return;
+    }
+  }
+  
+  let mergedDialogue = '';
+  indices.forEach(idx => {
+    const line = cleanedScriptLines[idx];
+    const dialogueMatch = line.match(/^([^:]+):\s*(.+)$/);
+    
+    if (dialogueMatch) {
+      mergedDialogue += ' ' + dialogueMatch[2].trim();
+    } else {
+      mergedDialogue += ' ' + line.trim();
+    }
+  });
+  
+  mergedDialogue = mergedDialogue.trim();
+  
+  const mergedLine = `${targetCharacter}: ${mergedDialogue}`;
+  
+  cleanedScriptLines[indices[0]] = mergedLine;
+  
+  for (let i = indices.length - 1; i > 0; i--) {
+    cleanedScriptLines.splice(indices[i], 1);
+  }
+  
+  renderScriptPreview();
+  updateDetectedCharactersList();
+  
+  showToast(t.mergeSuccess || 'Lines merged successfully', 2000, 'success');
+}
+
+/**
+ * Split a line at the cursor position into two lines
+ */
+function splitAtCursor() {
+  const t = translations[currentLang];
+  alert(t.splitFeatureNotAvailable || 'Line splitting functionality will be implemented in a future update. For now, please edit your script manually before pasting.');
 }

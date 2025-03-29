@@ -248,18 +248,6 @@ export function renderConverterView() {
           <h2>${t.cleanTitle || 'Clean & Prepare Script'}</h2>
           <p class="help-text">${t.cleanHelp || 'Review how your script is being parsed. Character dialogues are highlighted.'}</p>
           
-          <div class="clean-options">
-            <button id="autoDetectButton" class="secondary-button">
-              ${t.autoDetectButton || 'Auto-Detect Characters'}
-            </button>
-            <button id="mergeButton" class="secondary-button">
-              ${t.mergeButton || 'Merge Selected Lines'}
-            </button>
-            <button id="splitButton" class="secondary-button">
-              ${t.splitButton || 'Split at Cursor'}
-            </button>
-          </div>
-          
           <div id="scriptPreview" class="script-preview"></div>
           
           <div class="detection-summary">
