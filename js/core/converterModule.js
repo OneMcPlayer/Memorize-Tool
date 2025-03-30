@@ -1,7 +1,7 @@
-import { translations } from '/Memorize-Tool/js/translations.js';
-import { showToast } from '/Memorize-Tool/js/utils.js';
-import { ScriptConverter } from '/Memorize-Tool/js/services/ScriptConverter.js';
-import { ScriptProcessor } from '/Memorize-Tool/js/services/ScriptProcessor.js';
+import { translations } from '../translations.js';
+import { showToast } from '../utils.js';
+import { ScriptConverter } from '../services/ScriptConverter.js';
+import { ScriptProcessor } from '../services/ScriptProcessor.js';
 import { currentLang } from './settings.js';
 import { renderInputView, leaveConverterView } from './views.js';
 import { createValidId } from './utils.js';
@@ -202,11 +202,19 @@ function setupInteractiveEditor(initialText = '') {
   scriptPreview.innerHTML = `
     <div class="editor-tools">
       <div class="editor-tools-left">
-        <button type="button" class="tool-button" title="${t.toolBold || 'Bold'}" data-action="bold"><i class="fas fa-bold"></i></button>
-        <button type="button" class="tool-button" title="${t.toolItalic || 'Italic'}" data-action="italic"><i class="fas fa-italic"></i></button>
-        <button type="button" class="tool-button" title="${t.toolUppercase || 'UPPERCASE'}" data-action="uppercase"><i class="fas fa-font"></i></button>
+        <button type="button" class="tool-button" title="${t.toolBold || 'Bold'}" data-action="bold">
+          <i class="fas fa-bold"></i> <span class="tool-text">${t.toolBold || 'Bold'}</span>
+        </button>
+        <button type="button" class="tool-button" title="${t.toolItalic || 'Italic'}" data-action="italic">
+          <i class="fas fa-italic"></i> <span class="tool-text">${t.toolItalic || 'Italic'}</span>
+        </button>
+        <button type="button" class="tool-button" title="${t.toolUppercase || 'UPPERCASE'}" data-action="uppercase">
+          <i class="fas fa-font"></i> <span class="tool-text">${t.toolUppercase || 'UPPERCASE'}</span>
+        </button>
         <span class="editor-divider"></span>
-        <button type="button" class="tool-button" title="${t.toolAddCharacter || 'Add Character Name'}" data-action="add-character"><i class="fas fa-user-plus"></i></button>
+        <button type="button" class="tool-button" title="${t.toolAddCharacter || 'Add Character Name'}" data-action="add-character">
+          <i class="fas fa-user-plus"></i> <span class="tool-text">${t.toolAddCharacter || 'Add Character'}</span>
+        </button>
       </div>
       <div class="editor-tools-right">
         <div class="script-stats">

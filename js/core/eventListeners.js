@@ -1,7 +1,7 @@
-import { handleSwipeGesture, showToast } from '/Memorize-Tool/js/utils.js';
+import { handleSwipeGesture, showToast } from '../utils.js';
 import { setLanguage, toggleDarkMode, setAdvancedMode, currentLang } from './settings.js';
 import { renderInputView, renderConverterView } from './views.js';
-import { translations } from '/Memorize-Tool/js/translations.js';
+import { translations } from '../translations.js';
 
 let touchStartX = 0;
 

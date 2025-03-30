@@ -1,4 +1,4 @@
-import { translations } from '/Memorize-Tool/js/translations.js';
+import { translations } from '../translations.js';
 import { currentLang, isAdvancedMode } from './settings.js';
 import { setupInputHandlers } from './handlers.js';
 import { 
@@ -8,7 +8,7 @@ import {
   nextLine 
 } from './state.js';
 import { getPlainText } from './utils.js';
-import { showToast } from '/Memorize-Tool/js/utils.js';
+import { showToast } from '../utils.js';
 import { setupConverterHandlers } from './converterModule.js';
 
 // Get the app container element
