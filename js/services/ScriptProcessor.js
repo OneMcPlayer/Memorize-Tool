@@ -21,6 +21,9 @@ export class ScriptProcessor {
     
     // Additional patterns for aggressive detection mode
     const aggressiveCharacterPattern = /^([A-Z][A-Za-z0-9_\s''\-\.]+)(?:\s*)(?:\(.*\))?$/;
+    
+    // Enhanced pattern for italian script conventions
+    const italianNamePattern = /^(?:(?:Sig\.(?:ra|na)?|Dott\.(?:ssa)?|Prof\.(?:ssa)?)\s+)?([A-Z][A-Za-z0-9_\s''\-\.]+)(?:\s*:?\s*)(.*)/;
 
     for (let i = 0; i < lines.length; i++) {
       let line = lines[i].trim();
@@ -34,9 +37,9 @@ export class ScriptProcessor {
       }
 
       // Handle stage directions (both single and multiline)
-      if (line.startsWith('(') && !isMultilineStageDirection) {
+      if ((line.startsWith('(') || line.startsWith('[')) && !isMultilineStageDirection) {
         isStageDirection = true;
-        isMultilineStageDirection = !line.includes(')');
+        isMultilineStageDirection = !(line.endsWith(')') || line.endsWith(']'));
       }
 
       if (isStageDirection) {
@@ -44,9 +47,13 @@ export class ScriptProcessor {
           processedLines.push(currentLine);
           currentLine = '';
         }
+        // Convert all stage direction formats to standard parentheses
+        if (line.startsWith('[') && line.endsWith(']')) {
+          line = '(' + line.substring(1, line.length - 1) + ')';
+        }
         processedLines.push(line);
         
-        if (line.endsWith(')')) {
+        if (line.endsWith(')') || line.endsWith(']')) {
           isStageDirection = false;
         }
         continue;
@@ -67,12 +74,13 @@ export class ScriptProcessor {
       // This pattern looks for uppercase character names followed by a colon or continuing dialog
       else {
         const characterMatch = line.match(/^([A-Z][A-Za-z0-9_\s''\-\.]+)(?:\s*:?\s*)(.*)/);
+        const italianMatch = line.match(italianNamePattern);
         
         // For aggressive mode, check for standalone uppercase names without colon
         const aggressiveMatch = aggressiveDetection && !characterMatch ? 
           line.match(aggressiveCharacterPattern) : null;
         
-        if ((characterMatch || aggressiveMatch) && !isStageDirection) {
+        if ((characterMatch || aggressiveMatch || italianMatch) && !isStageDirection) {
           if (currentLine) {
             processedLines.push(currentLine);
           }
@@ -92,11 +100,23 @@ export class ScriptProcessor {
                 const nextLine = lines[i + 1].trim();
                 // If next line doesn't match a character pattern, treat it as dialogue for this character
                 if (nextLine && !nextLine.match(/^[A-Z][A-Za-z0-9_\s''\-\.]+(?:\s*:)/) 
-                    && !nextLine.startsWith('(') && !nextLine.startsWith('"')) {
+                    && !nextLine.startsWith('(') && !nextLine.startsWith('"') 
+                    && !nextLine.startsWith('[')) {
                   currentLine = `${lastCharacterName}: ${nextLine}`;
                   i++; // Skip the next line since we've used it
+                } else if (!nextLine || nextLine.length === 0) {
+                  // If the next line is empty, just make this a character name with empty dialogue
+                  currentLine = `${lastCharacterName}: `;
                 }
               }
+            }
+          } else if (italianMatch) {
+            lastCharacterName = italianMatch[1].trim();
+            // For lines with Italian-style character names
+            if (italianMatch[2].trim() || line.includes(':')) {
+              currentLine = `${lastCharacterName}: ${italianMatch[2].trim()}`;
+            } else {
+              currentLine = `${lastCharacterName}: `;
             }
           } else if (aggressiveMatch) {
             // Treat standalone uppercase line as a character name
@@ -107,7 +127,8 @@ export class ScriptProcessor {
               const nextLine = lines[i + 1].trim();
               // If next line doesn't look like a character name, treat it as dialogue
               if (nextLine && !nextLine.match(/^[A-Z][A-Za-z0-9_\s''\-\.]+(?:\s*:)/) 
-                  && !nextLine.startsWith('(') && !nextLine.startsWith('"')) {
+                  && !nextLine.startsWith('(') && !nextLine.startsWith('"')
+                  && !nextLine.startsWith('[')) {
                 currentLine = `${lastCharacterName}: ${nextLine}`;
                 i++; // Skip the next line since we've used it
               } else {
@@ -125,7 +146,9 @@ export class ScriptProcessor {
             const shouldAddSpace = 
               !currentLine.endsWith('-') && 
               !currentLine.endsWith('(') && 
+              !currentLine.endsWith('[') && 
               !line.startsWith(')') &&
+              !line.startsWith(']') &&
               !currentLine.endsWith(' ');
               
             const connector = shouldAddSpace ? ' ' : '';
@@ -153,12 +176,12 @@ export class ScriptProcessor {
       }
 
       // Check if multiline stage direction is ending
-      if (isMultilineStageDirection && line.includes(')')) {
+      if (isMultilineStageDirection && (line.includes(')') || line.includes(']'))) {
         isMultilineStageDirection = false;
       }
       
       // Check if stage direction is ending
-      if (line.endsWith(')') && !isMultilineStageDirection) {
+      if ((line.endsWith(')') || line.endsWith(']')) && !isMultilineStageDirection) {
         isStageDirection = false;
       }
     }

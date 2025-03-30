@@ -204,6 +204,7 @@ function isMobileDevice() {
  * Render the converter view
  */
 export function renderConverterView() {
+  // Get translations from the converter object, with fallbacks for missing keys
   const t = translations[currentLang].converter || {};
   
   // If mobile device, show notice and return to main view
@@ -237,7 +238,7 @@ export function renderConverterView() {
         <div class="converter-input">
           <textarea id="converterInput" rows="12" placeholder="${t.inputPlaceholder || 'Paste your script here...'}"></textarea>
           <div class="button-group center">
-            <button id="parseButton" class="next-step-btn" data-target="2">${t.parseButton || 'Parse Script'}</button>
+            <button id="parseButton">${t.parseButton || 'Parse Script'}</button>
           </div>
         </div>
       </div>

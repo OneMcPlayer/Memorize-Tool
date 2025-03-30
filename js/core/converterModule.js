@@ -158,15 +158,21 @@ function parseScript() {
 function prepareCleaningView(originalText = '') {
   if (!parseResult || !parseResult.processedLines) {
     showToast(translations[currentLang].errorParse || 'Invalid script data', 3000, 'error');
+    console.error('Error: parseResult is null or missing processedLines');
     return;
   }
-  
-  // Store the processed lines for the preview pane
-  cleanedScriptLines = [...parseResult.processedLines];
-  
-  // Use the original text for the editor if provided
-  setupInteractiveEditor(originalText || cleanedScriptLines.join('\n'));
-  updateDetectedCharactersList();
+
+  try {
+    // Store the processed lines for the preview pane
+    cleanedScriptLines = [...parseResult.processedLines];
+
+    // Use the original text for the editor if provided
+    setupInteractiveEditor(originalText || cleanedScriptLines.join('\n'));
+    updateDetectedCharactersList();
+  } catch (error) {
+    console.error('Error in prepareCleaningView:', error);
+    showToast(translations[currentLang].errorPrepareView || 'Error preparing cleaning view', 3000, 'error');
+  }
 }
 
 /**
@@ -393,8 +399,14 @@ function updateScriptParsing() {
     renderParsingPreview();
     updateDetectedCharactersList();
     updateScriptStats();
+    
+    // Enable auto save capability
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('script_converter_backup', rawText);
+    }
   } catch (error) {
     console.error('Error parsing script:', error);
+    showToast(translations[currentLang].errorParse || 'Error parsing script', 3000, 'error');
   }
 }
 
@@ -551,6 +563,23 @@ function renderParsingPreview() {
     lineElement.className = 'script-line';
     lineElement.dataset.index = index;
     
+    // Add click event for line selection
+    lineElement.addEventListener('click', (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        // Toggle selection for this line
+        lineElement.classList.toggle('selected');
+      } else {
+        // Single click to focus in editor
+        focusEditorOnLine(document.getElementById('scriptEditor'), index);
+        
+        // Highlight this line
+        document.querySelectorAll('.script-line.highlighted').forEach(el => {
+          el.classList.remove('highlighted');
+        });
+        lineElement.classList.add('highlighted');
+      }
+    });
+    
     // If we're in a scene, add to scene container
     const container = sceneContainer || parsingPreview;
     
@@ -571,7 +600,7 @@ function renderParsingPreview() {
         <span class="character-name" style="color: ${characterColors[character]}">${character}:</span>
         <span class="dialogue-text">${dialogue}</span>
         <div class="line-actions">
-          <button class="line-action-button" title="${translations[currentLang].editLine || 'Edit this line'}">
+          <button class="line-action-button edit-button" title="${translations[currentLang].editLine || 'Edit this line'}">
             <i class="fas fa-pencil-alt"></i>
           </button>
         </div>
@@ -582,7 +611,7 @@ function renderParsingPreview() {
       lineElement.innerHTML = `
         <span class="stage-direction">${line}</span>
         <div class="line-actions">
-          <button class="line-action-button" title="${translations[currentLang].editDirection || 'Edit direction'}">
+          <button class="line-action-button edit-button" title="${translations[currentLang].editDirection || 'Edit direction'}">
             <i class="fas fa-pencil-alt"></i>
           </button>
         </div>
@@ -592,7 +621,7 @@ function renderParsingPreview() {
       lineElement.innerHTML = `
         <span class="plain-text">${line}</span>
         <div class="line-actions">
-          <button class="line-action-button" title="${translations[currentLang].editLine || 'Edit this line'}">
+          <button class="line-action-button edit-button" title="${translations[currentLang].editLine || 'Edit this line'}">
             <i class="fas fa-pencil-alt"></i>
           </button>
         </div>
@@ -603,7 +632,7 @@ function renderParsingPreview() {
   });
   
   // Add event listeners for line action buttons
-  document.querySelectorAll('.line-action-button').forEach(button => {
+  document.querySelectorAll('.line-action-button.edit-button').forEach(button => {
     button.addEventListener('click', (e) => {
       e.stopPropagation();  // Prevent triggering the parent click event
       const lineElement = button.closest('.script-line');
@@ -613,256 +642,158 @@ function renderParsingPreview() {
       }
     });
   });
-}
-
-/**
- * Finalize the cleaned script before moving to metadata editing
- */
-function finalizeCleanedScript() {
-  const scriptEditor = document.getElementById('scriptEditor');
-  const t = translations[currentLang];
   
-  if (scriptEditor) {
-    try {
-      const rawText = scriptEditor.value;
-      // Process the raw editor text for the final step
-      cleanedScriptLines = ScriptProcessor.preProcessScript(rawText, { aggressiveDetection: true });
-      showStep(3);
-      prepareRolesFromDetectedCharacters();
-      showToast(t.cleanSuccess || 'Script cleaned successfully', 2000, 'success');
-    } catch (error) {
-      console.error('Error finalizing script:', error);
-      showToast(t.errorClean || 'Error processing cleaned script', 3000, 'error');
+  // Add merge button if any lines are selected
+  const addMergeButton = () => {
+    const selectedLines = document.querySelectorAll('.script-line.selected');
+    const mergeButtonContainer = document.getElementById('merge-button-container');
+    
+    if (mergeButtonContainer) {
+      if (selectedLines.length >= 2) {
+        mergeButtonContainer.innerHTML = `
+          <button id="merge-lines-button" class="action-button">
+            <i class="fas fa-object-group"></i> ${translations[currentLang].mergeButton || 'Merge Selected Lines'}
+          </button>
+        `;
+        
+        document.getElementById('merge-lines-button').addEventListener('click', mergeSelectedLines);
+        mergeButtonContainer.style.display = 'block';
+      } else {
+        mergeButtonContainer.style.display = 'none';
+      }
     }
-  } else {
-    showStep(3);
-  }
-}
-
-/**
- * Prepare roles fields based on detected characters
- */
-function prepareRolesFromDetectedCharacters() {
-  const characters = new Set();
-  cleanedScriptLines.forEach(line => {
-    const match = line.match(/^([^:]+):/);
-    if (match) characters.add(match[1].trim());
-  });
+  };
   
-  const rolesContainer = document.getElementById('scriptRolesContainer');
-  if (!rolesContainer) return;
-  rolesContainer.innerHTML = '';
-  
-  characters.forEach(character => {
-    addRoleField({
-      primaryName: character,
-      aliases: [character],
-      description: ''
-    });
-  });
-}
-
-/**
- * Add a new role field to the converter form
- * @param {Object} roleData - Optional role data to populate the field
- */
-function addRoleField(roleData = {}) {
-  const t = translations[currentLang];
-  const rolesContainer = document.getElementById('rolesContainer');
-  const roleId = createValidId(`role-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`);
-  
-  const roleHtml = `
-    <div class="role-field" id="${roleId}">
-      <div class="role-header">
-        <input type="text" class="role-name" value="${roleData.primaryName || ''}" 
-               placeholder="${t.roleName || 'Character Name'}" required>
-        <button type="button" class="remove-role" title="${t.removeRole || 'Remove'}" aria-label="${t.removeRole || 'Remove'}">×</button>
-      </div>
-      <div class="role-details">
-        <div class="form-group">
-          <label>${t.roleAliases || 'Aliases'}</label>
-          <input type="text" class="role-aliases" value="${(roleData.aliases || []).join(', ')}" 
-                 placeholder="${t.roleAliasesPlaceholder || 'E.g. JOHN, Johnny (comma-separated)'}">
-        </div>
-        <div class="form-group">
-          <label>${t.roleDescription || 'Description'}</label>
-          <input type="text" class="role-description" value="${roleData.description || ''}" 
-                 placeholder="${t.roleDescriptionPlaceholder || 'Brief character description'}">
-        </div>
-      </div>
-    </div>
-  `;
-  
-  rolesContainer.insertAdjacentHTML('beforeend', roleHtml);
-  
-  const removeButton = rolesContainer.querySelector(`#${roleId} .remove-role`);
-  if (removeButton) {
-    removeButton.addEventListener('click', () => {
-      const roleElement = document.getElementById(roleId);
-      roleElement.classList.add('fade-out');
-      setTimeout(() => {
-        roleElement.remove();
-        if (rolesContainer.querySelectorAll('.role-field').length === 0) {
-          addRoleField();
-        }
-      }, 300);
-    });
+  // Create container for merge button if it doesn't exist
+  if (!document.getElementById('merge-button-container')) {
+    const container = document.createElement('div');
+    container.id = 'merge-button-container';
+    container.className = 'merge-button-container';
+    container.style.display = 'none';
+    parsingPreview.parentElement.appendChild(container);
   }
   
-  const nameField = rolesContainer.querySelector(`#${roleId} .role-name`);
-  if (nameField && !nameField.value) {
-    nameField.focus();
-  }
-}
-
-/**
- * Add a new empty role field
- */
-function addNewRoleField() {
-  addRoleField();
-  
-  const rolesContainer = document.getElementById('rolesContainer');
-  const lastRole = rolesContainer.lastElementChild;
-  
-  if (lastRole) {
-    lastRole.scrollIntoView({ behavior: 'smooth', block: 'end' });
-  }
-}
-
-/**
- * Export the structured script
- */
-function exportScript() {
-  const t = translations[currentLang];
-  
-  try {
-    const metadata = {
-      title: document.getElementById('scriptTitle').value,
-      author: document.getElementById('scriptAuthor').value,
-      date: document.getElementById('scriptDate').value,
-      description: document.getElementById('scriptDescription').value
-    };
-    
-    if (!metadata.title.trim()) {
-      document.getElementById('scriptTitle').classList.add('field-error');
-      showToast(t.errorNoTitle || 'Please enter a script title', 3000, 'error');
-      setTimeout(() => document.getElementById('scriptTitle').classList.remove('field-error'), 2000);
-      return;
-    }
-    
-    const roles = [];
-    let hasValidRoles = false;
-    
-    document.querySelectorAll('.role-field').forEach(field => {
-      const nameInput = field.querySelector('.role-name');
-      if (nameInput && nameInput.value.trim()) {
-        hasValidRoles = true;
-        roles.push({
-          primaryName: nameInput.value.trim(),
-          aliases: field.querySelector('.role-aliases').value
-            .split(',')
-            .map(s => s.trim())
-            .filter(Boolean),
-          description: field.querySelector('.role-description').value.trim()
-        });
-      } else if (nameInput) {
-        nameInput.classList.add('field-error');
-        setTimeout(() => nameInput.classList.remove('field-error'), 2000);
+  // Add observer to check for line selection changes
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach(mutation => {
+      if (mutation.attributeName === 'class' && 
+          mutation.target.classList.contains('script-line')) {
+        addMergeButton();
       }
     });
-    
-    if (!hasValidRoles) {
-      showToast(t.errorNoRoles || 'Please add at least one character with a name', 3000, 'error');
-      return;
-    }
-    
-    const inputText = document.getElementById('converterInput').value;
-    const structuredScript = ScriptConverter.generateStructuredScript(inputText, metadata, roles);
-    
-    document.getElementById('converterOutput').value = structuredScript;
-    showToast(t.successExport, 2000, 'success');
-    showStep(3);
-    
-  } catch (error) {
-    console.error('Error exporting script:', error);
-    showToast(t.errorExport || 'Error exporting script', 3000, 'error');
-  }
+  });
+  
+  document.querySelectorAll('.script-line').forEach(line => {
+    observer.observe(line, { attributes: true });
+  });
 }
 
 /**
- * Copy the script to clipboard
+ * Focus the editor on a specific line
+ * @param {HTMLElement} editor - The editor element
+ * @param {number} lineIndex - The index of the line in cleanedScriptLines
  */
-async function copyScriptToClipboard() {
-  const t = translations[currentLang];
-  const outputText = document.getElementById('converterOutput').value;
-  
-  if (!outputText.trim()) {
-    showToast(t.errorNoOutput || 'No output to copy', 3000, 'error');
+function focusEditorOnLine(editor, lineIndex) {
+  if (!editor || lineIndex === undefined || lineIndex < 0 || lineIndex >= cleanedScriptLines.length) {
     return;
   }
-  
-  try {
-    await navigator.clipboard.writeText(outputText);
-    showToast(t.successCopy || 'Copied to clipboard!', 2000, 'success');
-  } catch (error) {
-    console.error('Failed to copy to clipboard:', error);
-    showToast(t.errorCopy || 'Failed to copy to clipboard', 3000, 'error');
-  }
-}
 
-/**
- * Download the structured script as a file
- */
-function downloadScript() {
-  const t = translations[currentLang];
-  const outputText = document.getElementById('converterOutput').value;
+  const lineToFind = cleanedScriptLines[lineIndex];
+  const editorText = editor.value;
   
-  if (!outputText.trim()) {
-    showToast(t.errorNoOutput || 'No output to download', 3000, 'error');
-    return;
-  }
+  // Try to find the exact line in the editor
+  const lines = editorText.split('\n');
+  let lineStart = 0;
+  let exactMatch = -1;
   
-  const title = document.getElementById('scriptTitle').value.trim() || 'script';
-  const safeTitle = title.replace(/[^a-z0-9]/gi, '-').toLowerCase();
-  
-  const blob = new Blob([outputText], {type: 'text/plain'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  
-  a.href = url;
-  a.download = `${safeTitle}.script`;
-  a.style.display = 'none';
-  
-  document.body.appendChild(a);
-  a.click();
-  
-  setTimeout(() => {
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }, 100);
-  
-  showToast(t.successDownload || 'Script downloaded!', 2000, 'success');
-}
-
-/**
- * Auto-detect characters in the script more aggressively
- */
-function autoDetectCharacters() {
-  const t = translations[currentLang];
-  
-  try {
-    const inputText = cleanedScriptLines.join('\n');
-    const processedLines = ScriptProcessor.preProcessScript(inputText, { aggressiveDetection: true });
-    
-    if (confirm(t.confirmAutoDetect || 'Replace current script with auto-detected character lines?')) {
-      cleanedScriptLines = processedLines;
-      renderScriptPreview();
-      updateDetectedCharactersList();
-      showToast(t.autoDetectSuccess || 'Character detection improved', 2000, 'success');
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].trim() === lineToFind.trim()) {
+      exactMatch = i;
+      break;
     }
-  } catch (error) {
-    console.error('Error in auto-detection:', error);
-    showToast(t.errorAutoDetect || 'Error in character detection', 3000, 'error');
+    lineStart += lines[i].length + 1; // +1 for the newline character
+  }
+  
+  if (exactMatch !== -1) {
+    // Calculate start and end positions of the line
+    lineStart = 0;
+    for (let i = 0; i < exactMatch; i++) {
+      lineStart += lines[i].length + 1;
+    }
+    const lineEnd = lineStart + lines[exactMatch].length;
+    
+    // Set selection and scroll to it
+    editor.focus();
+    editor.setSelectionRange(lineStart, lineEnd);
+    
+    // Scroll to make the selection visible
+    const lineHeight = 16; // Approximate line height
+    const linesVisible = Math.floor(editor.clientHeight / lineHeight);
+    const scrollTop = lineHeight * Math.max(0, exactMatch - Math.floor(linesVisible / 2));
+    editor.scrollTop = scrollTop;
+    
+    // Flash the line briefly to highlight it
+    const originalValue = editor.value;
+    const originalSelStart = editor.selectionStart;
+    const originalSelEnd = editor.selectionEnd;
+    
+    // Add a temporary class to highlight the line
+    editor.classList.add('line-highlight');
+    
+    // Remove the highlight after a short delay
+    setTimeout(() => {
+      editor.classList.remove('line-highlight');
+    }, 1000);
+  } else {
+    // If exact match not found, try a fuzzy match approach
+    // Create a simplified version of the line for matching (remove extra spaces)
+    const simplifiedLine = lineToFind.trim().replace(/\s+/g, ' ');
+    const lineWords = simplifiedLine.split(' ');
+    
+    // Look for a line that contains most of the words
+    let bestMatch = -1;
+    let bestScore = 0;
+    
+    for (let i = 0; i < lines.length; i++) {
+      const simplifiedEditorLine = lines[i].trim().replace(/\s+/g, ' ');
+      let score = 0;
+      
+      lineWords.forEach(word => {
+        if (simplifiedEditorLine.includes(word)) {
+          score++;
+        }
+      });
+      
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = i;
+      }
+    }
+    
+    if (bestMatch !== -1 && bestScore > Math.min(2, lineWords.length / 2)) {
+      // Calculate position
+      lineStart = 0;
+      for (let i = 0; i < bestMatch; i++) {
+        lineStart += lines[i].length + 1;
+      }
+      const lineEnd = lineStart + lines[bestMatch].length;
+      
+      // Set selection
+      editor.focus();
+      editor.setSelectionRange(lineStart, lineEnd);
+      
+      // Scroll to selection
+      const lineHeight = 16;
+      const linesVisible = Math.floor(editor.clientHeight / lineHeight);
+      const scrollTop = lineHeight * Math.max(0, bestMatch - Math.floor(linesVisible / 2));
+      editor.scrollTop = scrollTop;
+      
+      // Highlight
+      editor.classList.add('line-highlight');
+      setTimeout(() => {
+        editor.classList.remove('line-highlight');
+      }, 1000);
+    }
   }
 }
 
@@ -880,58 +811,275 @@ function mergeSelectedLines() {
   
   const indices = Array.from(selectedLines).map(line => parseInt(line.dataset.index)).sort((a, b) => a - b);
   
+  // Get characters from selected lines
+  const characters = new Set();
+  indices.forEach(idx => {
+    const line = cleanedScriptLines[idx];
+    const match = line.match(/^([^:]+):/);
+    if (match) characters.add(match[1].trim());
+  });
+  
   let targetCharacter = null;
-  const firstLine = cleanedScriptLines[indices[0]];
-  const charMatch = firstLine.match(/^([^:]+):/);
-  if (charMatch) {
-    targetCharacter = charMatch[1].trim();
-  } else {
-    const characterOptions = new Set();
-    indices.forEach(idx => {
-      const match = cleanedScriptLines[idx].match(/^([^:]+):/);
-      if (match) characterOptions.add(match[1].trim());
-    });
+  
+  // Determine which character to use for the merged line
+  if (characters.size === 1) {
+    // If all lines are from the same character, use that character
+    targetCharacter = Array.from(characters)[0];
+  } else if (characters.size > 1) {
+    // If multiple characters, let the user choose
+    targetCharacter = prompt(
+      t.selectCharacterForMerge || 'Multiple characters detected. Which character should speak the merged line?',
+      Array.from(characters)[0]
+    );
     
-    if (characterOptions.size > 0) {
-      targetCharacter = Array.from(characterOptions)[0];
-    } else {
-      targetCharacter = prompt(t.enterCharacterName || 'Enter character name for merged lines:');
-      if (!targetCharacter) return;
-    }
+    if (!targetCharacter) return; // User cancelled
+  } else {
+    // No character found, ask user to provide one
+    targetCharacter = prompt(t.enterCharacterName || 'Enter character name for merged lines:');
+    if (!targetCharacter) return;
   }
   
+  // Start building the merged dialogue
   let mergedDialogue = '';
   indices.forEach(idx => {
     const line = cleanedScriptLines[idx];
     const dialogueMatch = line.match(/^([^:]+):\s*(.+)$/);
     
     if (dialogueMatch) {
-      mergedDialogue += ' ' + dialogueMatch[2].trim();
+      // If this is dialogue from the selected character, just add the text
+      if (dialogueMatch[1].trim() === targetCharacter) {
+        mergedDialogue += ' ' + dialogueMatch[2].trim();
+      } else {
+        // Otherwise format it as "[CHARACTER: text]" to preserve information
+        mergedDialogue += ` [${dialogueMatch[1].trim()}: ${dialogueMatch[2].trim()}]`;
+      }
+    } else if (line.startsWith('(') && line.endsWith(')')) {
+      // Preserve stage directions
+      mergedDialogue += ' ' + line.trim();
     } else {
+      // For any other line, just add the text
       mergedDialogue += ' ' + line.trim();
     }
   });
   
   mergedDialogue = mergedDialogue.trim();
   
+  // Create the merged line with the target character
   const mergedLine = `${targetCharacter}: ${mergedDialogue}`;
   
+  // Replace the first line with the merged content
   cleanedScriptLines[indices[0]] = mergedLine;
   
+  // Remove the other lines that were merged, starting from the end to avoid index shifting
   for (let i = indices.length - 1; i > 0; i--) {
     cleanedScriptLines.splice(indices[i], 1);
   }
   
-  renderScriptPreview();
-  updateDetectedCharactersList();
+  // Apply the changes to the script editor directly
+  updateEditorWithCleanedLines();
   
   showToast(t.mergeSuccess || 'Lines merged successfully', 2000, 'success');
 }
 
 /**
+ * Update the editor content with the current cleanedScriptLines
+ */
+function updateEditorWithCleanedLines() {
+  const scriptEditor = document.getElementById('scriptEditor');
+  if (!scriptEditor) return;
+  
+  // Save cursor position
+  const selectionStart = scriptEditor.selectionStart;
+  const selectionEnd = scriptEditor.selectionEnd;
+  
+  // Update content
+  scriptEditor.value = cleanedScriptLines.join('\n');
+  
+  // Restore selection if possible (might not be in the same position)
+  scriptEditor.selectionStart = Math.min(selectionStart, scriptEditor.value.length);
+  scriptEditor.selectionEnd = Math.min(selectionEnd, scriptEditor.value.length);
+  
+  // Update UI
+  updateScriptParsing();
+}
+
+/**
+ * Finalize the cleaned script before moving to metadata editing
+ */
+function finalizeCleanedScript() {
+  const scriptEditor = document.getElementById('scriptEditor');
+  const t = translations[currentLang];
+
+  if (!scriptEditor) {
+    console.error('Error: scriptEditor element not found');
+    showToast(t.errorEditorNotFound || 'Editor not found', 3000, 'error');
+    return;
+  }
+
+  try {
+    const rawText = scriptEditor.value;
+    
+    // Check if there's any content
+    if (!rawText.trim()) {
+      showToast(t.errorNoInput || 'Please enter some script text', 3000, 'error');
+      return;
+    }
+    
+    // Process the raw editor text for the final step with aggressive character detection
+    cleanedScriptLines = ScriptProcessor.preProcessScript(rawText, { aggressiveDetection: true });
+    
+    // Normalize character names (make them consistent)
+    normalizeCharacterNames();
+    
+    // Move to step 3
+    showStep(3);
+    
+    // Extract roles from the cleaned script
+    prepareRolesFromDetectedCharacters();
+    
+    // Show success message
+    showToast(t.cleanSuccess || 'Script cleaned successfully', 2000, 'success');
+    
+    // Backup the final cleaned script
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('script_converter_final', cleanedScriptLines.join('\n'));
+    }
+  } catch (error) {
+    console.error('Error finalizing script:', error);
+    showToast(t.errorClean || 'Error processing cleaned script', 3000, 'error');
+  }
+}
+
+/**
+ * Normalize character names throughout the script
+ * This helps with cases like "JOHN" vs "John" or "BOB SMITH" vs "Bob Smith"
+ */
+function normalizeCharacterNames() {
+  if (!cleanedScriptLines || cleanedScriptLines.length === 0) return;
+  
+  // First, collect all character names and count occurrences
+  const characterCounts = {};
+  const characterVariants = {};
+  
+  cleanedScriptLines.forEach(line => {
+    const match = line.match(/^([^:]+):/);
+    if (match) {
+      const name = match[1].trim();
+      const nameLower = name.toLowerCase();
+      
+      // Keep track of all variants of the same name
+      if (!characterVariants[nameLower]) {
+        characterVariants[nameLower] = [name];
+      } else if (!characterVariants[nameLower].includes(name)) {
+        characterVariants[nameLower].push(name);
+      }
+      
+      // Count occurrences
+      if (!characterCounts[name]) {
+        characterCounts[name] = 1;
+      } else {
+        characterCounts[name]++;
+      }
+    }
+  });
+  
+  // For each lowercase name, find the most common variant
+  const normalizedNames = {};
+  Object.keys(characterVariants).forEach(lowerName => {
+    const variants = characterVariants[lowerName];
+    let mostCommonVariant = variants[0];
+    let maxCount = characterCounts[variants[0]] || 0;
+    
+    variants.forEach(variant => {
+      const count = characterCounts[variant] || 0;
+      if (count > maxCount) {
+        maxCount = count;
+        mostCommonVariant = variant;
+      }
+    });
+    
+    // Use the most common variant for normalization
+    variants.forEach(variant => {
+      normalizedNames[variant] = mostCommonVariant;
+    });
+  });
+  
+  // Replace character names in the script
+  cleanedScriptLines = cleanedScriptLines.map(line => {
+    const match = line.match(/^([^:]+):/);
+    if (match) {
+      const name = match[1].trim();
+      if (normalizedNames[name] && normalizedNames[name] !== name) {
+        return line.replace(/^([^:]+):/, `${normalizedNames[name]}:`);
+      }
+    }
+    return line;
+  });
+}
+
+/**
  * Split a line at the cursor position into two lines
+ * This is a placeholder for future implementation
  */
 function splitAtCursor() {
   const t = translations[currentLang];
-  alert(t.splitFeatureNotAvailable || 'Line splitting functionality will be implemented in a future update. For now, please edit your script manually before pasting.');
+  const scriptEditor = document.getElementById('scriptEditor');
+  
+  if (!scriptEditor) {
+    showToast(t.errorEditorNotFound || 'Editor not found', 3000, 'error');
+    return;
+  }
+  
+  const cursorPos = scriptEditor.selectionStart;
+  const text = scriptEditor.value;
+  
+  // Find the current line
+  const lines = text.split('\n');
+  let lineStart = 0;
+  let lineEnd = 0;
+  let currentLineIndex = 0;
+  
+  for (let i = 0; i < lines.length; i++) {
+    lineEnd = lineStart + lines[i].length;
+    
+    if (cursorPos >= lineStart && cursorPos <= lineEnd) {
+      currentLineIndex = i;
+      break;
+    }
+    
+    lineStart = lineEnd + 1; // +1 for the newline character
+  }
+  
+  const currentLine = lines[currentLineIndex];
+  const charMatch = currentLine.match(/^([^:]+):/);
+  
+  if (!charMatch) {
+    showToast(t.errorNoCharacterLine || 'Can only split character dialogue lines', 3000, 'warning');
+    return;
+  }
+  
+  const character = charMatch[1].trim();
+  const relativePos = cursorPos - lineStart;
+  
+  // If cursor is before the character name, can't split
+  if (relativePos <= character.length + 1) {
+    showToast(t.errorSplitPosition || 'Position cursor within the dialogue text to split', 3000, 'warning');
+    return;
+  }
+  
+  // Split at cursor position
+  const firstPart = currentLine.substring(0, relativePos);
+  const secondPart = `${character}: ${currentLine.substring(relativePos)}`;
+  
+  // Update lines array
+  lines[currentLineIndex] = firstPart;
+  lines.splice(currentLineIndex + 1, 0, secondPart);
+  
+  // Update editor content
+  scriptEditor.value = lines.join('\n');
+  
+  // Update parsing
+  updateScriptParsing();
+  
+  showToast(t.splitSuccess || 'Line split successfully', 2000, 'success');
 }
