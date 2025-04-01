@@ -6,7 +6,11 @@
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "cy:open": "cypress open",
+    "cy:run": "cypress run",
+    "test:e2e": "cypress run",
+    "serve": "http-server . -p 8080"
   },
   "keywords": [
     "script",
@@ -19,7 +23,10 @@
     "@babel/core": "^7.22.9",
     "@babel/preset-env": "^7.22.9",
     "babel-jest": "^29.6.1",
+    "cypress": "^13.7.0",
+    "http-server": "^14.1.1",
     "jest": "^29.6.1",
-    "jest-environment-jsdom": "^29.6.1"
+    "jest-environment-jsdom": "^29.6.1",
+    "wait-on": "^7.2.0"
   }
 }
