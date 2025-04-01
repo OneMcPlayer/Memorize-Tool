@@ -21,9 +21,9 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-        # Disable npm cache until we have a lock file
+        # Actually disable npm cache as commented
         cache: 'npm'
-        cache-dependency-path: '**/package.json'
+        cache-dependency-path: package-lock.json
     
     - name: Generate package-lock.json
       run: npm install --package-lock-only
@@ -45,9 +45,9 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: '18.x'
-        # Disable npm cache until we have a lock file
+        # Actually disable npm cache as commented
         cache: 'npm'
-        cache-dependency-path: '**/package.json'
+        cache-dependency-path: package-lock.json
         
     - name: Generate package-lock.json
       run: npm install --package-lock-only
