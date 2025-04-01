@@ -1091,3 +1091,29 @@ function splitAtCursor() {
   
   showToast(t.splitSuccess || 'Line split successfully', 2000, 'success');
 }
+
+/**
+ * Copy the processed script to clipboard
+ */
+function copyScriptToClipboard() {
+  const t = translations[currentLang];
+  
+  if (!parseResult || !parseResult.processedLines) {
+    showToast(t.errorNoScriptData || 'No script data available to copy', 3000, 'error');
+    return;
+  }
+  
+  try {
+    const textToCopy = cleanedScriptLines.join('\n');
+    
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      showToast(t.copiedToClipboard || 'Script copied to clipboard!', 2000, 'success');
+    }).catch(err => {
+      console.error('Could not copy text:', err);
+      showToast(t.errorCopyingToClipboard || 'Failed to copy to clipboard', 3000, 'error');
+    });
+  } catch (error) {
+    console.error('Error copying script to clipboard:', error);
+    showToast(t.errorCopyingToClipboard || 'Failed to copy to clipboard', 3000, 'error');
+  }
+}
