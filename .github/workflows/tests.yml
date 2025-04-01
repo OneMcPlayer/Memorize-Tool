@@ -17,16 +17,15 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
+    - name: Generate package-lock.json
+      run: npm install --package-lock-only
+    
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-        # Actually disable npm cache as commented
         cache: 'npm'
         cache-dependency-path: package-lock.json
-    
-    - name: Generate package-lock.json
-      run: npm install --package-lock-only
     
     - name: Install dependencies with fallback
       run: npm ci || npm install
@@ -44,7 +43,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '18.x'
+        node-version: '22.x'
         # Actually disable npm cache as commented
         cache: 'npm'
         cache-dependency-path: package-lock.json
