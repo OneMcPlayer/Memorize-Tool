@@ -66,13 +66,22 @@ export class LocalCache {
    * Clear all cached items
    */
   static clear() {
-    // Get a snapshot of all keys in localStorage
-    const allKeys = Array.from(Object.keys(localStorage));
+    // In the mock implementation, Object.keys(localStorage) might not work as expected
+    // Store keys in an array first to avoid modifying while iterating
+    const keys = [];
     
-    // Then filter and remove cache keys
-    allKeys
-      .filter(key => key.startsWith('cache_'))
-      .forEach(key => localStorage.removeItem(key));
+    // Get all keys
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('cache_')) {
+        keys.push(key);
+      }
+    }
+    
+    // Now remove all cache keys
+    keys.forEach(key => {
+      localStorage.removeItem(key);
+    });
   }
   
   /**
@@ -81,13 +90,18 @@ export class LocalCache {
    */
   static purgeExpired() {
     let purgedCount = 0;
+    const keys = [];
     
-    // Get a snapshot of all keys in localStorage
-    const allKeys = Array.from(Object.keys(localStorage))
-      .filter(key => key.startsWith('cache_'));
+    // Get all keys first
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('cache_')) {
+        keys.push(key);
+      }
+    }
     
-    // Process each key
-    allKeys.forEach(key => {
+    // Process each key to find and remove expired/invalid items
+    keys.forEach(key => {
       try {
         const item = localStorage.getItem(key);
         if (!item) return;
