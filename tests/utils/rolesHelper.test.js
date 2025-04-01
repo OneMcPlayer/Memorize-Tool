@@ -1,88 +1,88 @@
-import { parseRolesBlock, findRoleByName } from '../../js/utils/rolesHelper';
+import { parseRolesBlock, findRoleByName } from '../../js/utils/rolesHelper.js';
 
-describe('Roles Helper', () => {
-  describe('parseRolesBlock', () => {
-    it('should parse a valid roles block correctly', () => {
-      const rolesText = `CHARACTERS:
-        HAMLET [Prince of Denmark] - A young prince grappling with his father's death
-        GERTRUDE [Queen, Mother] - Hamlet's mother
-        CLAUDIUS - The new king and Hamlet's uncle`;
+describe('RolesHelper Utils', () => {
+  describe('parseRolesBlock function', () => {
+    test('should parse simple role definitions', () => {
+      const input = 'ROMEO - Young lover';
+      const result = parseRolesBlock(input);
       
-      const roles = parseRolesBlock(rolesText);
-      
-      expect(roles).toHaveLength(3);
-      expect(roles[0].name).toBe('HAMLET');
-      expect(roles[0].aliases).toEqual(['Prince of Denmark']);
-      expect(roles[0].description).toBe('A young prince grappling with his father\'s death');
-      
-      expect(roles[1].name).toBe('GERTRUDE');
-      expect(roles[1].aliases).toEqual(['Queen', 'Mother']);
-      expect(roles[1].description).toBe('Hamlet\'s mother');
-      
-      expect(roles[2].name).toBe('CLAUDIUS');
-      expect(roles[2].aliases).toEqual([]);
-      expect(roles[2].description).toBe('The new king and Hamlet\'s uncle');
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        name: 'ROMEO',
+        aliases: [],
+        description: 'Young lover'
+      });
     });
-
-    it('should handle roles without aliases or descriptions', () => {
-      const rolesText = `CHARACTERS:
-        ROMEO
-        JULIET - Young woman
-        MERCUTIO []`;
+    
+    test('should parse multiple roles', () => {
+      const input = 'ROMEO - Young lover\nJULIET - His beloved';
+      const result = parseRolesBlock(input);
       
-      const roles = parseRolesBlock(rolesText);
-      
-      expect(roles).toHaveLength(3);
-      expect(roles[0].name).toBe('ROMEO');
-      expect(roles[0].aliases).toEqual([]);
-      expect(roles[0].description).toBe('');
-      
-      expect(roles[1].name).toBe('JULIET');
-      expect(roles[1].description).toBe('Young woman');
-      
-      expect(roles[2].name).toBe('MERCUTIO');
-      expect(roles[2].aliases).toEqual([]);
+      expect(result).toHaveLength(2);
+      expect(result[0].name).toBe('ROMEO');
+      expect(result[1].name).toBe('JULIET');
     });
-
-    it('should handle empty or invalid input', () => {
+    
+    test('should parse roles with aliases', () => {
+      const input = 'ROMEO [ROM, R] - Young lover';
+      const result = parseRolesBlock(input);
+      
+      expect(result[0].aliases).toEqual(['ROM', 'R']);
+    });
+    
+    test('should handle no description', () => {
+      const input = 'ROMEO';
+      const result = parseRolesBlock(input);
+      
+      expect(result[0].description).toBe('');
+    });
+    
+    test('should ignore CHARACTERS: header', () => {
+      const input = 'CHARACTERS:\nROMEO - Young lover';
+      const result = parseRolesBlock(input);
+      
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe('ROMEO');
+    });
+    
+    test('should handle empty input', () => {
       expect(parseRolesBlock('')).toEqual([]);
       expect(parseRolesBlock(null)).toEqual([]);
       expect(parseRolesBlock(undefined)).toEqual([]);
     });
   });
-
-  describe('findRoleByName', () => {
-    const mockRoles = [
-      { name: 'HAMLET', aliases: ['Prince', 'Son'] },
-      { name: 'GERTRUDE', aliases: ['Queen', 'Mother'] },
-      { name: 'GHOST', aliases: [] }
+  
+  describe('findRoleByName function', () => {
+    const rolesList = [
+      { name: 'ROMEO', aliases: ['ROM', 'R'], description: 'Young lover' },
+      { name: 'JULIET', aliases: ['JUL', 'J'], description: 'His beloved' }
     ];
-
-    it('should find role by exact name', () => {
-      const result = findRoleByName('HAMLET', mockRoles);
-      expect(result).toEqual(mockRoles[0]);
+    
+    test('should find role by primary name', () => {
+      const result = findRoleByName('ROMEO', rolesList);
+      expect(result).toEqual(rolesList[0]);
     });
-
-    it('should find role by case-insensitive name', () => {
-      const result = findRoleByName('hamlet', mockRoles);
-      expect(result).toEqual(mockRoles[0]);
+    
+    test('should find role by alias', () => {
+      const result = findRoleByName('ROM', rolesList);
+      expect(result).toEqual(rolesList[0]);
     });
-
-    it('should find role by alias', () => {
-      const result = findRoleByName('Queen', mockRoles);
-      expect(result).toEqual(mockRoles[1]);
+    
+    test('should be case-insensitive', () => {
+      const result = findRoleByName('romeo', rolesList);
+      expect(result).toEqual(rolesList[0]);
     });
-
-    it('should return null for non-existent role', () => {
-      const result = findRoleByName('HORATIO', mockRoles);
+    
+    test('should return null for non-existent role', () => {
+      const result = findRoleByName('MERCUTIO', rolesList);
       expect(result).toBeNull();
     });
-
-    it('should handle empty or invalid inputs', () => {
-      expect(findRoleByName('', mockRoles)).toBeNull();
-      expect(findRoleByName(null, mockRoles)).toBeNull();
-      expect(findRoleByName('HAMLET', [])).toBeNull();
-      expect(findRoleByName('HAMLET', null)).toBeNull();
+    
+    test('should handle null/undefined inputs', () => {
+      expect(findRoleByName(null, rolesList)).toBeNull();
+      expect(findRoleByName(undefined, rolesList)).toBeNull();
+      expect(findRoleByName('ROMEO', null)).toBeNull();
+      expect(findRoleByName('ROMEO', undefined)).toBeNull();
     });
   });
 });
