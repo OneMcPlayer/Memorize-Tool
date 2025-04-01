@@ -339,11 +339,9 @@ export class ScriptProcessor {
         // Check the next line to see if it's likely dialogue
         if (i + 1 < scriptLines.length) {
           const nextLine = scriptLines[i + 1].trim();
-          // If next line isn't a character name, stage direction, or empty line,
+          // If next line isn't a stage direction, or empty line,
           // this is likely a character name followed by dialogue
           if (nextLine && 
-              !nextLine.match(/^[A-Z][A-Za-z0-9_\s''.\-]+:/) &&
-              !nextLine.match(/^[A-Z][A-Za-z0-9_\s''.\-]+$/) &&
               !nextLine.startsWith('(') && 
               !nextLine.startsWith('[') &&
               !skipPatterns.some(pattern => pattern.test(nextLine))) {
