@@ -66,10 +66,12 @@ export class LocalCache {
    * Clear all cached items
    */
   static clear() {
-    // Only clear keys that start with 'cache_'
-    Object.keys(localStorage)
-      .filter(key => key.startsWith('cache_'))
-      .forEach(key => localStorage.removeItem(key));
+    // Get all keys first to avoid issues with deleting while iterating
+    const keysToRemove = Object.keys(localStorage)
+      .filter(key => key.startsWith('cache_'));
+      
+    // Then remove each key
+    keysToRemove.forEach(key => localStorage.removeItem(key));
   }
   
   /**
@@ -79,21 +81,28 @@ export class LocalCache {
   static purgeExpired() {
     let purgedCount = 0;
     
-    Object.keys(localStorage)
-      .filter(key => key.startsWith('cache_'))
-      .forEach(key => {
-        try {
-          const cachedData = JSON.parse(localStorage.getItem(key));
-          if (cachedData.expiry && cachedData.expiry < Date.now()) {
-            localStorage.removeItem(key);
-            purgedCount++;
-          }
-        } catch (error) {
-          // If we can't parse the item, it's probably corrupted, so remove it
+    // Get all keys first to avoid issues with deleting while iterating
+    const keysToCheck = Object.keys(localStorage)
+      .filter(key => key.startsWith('cache_'));
+    
+    // Then check and remove expired items
+    keysToCheck.forEach(key => {
+      try {
+        const item = localStorage.getItem(key);
+        if (!item) return;
+        
+        const cachedData = JSON.parse(item);
+        
+        if (cachedData.expiry && cachedData.expiry < Date.now()) {
           localStorage.removeItem(key);
           purgedCount++;
         }
-      });
+      } catch (error) {
+        // If we can't parse the item, it's probably corrupted, so remove it
+        localStorage.removeItem(key);
+        purgedCount++;
+      }
+    });
       
     return purgedCount;
   }
