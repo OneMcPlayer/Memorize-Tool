@@ -1117,3 +1117,45 @@ function copyScriptToClipboard() {
     showToast(t.errorCopyingToClipboard || 'Failed to copy to clipboard', 3000, 'error');
   }
 }
+
+/**
+ * Download the processed script as a text file
+ */
+function downloadScript() {
+  const t = translations[currentLang];
+  
+  if (!parseResult || !parseResult.processedLines) {
+    showToast(t.errorNoScriptData || 'No script data available to download', 3000, 'error');
+    return;
+  }
+  
+  try {
+    const textToDownload = cleanedScriptLines.join('\n');
+    const blob = new Blob([textToDownload], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    
+    // Create a temporary link element to trigger the download
+    const downloadLink = document.createElement('a');
+    downloadLink.href = url;
+    
+    // Generate a filename based on metadata if available, or use a default name
+    const metadata = document.getElementById('scriptTitle') ? 
+                     document.getElementById('scriptTitle').value : 'script';
+    const filename = `${metadata.trim() || 'script'}.txt`;
+    
+    downloadLink.download = filename;
+    
+    // Append to body, click to download, then remove
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+    
+    // Release the URL object
+    setTimeout(() => URL.revokeObjectURL(url), 100);
+    
+    showToast(t.downloadSuccess || 'Script downloaded successfully!', 2000, 'success');
+  } catch (error) {
+    console.error('Error downloading script:', error);
+    showToast(t.errorDownloading || 'Failed to download script', 3000, 'error');
+  }
+}
