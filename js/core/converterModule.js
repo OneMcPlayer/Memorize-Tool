@@ -646,7 +646,7 @@ function renderParsingPreview() {
       const lineElement = button.closest('.script-line');
       if (lineElement) {
         const lineIndex = parseInt(lineElement.dataset.index);
-        focusEditorOnLine(document.getElementById('scriptEditor'), lineIndex);
+        focusEditorOnLine(document.getElementById('scriptEditor'), lineIndex, cleanedScriptLines);
       }
     });
   });
@@ -700,13 +700,14 @@ function renderParsingPreview() {
  * Focus the editor on a specific line
  * @param {HTMLElement} editor - The editor element
  * @param {number} lineIndex - The index of the line in cleanedScriptLines
+ * @param {Array} cleanedLines - Array of preprocessed script lines
  */
-function focusEditorOnLine(editor, lineIndex) {
-  if (!editor || lineIndex === undefined || lineIndex < 0 || lineIndex >= cleanedScriptLines.length) {
+function focusEditorOnLine(editor, lineIndex, cleanedLines) {
+  if (!editor || lineIndex === undefined || !cleanedLines || lineIndex < 0 || lineIndex >= cleanedLines.length) {
     return;
   }
 
-  const lineToFind = cleanedScriptLines[lineIndex];
+  const lineToFind = cleanedLines[lineIndex];
   const editorText = editor.value;
   
   // Try to find the exact line in the editor
@@ -741,11 +742,6 @@ function focusEditorOnLine(editor, lineIndex) {
     editor.scrollTop = scrollTop;
     
     // Flash the line briefly to highlight it
-    const originalValue = editor.value;
-    const originalSelStart = editor.selectionStart;
-    const originalSelEnd = editor.selectionEnd;
-    
-    // Add a temporary class to highlight the line
     editor.classList.add('line-highlight');
     
     // Remove the highlight after a short delay
@@ -753,12 +749,10 @@ function focusEditorOnLine(editor, lineIndex) {
       editor.classList.remove('line-highlight');
     }, 1000);
   } else {
-    // If exact match not found, try a fuzzy match approach
-    // Create a simplified version of the line for matching (remove extra spaces)
+    // If exact match not found, try fuzzy matching
     const simplifiedLine = lineToFind.trim().replace(/\s+/g, ' ');
     const lineWords = simplifiedLine.split(' ');
     
-    // Look for a line that contains most of the words
     let bestMatch = -1;
     let bestScore = 0;
     
@@ -1259,4 +1253,398 @@ function prepareRolesFromDetectedCharacters() {
   sortedCharacters.forEach(character => {
     addNewRoleField(character);
   });
+}
+
+/**
+ * Set up event handlers and functionality for the simplified converter view
+ */
+export function setupSimpleConverterHandlers() {
+  const scriptEditor = document.getElementById('scriptEditor');
+  const parsingPreview = document.getElementById('parsingPreview');
+  const backButton = document.getElementById('simpleConverterBackButton');
+  const copyButton = document.getElementById('copyScriptButton');
+  const downloadButton = document.getElementById('downloadScriptButton');
+  const t = translations[currentLang].converter || {};
+  let cleanedScriptLines = [];
+
+  // Initialize with sample text if available
+  const initialText = localStorage.getItem('simple_converter_backup') || 
+    `HAMLET: To be, or not to be: that is the question.
+
+OPHELIA: My lord, I have remembrances of yours,
+That I have longed long to re-deliver;
+I pray you, now receive them.
+
+(Hamlet looks at her with suspicion)
+
+HAMLET: No, not I; I never gave you aught.
+
+OPHELIA: My honored lord, you know right well you did.`;
+
+  if (scriptEditor) {
+    scriptEditor.value = initialText;
+    scriptEditor.addEventListener('input', debounceSimpleScriptParsing);
+    scriptEditor.addEventListener('keydown', handleEditorKeydown);
+    
+    // Initial parsing
+    updateSimpleScriptParsing();
+  }
+
+  // Set up toolbar buttons
+  document.querySelectorAll('.tool-button').forEach(button => {
+    button.addEventListener('click', () => handleToolAction(button.dataset.action));
+  });
+
+  // Back button handler
+  if (backButton) {
+    backButton.addEventListener('click', () => {
+      if (scriptEditor.value.trim() !== initialText.trim() &&
+          !confirm(t.confirmLeave || 'Leave converter? Your changes will be lost.')) {
+        return;
+      }
+      leaveConverterView();
+    });
+  }
+
+  // Copy button handler
+  if (copyButton) {
+    copyButton.addEventListener('click', () => {
+      if (!scriptEditor || !scriptEditor.value.trim()) {
+        showToast(t.errorNoScriptData || 'No script text to copy', 3000, 'error');
+        return;
+      }
+
+      navigator.clipboard.writeText(scriptEditor.value)
+        .then(() => {
+          showToast(t.copiedToClipboard || 'Script copied to clipboard!', 2000, 'success');
+        })
+        .catch(err => {
+          console.error('Could not copy text:', err);
+          showToast(t.errorCopyingToClipboard || 'Failed to copy to clipboard', 3000, 'error');
+        });
+    });
+  }
+
+  // Download button handler
+  if (downloadButton) {
+    downloadButton.addEventListener('click', () => {
+      if (!scriptEditor || !scriptEditor.value.trim()) {
+        showToast(t.errorNoScriptData || 'No script text to download', 3000, 'error');
+        return;
+      }
+
+      try {
+        const textToDownload = scriptEditor.value;
+        const blob = new Blob([textToDownload], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        
+        // Create a temporary link element to trigger the download
+        const downloadLink = document.createElement('a');
+        downloadLink.href = url;
+        
+        // Generate a filename with timestamp
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
+        const filename = `script-${timestamp}.txt`;
+        
+        downloadLink.download = filename;
+        
+        // Append to body, click to download, then remove
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        
+        // Release the URL object
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+        
+        showToast(t.downloadSuccess || 'Script downloaded successfully!', 2000, 'success');
+      } catch (error) {
+        console.error('Error downloading script:', error);
+        showToast(t.errorDownloading || 'Failed to download script', 3000, 'error');
+      }
+    });
+  }
+
+  /**
+   * Debounce the script parsing to avoid excessive updates
+   */
+  function debounceSimpleScriptParsing() {
+    if (this.parseTimeout) {
+      clearTimeout(this.parseTimeout);
+    }
+    
+    this.parseTimeout = setTimeout(() => {
+      updateSimpleScriptParsing();
+    }, 300); // 300ms delay before executing the actual parsing
+  }
+
+  /**
+   * Update the script parsing for the simple converter view
+   */
+  function updateSimpleScriptParsing() {
+    if (!scriptEditor) return;
+    
+    const rawText = scriptEditor.value;
+    
+    try {
+      // Save to localStorage
+      localStorage.setItem('simple_converter_backup', rawText);
+      
+      // Process the script with aggressive character detection
+      cleanedScriptLines = ScriptProcessor.preProcessScript(rawText, { aggressiveDetection: true });
+      
+      // Update UI components
+      renderSimpleParsingPreview();
+      updateSimpleDetectedCharactersList();
+      updateSimpleScriptStats();
+    } catch (error) {
+      console.error('Error parsing script:', error);
+      showToast(t.errorParse || 'Error parsing script', 3000, 'error');
+    }
+  }
+
+  /**
+   * Render the parsing preview with highlighted characters
+   */
+  function renderSimpleParsingPreview() {
+    if (!parsingPreview) return;
+    
+    parsingPreview.innerHTML = '';
+    
+    const characterColors = {};
+    
+    // Group by scene if we detect scene markers
+    let currentScene = null;
+    let sceneContainer = null;
+    
+    cleanedScriptLines.forEach((line, index) => {
+      // Check for scene markers (patterns like "SCENE 1" or "ACT I")
+      const sceneMatch = line.match(/^(ACT|SCENE)\s+([IVX0-9]+)|^ACT\s+([IVX0-9]+),?\s+SCENE\s+([IVX0-9]+)/i);
+      
+      if (sceneMatch) {
+        currentScene = line;
+        sceneContainer = document.createElement('div');
+        sceneContainer.className = 'script-scene';
+        
+        const sceneHeader = document.createElement('div');
+        sceneHeader.className = 'scene-header';
+        sceneHeader.innerHTML = `<i class="fas fa-theater-masks"></i> ${line}`;
+        
+        sceneContainer.appendChild(sceneHeader);
+        parsingPreview.appendChild(sceneContainer);
+        return;
+      }
+      
+      // Create line element
+      const lineElement = document.createElement('div');
+      lineElement.className = 'script-line';
+      lineElement.dataset.index = index;
+      
+      // Add click event to focus editor on that line
+      lineElement.addEventListener('click', () => {
+        focusEditorOnLine(scriptEditor, index, cleanedScriptLines);
+      });
+      
+      // If we're in a scene, add to scene container
+      const container = sceneContainer || parsingPreview;
+      
+      // Process character lines
+      const charMatch = line.match(/^([^:]+):\s*(.+)$/);
+      if (charMatch) {
+        const character = charMatch[1].trim();
+        const dialogue = charMatch[2].trim();
+        
+        // Generate a consistent color for each character
+        if (!characterColors[character]) {
+          const hash = Array.from(character).reduce((acc, char) => char.charCodeAt(0) + acc, 0);
+          const hue = hash % 360;
+          characterColors[character] = `hsl(${hue}, 70%, 60%)`;
+        }
+        
+        lineElement.innerHTML = `
+          <span class="character-name" style="color: ${characterColors[character]}">${character}:</span>
+          <span class="dialogue-text">${dialogue}</span>
+        `;
+        lineElement.dataset.character = character;
+      } else if (line.startsWith('(') && line.endsWith(')')) {
+        // Stage direction
+        lineElement.innerHTML = `<span class="stage-direction">${line}</span>`;
+        lineElement.classList.add('direction-line');
+      } else {
+        lineElement.innerHTML = `<span class="plain-text">${line}</span>`;
+      }
+      
+      container.appendChild(lineElement);
+    });
+  }
+
+  /**
+   * Update the list of detected characters in the script
+   */
+  function updateSimpleDetectedCharactersList() {
+    const detectedCharactersList = document.getElementById('detectedCharactersList');
+    if (!detectedCharactersList) return;
+    
+    detectedCharactersList.innerHTML = '';
+    
+    const characters = {};
+    
+    cleanedScriptLines.forEach(line => {
+      const charMatch = line.match(/^([^:]+):/);
+      if (charMatch) {
+        const character = charMatch[1].trim();
+        if (characters[character]) {
+          characters[character]++;
+        } else {
+          characters[character] = 1;
+        }
+      }
+    });
+    
+    // Count number of unique characters
+    const characterCount = Object.keys(characters).length;
+    
+    // Add a summary header
+    const summary = document.createElement('div');
+    summary.className = 'characters-summary';
+    summary.innerHTML = `
+      <div class="character-count">
+        <span class="count-number">${characterCount}</span>
+        <span class="count-label">${characterCount === 1 ? 
+          (t.characterSingular || 'Character') : 
+          (t.characterPlural || 'Characters')}</span>
+      </div>
+    `;
+    detectedCharactersList.appendChild(summary);
+    
+    if (characterCount === 0) {
+      const noChars = document.createElement('div');
+      noChars.className = 'no-characters-detected';
+      noChars.innerHTML = `
+        <i class="fas fa-exclamation-circle"></i>
+        <p>${t.noCharactersDetected || 'No characters detected. Try adding character names followed by a colon.'}</p>
+      `;
+      detectedCharactersList.appendChild(noChars);
+      return;
+    }
+    
+    // Create character list
+    const characterList = document.createElement('div');
+    characterList.className = 'character-items';
+    
+    Object.entries(characters)
+      .sort((a, b) => b[1] - a[1])
+      .forEach(([character, count]) => {
+        const characterItem = document.createElement('div');
+        characterItem.className = 'character-item';
+        
+        const hash = Array.from(character).reduce((acc, char) => char.charCodeAt(0) + acc, 0);
+        const hue = hash % 360;
+        const color = `hsl(${hue}, 70%, 60%)`;
+        
+        characterItem.innerHTML = `
+          <div class="character-color" style="background-color: ${color}"></div>
+          <span class="character-name">${character}</span>
+          <span class="line-count">${count} ${count === 1 ? 
+            (t.lineSingular || 'line') : 
+            (t.linePlural || 'lines')}</span>
+          <button class="character-edit" title="${t.editCharacter || 'Edit character'}">
+            <i class="fas fa-pencil-alt"></i>
+          </button>
+        `;
+        
+        // Add edit character functionality
+        const editButton = characterItem.querySelector('.character-edit');
+        if (editButton) {
+          editButton.addEventListener('click', () => {
+            promptEditCharacter(character, scriptEditor, updateSimpleScriptParsing);
+          });
+        }
+        
+        characterList.appendChild(characterItem);
+      });
+    
+    detectedCharactersList.appendChild(characterList);
+  }
+
+  /**
+   * Update script statistics
+   */
+  function updateSimpleScriptStats() {
+    const statsElement = document.getElementById('scriptStats');
+    if (!scriptEditor || !statsElement) return;
+    
+    const text = scriptEditor.value;
+    const characters = text.length;
+    const words = text.split(/\s+/).filter(Boolean).length;
+    const lines = text.split('\n').filter(Boolean).length;
+    
+    statsElement.innerHTML = `
+      <i class="fas fa-align-left"></i> ${lines} ${t.statsLines || 'lines'} &nbsp;
+      <i class="fas fa-font"></i> ${words} ${t.statsWords || 'words'} &nbsp;
+      <i class="fas fa-keyboard"></i> ${characters} ${t.statsChars || 'chars'}
+    `;
+  }
+
+  /**
+   * Handle toolbar button actions for the simple converter
+   */
+  function handleToolAction(action) {
+    if (!scriptEditor) return;
+    
+    const start = scriptEditor.selectionStart;
+    const end = scriptEditor.selectionEnd;
+    const selectedText = scriptEditor.value.substring(start, end);
+    
+    switch(action) {
+      case 'uppercase':
+        if (selectedText) {
+          const newText = selectedText.toUpperCase();
+          scriptEditor.value = scriptEditor.value.substring(0, start) + newText + scriptEditor.value.substring(end);
+          scriptEditor.selectionStart = start;
+          scriptEditor.selectionEnd = start + newText.length;
+          updateSimpleScriptParsing();
+        }
+        break;
+      case 'add-character':
+        const characterName = prompt(t.enterCharacterName || 'Enter character name:');
+        if (characterName) {
+          const formattedText = `${characterName.trim()}: `;
+          insertTextAtCursor(scriptEditor, formattedText);
+          updateSimpleScriptParsing();
+        }
+        break;
+      case 'clear':
+        if (confirm(t.confirmClear || 'Clear all text? This cannot be undone.')) {
+          scriptEditor.value = '';
+          updateSimpleScriptParsing();
+        }
+        break;
+    }
+    
+    scriptEditor.focus();
+  }
+
+  /**
+   * Show a dialog to edit a character name and update all instances
+   * @param {string} oldName - Original character name
+   * @param {HTMLElement} editor - Editor element
+   * @param {Function} updateCallback - Function to call after editing
+   */
+  function promptEditCharacter(oldName, editor, updateCallback) {
+    const newName = prompt(t.editCharacterPrompt || 'Edit character name:', oldName);
+    
+    if (!newName || newName === oldName) return;
+    
+    if (!editor) return;
+    
+    // Replace all occurrences of the character name in the script
+    const regex = new RegExp(`^${oldName}:`, 'gm');
+    editor.value = editor.value.replace(regex, `${newName}:`);
+    
+    if (updateCallback && typeof updateCallback === 'function') {
+      updateCallback();
+    }
+    
+    showToast(t.characterRenamed || 'Character renamed successfully', 2000, 'success');
+  }
 }
