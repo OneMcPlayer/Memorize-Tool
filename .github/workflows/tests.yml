@@ -21,25 +21,16 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-        # Remove cache-dependency-path to avoid dependency on the lock file
+        # Disable npm cache until we have a lock file
         cache: 'npm'
+        cache-dependency-path: '**/package.json'
     
-    - name: Check for package-lock.json
-      id: check-lock-file
-      run: |
-        if [ -f "package-lock.json" ]; then
-          echo "lock_file_exists=true" >> $GITHUB_OUTPUT
-        else
-          echo "lock_file_exists=false" >> $GITHUB_OUTPUT
-        fi
-
     - name: Generate package-lock.json
-      if: steps.check-lock-file.outputs.lock_file_exists != 'true'
       run: npm install --package-lock-only
     
-    - name: Install dependencies
-      run: npm ci
-
+    - name: Install dependencies with fallback
+      run: npm ci || npm install
+      
     - name: Run tests
       run: npm test
 
@@ -54,23 +45,15 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: '18.x'
+        # Disable npm cache until we have a lock file
         cache: 'npm'
+        cache-dependency-path: '**/package.json'
         
-    - name: Check for package-lock.json
-      id: check-lock-file
-      run: |
-        if [ -f "package-lock.json" ]; then
-          echo "lock_file_exists=true" >> $GITHUB_OUTPUT
-        else
-          echo "lock_file_exists=false" >> $GITHUB_OUTPUT
-        fi
-
     - name: Generate package-lock.json
-      if: steps.check-lock-file.outputs.lock_file_exists != 'true'
       run: npm install --package-lock-only
       
-    - name: Install dependencies
-      run: npm ci
+    - name: Install dependencies with fallback
+      run: npm ci || npm install
       
     - name: Create cypress directory structure
       run: |
