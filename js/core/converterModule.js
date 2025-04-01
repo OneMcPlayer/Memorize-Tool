@@ -1159,3 +1159,104 @@ function downloadScript() {
     showToast(t.errorDownloading || 'Failed to download script', 3000, 'error');
   }
 }
+
+/**
+ * Add a new role field to the roles editor
+ * @param {Object} [roleData] - Optional initial role data
+ */
+function addNewRoleField(roleData = {}) {
+  const rolesContainer = document.getElementById('rolesContainer');
+  if (!rolesContainer) return;
+  
+  const t = translations[currentLang];
+  const roleId = 'role-' + Date.now(); // Unique ID for the new role
+  
+  // Create a new role field element
+  const roleField = document.createElement('div');
+  roleField.className = 'role-field';
+  roleField.id = roleId;
+  
+  // Create the HTML structure for the role field
+  roleField.innerHTML = `
+    <div class="role-header">
+      <span class="role-name">${t.roleName || 'Character Name'}</span>
+      <button type="button" class="remove-role" title="${t.removeRole || 'Remove this character'}">×</button>
+    </div>
+    <div class="role-details">
+      <div class="input-group">
+        <input type="text" class="role-primary-name" placeholder="${t.roleName || 'Character Name'}" value="${roleData.primaryName || ''}">
+      </div>
+      <div class="input-group">
+        <input type="text" class="role-aliases" placeholder="${t.roleAliasesPlaceholder || 'E.g. BOB, Robert (comma-separated)'}" 
+               value="${roleData.aliases ? roleData.aliases.filter(a => a !== roleData.primaryName).join(', ') : ''}">
+      </div>
+      <div class="input-group full-width">
+        <textarea class="role-description" placeholder="${t.roleDescriptionPlaceholder || 'Brief character description'}">${roleData.description || ''}</textarea>
+      </div>
+    </div>
+  `;
+  
+  // Add the new role field to the container
+  rolesContainer.appendChild(roleField);
+  
+  // Add event listener to the remove button
+  const removeButton = roleField.querySelector('.remove-role');
+  if (removeButton) {
+    removeButton.addEventListener('click', () => {
+      // Add a fade out animation before removing the element
+      roleField.classList.add('fade-out');
+      setTimeout(() => {
+        rolesContainer.removeChild(roleField);
+      }, 300); // Match this timing with the CSS transition
+    });
+  }
+  
+  // Focus on the name field for easy editing
+  setTimeout(() => {
+    const nameField = roleField.querySelector('.role-primary-name');
+    if (nameField) {
+      nameField.focus();
+    }
+  }, 100);
+}
+
+/**
+ * Prepare role fields from detected characters
+ */
+function prepareRolesFromDetectedCharacters() {
+  const rolesContainer = document.getElementById('rolesContainer');
+  if (!rolesContainer) return;
+  
+  // Clear existing roles
+  rolesContainer.innerHTML = '';
+  
+  // Extract characters from cleaned script
+  const characters = {};
+  
+  cleanedScriptLines.forEach(line => {
+    const charMatch = line.match(/^([^:]+):/);
+    if (charMatch) {
+      const character = charMatch[1].trim();
+      if (characters[character]) {
+        characters[character]++;
+      } else {
+        characters[character] = 1;
+      }
+    }
+  });
+  
+  // Sort characters by frequency (most lines first)
+  const sortedCharacters = Object.entries(characters)
+    .sort((a, b) => b[1] - a[1])
+    .map(([name, count]) => ({
+      primaryName: name,
+      aliases: [name],
+      description: '',
+      lineCount: count
+    }));
+  
+  // Add role fields for each character
+  sortedCharacters.forEach(character => {
+    addNewRoleField(character);
+  });
+}
