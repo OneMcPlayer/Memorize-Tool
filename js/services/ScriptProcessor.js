@@ -50,11 +50,23 @@ export class ScriptProcessor {
     // Pattern for Italian act/scene markers
     const actSceneMarkerPattern = /^(?:ATTO|SCENA|ATTO\s+[\w]+(?:,|\s)\s*SCENA\s+[\w]+)/i;
     
-    // Better handling for stage directions in various formats
+    // Better handling for stage directions in various formats - expanded to include Italian entrance/exit patterns
     const possibleStageDirectionsPattern = /^(?:Entra(?:no)?|Exit(?:s)?|Enter(?:s)?|Esce|Escono|Detti|Poi(?:\s+\w+)+|Quindi|Quindi(?:\s+\w+)+)/i;
 
     let isCharacterList = false; // To track if we're in a character list section
     let isFirstLine = true;     // To track if we're processing the first line
+    
+    // Check for plain text (not part of a dialogue)
+    const isPlainText = (line) => {
+        // No character marker, not a stage direction, etc.
+        return !line.includes(':') && 
+               !line.startsWith('(') && 
+               !line.startsWith('[') &&
+               !possibleStageDirectionsPattern.test(line) &&
+               !sceneDescPattern.test(line) &&
+               !actSceneMarkerPattern.test(line) &&
+               !characterListPattern.test(line);
+    };
 
     // First pass - handle aggressive detection for standalone character names
     if (aggressiveDetection) {
@@ -94,7 +106,7 @@ export class ScriptProcessor {
     for (let i = 0; i < lines.length; i++) {
       let line = lines[i].trim();
       
-      // Handle title on first line
+      // Handle title on first line - keep it exactly as is
       if (isFirstLine && line && !line.includes(':') && !line.startsWith('(') && !line.startsWith('[')) {
         processedLines.push(line);
         isFirstLine = false;
@@ -177,7 +189,7 @@ export class ScriptProcessor {
         if (line.startsWith('[') && line.endsWith(']')) {
           line = '(' + line.substring(1, line.length - 1) + ')';
         } else if (!line.startsWith('(') && !line.endsWith(')') && 
-                  possibleStageDirectionsPattern.test(line)) {
+                  (possibleStageDirectionsPattern.test(line) || line.startsWith('Entra') || line.startsWith('Esce'))) {
           // If it's a stage direction without parentheses, wrap it
           line = `(${line})`;
         }
@@ -252,6 +264,7 @@ export class ScriptProcessor {
           // Only end previous character's dialogue if there was one
           if (currentLine) {
             processedLines.push(currentLine);
+            currentLine = '';
           }
           
           inCharacterDialogue = false; // Reset for the new character
@@ -329,10 +342,10 @@ export class ScriptProcessor {
                 currentLine += connector + line;
               }
             }
-          } else if (lastCharacterName && !isStageDirection) {
-            // This is likely a continuation of the last character's dialogue after some interruption
-            currentLine = `${lastCharacterName}: ${line}`;
-            inCharacterDialogue = true;
+          } else if (lastCharacterName && !isStageDirection && isPlainText(line)) {
+            // For plain text that is not a character name, stage direction, etc.
+            // This is either a normal line or a continuation
+            currentLine = line;
           } else if (isCharacterList) {
             // If we're in a character list section, process the line as is
             processedLines.push(line);
@@ -356,6 +369,10 @@ export class ScriptProcessor {
     }
 
     if (currentLine) {
+      // Ensure we don't have any trailing colons or unnecessary spaces
+      if (currentLine.endsWith(': ') && !inCharacterDialogue) {
+        currentLine = currentLine.slice(0, -2);
+      }
       processedLines.push(currentLine);
     }
 
@@ -406,9 +423,8 @@ export class ScriptProcessor {
       alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     );
     
-    // Simplified pattern - now we just look for the character name followed by colon
-    // regardless of script format
-    const regexPattern = `^\\s*(${escapedAliases.join('|')})\\s*:|^\\s*(${escapedAliases.join('|')})\\s*\\(.*\\)`;
+    // Pattern to match character lines, either directly or with inline stage directions
+    const regexPattern = `^\\s*(${escapedAliases.join('|')})\\s*:|^\\s*(${escapedAliases.join('|')})\\s+\\([^)]+\\):`;
     
     const regex = new RegExp(regexPattern, "i");
     
@@ -429,9 +445,8 @@ export class ScriptProcessor {
       
       // Add the preceding context lines if requested
       if (precedingCount > 0) {
-        // Start from the line after the previous character line or from max(0, targetIndex - precedingCount)
-        const prevCharLineIndex = i > 0 ? characterLineIndices[i-1] : -1;
-        const startIndex = Math.max(prevCharLineIndex + 1, targetIndex - precedingCount);
+        // Calculate the start index for preceding lines
+        let startIndex = Math.max(0, targetIndex - precedingCount);
         
         // Add each preceding line up to (but not including) the target line
         for (let j = startIndex; j < targetIndex; j++) {
@@ -731,14 +746,31 @@ export class ScriptProcessor {
     const sceneHeadingPattern = /^(?:ACT|SCENE|ATTO|SCENA|ACT \w+,?\s+SCENE \w+)/i;
     
     // Pattern for stage directions
-    const stageDirectionPattern = /^(?:\(.*\)|\[.*\]|Entra(?:no)?|Exit(?:s)?|Enter(?:s)?|Esce|Escono|Detti)/i;
+    const stageDirectionPattern = /^\(.*\)$|^\[.*\]$|^Entra(?:no)?|^Exit(?:s)?|^Enter(?:s)?|^Esce|^Escono|^Detti/i;
     
     // Pattern for character lists
     const characterListPattern = /^(?:Characters|Personaggi|PERSONAGGI|Dramatis\s+Personae)/i;
     
+    // First line is typically the title, don't include it in dialogue counts
+    let isFirstLine = true;
+    
     for (let i = 0; i < processedLines.length; i++) {
       const line = processedLines[i].trim();
       if (!line) continue;
+      
+      // Skip title on first line
+      if (isFirstLine) {
+        structuredLines.push({
+          character: null,
+          speaker: null,
+          text: line,
+          isSceneHeading: false,
+          isDirection: false,
+          isTitle: true
+        });
+        isFirstLine = false;
+        continue;
+      }
       
       // Check for scene headings
       if (sceneHeadingPattern.test(line)) {
