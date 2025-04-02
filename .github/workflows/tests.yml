@@ -55,35 +55,39 @@ jobs:
         mkdir -p cypress/screenshots
         mkdir -p cypress/videos
       
-    # Debug server availability
-    - name: Check directory contents
-      run: ls -la
-      
-    # Use npm script to start the server instead of direct http-server command
-    - name: Start HTTP server
-      run: npm run serve &
-      
-    # Add debug info to help diagnose server issues
-    - name: Debug server
+    # Use a modified approach to start the HTTP server
+    - name: Start HTTP server and run Cypress tests
       run: |
+        echo "Starting HTTP server with explicit host binding"
+        npx http-server . -p 8080 -a localhost &
+        SERVER_PID=$!
+        echo "Server started with PID: $SERVER_PID"
+        
+        # Give the server a moment to start
         sleep 5
-        echo "Checking if server is running:"
-        ps aux | grep http-server
-        echo "Checking network connections:"
-        netstat -tulpn | grep 8080 || echo "No process found on port 8080"
-        curl -v http://localhost:8080 || echo "Cannot connect to server"
-      
-    - name: Wait for server
-      run: npx wait-on http://localhost:8080 --timeout 120000
-      
-    - name: Run Cypress tests
-      uses: cypress-io/github-action@v6
-      with:
-        browser: chrome
-        headless: true
-        install: false
-        wait-on: 'http://localhost:8080'
-        wait-on-timeout: 120
+        
+        # Check if server is running
+        if ps -p $SERVER_PID > /dev/null; then
+          echo "Server is running with PID: $SERVER_PID"
+        else
+          echo "Server failed to start"
+          exit 1
+        fi
+        
+        # Check if server is accessible
+        curl -v http://localhost:8080 || echo "Cannot connect to server with curl"
+        
+        # Run Cypress tests directly
+        npx cypress run --browser chrome --headless
+        
+        # Store the exit code
+        CYPRESS_EXIT_CODE=$?
+        
+        # Kill the server
+        kill $SERVER_PID || true
+        
+        # Exit with Cypress exit code
+        exit $CYPRESS_EXIT_CODE
         
     - name: Upload screenshots on failure
       uses: actions/upload-artifact@v4
