@@ -35,7 +35,10 @@ export class ScriptProcessor {
     // Enhanced pattern for italian script conventions with more title variants
     const italianNamePattern = /^(?:(?:Sig\.(?:ra|na)?|Dott\.(?:ssa)?|Prof\.(?:ssa)?|SIGNOR(?:A|E|I)?|DOTTOR(?:E|ESSA)?|PROFESSOR(?:E|ESSA)?)\s+)?([A-Z][A-Za-z0-9_\s''\-\.]+)(?:\s*:?\s*)(.*)/i;
     
-    // Pattern to detect character names - needs to be used multiple times, so defined once
+    // Pattern to detect character with inline stage directions
+    const characterWithDirectionPattern = /^([A-Z][A-Za-z0-9_\s''\-\.]+)\s+(\([^)]+\)):\s*(.*)/;
+    
+    // Pattern to detect regular character names - needs to be used multiple times, so defined once
     const characterPattern = /^([A-Z][A-Za-z0-9_\s''\-\.]+)(?:\s*:?\s*)(.*)/;
 
     // Pattern for scene headings like "La scena rappresenta..." or "The scene is set in..."
@@ -51,9 +54,18 @@ export class ScriptProcessor {
     const possibleStageDirectionsPattern = /^(?:Entra(?:no)?|Exit(?:s)?|Enter(?:s)?|Esce|Escono|Detti|Poi(?:\s+\w+)+|Quindi|Quindi(?:\s+\w+)+)/i;
 
     let isCharacterList = false; // To track if we're in a character list section
+    let isFirstLine = true;     // To track if we're processing the first line
 
     for (let i = 0; i < lines.length; i++) {
       let line = lines[i].trim();
+      
+      // Handle title on first line
+      if (isFirstLine && line && !line.includes(':') && !line.startsWith('(') && !line.startsWith('[')) {
+        processedLines.push(line);
+        isFirstLine = false;
+        continue;
+      }
+      isFirstLine = false;
       
       if (!line) {
         if (currentLine) {
@@ -140,6 +152,24 @@ export class ScriptProcessor {
         if ((line.endsWith(')') || line.endsWith(']')) && !isMultilineStageDirection) {
           isStageDirection = false;
         }
+        continue;
+      }
+
+      // Check for character with inline stage direction - like "JOHN (smiling):"
+      const charWithDirectionMatch = line.match(characterWithDirectionPattern);
+      if (charWithDirectionMatch && !isStageDirection) {
+        if (currentLine) {
+          processedLines.push(currentLine);
+        }
+        
+        // Keep the stage direction as part of the character name
+        const charName = charWithDirectionMatch[1].trim();
+        const direction = charWithDirectionMatch[2].trim();
+        const dialogText = charWithDirectionMatch[3].trim();
+        
+        lastCharacterName = charName;
+        currentLine = `${charName} ${direction}: ${dialogText}`;
+        inCharacterDialogue = true;
         continue;
       }
 
@@ -258,24 +288,29 @@ export class ScriptProcessor {
               !line.startsWith(']') &&
               !currentLine.endsWith(' ');
 
-            const connector = shouldAddSpace ? ' ' : '';
-            
-            // Handle terminating triple quotes in structured format
-            if (line.includes('"""') && !line.startsWith('"""')) {
-              // Only include text before the closing quotes
-              const textBeforeClosing = line.split('"""')[0];
-              currentLine += connector + textBeforeClosing;
-              processedLines.push(currentLine);
-              currentLine = '';
-              inCharacterDialogue = false;
-            } else if (line === '"""') {
-              // If the line is just closing quotes, finish the current line
-              processedLines.push(currentLine);
-              currentLine = '';
-              inCharacterDialogue = false;
+            // Special handling for hyphenated line breaks - join without space
+            if (currentLine.endsWith('-')) {
+              currentLine = currentLine.substring(0, currentLine.length - 1) + line;
             } else {
-              // Continue the dialogue with the current line
-              currentLine += connector + line;
+              const connector = shouldAddSpace ? ' ' : '';
+              
+              // Handle terminating triple quotes in structured format
+              if (line.includes('"""') && !line.startsWith('"""')) {
+                // Only include text before the closing quotes
+                const textBeforeClosing = line.split('"""')[0];
+                currentLine += connector + textBeforeClosing;
+                processedLines.push(currentLine);
+                currentLine = '';
+                inCharacterDialogue = false;
+              } else if (line === '"""') {
+                // If the line is just closing quotes, finish the current line
+                processedLines.push(currentLine);
+                currentLine = '';
+                inCharacterDialogue = false;
+              } else {
+                // Continue the dialogue with the current line
+                currentLine += connector + line;
+              }
             }
           } else if (lastCharacterName && !isStageDirection) {
             // This is likely a continuation of the last character's dialogue after some interruption
