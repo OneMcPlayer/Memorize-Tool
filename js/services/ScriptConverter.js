@@ -22,20 +22,8 @@ export class ScriptConverter {
       throw new Error('No script text provided');
     }
     
-    // Process the script to normalize it
-    const processedLines = ScriptProcessor.preProcessScript(scriptText);
-    
-    // Extract roles
-    const roles = ScriptProcessor.extractRolesFromPlainText(processedLines);
-    
-    // Extract basic metadata
-    const metadata = this.#extractBasicMetadata(scriptText);
-    
-    return {
-      ...metadata,
-      roles,
-      processedLines
-    };
+    // Use the consolidated parsing logic from ScriptProcessor
+    return ScriptProcessor.parseNonStructuredScript(scriptText);
   }
   
   /**
@@ -50,12 +38,12 @@ export class ScriptConverter {
     const processedLines = ScriptProcessor.preProcessScript(sourceText);
 
     // 2. Extract scenes
-    const scenes = this.#extractScenes(processedLines);
+    const scenes = ScriptProcessor.extractScenes(processedLines);
 
     // 3. Initialize output with metadata
     let output = '';
     output += `@title "${metadata.title || 'Untitled Script'}"\n`;
-    if (metadata.author) output += `@title "${metadata.author}"\n`;
+    if (metadata.author) output += `@author "${metadata.author}"\n`;
     if (metadata.date) output += `@date "${metadata.date}"\n`;
     if (metadata.description) output += `@description "${metadata.description}"\n`;
     output += '\n';
@@ -94,11 +82,13 @@ export class ScriptConverter {
       
       output += '\n';
       
-      // Add dialogue
+      // Add dialogue section
+      output += 'dialogue {\n';
+      
       scene.lines.forEach(line => {
         // Handle stage directions
         if (line.startsWith('(') && line.endsWith(')')) {
-          output += `${line}\n`;
+          output += `  ${line}\n`;
           return;
         }
         
@@ -109,116 +99,17 @@ export class ScriptConverter {
           const text = match[2].trim();
           
           // Use triple-quote format for dialogue
-          output += `"${character}": """${text}"""\n\n`;
+          output += `  "${character}": """${text}"""\n\n`;
         } else {
           // Just add the line as-is if it doesn't match the pattern
-          output += `${line}\n`;
+          output += `  ${line}\n`;
         }
       });
       
-      output += '@endscene\n\n';
+      output += '}\n\n';
     });
 
     return output;
-  }
-  
-  /**
-   * Extract basic metadata from script text
-   * @private
-   * @param {string} scriptText - The script text
-   * @returns {Object} - Extracted metadata
-   */
-  static #extractBasicMetadata(scriptText) {
-    const metadata = {
-      title: '',
-      author: '',
-      date: '',
-      description: ''
-    };
-    
-    // Try to extract title from first line
-    const lines = scriptText.split('\n');
-    if (lines.length > 0) {
-      const potentialTitle = lines[0].trim();
-      if (potentialTitle && !potentialTitle.includes(':')) {
-        metadata.title = potentialTitle;
-      }
-    }
-    
-    return metadata;
-  }
-  
-  /**
-   * Extract scenes from processed script lines
-   * @private
-   * @param {string[]} processedLines - Processed script lines
-   * @returns {Array} - Extracted scenes
-   */
-  static #extractScenes(processedLines) {
-    // Look for scene markers like "ACT I", "SCENE 1", etc.
-    const sceneMarkerRegex = /^(ACT|SCENE|ACT \w+,? SCENE \w+)/i;
-    
-    let scenes = [];
-    let currentScene = {
-      title: 'Scene 1',
-      location: '',
-      time: '',
-      description: '',
-      lines: []
-    };
-    
-    // Look for settings lines that might indicate location/time
-    const settingRegex = /^(SETTING|LOCATION|TIME|PLACE):\s*(.+)$/i;
-    
-    processedLines.forEach(line => {
-      // Check if it's a scene marker
-      const sceneMatch = line.match(sceneMarkerRegex);
-      if (sceneMatch) {
-        // Save current scene if it has content
-        if (currentScene.lines.length > 0) {
-          scenes.push(currentScene);
-        }
-        
-        // Start a new scene
-        currentScene = {
-          title: line.trim(),
-          location: '',
-          time: '',
-          description: '',
-          lines: []
-        };
-        return;
-      }
-      
-      // Check if it's a setting line
-      const settingMatch = line.match(settingRegex);
-      if (settingMatch) {
-        const settingType = settingMatch[1].toLowerCase();
-        const value = settingMatch[2].trim();
-        
-        if (settingType === 'setting' || settingType === 'location' || settingType === 'place') {
-          currentScene.location = value;
-        } else if (settingType === 'time') {
-          currentScene.time = value;
-        }
-        return;
-      }
-      
-      // Otherwise, add to current scene
-      currentScene.lines.push(line);
-    });
-    
-    // Add the final scene if it has content
-    if (currentScene.lines.length > 0) {
-      scenes.push(currentScene);
-    }
-    
-    // If no scenes were explicitly marked, treat the whole script as one scene
-    if (scenes.length === 0 && currentScene.lines.length > 0) {
-      scenes = [currentScene];
-    }
-    
-    return scenes;
   }
 
   processScript(script) {

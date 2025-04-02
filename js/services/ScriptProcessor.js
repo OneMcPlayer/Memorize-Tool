@@ -1,4 +1,11 @@
 export class ScriptProcessor {
+  /**
+   * Main method for pre-processing script text into standardized format.
+   * This is the central parsing function for non-structured scripts.
+   * @param {string} scriptText - The raw script text
+   * @param {object} options - Parsing options
+   * @returns {string[]} - Processed script lines
+   */
   static preProcessScript(scriptText, options = {}) {
     if (!scriptText) {
       console.warn('Empty script text provided to preprocessor');
@@ -170,7 +177,7 @@ export class ScriptProcessor {
               !line.startsWith(')') &&
               !line.startsWith(']') &&
               !currentLine.endsWith(' ');
-              
+
             const connector = shouldAddSpace ? ' ' : '';
             
             // Handle terminating triple quotes in structured format
@@ -219,6 +226,13 @@ export class ScriptProcessor {
     return processedLines;
   }
 
+  /**
+   * Extract lines spoken by a specific character.
+   * @param {string[]} scriptLines - Processed script lines
+   * @param {string|Array|Object} characterData - Character name or data
+   * @param {number} precedingCount - Number of preceding lines to include
+   * @returns {Array} - Extracted character lines
+   */
   static extractCharacterLines(scriptLines, characterData, precedingCount) {
     if (!scriptLines || !scriptLines.length) {
       console.warn('No script lines provided for character extraction');
@@ -280,10 +294,9 @@ export class ScriptProcessor {
   }
 
   /**
-   * Extracts roles from an array of script lines.
-   * 
-   * @param {string[]} scriptLines - An array of strings representing lines from the script.
-   * @returns {Array<{primaryName: string, aliases: string[], description: string}>} - An array of role objects
+   * Extract roles from an array of processed script lines.
+   * @param {string[]} scriptLines - An array of processed script lines
+   * @returns {Array<{primaryName: string, aliases: string[], description: string}>} - Array of role objects
    */
   static extractRolesFromPlainText(scriptLines) {
     if (!scriptLines || !scriptLines.length) {
@@ -383,5 +396,235 @@ export class ScriptProcessor {
     
     // Convert map to array for compatibility with existing code
     return Array.from(rolesMap.values());
+  }
+  
+  /**
+   * Main entry point for parsing non-structured scripts.
+   * This method coordinates the parsing of plain text scripts and returns a complete result.
+   * @param {string} scriptText - The raw script text
+   * @param {object} options - Parsing options
+   * @returns {object} - Complete parsed script information
+   */
+  static parseNonStructuredScript(scriptText, options = {}) {
+    if (!scriptText) {
+      return {
+        title: '',
+        metadata: {
+          title: '',
+          author: '',
+          date: '',
+          description: ''
+        },
+        roles: [],
+        lines: []
+      };
+    }
+    
+    // Process the script to normalize it
+    const processedLines = this.preProcessScript(scriptText, options);
+    
+    // Extract roles
+    const roles = this.extractRolesFromPlainText(processedLines);
+    
+    // Extract basic metadata
+    const metadata = this.#extractBasicMetadata(scriptText);
+    
+    // Process into structured lines with characters, dialog, etc.
+    const parsedLines = this.#processIntoStructuredLines(processedLines);
+    
+    return {
+      title: metadata.title || '',
+      metadata,
+      roles,
+      processedLines, // Raw processed lines
+      lines: parsedLines // Structured line objects
+    };
+  }
+  
+  /**
+   * Extract basic metadata from script text
+   * @private
+   * @param {string} scriptText - The script text
+   * @returns {Object} - Extracted metadata
+   */
+  static #extractBasicMetadata(scriptText) {
+    const metadata = {
+      title: '',
+      author: '',
+      date: '',
+      description: ''
+    };
+    
+    // Try to extract title from first line
+    const lines = scriptText.split('\n');
+    if (lines.length > 0) {
+      const potentialTitle = lines[0].trim();
+      if (potentialTitle && !potentialTitle.includes(':')) {
+        metadata.title = potentialTitle;
+      }
+      
+      // Look for specific metadata markers
+      lines.slice(0, 10).forEach(line => {
+        const titleMatch = line.match(/^(?:TITLE|TITLE:)\s*(.+)/i);
+        const authorMatch = line.match(/^(?:BY|AUTHOR|AUTHOR:)\s*(.+)/i);
+        const dateMatch = line.match(/^(?:DATE|DATE:)\s*(.+)/i);
+        
+        if (titleMatch) metadata.title = titleMatch[1].trim();
+        if (authorMatch) metadata.author = authorMatch[1].trim();
+        if (dateMatch) metadata.date = dateMatch[1].trim();
+      });
+    }
+    
+    return metadata;
+  }
+  
+  /**
+   * Process lines into structured format with character, text, dialog properties
+   * @private
+   * @param {string[]} processedLines - Pre-processed script lines
+   * @returns {Array} - Structured line objects
+   */
+  static #processIntoStructuredLines(processedLines) {
+    const structuredLines = [];
+    let currentCharacter = null;
+    
+    for (let i = 0; i < processedLines.length; i++) {
+      const line = processedLines[i].trim();
+      if (!line) continue;
+      
+      // Check for scene headings - both ACT # and SCENE #
+      if (line.match(/^(?:ACT|SCENE)\s+\w+/i)) {
+        structuredLines.push({
+          character: null,
+          speaker: null,
+          text: line,
+          isSceneHeading: true,
+          isDirection: false
+        });
+        continue;
+      }
+      
+      // Check for stage directions
+      if ((line.startsWith('(') && line.endsWith(')')) || 
+          (line.startsWith('[') && line.endsWith(']'))) {
+        structuredLines.push({
+          character: null,
+          speaker: null,
+          text: line,
+          isSceneHeading: false,
+          isDirection: true
+        });
+        continue;
+      }
+      
+      // Check for character dialog
+      const characterMatch = line.match(/^([^:]+):\s*(.*)/);
+      if (characterMatch) {
+        currentCharacter = characterMatch[1].trim();
+        const dialogText = characterMatch[2].trim();
+        
+        structuredLines.push({
+          character: currentCharacter,
+          speaker: currentCharacter,
+          text: line,
+          dialog: dialogText,
+          isSceneHeading: false,
+          isDirection: false
+        });
+      } else if (currentCharacter) {
+        // This could be continued dialog, but we're not sure
+        // In a more sophisticated version, we might append to the previous entry
+        structuredLines.push({
+          character: null,
+          speaker: null,
+          text: line,
+          isSceneHeading: false,
+          isDirection: false
+        });
+      } else {
+        // Just a line of text without clear attribution
+        structuredLines.push({
+          character: null,
+          speaker: null,
+          text: line,
+          isSceneHeading: false,
+          isDirection: false
+        });
+      }
+    }
+    
+    return structuredLines;
+  }
+  
+  /**
+   * Extract scenes from processed script lines
+   * @param {string[]} processedLines - Processed script lines
+   * @returns {Array} - Extracted scenes
+   */
+  static extractScenes(processedLines) {
+    // Look for scene markers like "ACT I", "SCENE 1", etc.
+    const sceneMarkerRegex = /^(ACT|SCENE|ACT \w+,? SCENE \w+)/i;
+    
+    let scenes = [];
+    let currentScene = {
+      title: 'Scene 1',
+      location: '',
+      time: '',
+      description: '',
+      lines: []
+    };
+    
+    // Look for settings lines that might indicate location/time
+    const settingRegex = /^(SETTING|LOCATION|TIME|PLACE):\s*(.+)$/i;
+    
+    processedLines.forEach(line => {
+      // Check if it's a scene marker
+      const sceneMatch = line.match(sceneMarkerRegex);
+      if (sceneMatch) {
+        // Save current scene if it has content
+        if (currentScene.lines.length > 0) {
+          scenes.push(currentScene);
+        }
+        
+        // Start a new scene
+        currentScene = {
+          title: line.trim(),
+          location: '',
+          time: '',
+          description: '',
+          lines: []
+        };
+        return;
+      }
+      
+      // Check if it's a setting line
+      const settingMatch = line.match(settingRegex);
+      if (settingMatch) {
+        const settingType = settingMatch[1].toLowerCase();
+        const value = settingMatch[2].trim();
+        
+        if (settingType === 'setting' || settingType === 'location' || settingType === 'place') {
+          currentScene.location = value;
+        } else if (settingType === 'time') {
+          currentScene.time = value;
+        }
+        return;
+      }
+      
+      // Otherwise, add to current scene
+      currentScene.lines.push(line);
+    });
+    
+    // Add the final scene if it has content
+    if (currentScene.lines.length > 0) {
+      scenes.push(currentScene);
+    }
+    
+    // If no scenes were explicitly marked, treat the whole script as one scene
+    if (scenes.length === 0 && currentScene.lines.length > 0) {
+      scenes = [currentScene];
+    }
+    
+    return scenes;
   }
 }

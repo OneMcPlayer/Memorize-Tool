@@ -1,4 +1,5 @@
 import { parseRolesBlock } from '../utils/rolesHelper.js';
+import { ScriptProcessor } from '../services/ScriptProcessor.js';
 
 export class Script {
   constructor() {
@@ -9,7 +10,7 @@ export class Script {
     this.lines = []; // simplified representation of all lines
   }
 
-  // Update the parse method to match test expectations
+  // Updated parse method that uses the ScriptProcessor
   static parse(input) {
     if (!input) {
       return {
@@ -19,154 +20,18 @@ export class Script {
       };
     }
 
-    const result = {
-      title: '',
-      roles: [],
-      lines: []
+    // Use the consolidated parsing logic from ScriptProcessor
+    const parsedResult = ScriptProcessor.parseNonStructuredScript(input);
+    
+    // Convert to the expected output format for backward compatibility
+    return {
+      title: parsedResult.title || '',
+      roles: parsedResult.roles.map(role => ({
+        name: role.primaryName,
+        description: role.description || ''
+      })),
+      lines: parsedResult.lines
     };
-
-    const lines = input.split('\n');
-    let currentSection = null;
-    let currentCharacter = null;
-    let currentDialog = [];
-
-    // First pass to extract title and roles
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (!line) continue;
-
-      // Check for title
-      if (line.startsWith('TITLE:')) {
-        result.title = line.substring(6).trim();
-        continue;
-      }
-
-      // Check for characters section
-      if (line === 'CHARACTERS:') {
-        currentSection = 'characters';
-        continue;
-      }
-
-      // Parse character definitions
-      if (currentSection === 'characters' && !line.match(/^ACT|^SCENE/)) {
-        // Parse character definition (NAME - Description)
-        const match = line.match(/^([A-Z]+)(?:\s*-\s*(.+))?$/);
-        if (match) {
-          result.roles.push({
-            name: match[1],
-            description: match[2] || ''
-          });
-        }
-      }
-    }
-
-    // Reset for second pass to handle lines in proper order
-    currentSection = null;
-
-    // Second pass to process all lines in order
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (!line) continue;
-
-      // Skip title and character definition lines that we've already processed
-      if (line.startsWith('TITLE:') || line === 'CHARACTERS:' || 
-          (currentSection === 'characters' && !line.match(/^ACT|^SCENE/))) {
-        if (line.match(/^ACT|^SCENE/)) {
-          currentSection = null;
-        } else {
-          continue;
-        }
-      }
-
-      // Check for characters section
-      if (line === 'CHARACTERS:') {
-        currentSection = 'characters';
-        continue;
-      }
-
-      // Check for scene headings - both ACT # and SCENE #
-      if (line.match(/^ACT\s+\d+$/) || line.match(/^SCENE\s+\d+$/)) {
-        // Flush any accumulated dialog before adding a new scene heading
-        if (currentCharacter && currentDialog.length > 0) {
-          result.lines.push({
-            character: currentCharacter,
-            text: currentDialog.join(' ').trim(),
-            dialog: currentDialog.join(' ').trim(),
-            isSceneHeading: false,
-            isDirection: false
-          });
-          currentDialog = [];
-          currentCharacter = null;
-        }
-        
-        result.lines.push({
-          character: null,
-          text: line,
-          isSceneHeading: true,
-          isDirection: false
-        });
-        continue;
-      }
-
-      // Check for stage directions
-      if (line.startsWith('[') && line.endsWith(']')) {
-        // Flush any accumulated dialog before adding a stage direction
-        if (currentCharacter && currentDialog.length > 0) {
-          result.lines.push({
-            character: currentCharacter,
-            text: currentDialog.join(' ').trim(),
-            dialog: currentDialog.join(' ').trim(),
-            isSceneHeading: false,
-            isDirection: false
-          });
-          currentDialog = [];
-          currentCharacter = null;
-        }
-        
-        result.lines.push({
-          character: null,
-          text: line,
-          isSceneHeading: false,
-          isDirection: true
-        });
-        continue;
-      }
-
-      // Check for character dialog
-      const characterMatch = line.match(/^([A-Z]+):(.*)/);
-      if (characterMatch) {
-        // Save the previous dialog if any
-        if (currentCharacter && currentDialog.length > 0) {
-          result.lines.push({
-            character: currentCharacter,
-            text: currentDialog.join(' ').trim(),
-            dialog: currentDialog.join(' ').trim(),
-            isSceneHeading: false,
-            isDirection: false
-          });
-          currentDialog = [];
-        }
-        
-        currentCharacter = characterMatch[1];
-        currentDialog = [characterMatch[2].trim()];
-      } else if (currentCharacter && line) {
-        // Append to the current dialog for multiline
-        currentDialog.push(line);
-      }
-    }
-
-    // Add the last dialog if any
-    if (currentCharacter && currentDialog.length > 0) {
-      result.lines.push({
-        character: currentCharacter,
-        text: currentDialog.join(' ').trim(),
-        dialog: currentDialog.join(' ').trim(),
-        isSceneHeading: false,
-        isDirection: false
-      });
-    }
-
-    return result;
   }
 
   static fromStructuredText(content) {
