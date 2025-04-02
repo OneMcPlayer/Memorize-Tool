@@ -40,17 +40,25 @@ export function setLanguage(lang) {
  * @returns {boolean} - The new dark mode state
  */
 export function toggleDarkMode() {
-  // Directly toggle the class for immediate effect and testing reliability
-  document.body.classList.toggle('dark-mode');
-  isDarkMode = document.body.classList.contains('dark-mode');
+  // Add a console log for debugging
+  console.log('toggleDarkMode called, before toggle:', document.body.classList.contains('dark-mode'));
+  
+  // Explicitly add or remove the class instead of toggling
+  if (document.body.classList.contains('dark-mode')) {
+    document.body.classList.remove('dark-mode');
+    isDarkMode = false;
+  } else {
+    document.body.classList.add('dark-mode');
+    isDarkMode = true;
+  }
+  
+  // Add another console log after the change
+  console.log('After toggle, isDarkMode:', isDarkMode, 'Body has class:', document.body.classList.contains('dark-mode'));
+  
+  // Save to localStorage
   localStorage.setItem('darkMode', isDarkMode);
   
-  // Dispatch a custom event for any components that need to react to theme changes
-  const themeChangeEvent = new CustomEvent('themechange', { 
-    detail: { isDarkMode } 
-  });
-  document.dispatchEvent(themeChangeEvent);
-  
+  // Return the current state
   return isDarkMode;
 }
 
