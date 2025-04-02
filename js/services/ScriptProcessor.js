@@ -34,19 +34,65 @@ export class ScriptProcessor {
       .map(line => line.trim())
       .filter(line => line.length > 0);
     
-    // Process line continuations with hyphens
-    const processedLines = [];
+    // First pass: join multi-line dialogue and handle line continuations
+    const joinedLines = [];
+    let currentLine = '';
+    let pendingJoin = false;
     let lastSpeaker = null;
-    let inCharacterDialog = false;
     
     for (let i = 0; i < nonBlankLines.length; i++) {
-      let currentLine = nonBlankLines[i];
+      const line = nonBlankLines[i];
       
       // Handle line joining with hyphens
-      if (currentLine.endsWith('-') && i < nonBlankLines.length - 1) {
+      if (line.endsWith('-') && i < nonBlankLines.length - 1) {
         // Remove the hyphen and join with the next line
-        currentLine = currentLine.substring(0, currentLine.length - 1) + nonBlankLines[++i];
+        currentLine = (currentLine ? currentLine + ' ' : '') + line.substring(0, line.length - 1);
+        pendingJoin = true;
+        continue;
       }
+      
+      // Check if this is a continuation of a multi-line dialogue
+      // This happens when the previous line doesn't end with typical sentence-ending punctuation
+      // and the current line starts with lowercase or is a conjunction
+      const startsWithLowercase = /^[a-z]/.test(line);
+      const isPreviousIncomplete = currentLine && !/[.!?:;]$/.test(currentLine);
+      const isConjunctionLine = /^(?:e|ma|o|che|quindi|così|perché|inoltre)/i.test(line);
+      
+      // Join lines belonging to the same dialogue
+      if ((startsWithLowercase || isConjunctionLine) && isPreviousIncomplete && !line.includes(':') && lastSpeaker) {
+        currentLine = currentLine + ' ' + line;
+        pendingJoin = true;
+        continue;
+      }
+      
+      // Store current line if we have one pending
+      if (currentLine) {
+        joinedLines.push(currentLine);
+        
+        // Check if this was a character line to track the speaker
+        const characterMatch = currentLine.match(/^([A-Z][A-Z\s.']+):/);
+        if (characterMatch) {
+          lastSpeaker = characterMatch[1].trim();
+        }
+      }
+      
+      // Start a new line
+      currentLine = line;
+      pendingJoin = false;
+    }
+    
+    // Don't forget the last line
+    if (currentLine) {
+      joinedLines.push(currentLine);
+    }
+    
+    // Second pass: Process the joined lines
+    const processedLines = [];
+    lastSpeaker = null;
+    let inCharacterDialog = false;
+    
+    for (let i = 0; i < joinedLines.length; i++) {
+      let currentLine = joinedLines[i];
       
       // Convert square bracket stage directions to parentheses
       if (currentLine.startsWith('[') && currentLine.endsWith(']')) {
@@ -81,8 +127,8 @@ export class ScriptProcessor {
       }
       
       // Handle aggressive detection option for character names without colons
-      if (options.aggressiveDetection && /^[A-Z][A-Z\s.']+$/.test(currentLine) && i < nonBlankLines.length - 1) {
-        const nextLine = nonBlankLines[i+1];
+      if (options.aggressiveDetection && /^[A-Z][A-Z\s.']+$/.test(currentLine) && i < joinedLines.length - 1) {
+        const nextLine = joinedLines[i+1];
         if (!nextLine.includes(':') && !nextLine.startsWith('(')) {
           processedLines.push(`${currentLine}: ${nextLine}`);
           i++; // Skip the next line as we've processed it
