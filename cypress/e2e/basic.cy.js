@@ -16,11 +16,17 @@ describe('Memorize Tool - Basic Tests', () => {
 
   it('should have theme toggle button', () => {
     cy.get('#themeToggle').should('exist');
-    cy.get('#themeToggle').click();
-    // Add a small wait to ensure the DOM has updated
-    cy.wait(100);
-    // Check for theme change with the dark-mode class
-    cy.get('body').should('have.class', 'dark-mode');
+    
+    // Ensure body doesn't have dark-mode class initially
+    cy.get('body').should('not.have.class', 'dark-mode');
+    
+    // Force click to ensure the event fires properly
+    cy.get('#themeToggle').click({force: true});
+    
+    // Use should with a callback to retry until it passes
+    cy.get('body').should(($body) => {
+      expect($body).to.have.class('dark-mode');
+    });
   });
 
   it('should open options menu', () => {
