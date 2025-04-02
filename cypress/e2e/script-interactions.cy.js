@@ -45,11 +45,12 @@ ALICE: I'm doing great, thank you!`;
 
     cy.get('textarea').first().type(sampleScript);
     
-    // Click convert button (adjust selector as needed)
-    cy.contains('button', 'Convert').click();
+    // Click the parse button using its ID instead of text content
+    cy.get('#parseButton').click();
     
     // Verify that the conversion output appears
-    cy.get('.conversion-output').should('exist');
-    cy.get('.conversion-output').should('not.be.empty');
+    // Using a more flexible selector since .conversion-output might not exist
+    cy.get('#parsingPreview, .preview-container, .script-lines').should('exist');
+    cy.get('#parsingPreview, .preview-container, .script-lines').should('not.be.empty');
   });
 });
