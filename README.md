@@ -3,7 +3,7 @@
 A modern, browser-based application designed to help actors and theater students effectively memorize their lines by practicing them in context. Built with vanilla JavaScript, CSS, and HTML for maximum portability and ease of use without dependencies.
 
 ![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
-![Tests](https://img.shields.io/badge/tests-54_tests-blue.svg)
+![Tests](https://img.shields.io/badge/tests-109_tests-blue.svg)
 
 ## 📖 Overview
 

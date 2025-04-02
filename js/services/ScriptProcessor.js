@@ -168,9 +168,17 @@ export class ScriptProcessor {
         continue;
       }
 
+      // Handle entrance and exit stage directions
+      if (possibleStageDirectionsPattern.test(line) && !line.startsWith('(') && !line.endsWith(')')) {
+        // Wrap entrance/exit text in parentheses
+        line = `(${line})`;
+        processedLines.push(line);
+        continue;
+      }
+      
       // Handle stage directions (both single and multiline)
       if ((line.startsWith('(') || line.startsWith('[')) && !isMultilineStageDirection || 
-          possibleStageDirectionsPattern.test(line) || isStageDirection) {
+          isStageDirection) {
         
         isStageDirection = true;
         // Check if this is the start of a multiline direction
@@ -188,8 +196,7 @@ export class ScriptProcessor {
         // Convert all stage directions to standard parentheses format
         if (line.startsWith('[') && line.endsWith(']')) {
           line = '(' + line.substring(1, line.length - 1) + ')';
-        } else if (!line.startsWith('(') && !line.endsWith(')') && 
-                  (possibleStageDirectionsPattern.test(line) || line.startsWith('Entra') || line.startsWith('Esce'))) {
+        } else if (!line.startsWith('(') && !line.endsWith(')')) {
           // If it's a stage direction without parentheses, wrap it
           line = `(${line})`;
         }
@@ -197,8 +204,9 @@ export class ScriptProcessor {
         processedLines.push(line);
         
         // Check if the stage direction ends on this line
-        if ((line.endsWith(')') || line.endsWith(']')) && !isMultilineStageDirection) {
+        if ((line.endsWith(')') || line.endsWith(']'))) {
           isStageDirection = false;
+          isMultilineStageDirection = false;
         }
         continue;
       }
@@ -319,7 +327,7 @@ export class ScriptProcessor {
 
             // Special handling for hyphenated line breaks - join without space
             if (currentLine.endsWith('-')) {
-              // Remove the hyphen and join directly to the next line
+              // Remove the hyphen and join directly to the next line without adding a space
               currentLine = currentLine.substring(0, currentLine.length - 1) + line;
             } else {
               const connector = shouldAddSpace ? ' ' : '';
@@ -338,310 +346,267 @@ export class ScriptProcessor {
                 currentLine = '';
                 inCharacterDialogue = false;
               } else {
-                // Continue the dialogue with the current line
+                // Regular continuing dialogue
                 currentLine += connector + line;
               }
             }
-          } else if (lastCharacterName && !isStageDirection && isPlainText(line)) {
-            // For plain text that is not a character name, stage direction, etc.
-            // This is either a normal line or a continuation
-            currentLine = line;
-          } else if (isCharacterList) {
-            // If we're in a character list section, process the line as is
-            processedLines.push(line);
-            currentLine = '';
           } else {
-            // This is just a line without a character associated
+            // Not continuing dialogue - add the line as is
+            if (currentLine) {
+              processedLines.push(currentLine);
+            }
             currentLine = line;
           }
         }
       }
-
-      // Check if multiline stage direction is ending
-      if (isMultilineStageDirection && (line.includes(')') || line.includes(']'))) {
-        isMultilineStageDirection = false;
-      }
-      
-      // Check if stage direction is ending
-      if ((line.endsWith(')') || line.endsWith(']')) && !isMultilineStageDirection) {
-        isStageDirection = false;
-      }
     }
-
+    
+    // Don't forget to add the last line if it exists
     if (currentLine) {
-      // Ensure we don't have any trailing colons or unnecessary spaces
-      if (currentLine.endsWith(': ') && !inCharacterDialogue) {
-        currentLine = currentLine.slice(0, -2);
-      }
       processedLines.push(currentLine);
     }
-
+    
     return processedLines;
   }
 
   /**
-   * Extract lines spoken by a specific character.
+   * Extract all lines spoken by a specific character
    * @param {string[]} scriptLines - Processed script lines
-   * @param {string|Array|Object} characterData - Character name or data
-   * @param {number} precedingCount - Number of preceding lines to include
-   * @returns {Array} - Extracted character lines
+   * @param {string|string[]|object} character - Character identifier (name, array of names, or character object)
+   * @param {number} precedingLines - Number of context lines to include before each character line
+   * @returns {Array<{line: string, index: number, speaker: string, isPreceding: boolean}>}
    */
-  static extractCharacterLines(scriptLines, characterData, precedingCount = 0) {
+  static extractCharacterLines(scriptLines, character, precedingLines = 0) {
     if (!scriptLines || !scriptLines.length) {
       console.warn('No script lines provided for character extraction');
       return [];
     }
     
-    if (!characterData) {
+    if (!character) {
       console.warn('No character data provided for extraction');
       return [];
     }
     
-    // Handle either string, array, or object with aliases
-    let characterAliases;
-    if (typeof characterData === 'string') {
-      characterAliases = [characterData];
-    } else if (Array.isArray(characterData)) {
-      characterAliases = characterData;
-    } else if (characterData?.aliases) {
-      // Use all aliases including primary name
-      characterAliases = [characterData.primaryName, ...characterData.aliases];
+    // Normalize character data to an array of possible names
+    let characterNames = [];
+    if (typeof character === 'string') {
+      characterNames = [character];
+    } else if (Array.isArray(character)) {
+      characterNames = character;
+    } else if (character.primaryName) {
+      characterNames = [character.primaryName];
+      if (character.aliases && Array.isArray(character.aliases)) {
+        characterNames = characterNames.concat(character.aliases);
+      }
     } else {
       throw new Error('Invalid character data provided');
     }
     
-    // Filter out empty aliases
-    characterAliases = characterAliases.filter(alias => alias && typeof alias === 'string');
+    // Extract character's lines and preceding context
+    const characterLines = [];
+    let contextBuffer = [];
     
-    if (!characterAliases.length) {
-      console.warn('No valid character aliases found');
-      return [];
-    }
-
-    // Create regex pattern that matches any alias
-    const escapedAliases = characterAliases.map(alias => 
-      alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    );
-    
-    // Pattern to match character lines, either directly or with inline stage directions
-    const regexPattern = `^\\s*(${escapedAliases.join('|')})\\s*:|^\\s*(${escapedAliases.join('|')})\\s+\\([^)]+\\):`;
-    
-    const regex = new RegExp(regexPattern, "i");
-    
-    console.debug(`Character regex pattern: ${regexPattern}`);
-    
-    // First pass: collect all the target character's line indices
-    const characterLineIndices = [];
     for (let i = 0; i < scriptLines.length; i++) {
-      if (regex.test(scriptLines[i])) {
-        characterLineIndices.push(i);
-      }
-    }
-    
-    // Second pass: construct result with preceding lines
-    const extractedLines = [];
-    for (let i = 0; i < characterLineIndices.length; i++) {
-      const targetIndex = characterLineIndices[i];
+      const line = scriptLines[i];
       
-      // Add the preceding context lines if requested
-      if (precedingCount > 0) {
-        // Calculate the start index for preceding lines
-        let startIndex = Math.max(0, targetIndex - precedingCount);
+      // Extract speaker from the line if present
+      let speaker = null;
+      const colonIndex = line.indexOf(':');
+      if (colonIndex > 0) {
+        speaker = line.substring(0, colonIndex).trim();
+      }
+      
+      // Keep track of recent lines for context
+      if (precedingLines > 0) {
+        contextBuffer.push({ 
+          line, 
+          index: i, 
+          speaker,
+          isPreceding: true
+        });
         
-        // Add each preceding line up to (but not including) the target line
-        for (let j = startIndex; j < targetIndex; j++) {
-          extractedLines.push({
-            index: j,
-            line: scriptLines[j],
-            speaker: scriptLines[j].match(/^([^:]+):/)?.[1]?.trim() || '',
-            isPreceding: true
-          });
+        // Keep the buffer at the right size
+        if (contextBuffer.length > precedingLines) {
+          contextBuffer.shift();
         }
       }
       
-      // Add the target character line itself
-      extractedLines.push({
-        index: targetIndex,
-        line: scriptLines[targetIndex],
-        speaker: scriptLines[targetIndex].match(/^([^:]+):/)?.[1]?.trim() || '',
-        isPreceding: false
-      });
+      // Check if this is a line by our target character
+      const isCharacterLine = speaker && characterNames.some(name => 
+        speaker === name || speaker.startsWith(name + ' (')
+      );
+      
+      if (isCharacterLine) {
+        // Add preceding context if requested
+        if (precedingLines > 0) {
+          // Add all except this line from the context buffer
+          for (let j = 0; j < contextBuffer.length - 1; j++) {
+            characterLines.push(contextBuffer[j]);
+          }
+          contextBuffer = [];
+        }
+        
+        // Add the character's line itself
+        characterLines.push({ 
+          line, 
+          index: i, 
+          speaker,
+          isPreceding: false
+        });
+      }
     }
     
-    console.debug(`Extracted ${extractedLines.length} lines for character (including ${precedingCount} preceding lines per match)`);
-    return extractedLines;
+    return characterLines;
   }
-
+  
   /**
-   * Extract roles from an array of processed script lines.
-   * @param {string[]} scriptLines - An array of processed script lines
-   * @returns {Array<{primaryName: string, aliases: string[], description: string}>} - Array of role objects
+   * Extract all character roles from plain text script lines
+   * @param {string[]} scriptLines - Processed script lines
+   * @returns {Array<{primaryName: string, aliases: string[], isTitled: boolean, description: string}>}
    */
   static extractRolesFromPlainText(scriptLines) {
     if (!scriptLines || !scriptLines.length) {
       console.warn('No script lines provided for role extraction');
       return [];
     }
-
-    const rolesMap = new Map();
     
+    const roles = new Map(); // Using a Map to ensure uniqueness by character name
+    let inCharacterList = false;
+    
+    // Common patterns
+    const characterPattern = /^([A-Z][A-Za-z0-9_\s''\-\.]+)(?:\s*:)/;
+    const characterListEntryPattern = /^([A-Z][A-Za-z0-9_\s''\-\.]+)(?:\s*[-–]\s*)(.+)$/;
+    const characterListSectionPattern = /^(?:Characters|Personaggi|PERSONAGGI|CHARACTERS|Dramatis\s+Personae):/i;
+    const actSceneMarkerPattern = /^(?:ACT|SCENE|ATTO|SCENA|ATTO\s+[\w]+(?:,|\s)\s*SCENA\s+[\w]+)/i;
+    
+    // Skip these common script elements
     const skipPatterns = [
-      /^\(.*\)$/,                      // Stage directions
-      /^(?:entra|esce|detti)/i,        // Stage directions in Italian
-      /^la scena/i,                    // Scene descriptions in Italian
-      /^(?:sipario|atto|scena)/i,      // Act/scene markers in Italian
-      /^act|scene/i,                   // Act/scene markers in English
-      /^enter|exit/i,                  // Enter/exit in English
-      /^poi|quindi|the curtain|il sipario|personaggi|characters/i, // Additional markers
+      /^ACT\s+[\w]+$/i,
+      /^SCENE\s+[\w]+$/i,
+      /^ATTO\s+[\w]+$/i, 
+      /^SCENA\s+[\w]+$/i,
+      /^\(.*\)$/, // Stage directions
+      /^\[.*\]$/, // Alternative stage directions
+      /^La scena rappresenta/i, // Scene descriptions
+      /^The scene is set/i,
+      /^sipario/i, // Curtain
+      /^entra(?:no)?/i, // Entrances
+      /^esce(?:ono)?/i, // Exits
+      /^exit(?:s)?/i,
+      /^enter(?:s)?/i
     ];
 
-    const addRole = (name, description = '') => {
-      const cleanName = name.trim().replace(/\s+/g, ' ');
-      if (!rolesMap.has(cleanName) && cleanName.length > 1) {
-        // Check if the name has a title like SIGNORA, Sig., etc.
-        const isTitled = /^(SIGNOR[A|E|I]?|DOTTOR[ESSA]?|PROFESSOR[ESSA]?|Sig\.|Dott\.|Prof\.)/i.test(cleanName);
-        
-        rolesMap.set(cleanName, {
-          primaryName: cleanName,
-          aliases: [cleanName],
-          description: description,
-          isTitled: isTitled
-        });
-      } else if (rolesMap.has(cleanName) && description && !rolesMap.get(cleanName).description) {
-        // Update existing role with description if not already set
-        const role = rolesMap.get(cleanName);
-        role.description = description;
-        rolesMap.set(cleanName, role);
-      }
-    };
-    
-    // Check for structured character list like "CHARACTER - Description"
-    const charDescPattern = /^([A-Z][A-Za-z0-9_\s''.\-]+)\s+-\s+(.+)$/;
-    
-    // Check for character lists like "Characters: John, Mary, etc."
-    let inCharacterList = false;
-    let characterListSectionEnded = false;
-    
-    // Improved extraction logic
-    let previousLine = '';
-    let inDialogue = false;
-    
     for (let i = 0; i < scriptLines.length; i++) {
       const line = scriptLines[i].trim();
-      if (!line) {
-        inDialogue = false;
-        previousLine = line;
+      
+      if (!line) continue; // Skip empty lines
+      
+      // Skip common script elements that aren't character names
+      if (skipPatterns.some(pattern => pattern.test(line)) || actSceneMarkerPattern.test(line)) {
         continue;
       }
       
-      // Check if this is a character list section header
-      if (/^(?:Characters|Personaggi|PERSONAGGI|CHARACTERS|Dramatis\s+Personae):/i.test(line)) {
+      // Check if we're entering a character list section
+      if (characterListSectionPattern.test(line)) {
         inCharacterList = true;
-        characterListSectionEnded = false;
         continue;
       }
       
-      // If in a character list section, process differently
-      if (inCharacterList && !characterListSectionEnded) {
-        // Check if the character list section has ended
-        if (skipPatterns.some(pattern => pattern.test(line)) || 
-            /^[A-Z][\w\s]+:/.test(line) || // Dialogue line with character name
-            line.startsWith('(') || line.startsWith('[')) { // Stage direction
-          characterListSectionEnded = true;
-          inCharacterList = false;
-        } else {
-          // This might be a character with description
-          const charDescMatch = line.match(charDescPattern);
-          if (charDescMatch) {
-            addRole(charDescMatch[1], charDescMatch[2]);
-          } else {
-            // Could be a list of characters on one line
-            const possibleCharacters = line.split(/,|\se\s|\sand\s/).map(s => s.trim()).filter(s => s.length > 0);
-            if (possibleCharacters.length > 0) {
-              possibleCharacters.forEach(char => addRole(char));
-            }
-          }
+      // If in a character list section, look for character entries (Name - Description)
+      if (inCharacterList) {
+        const characterListMatch = line.match(characterListEntryPattern);
+        if (characterListMatch) {
+          const name = characterListMatch[1].trim();
+          const description = characterListMatch[2].trim();
+          
+          // Check if the character has a title
+          const isTitled = /^(?:Sig\.|Dott\.|Prof\.|SIGNOR(?:A|E|I)?|DOTTOR(?:E|ESSA)?|PROFESSOR(?:E|ESSA)?)\s+/.test(name);
+          
+          roles.set(name, {
+            primaryName: name,
+            aliases: [],
+            isTitled,
+            description
+          });
+          
           continue;
         }
+        
+        // End of character list if we encounter a line not in character list format
+        if (line.match(characterPattern)) {
+          inCharacterList = false;
+        } else if (!line.includes('-')) {
+          // Check for a transition to dialogue or regular content
+          if (i + 1 < scriptLines.length && scriptLines[i + 1].includes(':')) {
+            inCharacterList = false;
+          }
+        }
       }
-
-      // Skip known non-character lines
-      if (skipPatterns.some(pattern => pattern.test(line))) {
-        inDialogue = false;
-        previousLine = line;
+      
+      // Process standard character dialogue format (NAME: dialogue)
+      const characterMatch = line.match(characterPattern);
+      if (characterMatch) {
+        const name = characterMatch[1].trim();
+        
+        // Check if the character has a title
+        const isTitled = /^(?:Sig\.|Dott\.|Prof\.|SIGNOR(?:A|E|I)?|DOTTOR(?:E|ESSA)?|PROFESSOR(?:E|ESSA)?)\s+/.test(name);
+        
+        if (!roles.has(name)) {
+          roles.set(name, {
+            primaryName: name,
+            aliases: [],
+            isTitled,
+            description: ''
+          });
+        }
+        
         continue;
       }
-
-      const namePatterns = [
-        /^([A-Z][A-Za-z0-9_\s''.\-]+):\s*/, // Name with colon followed by text
-        /^(Sig\.(?:ra|na)?|Dott\.(?:ssa)?|Prof\.(?:ssa)?|SIGNOR[A|E|I]?|DOTTOR[E|ESSA]?|PROFESSOR[E|ESSA]?)\s+([A-Z][A-Za-z0-9_\s''.\-]+):\s*/, // Italian title + name
-        /^([A-Z][A-Za-z0-9_\s''.\-]+(?:\s*(?:,|e|and)\s*[A-Z][A-Za-z0-9_\s''.\-]+)+)$/ // List of names
-      ];
-
-      // More accurate standalone name pattern
-      // Checks for context to confirm it's actually a character name
-      let isStandaloneCharacterName = false;
-      if (/^[A-Z][A-Za-z0-9_\s''.\-]+$/.test(line)) {
-        // It's an uppercase name, but we need more evidence it's a character
-        // Check the next line to see if it's likely dialogue
-        if (i + 1 < scriptLines.length) {
-          const nextLine = scriptLines[i + 1].trim();
-          // If next line isn't a stage direction, or empty line,
-          // this is likely a character name followed by dialogue
-          if (nextLine && 
-              !nextLine.startsWith('(') && 
-              !nextLine.startsWith('[') &&
-              !skipPatterns.some(pattern => pattern.test(nextLine))) {
-            isStandaloneCharacterName = true;
-          }
-        }
-      }
-
-      let foundCharacter = false;
       
-      // Check for character with colon first (most reliable pattern)
-      for (const pattern of namePatterns) {
+      // Process comma-separated lists of characters (e.g., "JOHN, MARY, JACK")
+      // and characters separated by "and" or "e" (Italian "and")
+      const separatedNamesPatterns = [
+        /^([A-Z][A-Za-z0-9_\s''\-\.]+)(?:,\s+)([A-Z][A-Za-z0-9_\s''\-\.]+)(?:,\s+)?([A-Z][A-Za-z0-9_\s''\-\.]+)?(?:,\s+)?([A-Z][A-Za-z0-9_\s''\-\.]+)?/,
+        /^([A-Z][A-Za-z0-9_\s''\-\.]+)(?:\s+and\s+)([A-Z][A-Za-z0-9_\s''\-\.]+)/,
+        /^([A-Z][A-Za-z0-9_\s''\-\.]+)(?:\s+e\s+)([A-Z][A-Za-z0-9_\s''\-\.]+)/
+      ];
+      
+      for (const pattern of separatedNamesPatterns) {
         const match = line.match(pattern);
         if (match) {
-          // If it's the Italian title pattern, combine title and name
-          if (pattern.toString().includes('Sig') || pattern.toString().includes('SIGNOR')) {
-            const title = match[1];
-            const name = match[2];
-            addRole(`${title} ${name}`);
-          } 
-          // Check for multiple names (separated by commas, 'e', or 'and')
-          else if (match[1].includes(',') || match[1].includes(' e ') || match[1].includes(' and ')) {
-            match[1].split(/(?:\s*,\s*|\s+e\s+|\s+and\s+)/).forEach(name => addRole(name));
-          } else {
-            addRole(match[1]);
+          // Process each captured group (may contain null for optional captures)
+          for (let j = 1; j < match.length; j++) {
+            if (match[j]) {
+              const name = match[j].trim();
+              if (!roles.has(name) && name.length > 0) {
+                const isTitled = /^(?:Sig\.|Dott\.|Prof\.|SIGNOR(?:A|E|I)?|DOTTOR(?:E|ESSA)?|PROFESSOR(?:E|ESSA)?)\s+/.test(name);
+                
+                roles.set(name, {
+                  primaryName: name,
+                  aliases: [],
+                  isTitled,
+                  description: ''
+                });
+              }
+            }
           }
-          foundCharacter = true;
-          inDialogue = pattern.toString().includes(':');
-          break;
+          break; // Break after first matching pattern
         }
       }
-
-      // If no character found via patterns but we identified a standalone name
-      if (!foundCharacter && isStandaloneCharacterName) {
-        addRole(line);
-        inDialogue = true;
-      }
-      
-      previousLine = line;
     }
     
-    // Convert map to array for compatibility with existing code
-    return Array.from(rolesMap.values());
+    // Convert the map to an array for the final result
+    return Array.from(roles.values());
   }
   
   /**
-   * Main entry point for parsing non-structured scripts.
-   * This method coordinates the parsing of plain text scripts and returns a complete result.
+   * Parse a non-structured script text into a structured format
    * @param {string} scriptText - The raw script text
    * @param {object} options - Parsing options
-   * @returns {object} - Complete parsed script information
+   * @returns {object} - Structured script data
    */
   static parseNonStructuredScript(scriptText, options = {}) {
+    // Default value for empty scripts
     if (!scriptText) {
       return {
         title: '',
@@ -656,280 +621,220 @@ export class ScriptProcessor {
       };
     }
     
-    // Process the script to normalize it with aggressive detection for better results
-    const processedLines = this.preProcessScript(scriptText, { ...options, aggressiveDetection: true });
-    
-    // Extract roles
-    const roles = this.extractRolesFromPlainText(processedLines);
+    // Process the raw text into standardized lines
+    const processedLines = this.preProcessScript(scriptText, options);
     
     // Extract basic metadata
-    const metadata = this.#extractBasicMetadata(scriptText);
+    let title = '';
+    let author = '';
+    let date = '';
+    let description = '';
     
-    // Process into structured lines with characters, dialog, etc.
-    const parsedLines = this.#processIntoStructuredLines(processedLines);
+    // First line is typically the title
+    if (processedLines.length > 0) {
+      title = processedLines[0];
+    }
     
-    return {
-      title: metadata.title || '',
-      metadata,
-      roles,
-      processedLines, // Raw processed lines
-      lines: parsedLines // Structured line objects
-    };
-  }
-  
-  /**
-   * Extract basic metadata from script text
-   * @private
-   * @param {string} scriptText - The script text
-   * @returns {Object} - Extracted metadata
-   */
-  static #extractBasicMetadata(scriptText) {
-    const metadata = {
-      title: '',
-      author: '',
-      date: '',
-      description: ''
-    };
-    
-    // Try to extract title from first line
-    const lines = scriptText.split('\n');
-    if (lines.length > 0) {
-      const potentialTitle = lines[0].trim();
-      if (potentialTitle && !potentialTitle.includes(':') && 
-          !potentialTitle.startsWith('(') && !potentialTitle.startsWith('[')) {
-        metadata.title = potentialTitle;
-        
-        // If the second line looks like a subtitle or description, add it
-        if (lines.length > 1 && lines[1].trim() && 
-            !lines[1].includes(':') && !lines[1].startsWith('(') && !lines[1].startsWith('[')) {
-          metadata.description = lines[1].trim();
+    // Look for scene descriptions and other metadata
+    for (let i = 1; i < Math.min(10, processedLines.length); i++) {
+      const line = processedLines[i];
+      
+      // Scene descriptions often contain key metadata
+      if (line.startsWith('(')) {
+        if (!description) {
+          description = line.replace(/^\(|\)$/g, '').trim();
         }
       }
       
-      // Look for specific metadata markers
-      lines.slice(0, 15).forEach(line => {
-        const titleMatch = line.match(/^(?:TITLE|TITLE:|TITOLO|TITOLO:)\s*(.+)/i);
-        const authorMatch = line.match(/^(?:BY|AUTHOR|AUTHOR:|AUTORE|AUTORE:|DI)\s*(.+)/i);
-        const dateMatch = line.match(/^(?:DATE|DATE:|DATA|DATA:)\s*(.+)/i);
-        const descMatch = line.match(/^(?:DESCRIPTION|DESCRIPTION:|DESCRIZIONE|DESCRIZIONE:)\s*(.+)/i);
-        
-        if (titleMatch) metadata.title = titleMatch[1].trim();
-        if (authorMatch) metadata.author = authorMatch[1].trim();
-        if (dateMatch) metadata.date = dateMatch[1].trim();
-        if (descMatch) metadata.description = descMatch[1].trim();
-      });
+      // Look for possible author
+      if (line.match(/^By\s+|^Di\s+|^Author:?\s+|^Autore:?\s+/i) && !author) {
+        author = line.replace(/^By\s+|^Di\s+|^Author:?\s+|^Autore:?\s+/i, '').trim();
+      }
       
-      // Look for scene descriptions that might contain location info
-      const sceneDescPattern = /^(?:La\s+scena|The\s+scene|SCENA|SCENE)\s+(?:rappresenta|è|si\s+svolge|shows|is|takes\s+place\s+in)\s+(.+)/i;
-      lines.slice(0, 20).forEach(line => {
-        const sceneMatch = line.match(sceneDescPattern);
-        if (sceneMatch && !metadata.description) {
-          metadata.description = sceneMatch[0].trim();
-        }
-      });
+      // Look for possible date
+      const dateMatch = line.match(/\b((?:19|20)\d{2})\b/);
+      if (dateMatch && !date) {
+        date = dateMatch[1];
+      }
     }
     
-    return metadata;
-  }
-  
-  /**
-   * Process lines into structured format with character, text, dialog properties
-   * @private
-   * @param {string[]} processedLines - Pre-processed script lines
-   * @returns {Array} - Structured line objects
-   */
-  static #processIntoStructuredLines(processedLines) {
+    // Extract all character roles from the processed lines
+    const roles = this.extractRolesFromPlainText(processedLines);
+    
+    // Convert processed lines to structured format
     const structuredLines = [];
-    let currentCharacter = null;
-    
-    // Improved pattern for scene headings
-    const sceneHeadingPattern = /^(?:ACT|SCENE|ATTO|SCENA|ACT \w+,?\s+SCENE \w+)/i;
-    
-    // Pattern for stage directions
-    const stageDirectionPattern = /^\(.*\)$|^\[.*\]$|^Entra(?:no)?|^Exit(?:s)?|^Enter(?:s)?|^Esce|^Escono|^Detti/i;
-    
-    // Pattern for character lists
-    const characterListPattern = /^(?:Characters|Personaggi|PERSONAGGI|Dramatis\s+Personae)/i;
-    
-    // First line is typically the title, don't include it in dialogue counts
-    let isFirstLine = true;
     
     for (let i = 0; i < processedLines.length; i++) {
-      const line = processedLines[i].trim();
-      if (!line) continue;
+      const line = processedLines[i];
       
-      // Skip title on first line
-      if (isFirstLine) {
-        structuredLines.push({
-          character: null,
-          speaker: null,
-          text: line,
-          isSceneHeading: false,
-          isDirection: false,
-          isTitle: true
-        });
-        isFirstLine = false;
+      // Skip the title line which we already processed
+      if (i === 0 && line === title) {
         continue;
       }
       
-      // Check for scene headings
-      if (sceneHeadingPattern.test(line)) {
-        structuredLines.push({
-          character: null,
-          speaker: null,
-          text: line,
-          isSceneHeading: true,
-          isDirection: false
-        });
+      const structuredLine = {
+        index: i,
+        text: line,
+        character: null,
+        dialogue: '',
+        isDirection: false,
+        isSceneHeading: false
+      };
+      
+      // Check if this is a stage direction
+      if (line.startsWith('(') && line.endsWith(')')) {
+        structuredLine.isDirection = true;
+        structuredLine.text = line.substring(1, line.length - 1);
+        structuredLines.push(structuredLine);
         continue;
       }
       
-      // Check for character lists
-      if (characterListPattern.test(line)) {
-        structuredLines.push({
-          character: null,
-          speaker: null,
-          text: line,
-          isSceneHeading: false,
-          isDirection: false,
-          isCharacterList: true
-        });
+      // Check if this is a scene or act heading
+      if (line.match(/^(?:ACT|SCENE|ATTO|SCENA)\s+[\w]+/i)) {
+        structuredLine.isSceneHeading = true;
+        structuredLines.push(structuredLine);
         continue;
       }
       
-      // Check for stage directions
-      if (stageDirectionPattern.test(line)) {
-        structuredLines.push({
-          character: null,
-          speaker: null,
-          text: line,
-          isSceneHeading: false,
-          isDirection: true
-        });
-        continue;
-      }
-      
-      // Check for character dialog
-      const characterMatch = line.match(/^([^:]+):\s*(.*)/);
-      if (characterMatch) {
-        currentCharacter = characterMatch[1].trim();
-        const dialogText = characterMatch[2].trim();
+      // Parse character dialogue
+      const colonIndex = line.indexOf(':');
+      if (colonIndex > 0) {
+        const characterName = line.substring(0, colonIndex).trim();
+        const dialogue = line.substring(colonIndex + 1).trim();
         
-        structuredLines.push({
-          character: currentCharacter,
-          speaker: currentCharacter,
-          text: line,
-          dialog: dialogText,
-          isSceneHeading: false,
-          isDirection: false
-        });
-      } else if (currentCharacter) {
-        // This could be continued dialog, but we're not sure
-        // In a more sophisticated version, we might append to the previous entry
-        structuredLines.push({
-          character: null,
-          speaker: null,
-          text: line,
-          isSceneHeading: false,
-          isDirection: false
-        });
-      } else {
-        // Just a line of text without clear attribution
-        structuredLines.push({
-          character: null,
-          speaker: null,
-          text: line,
-          isSceneHeading: false,
-          isDirection: false
-        });
+        structuredLine.character = characterName;
+        structuredLine.dialogue = dialogue;
       }
+      
+      structuredLines.push(structuredLine);
     }
     
-    return structuredLines;
+    return {
+      title,
+      metadata: { title, author, date, description },
+      roles,
+      lines: structuredLines
+    };
   }
-  
+
   /**
    * Extract scenes from processed script lines
    * @param {string[]} processedLines - Processed script lines
-   * @returns {Array} - Extracted scenes
+   * @returns {Array<{title: string, description: string, location: string, time: string, lines: string[]}>}
    */
   static extractScenes(processedLines) {
-    // Look for scene markers like "ACT I", "SCENE 1", "ATTO PRIMO", etc.
-    const sceneMarkerRegex = /^(ACT|SCENE|ATTO|SCENA|ACT \w+,?\s+SCENE \w+)/i;
+    if (!processedLines || !processedLines.length) {
+      return [{ title: '', description: '', location: '', time: '', lines: [] }];
+    }
     
-    let scenes = [];
+    const scenes = [];
     let currentScene = {
-      title: 'Scene 1',
+      title: '',
+      description: '',
       location: '',
       time: '',
-      description: '',
       lines: []
     };
     
-    // Look for settings lines that might indicate location/time
-    const settingRegex = /^(SETTING|LOCATION|TIME|PLACE|LUOGO|DATA|ORA):\s*(.+)$/i;
+    let currentAct = '';
+    let inSceneDescription = false;
     
-    // Look for scene descriptions
-    const sceneDescPattern = /^(?:La\s+scena|The\s+scene|SCENA|SCENE)\s+(?:rappresenta|è|si\s+svolge|shows|is|takes\s+place\s+in)\s+(.+)/i;
+    // Patterns for scene and act headers
+    const sceneHeaderPattern = /^(?:SCENE|SCENA)\s+[\w]+/i;
+    const actHeaderPattern = /^(?:ACT|ATTO)\s+[\w]+/i;
+    const combinedHeaderPattern = /^(?:ATTO|ACT)\s+[\w]+(?:,|\s)\s*(?:SCENA|SCENE)\s+[\w]+/i;
     
-    processedLines.forEach(line => {
-      // Check if it's a scene description
-      const descMatch = line.match(sceneDescPattern);
-      if (descMatch && !currentScene.description) {
-        if (line.startsWith('(') && line.endsWith(')')) {
-          currentScene.description = line.substring(1, line.length - 1).trim();
-        } else {
-          currentScene.description = line.trim();
-        }
-        return;
+    // Patterns for scene description parts
+    const locationPattern = /^(?:LOCATION|LUOGO|POSTO|PLACE):\s+(.+)$/i;
+    const timePattern = /^(?:TIME|TEMPO|ORA):\s+(.+)$/i;
+    
+    for (let i = 0; i < processedLines.length; i++) {
+      const line = processedLines[i].trim();
+      
+      // Skip empty lines
+      if (!line) continue;
+      
+      // Check for act header
+      if (actHeaderPattern.test(line)) {
+        currentAct = line;
+        continue;
       }
       
-      // Check if it's a scene marker
-      const sceneMatch = line.match(sceneMarkerRegex);
-      if (sceneMatch) {
-        // Save current scene if it has content
-        if (currentScene.lines.length > 0 || currentScene.description) {
+      // Check for combined act and scene header
+      if (combinedHeaderPattern.test(line)) {
+        // Start a new scene
+        if (currentScene.lines.length > 0) {
           scenes.push(currentScene);
         }
         
-        // Start a new scene
         currentScene = {
-          title: line.trim(),
+          title: line,
+          description: '',
           location: '',
           time: '',
-          description: '',
           lines: []
         };
-        return;
+        inSceneDescription = true;
+        continue;
       }
       
-      // Check if it's a setting line
-      const settingMatch = line.match(settingRegex);
-      if (settingMatch) {
-        const settingType = settingMatch[1].toLowerCase();
-        const value = settingMatch[2].trim();
-        
-        if (settingType === 'setting' || settingType === 'location' || 
-            settingType === 'place' || settingType === 'luogo') {
-          currentScene.location = value;
-        } else if (settingType === 'time' || settingType === 'ora' || settingType === 'data') {
-          currentScene.time = value;
+      // Check for scene header
+      if (sceneHeaderPattern.test(line)) {
+        // Start a new scene
+        if (currentScene.lines.length > 0) {
+          scenes.push(currentScene);
         }
-        return;
+        
+        currentScene = {
+          title: line,
+          description: '',
+          location: '',
+          time: '',
+          lines: []
+        };
+        inSceneDescription = true;
+        continue;
       }
       
-      // Otherwise, add to current scene
+      // Process scene description parts
+      if (inSceneDescription) {
+        const locationMatch = line.match(locationPattern);
+        if (locationMatch) {
+          currentScene.location = locationMatch[1];
+          continue;
+        }
+        
+        const timeMatch = line.match(timePattern);
+        if (timeMatch) {
+          currentScene.time = timeMatch[1];
+          continue;
+        }
+        
+        // Assume this is a general scene description if it doesn't match specific patterns
+        // and it's right after the scene header
+        if (!currentScene.description && !line.includes(':')) {
+          // Remove parentheses if this is a wrapped stage direction
+          if (line.startsWith('(') && line.endsWith(')')) {
+            currentScene.description = line.substring(1, line.length - 1);
+          } else {
+            currentScene.description = line;
+          }
+          continue;
+        }
+        
+        // End of scene description when we hit a character dialogue line
+        if (line.includes(':')) {
+          inSceneDescription = false;
+        }
+      }
+      
+      // Add line to current scene
       currentScene.lines.push(line);
-    });
-    
-    // Add the final scene if it has content
-    if (currentScene.lines.length > 0 || currentScene.description) {
-      scenes.push(currentScene);
     }
     
-    // If no scenes were explicitly marked, treat the whole script as one scene
-    if (scenes.length === 0 && (currentScene.lines.length > 0 || currentScene.description)) {
-      scenes = [currentScene];
+    // Don't forget to add the last scene
+    if (currentScene.lines.length > 0 || scenes.length === 0) {
+      scenes.push(currentScene);
     }
     
     return scenes;
