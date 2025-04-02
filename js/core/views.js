@@ -27,7 +27,6 @@ export function renderInputView() {
       <button class="tab-btn" data-tab="paste">📝 ${t.pasteModeTab}</button>
       <button class="tab-btn" data-tab="file">📁 ${t.fileModeTab}</button>
       <button class="tab-btn active" data-tab="library">📚 ${t.libraryModeTab}</button>
-      <button class="tab-btn" data-tab="convert">🔄 ${t.converterTab || 'Script Converter'}</button>
     </div>
     ` : `
     <div class="input-tabs">
@@ -41,10 +40,6 @@ export function renderInputView() {
     <div class="tab-content hidden" id="file-tab">
       <input type="file" id="scriptFile" accept=".script">
       <p class="help-text">${t.formatHelp}</p>
-    </div>
-    <div class="tab-content hidden" id="convert-tab">
-      <button id="openConverterButton" class="full-width">${t.openConverter || 'Open Script Converter'}</button>
-      <p class="help-text">${t.converterHelp || 'Convert plain text scripts to a structured format with character detection'}</p>
     </div>
     ` : ''}
     <div class="tab-content" id="library-tab">
