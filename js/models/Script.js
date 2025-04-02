@@ -1,4 +1,4 @@
-import { parseRolesBlock } from '/Memorize-Tool/js/utils/rolesHelper.js';
+import { parseRolesBlock } from '../utils/rolesHelper.js';
 
 export class Script {
   constructor() {

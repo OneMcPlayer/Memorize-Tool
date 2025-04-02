@@ -1,7 +1,7 @@
 import { Script } from '../../js/models/Script.js';
 
 // Mock the imported module
-jest.mock('/Memorize-Tool/js/utils/rolesHelper.js', () => ({
+jest.mock('../../js/utils/rolesHelper.js', () => ({
   parseRolesBlock: jest.fn((line) => {
     // Simple mock implementation that returns a role object
     const parts = line.split(':');
