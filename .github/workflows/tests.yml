@@ -21,9 +21,8 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-        # Disable npm cache to avoid the dependency resolution error
-        cache: 'npm'
-        cache-dependency-path: '**/package-lock.json'
+        # Disable npm cache completely
+        cache: false
     
     - name: Install dependencies
       run: npm install
@@ -42,9 +41,8 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: '18.x'
-        # Disable npm cache to avoid dependency resolution errors
-        cache: 'npm'
-        cache-dependency-path: '**/package-lock.json'
+        # Disable npm cache completely
+        cache: false
         
     - name: Install dependencies
       run: npm install
