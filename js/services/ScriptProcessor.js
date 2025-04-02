@@ -1,4 +1,18 @@
 export class ScriptProcessor {
+  // Private helper function to match character names
+  static matchesCharacter(line, characterNames) {
+    if (!characterNames || !characterNames.length || !line) return false;
+    
+    // Check if the line starts with any character name followed by colon
+    for (const charName of characterNames) {
+      const namePattern = new RegExp(`^${charName}\\s*(?:\\(.*\\))?\\s*:`);
+      if (namePattern.test(line)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /**
    * Main method for pre-processing script text into standardized format.
    * This is the central parsing function for non-structured scripts.
@@ -22,6 +36,9 @@ export class ScriptProcessor {
     
     // Process line continuations with hyphens
     const processedLines = [];
+    let lastSpeaker = null;
+    let inCharacterDialog = false;
+    
     for (let i = 0; i < nonBlankLines.length; i++) {
       let currentLine = nonBlankLines[i];
       
@@ -29,6 +46,11 @@ export class ScriptProcessor {
       if (currentLine.endsWith('-') && i < nonBlankLines.length - 1) {
         // Remove the hyphen and join with the next line
         currentLine = currentLine.substring(0, currentLine.length - 1) + nonBlankLines[++i];
+      }
+      
+      // Convert square bracket stage directions to parentheses
+      if (currentLine.startsWith('[') && currentLine.endsWith(']')) {
+        currentLine = `(${currentLine.substring(1, currentLine.length - 1)})`;
       }
       
       // Detect Italian stage directions like "Detti, Poi, etc."
@@ -41,6 +63,53 @@ export class ScriptProcessor {
       if (/^(Entra|Entrano|Esce|Escono)/.test(currentLine) && !currentLine.startsWith('(')) {
         processedLines.push(`(${currentLine})`);
         continue;
+      }
+      
+      // Process quoted format like "CHARACTER": """Dialog"""
+      const quotedFormatMatch = currentLine.match(/"([^"]+)":\s*"""([^"]*)"""/);
+      if (quotedFormatMatch) {
+        currentLine = `${quotedFormatMatch[1]}: ${quotedFormatMatch[2]}`;
+      }
+      
+      // Detect standard character dialogue format
+      const characterMatch = currentLine.match(/^([A-Z][A-Z\s.']+):(.*)$/);
+      
+      // Process scene descriptions (usually starts with "La scena rappresenta...")
+      if (i < 5 && currentLine.match(/^La\sscena\srappresenta/i) && !currentLine.startsWith('(')) {
+        processedLines.push(`(${currentLine})`);
+        continue;
+      }
+      
+      // Handle aggressive detection option for character names without colons
+      if (options.aggressiveDetection && /^[A-Z][A-Z\s.']+$/.test(currentLine) && i < nonBlankLines.length - 1) {
+        const nextLine = nonBlankLines[i+1];
+        if (!nextLine.includes(':') && !nextLine.startsWith('(')) {
+          processedLines.push(`${currentLine}: ${nextLine}`);
+          i++; // Skip the next line as we've processed it
+          continue;
+        }
+      }
+      
+      // Handle character names without dialogue
+      if (currentLine.match(/^[A-Z][A-Z\s.']+:$/)) {
+        processedLines.push(`${currentLine} `);
+        continue;
+      }
+      
+      // Handle continued dialogue
+      const startsWithUppercaseLetter = /^[A-Z]/.test(currentLine);
+      if (!characterMatch && startsWithUppercaseLetter && lastSpeaker && !currentLine.startsWith('(') && inCharacterDialog) {
+        // This is likely a continuation of the previous character's dialogue
+        processedLines.push(`${currentLine}: ?`);
+        continue;
+      }
+      
+      // Update last speaker if this is a character line
+      if (characterMatch) {
+        lastSpeaker = characterMatch[1].trim();
+        inCharacterDialog = true;
+      } else if (currentLine.startsWith('(')) {
+        inCharacterDialog = false;
       }
       
       processedLines.push(currentLine);
@@ -96,7 +165,7 @@ export class ScriptProcessor {
       }
       
       // Check if this line belongs to the character
-      const isCharacterLine = matchesCharacter(line, characterNames);
+      const isCharacterLine = this.matchesCharacter(line, characterNames);
       
       if (isCharacterLine) {
         // Add preceding context if requested
@@ -135,6 +204,10 @@ export class ScriptProcessor {
     }
     
     const rolesMap = new Map();
+    const skipPatterns = [
+      /^(?:ACT|ATTO|SCENE|SCENA|SIPARIO)/i,
+      /^PERSONAGGI$/i
+    ];
     
     // Process each line
     for (let i = 0; i < scriptLines.length; i++) {
@@ -142,6 +215,64 @@ export class ScriptProcessor {
       
       // Skip stage directions
       if (line.startsWith('(') && line.endsWith(')')) {
+        continue;
+      }
+      
+      // Skip common script elements that aren't character names
+      let skipLine = false;
+      for (const pattern of skipPatterns) {
+        if (pattern.test(line)) {
+          if (line.toLowerCase() === 'personaggi:' || line.toLowerCase() === 'personaggi') {
+            // Don't skip the Personaggi heading, but process the characters below
+            if (i + 1 < scriptLines.length) {
+              // Process next few lines as character definitions
+              let j = i + 1;
+              while (j < scriptLines.length && !scriptLines[j].includes(':') && j < i + 10) {
+                const characterDef = scriptLines[j];
+                // Character definitions often are in format "NAME - description"
+                const defMatch = characterDef.match(/^([A-Z][A-Za-z0-9\s.']+)(?:\s*-\s*(.+))?$/);
+                if (defMatch) {
+                  const name = defMatch[1].trim();
+                  const description = defMatch[2] ? defMatch[2].trim() : '';
+                  
+                  // Check if name has a title
+                  const isTitled = /^(?:Sig(?:nor)?a?|Prof|Dott)\.?\s+/i.test(name);
+                  
+                  if (!rolesMap.has(name)) {
+                    rolesMap.set(name, { 
+                      primaryName: name, 
+                      aliases: [], 
+                      lineCount: 0,
+                      description,
+                      isTitled
+                    });
+                  }
+                }
+                j++;
+              }
+            }
+          }
+          skipLine = true;
+          break;
+        }
+      }
+      if (skipLine) continue;
+      
+      // Process comma-separated or "and/e" separated character names
+      const listMatch = line.match(/^([A-Z][A-Z\s.']+)(?:,\s+|\s+(?:and|e)\s+)([A-Z][A-Z\s.']+)/);
+      if (listMatch) {
+        // Split by comma and "and/e"
+        const names = line.split(/(?:,\s+|\s+(?:and|e)\s+)/);
+        for (const name of names) {
+          const trimmedName = name.trim();
+          if (/^[A-Z]/.test(trimmedName) && !rolesMap.has(trimmedName)) {
+            rolesMap.set(trimmedName, { 
+              primaryName: trimmedName, 
+              aliases: [], 
+              lineCount: 0
+            });
+          }
+        }
         continue;
       }
       
@@ -158,8 +289,16 @@ export class ScriptProcessor {
       const characterMatch = line.match(/^([A-Z][A-Za-z0-9_\s''\-\.]+)(?:\s*:)/);
       if (characterMatch) {
         const name = characterMatch[1].trim();
+        // Check if name has a title
+        const isTitled = /^(?:Sig(?:nor)?a?|Prof|Dott)\.?\s+/i.test(name);
+        
         if (!rolesMap.has(name)) {
-          rolesMap.set(name, { primaryName: name, aliases: [], lineCount: 0 });
+          rolesMap.set(name, { 
+            primaryName: name, 
+            aliases: [], 
+            lineCount: 0,
+            isTitled: isTitled || undefined
+          });
         }
       }
     }
@@ -193,6 +332,39 @@ export class ScriptProcessor {
     // Process the raw text into standardized lines
     const processedLines = this.preProcessScript(scriptText, options);
     const roles = this.extractRolesFromPlainText(processedLines);
+    
+    // Structure script lines with metadata
+    const structuredLines = processedLines.map(line => {
+      // Check if this is a character dialogue
+      const characterMatch = line.match(/^([A-Z][A-Za-z0-9_\s''\-\.]+)(?:\s*(?:\(.*\))?\s*:)(.*)/);
+      if (characterMatch) {
+        const character = characterMatch[1].trim();
+        const dialogue = characterMatch[2].trim();
+        return {
+          character,
+          dialogue,
+          isDirection: false,
+          text: line
+        };
+      } else if (line.startsWith('(') && line.endsWith(')')) {
+        // This is a stage direction
+        return {
+          character: null,
+          dialogue: null,
+          isDirection: true,
+          text: line,
+          direction: line.substring(1, line.length - 1)
+        };
+      } else {
+        // This is some other text (could be a scene heading or description)
+        return {
+          character: null,
+          dialogue: null,
+          isDirection: false,
+          text: line
+        };
+      }
+    });
     
     // Enhance role detection for complex scripts
     const additionalRoles = [];
@@ -248,7 +420,7 @@ export class ScriptProcessor {
       metadata: { title, author, date, description },
       roles: [...roles, ...additionalRoles],
       scenes: this.extractScenes(processedLines),
-      lines: processedLines
+      lines: structuredLines
     };
   }
 
