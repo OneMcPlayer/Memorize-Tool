@@ -21,8 +21,7 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-        # Disable npm cache completely
-        cache: false
+        # Remove the cache parameter entirely instead of setting it to false
     
     - name: Install dependencies
       run: npm install
@@ -41,8 +40,7 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: '18.x'
-        # Disable npm cache completely
-        cache: false
+        # Remove the cache parameter entirely instead of setting it to false
         
     - name: Install dependencies
       run: npm install
