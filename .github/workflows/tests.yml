@@ -43,16 +43,15 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '22.x'
-        # Actually disable npm cache as commented
+        node-version: '18.x'
         cache: 'npm'
         cache-dependency-path: package-lock.json
         
-    - name: Generate package-lock.json
-      run: npm install --package-lock-only
-      
-    - name: Install dependencies with fallback
+    - name: Install dependencies
       run: npm ci || npm install
+      
+    - name: Verify Cypress
+      run: npx cypress verify
       
     - name: Create cypress directory structure
       run: |
@@ -70,6 +69,7 @@ jobs:
       with:
         browser: chrome
         headless: true
+        install: false
         
     - name: Upload screenshots on failure
       uses: actions/upload-artifact@v4
@@ -77,4 +77,12 @@ jobs:
       with:
         name: cypress-screenshots
         path: cypress/screenshots
+        if-no-files-found: ignore
+        
+    - name: Upload videos
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: cypress-videos
+        path: cypress/videos
         if-no-files-found: ignore
