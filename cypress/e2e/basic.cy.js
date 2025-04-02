@@ -17,7 +17,9 @@ describe('Memorize Tool - Basic Tests', () => {
   it('should have theme toggle button', () => {
     cy.get('#themeToggle').should('exist');
     cy.get('#themeToggle').click();
-    // Check for theme change with the dark-mode class instead of data-theme attribute
+    // Add a small wait to ensure the DOM has updated
+    cy.wait(100);
+    // Check for theme change with the dark-mode class
     cy.get('body').should('have.class', 'dark-mode');
   });
 

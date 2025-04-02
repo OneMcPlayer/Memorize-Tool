@@ -40,10 +40,20 @@ export function setLanguage(lang) {
  * @returns {boolean} - The new dark mode state
  */
 export function toggleDarkMode() {
-  document.body.classList.toggle('dark-mode');
-  isDarkMode = document.body.classList.contains('dark-mode');
-  localStorage.setItem('darkMode', isDarkMode);
-  return isDarkMode;
+  // Force a proper redraw by using setTimeout with 0 delay
+  setTimeout(() => {
+    document.body.classList.toggle('dark-mode');
+    isDarkMode = document.body.classList.contains('dark-mode');
+    localStorage.setItem('darkMode', isDarkMode);
+    
+    // Dispatch a custom event for any components that need to react to theme changes
+    const themeChangeEvent = new CustomEvent('themechange', { 
+      detail: { isDarkMode } 
+    });
+    document.dispatchEvent(themeChangeEvent);
+  }, 0);
+  
+  return !isDarkMode; // Return the anticipated state for immediate feedback
 }
 
 /**
