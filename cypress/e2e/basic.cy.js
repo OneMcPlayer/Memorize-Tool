@@ -4,7 +4,7 @@ describe('Memorize Tool - Basic Tests', () => {
   });
 
   it('should load the application', () => {
-    cy.contains('Script Memorization Tool').should('exist');
+    cy.get('title').should('contain', 'Script Memorization Tool');
     cy.get('#app').should('exist');
   });
 
@@ -17,8 +17,8 @@ describe('Memorize Tool - Basic Tests', () => {
   it('should have theme toggle button', () => {
     cy.get('#themeToggle').should('exist');
     cy.get('#themeToggle').click();
-    // Check for theme change - could verify a CSS class or attribute change
-    cy.get('body').should('have.attr', 'data-theme');
+    // Check for theme change with the dark-mode class instead of data-theme attribute
+    cy.get('body').should('have.class', 'dark-mode');
   });
 
   it('should open options menu', () => {
