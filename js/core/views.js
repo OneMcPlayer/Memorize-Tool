@@ -212,7 +212,6 @@ function isMobileDevice() {
 export function renderConverterView() {
   // Get translations from the converter object, with fallbacks for missing keys
   const t = translations[currentLang].converter || {};
-  const commonT = translations[currentLang];
   
   // If mobile device, show notice and return to main view
   if (isMobileDevice()) {
@@ -224,7 +223,6 @@ export function renderConverterView() {
   // Add desktop converter class to body for special styling
   document.body.classList.add('converter-view');
   
-  // Create a unified converter view with real-time highlighting
   app.innerHTML = `
     <div class="converter-header">
       <button id="converterTopBackButton" class="back-button">
@@ -233,74 +231,95 @@ export function renderConverterView() {
       <h1>${t.title || 'Script Converter'}</h1>
     </div>
     
+    <div class="steps-indicator">
+      <div class="step-indicator active">${t.stepInsert || '1. Insert Script'}</div>
+      <div class="step-indicator">${t.stepClean || '2. Clean Script'}</div>
+      <div class="step-indicator">${t.stepEdit || '3. Edit Details'}</div>
+      <div class="step-indicator">${t.stepOutput || '4. Get Output'}</div>
+    </div>
+    
     <div class="converter-container">
-      <!-- Unified converter with editor and preview side by side -->
-      <div class="editor-preview-split">
-        <!-- Left panel: Editor -->
-        <div class="editor-panel">
-          <h2>${t.editScriptTitle || 'Edit Script'}</h2>
-          <div class="editor-tools">
-            <div class="editor-tools-left">
-              <button type="button" class="tool-button" title="${t.toolUppercase || 'UPPERCASE'}" data-action="uppercase">
-                <i class="fas fa-font"></i> <span class="tool-text">${t.toolUppercase || 'UPPERCASE'}</span>
-              </button>
-              <button type="button" class="tool-button" title="${t.toolAddCharacter || 'Add Character Name'}" data-action="add-character">
-                <i class="fas fa-user-plus"></i> <span class="tool-text">${t.toolAddCharacter || 'Add Character'}</span>
-              </button>
-            </div>
-            <div class="editor-tools-right">
-              <div class="script-stats">
-                <span id="scriptStats"></span>
-              </div>
-            </div>
+      <!-- Step 1: Insert Script -->
+      <div id="step1-container" class="step-container">
+        <div class="converter-input">
+          <textarea id="converterInput" rows="12" placeholder="${t.inputPlaceholder || 'Paste your script here...'}"></textarea>
+          <div class="button-group center">
+            <button id="parseButton">${t.parseButton || 'Parse Script'}</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Step 2: Clean Script (NEW) -->
+      <div id="step2-container" class="step-container" style="display:none">
+        <div class="converter-clean">
+          <h2>${t.cleanTitle || 'Clean & Prepare Script'}</h2>
+          <p class="help-text">${t.cleanHelp || 'Review how your script is being parsed. Character dialogues are highlighted.'}</p>
+          
+          <div id="scriptPreview" class="script-preview"></div>
+          
+          <div class="detection-summary">
+            <h3>${t.detectedCharacters || 'Detected Characters'}</h3>
+            <div id="detectedCharactersList" class="detected-characters-list"></div>
           </div>
           
-          <div class="editor-wrapper">
-            <textarea id="scriptEditor" class="script-editor" placeholder="${t.editorPlaceholder || 'Enter your script here...'}" spellcheck="true"></textarea>
-            <div class="editor-footer">
-              <div class="editor-hint-permanent">${t.editorHint || 'Tip: Character names should be followed by a colon (e.g. HAMLET: To be or not to be)'}</div>
-            </div>
+          <div class="button-group">
+            <button class="prev-step-btn" data-target="1">${t.backButton || '← Back'}</button>
+            <button class="next-step-btn" data-target="3">${t.continueButton || 'Continue →'}</button>
           </div>
-          
-          <div class="editor-actions">
-            <button id="copyScriptButton">
-              <i class="fas fa-copy"></i> ${t.copyButton || 'Copy to Clipboard'}
-            </button>
-            <button id="downloadScriptButton">
-              <i class="fas fa-download"></i> ${t.downloadButton || 'Download'}
-            </button>
-            <button id="converterBackButton" class="secondary-button">
-              ${t.backToMain || 'Back to Main'}
-            </button>
+        </div>
+      </div>
+      
+      <!-- Step 3: Edit Metadata & Roles (Previously Step 2) -->
+      <div id="step3-container" class="step-container" style="display:none">
+        <div class="converter-metadata">
+          <h2>${t.metadataTitle || 'Script Metadata'}</h2>
+          <div class="form-group">
+            <label for="scriptTitle">${t.titleLabel || 'Title'}</label>
+            <input type="text" id="scriptTitle" class="full-width" required>
+          </div>
+          <div class="form-group">
+            <label for="scriptAuthor">${t.authorLabel || 'Author'}</label>
+            <input type="text" id="scriptAuthor" class="full-width">
+          </div>
+          <div class="form-group">
+            <label for="scriptDate">${t.dateLabel || 'Date'}</label>
+            <input type="text" id="scriptDate" class="full-width">
+          </div>
+          <div class="form-group">
+            <label for="scriptDescription">${t.descriptionLabel || 'Description'}</label>
+            <input type="text" id="scriptDescription" class="full-width">
           </div>
         </div>
         
-        <!-- Right panel: Preview with syntax highlighting -->
-        <div class="preview-panel">
-          <h2>${t.previewTitle || 'Parsing Preview'}</h2>
-          <p class="help-text">${t.previewHelp || 'Character dialogues are highlighted by color. Click any line to edit.'}</p>
-          <div id="parsingPreview" class="script-lines"></div>
-          <div class="preview-footer">
-            <span class="preview-status">${t.previewStatus || 'Preview updates as you type'}</span>
-          </div>
+        <div class="converter-roles">
+          <h2>${t.rolesTitle || 'Character Roles'}</h2>
+          <p class="help-text">${t.rolesHelp || 'Add all characters in your script including any aliases they might have'}</p>
+          
+          <div id="rolesContainer"></div>
+          
+          <button id="addRoleButton">${t.addRoleButton || 'Add Character'}</button>
+        </div>
+        
+        <div class="button-group">
+          <button class="prev-step-btn" data-target="2">${t.backButton || '← Back'}</button>
+          <button class="next-step-btn" data-target="4">${t.exportButton || 'Export Structured Script'}</button>
         </div>
       </div>
       
-      <!-- Character detection panel -->
-      <div class="detection-summary card-style">
-        <h3><i class="fas fa-users"></i> ${t.detectedCharacters || 'Detected Characters'}</h3>
-        <div id="detectedCharactersList" class="detected-characters-list"></div>
-      </div>
-      
-      <!-- Editing tips -->
-      <div class="editing-tips card-style">
-        <h3><i class="fas fa-lightbulb"></i> ${t.editingTips || 'Editing Tips'}</h3>
-        <ul class="tips-list">
-          <li>${t.tipCharacterFormat || 'Format character lines as "CHARACTER: Dialogue text"'}</li>
-          <li>${t.tipStageDirections || 'Stage directions can be wrapped in parentheses (like this)'}</li>
-          <li>${t.tipSelection || 'Click a line in the preview to locate it in the editor'}</li>
-          <li>${t.tipCtrlClick || 'Use Ctrl+Click to select multiple lines for merging'}</li>
-        </ul>
+      <!-- Step 4: Output (Previously Step 3) -->
+      <div id="step4-container" class="step-container" style="display:none">
+        <div class="converter-output">
+          <textarea id="converterOutput" rows="12" readonly></textarea>
+          
+          <div class="button-group center">
+            <button id="copyButton">${t.copyButton || 'Copy to Clipboard'}</button>
+            <button id="downloadButton">${t.downloadButton || 'Download as File'}</button>
+          </div>
+          
+          <button id="converterBackButton">
+            ${t.backToMain || 'Back to Main'}
+          </button>
+        </div>
       </div>
     </div>
   `;
