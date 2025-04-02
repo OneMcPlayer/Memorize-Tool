@@ -933,11 +933,8 @@ function finalizeCleanedScript() {
     // Normalize character names (make them consistent)
     normalizeCharacterNames();
     
-    // Move to step 3
-    showStep(3);
-    
-    // Extract roles from the cleaned script
-    prepareRolesFromDetectedCharacters();
+    // Show the role selection step instead of going directly to metadata editing
+    showRoleSelectionStep();
     
     // Show success message
     showToast(t.cleanSuccess || 'Script cleaned successfully', 2000, 'success');
@@ -953,70 +950,353 @@ function finalizeCleanedScript() {
 }
 
 /**
- * Normalize character names throughout the script
- * This helps with cases like "JOHN" vs "John" or "BOB SMITH" vs "Bob Smith"
+ * Display the role selection step which allows users to review and select characters
  */
-function normalizeCharacterNames() {
-  if (!cleanedScriptLines || cleanedScriptLines.length === 0) return;
+function showRoleSelectionStep() {
+  // Create a dedicated container for the role selection step if it doesn't exist
+  let roleSelectionContainer = document.getElementById('role-selection-container');
+  if (!roleSelectionContainer) {
+    const step2Container = document.getElementById('step2-container');
+    if (!step2Container) return;
+
+    roleSelectionContainer = document.createElement('div');
+    roleSelectionContainer.id = 'role-selection-container';
+    roleSelectionContainer.className = 'role-selection-container card-style';
+    
+    // Insert after step2-container
+    step2Container.parentNode.insertBefore(roleSelectionContainer, step2Container.nextSibling);
+  }
   
-  // First, collect all character names and count occurrences
-  const characterCounts = {};
-  const characterVariants = {};
+  // Reset the container
+  roleSelectionContainer.innerHTML = '';
+  
+  const t = translations[currentLang];
+  
+  // Create the header section
+  const header = document.createElement('div');
+  header.className = 'role-selection-header';
+  header.innerHTML = `
+    <h3><i class="fas fa-user-check"></i> ${t.selectRolesTitle || 'Select Character Roles'}</h3>
+    <p class="help-text">${t.selectRolesHelp || 'Review and select characters that should be included in your script.'}</p>
+  `;
+  roleSelectionContainer.appendChild(header);
+  
+  // Extract characters from cleaned script
+  const characters = {};
   
   cleanedScriptLines.forEach(line => {
-    const match = line.match(/^([^:]+):/);
-    if (match) {
-      const name = match[1].trim();
-      const nameLower = name.toLowerCase();
-      
-      // Keep track of all variants of the same name
-      if (!characterVariants[nameLower]) {
-        characterVariants[nameLower] = [name];
-      } else if (!characterVariants[nameLower].includes(name)) {
-        characterVariants[nameLower].push(name);
-      }
-      
-      // Count occurrences
-      if (!characterCounts[name]) {
-        characterCounts[name] = 1;
+    const charMatch = line.match(/^([^:]+):/);
+    if (charMatch) {
+      const character = charMatch[1].trim();
+      if (characters[character]) {
+        characters[character]++;
       } else {
-        characterCounts[name]++;
+        characters[character] = 1;
       }
     }
   });
   
-  // For each lowercase name, find the most common variant
-  const normalizedNames = {};
-  Object.keys(characterVariants).forEach(lowerName => {
-    const variants = characterVariants[lowerName];
-    let mostCommonVariant = variants[0];
-    let maxCount = characterCounts[variants[0]] || 0;
-    
-    variants.forEach(variant => {
-      const count = characterCounts[variant] || 0;
-      if (count > maxCount) {
-        maxCount = count;
-        mostCommonVariant = variant;
-      }
+  // Create the character selection list
+  const characterList = document.createElement('div');
+  characterList.className = 'role-selection-list';
+  
+  // If no characters were detected
+  if (Object.keys(characters).length === 0) {
+    characterList.innerHTML = `
+      <div class="no-characters-detected">
+        <i class="fas fa-exclamation-circle"></i>
+        <p>${t.noCharactersDetected || 'No characters detected. Try adding character names followed by a colon.'}</p>
+      </div>
+    `;
+    roleSelectionContainer.appendChild(characterList);
+    return;
+  }
+  
+  // Header for the character list
+  const listHeader = document.createElement('div');
+  listHeader.className = 'role-list-header';
+  listHeader.innerHTML = `
+    <div class="role-select-all">
+      <label>
+        <input type="checkbox" id="select-all-roles" checked>
+        <span>${t.selectAll || 'Select All'}</span>
+      </label>
+    </div>
+    <div class="role-count">
+      ${Object.keys(characters).length} ${Object.keys(characters).length === 1 ? 
+        (t.characterSingular || 'character') : 
+        (t.characterPlural || 'characters')} ${t.detected || 'detected'}
+    </div>
+  `;
+  characterList.appendChild(listHeader);
+  
+  // Add role selection items
+  const roleItemsContainer = document.createElement('div');
+  roleItemsContainer.className = 'role-items-container';
+  
+  // Sort characters by frequency (most lines first)
+  Object.entries(characters)
+    .sort((a, b) => b[1] - a[1])
+    .forEach(([character, count]) => {
+      const hash = Array.from(character).reduce((acc, char) => char.charCodeAt(0) + acc, 0);
+      const hue = hash % 360;
+      const color = `hsl(${hue}, 70%, 60%)`;
+      
+      const characterItem = document.createElement('div');
+      characterItem.className = 'role-selection-item';
+      characterItem.innerHTML = `
+        <label class="role-checkbox">
+          <input type="checkbox" class="role-item-checkbox" data-character="${character}" checked>
+          <span class="checkmark"></span>
+        </label>
+        <div class="role-item-content">
+          <div class="role-color" style="background-color: ${color}"></div>
+          <div class="role-details">
+            <span class="role-name">${character}</span>
+            <span class="role-line-count">${count} ${count === 1 ? 
+              (t.lineSingular || 'line') : 
+              (t.linePlural || 'lines')}</span>
+          </div>
+        </div>
+        <div class="role-actions">
+          <button class="role-rename-btn" data-character="${character}" title="${t.renameCharacter || 'Rename character'}">
+            <i class="fas fa-pencil-alt"></i>
+          </button>
+          <button class="role-merge-btn" data-character="${character}" title="${t.mergeCharacter || 'Merge with another character'}">
+            <i class="fas fa-object-group"></i>
+          </button>
+        </div>
+      `;
+      
+      roleItemsContainer.appendChild(characterItem);
     });
-    
-    // Use the most common variant for normalization
-    variants.forEach(variant => {
-      normalizedNames[variant] = mostCommonVariant;
+  
+  characterList.appendChild(roleItemsContainer);
+  
+  // Add buttons for navigation
+  const actionButtons = document.createElement('div');
+  actionButtons.className = 'role-selection-actions';
+  actionButtons.innerHTML = `
+    <button id="role-selection-back" class="secondary-button">
+      <i class="fas fa-arrow-left"></i> ${t.backToEditing || 'Back to Editing'}
+    </button>
+    <button id="role-selection-continue" class="primary-button">
+      ${t.continueToMetadata || 'Continue to Metadata'} <i class="fas fa-arrow-right"></i>
+    </button>
+  `;
+  
+  roleSelectionContainer.appendChild(characterList);
+  roleSelectionContainer.appendChild(actionButtons);
+  
+  // Add event listeners
+  document.getElementById('select-all-roles').addEventListener('change', function() {
+    const isChecked = this.checked;
+    document.querySelectorAll('.role-item-checkbox').forEach(checkbox => {
+      checkbox.checked = isChecked;
     });
   });
   
-  // Replace character names in the script
-  cleanedScriptLines = cleanedScriptLines.map(line => {
+  document.querySelectorAll('.role-rename-btn').forEach(button => {
+    button.addEventListener('click', function() {
+      const character = this.dataset.character;
+      renameCharacterInScript(character);
+    });
+  });
+  
+  document.querySelectorAll('.role-merge-btn').forEach(button => {
+    button.addEventListener('click', function() {
+      const character = this.dataset.character;
+      mergeCharacterWithAnother(character);
+    });
+  });
+  
+  document.getElementById('role-selection-back').addEventListener('click', function() {
+    // Hide role selection and go back to step 2
+    roleSelectionContainer.style.display = 'none';
+    document.getElementById('step2-container').style.display = 'block';
+  });
+  
+  document.getElementById('role-selection-continue').addEventListener('click', function() {
+    // Process selected roles and continue to step 3
+    processSelectedRoles();
+    roleSelectionContainer.style.display = 'none';
+    showStep(3);
+  });
+  
+  // Show this container, hide others
+  document.querySelectorAll('.step-container').forEach(container => {
+    container.style.display = 'none';
+  });
+  roleSelectionContainer.style.display = 'block';
+}
+
+/**
+ * Process the selected roles and prepare them for the metadata step
+ */
+function processSelectedRoles() {
+  // Get all selected characters
+  const selectedCharacters = [];
+  document.querySelectorAll('.role-item-checkbox:checked').forEach(checkbox => {
+    selectedCharacters.push(checkbox.dataset.character);
+  });
+  
+  // Filter cleaned script lines to include only the selected characters' lines and stage directions
+  const filteredLines = cleanedScriptLines.filter(line => {
+    // Keep stage directions
+    if (line.startsWith('(') && line.endsWith(')')) return true;
+    
+    // Keep scene markers
+    if (line.match(/^(ACT|SCENE|ATTO|SCENA)\s+/i)) return true;
+    
+    // Keep only dialogue from selected characters
+    const charMatch = line.match(/^([^:]+):/);
+    if (charMatch) {
+      const character = charMatch[1].trim();
+      return selectedCharacters.includes(character);
+    }
+    
+    // Keep lines without character references
+    return !line.includes(':');
+  });
+  
+  // Update the cleaned script lines with the filtered ones
+  cleanedScriptLines = filteredLines;
+  
+  // Create character objects for the metadata step
+  const characterObjects = selectedCharacters.map(name => ({
+    primaryName: name,
+    aliases: [name],
+    description: '',
+    lineCount: countCharacterLines(name)
+  }));
+  
+  // Update the roles container with the selected characters
+  const rolesContainer = document.getElementById('rolesContainer');
+  if (rolesContainer) {
+    // Clear existing roles
+    rolesContainer.innerHTML = '';
+    
+    // Add role fields for each selected character
+    characterObjects.forEach(character => {
+      addNewRoleField(character);
+    });
+  }
+}
+
+/**
+ * Count the number of lines for a character in the cleaned script
+ * @param {string} character - Character name
+ * @returns {number} - Number of lines
+ */
+function countCharacterLines(character) {
+  return cleanedScriptLines.filter(line => {
     const match = line.match(/^([^:]+):/);
-    if (match) {
-      const name = match[1].trim();
-      if (normalizedNames[name] && normalizedNames[name] !== name) {
-        return line.replace(/^([^:]+):/, `${normalizedNames[name]}:`);
-      }
+    return match && match[1].trim() === character;
+  }).length;
+}
+
+/**
+ * Rename a character throughout the script
+ * @param {string} oldName - Current character name
+ */
+function renameCharacterInScript(oldName) {
+  const t = translations[currentLang];
+  const newName = prompt(t.editCharacterPrompt || 'Edit character name:', oldName);
+  
+  if (!newName || newName === oldName) return;
+  
+  // Replace in cleanedScriptLines
+  cleanedScriptLines = cleanedScriptLines.map(line => {
+    if (line.startsWith(`${oldName}:`)) {
+      return line.replace(/^([^:]+):/, `${newName}:`);
     }
     return line;
   });
+  
+  // Update the checkbox data attribute and displayed name
+  const checkbox = document.querySelector(`.role-item-checkbox[data-character="${oldName}"]`);
+  if (checkbox) {
+    checkbox.dataset.character = newName;
+    const nameElement = checkbox.closest('.role-selection-item').querySelector('.role-name');
+    if (nameElement) {
+      nameElement.textContent = newName;
+    }
+    
+    // Update button data attributes
+    const renameBtn = checkbox.closest('.role-selection-item').querySelector('.role-rename-btn');
+    if (renameBtn) {
+      renameBtn.dataset.character = newName;
+    }
+    
+    const mergeBtn = checkbox.closest('.role-selection-item').querySelector('.role-merge-btn');
+    if (mergeBtn) {
+      mergeBtn.dataset.character = newName;
+    }
+  }
+  
+  showToast(t.characterRenamed || 'Character renamed successfully', 2000, 'success');
+}
+
+/**
+ * Merge one character with another
+ * @param {string} sourceCharacter - The character to merge from
+ */
+function mergeCharacterWithAnother(sourceCharacter) {
+  const t = translations[currentLang];
+  
+  // Get list of other characters
+  const otherCharacters = [];
+  document.querySelectorAll('.role-item-checkbox').forEach(checkbox => {
+    const character = checkbox.dataset.character;
+    if (character !== sourceCharacter) {
+      otherCharacters.push(character);
+    }
+  });
+  
+  if (otherCharacters.length === 0) {
+    showToast(t.errorNoOtherCharacters || 'No other characters to merge with', 3000, 'warning');
+    return;
+  }
+  
+  // Create options for the prompt
+  const options = otherCharacters.map(char => `${char}`).join('\n');
+  const targetCharacter = prompt(
+    `${t.selectTargetCharacter || 'Select target character to merge with'} "${sourceCharacter}":\n\n${options}`, 
+    otherCharacters[0]
+  );
+  
+  if (!targetCharacter || !otherCharacters.includes(targetCharacter)) {
+    return;
+  }
+  
+  // Replace source character with target character in the script
+  cleanedScriptLines = cleanedScriptLines.map(line => {
+    if (line.startsWith(`${sourceCharacter}:`)) {
+      return line.replace(/^([^:]+):/, `${targetCharacter}:`);
+    }
+    return line;
+  });
+  
+  // Remove the source character's checkbox item
+  const sourceItem = document.querySelector(`.role-item-checkbox[data-character="${sourceCharacter}"]`).closest('.role-selection-item');
+  if (sourceItem) {
+    sourceItem.remove();
+  }
+  
+  // Update the target character's line count
+  const targetLineCount = countCharacterLines(targetCharacter);
+  const targetLineCountElement = document.querySelector(`.role-item-checkbox[data-character="${targetCharacter}"]`).closest('.role-selection-item').querySelector('.role-line-count');
+  if (targetLineCountElement) {
+    targetLineCountElement.textContent = `${targetLineCount} ${targetLineCount === 1 ? 
+      (t.lineSingular || 'line') : 
+      (t.linePlural || 'lines')}`;
+  }
+  
+  showToast(
+    `${t.charactersMerged || 'Characters merged successfully'}: ${sourceCharacter} → ${targetCharacter}`,
+    2000,
+    'success'
+  );
 }
 
 /**

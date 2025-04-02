@@ -37,6 +37,27 @@
   - [ ] Implement local storage for scripts
   - [ ] Create sync mechanism for when connection is restored
 
+### Script Conversion Process Improvements
+- [ ] User Experience Improvements
+  - [ ] Add a dropdown for selecting common script formats (screenplay, stage play, radio play)
+  - [ ] Provide format-specific examples to guide users
+  - [ ] Implement visual script builder with drag-and-drop elements
+  - [ ] Add character management panel with real-time detection
+  - [ ] Implement format checker to highlight inconsistencies
+
+- [ ] Algorithm Improvements
+  - [ ] Enhance pattern recognition with flexible regex patterns
+  - [ ] Add support for additional script formats
+  - [ ] Implement context-aware processing for scene and character detection
+  - [ ] Improve preprocessing for multi-line stage directions and scene headings
+  - [ ] Research machine learning options for entity recognition
+
+- [ ] Technical Improvements
+  - [ ] Create script format analyzer for automatic parsing strategy selection
+  - [ ] Implement bidirectional updates for real-time editing/preview
+  - [ ] Add support for industry-standard formats (Final Draft, Fountain)
+  - [ ] Implement batch processing for multiple scripts
+
 ## Technical Improvements
 
 ### Script Analysis Dashboard
