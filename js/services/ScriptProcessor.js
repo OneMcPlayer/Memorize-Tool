@@ -29,7 +29,7 @@ export class ScriptProcessor {
     // Enhanced detection when aggressive mode is enabled
     const aggressiveDetection = options.aggressiveDetection || false;
     
-    // Additional patterns for aggressive detection mode
+    // Additional patterns for aggressive detection mode - for standalone uppercase names
     const aggressiveCharacterPattern = /^([A-Z][A-Za-z0-9_\s''\-\.]+)(?:\s*)(?:\(.*\))?$/;
     
     // Enhanced pattern for italian script conventions with more title variants
@@ -55,6 +55,41 @@ export class ScriptProcessor {
 
     let isCharacterList = false; // To track if we're in a character list section
     let isFirstLine = true;     // To track if we're processing the first line
+
+    // First pass - handle aggressive detection for standalone character names
+    if (aggressiveDetection) {
+      const tempLines = [];
+      let i = 0;
+      while (i < lines.length) {
+        const line = lines[i].trim();
+        
+        // Check if this is a standalone character name (uppercase, no colon)
+        if (line.match(aggressiveCharacterPattern) && !line.includes(':')) {
+          // Look ahead to see if the next line is the dialogue
+          if (i + 1 < lines.length) {
+            const nextLine = lines[i + 1].trim();
+            // If next line doesn't look like a character or stage direction, it's dialogue
+            if (nextLine && 
+                !nextLine.match(/^[A-Z][A-Za-z0-9_\s''\-\.]+(?:\s*:)/) && 
+                !nextLine.startsWith('(') && 
+                !nextLine.startsWith('[') && 
+                !possibleStageDirectionsPattern.test(nextLine)) {
+              // Combine the two lines
+              tempLines.push(`${line}: ${nextLine}`);
+              i += 2; // Skip both lines
+              continue;
+            }
+          }
+        }
+        
+        // If not processed as a character name, keep the original line
+        tempLines.push(line);
+        i++;
+      }
+      
+      // Update lines with the preprocessed version
+      lines = tempLines;
+    }
 
     for (let i = 0; i < lines.length; i++) {
       let line = lines[i].trim();
@@ -141,7 +176,8 @@ export class ScriptProcessor {
         // Convert all stage directions to standard parentheses format
         if (line.startsWith('[') && line.endsWith(']')) {
           line = '(' + line.substring(1, line.length - 1) + ')';
-        } else if (!line.startsWith('(') && possibleStageDirectionsPattern.test(line)) {
+        } else if (!line.startsWith('(') && !line.endsWith(')') && 
+                  possibleStageDirectionsPattern.test(line)) {
           // If it's a stage direction without parentheses, wrap it
           line = `(${line})`;
         }
@@ -152,6 +188,22 @@ export class ScriptProcessor {
         if ((line.endsWith(')') || line.endsWith(']')) && !isMultilineStageDirection) {
           isStageDirection = false;
         }
+        continue;
+      }
+
+      // Special case for complex Italian scripts with character lists in the form:
+      // "Teresa, la signora Ridabella, la signora Celeste, i Pelaez. Poi la signora Jone un momento."
+      if (line.includes(',') && !line.includes(':') && 
+          line.split(',').some(part => part.trim().match(/^[A-Z][A-Za-z\s]+$/))) {
+        // This looks like a character list, treat as a stage direction
+        if (currentLine) {
+          processedLines.push(currentLine);
+          currentLine = '';
+        }
+        if (!line.startsWith('(') && !line.endsWith(')')) {
+          line = `(${line})`;
+        }
+        processedLines.push(line);
         continue;
       }
 
@@ -213,25 +265,8 @@ export class ScriptProcessor {
             } else {
               // This is likely just a character name alone on a line
               // In aggressive mode, we'll treat the next line as dialogue if it's not a character name
-              currentLine = lastCharacterName;
-              
-              // Look ahead to see if next line continues the dialogue
-              if (aggressiveDetection && i + 1 < lines.length) {
-                const nextLine = lines[i + 1].trim();
-                // If next line doesn't match a character pattern, treat it as dialogue for this character
-                if (nextLine && !nextLine.match(/^[A-Z][A-Za-z0-9_\s''\-\.]+(?:\s*:)/) 
-                    && !nextLine.startsWith('(') && !nextLine.startsWith('"') 
-                    && !nextLine.startsWith('[') && 
-                    !possibleStageDirectionsPattern.test(nextLine)) {
-                  currentLine = `${lastCharacterName}: ${nextLine}`;
-                  inCharacterDialogue = true;
-                  i++; // Skip the next line since we've used it
-                } else if (!nextLine || nextLine.length === 0) {
-                  // If the next line is empty, just make this a character name with empty dialogue
-                  currentLine = `${lastCharacterName}: `;
-                  inCharacterDialogue = true;
-                }
-              }
+              currentLine = `${lastCharacterName}: `;
+              inCharacterDialogue = true;
             }
           } else if (italianMatch) {
             // Italian name patterns - handle titles like "SIGNORA PELAEZ" properly
@@ -255,27 +290,8 @@ export class ScriptProcessor {
           } else if (aggressiveMatch) {
             // Treat standalone uppercase line as a character name
             lastCharacterName = aggressiveMatch[1].trim();
-            
-            // Look ahead to see if next line is the dialogue
-            if (i + 1 < lines.length) {
-              const nextLine = lines[i + 1].trim();
-              // If next line doesn't look like a character name, treat it as dialogue
-              if (nextLine && !nextLine.match(/^[A-Z][A-Za-z0-9_\s''\-\.]+(?:\s*:)/) 
-                  && !nextLine.startsWith('(') && !nextLine.startsWith('"')
-                  && !nextLine.startsWith('[') && !possibleStageDirectionsPattern.test(nextLine)) {
-                currentLine = `${lastCharacterName}: ${nextLine}`;
-                inCharacterDialogue = true;
-                i++; // Skip the next line since we've used it
-              } else {
-                // Just save the character name with empty dialogue
-                currentLine = `${lastCharacterName}: `;
-                inCharacterDialogue = true;
-              }
-            } else {
-              // End of script, just save the character name
-              currentLine = `${lastCharacterName}: `;
-              inCharacterDialogue = true;
-            }
+            currentLine = `${lastCharacterName}: `;
+            inCharacterDialogue = true;
           }
         } else {
           if (currentLine && inCharacterDialogue) {
@@ -290,6 +306,7 @@ export class ScriptProcessor {
 
             // Special handling for hyphenated line breaks - join without space
             if (currentLine.endsWith('-')) {
+              // Remove the hyphen and join directly to the next line
               currentLine = currentLine.substring(0, currentLine.length - 1) + line;
             } else {
               const connector = shouldAddSpace ? ' ' : '';
@@ -391,28 +408,33 @@ export class ScriptProcessor {
     
     // Simplified pattern - now we just look for the character name followed by colon
     // regardless of script format
-    const regexPattern = `^\\s*(${escapedAliases.join('|')})\\s*:`;
+    const regexPattern = `^\\s*(${escapedAliases.join('|')})\\s*:|^\\s*(${escapedAliases.join('|')})\\s*\\(.*\\)`;
     
     const regex = new RegExp(regexPattern, "i");
     
     console.debug(`Character regex pattern: ${regexPattern}`);
     
-    const extractedLines = [];
-    
-    // First, find all lines that match the character
-    const matchedLineIndices = [];
+    // First pass: collect all the target character's line indices
+    const characterLineIndices = [];
     for (let i = 0; i < scriptLines.length; i++) {
       if (regex.test(scriptLines[i])) {
-        matchedLineIndices.push(i);
+        characterLineIndices.push(i);
       }
     }
     
-    // Now process each matched line, including preceding context
-    matchedLineIndices.forEach(index => {
-      // Add preceding lines if requested
+    // Second pass: construct result with preceding lines
+    const extractedLines = [];
+    for (let i = 0; i < characterLineIndices.length; i++) {
+      const targetIndex = characterLineIndices[i];
+      
+      // Add the preceding context lines if requested
       if (precedingCount > 0) {
-        const startIndex = Math.max(0, index - precedingCount);
-        for (let j = startIndex; j < index; j++) {
+        // Start from the line after the previous character line or from max(0, targetIndex - precedingCount)
+        const prevCharLineIndex = i > 0 ? characterLineIndices[i-1] : -1;
+        const startIndex = Math.max(prevCharLineIndex + 1, targetIndex - precedingCount);
+        
+        // Add each preceding line up to (but not including) the target line
+        for (let j = startIndex; j < targetIndex; j++) {
           extractedLines.push({
             index: j,
             line: scriptLines[j],
@@ -422,16 +444,16 @@ export class ScriptProcessor {
         }
       }
       
-      // Add the matched line
+      // Add the target character line itself
       extractedLines.push({
-        index: index,
-        line: scriptLines[index],
-        speaker: scriptLines[index].match(/^([^:]+):/)?.[1]?.trim() || '',
+        index: targetIndex,
+        line: scriptLines[targetIndex],
+        speaker: scriptLines[targetIndex].match(/^([^:]+):/)?.[1]?.trim() || '',
         isPreceding: false
       });
-    });
+    }
     
-    console.debug(`Extracted ${extractedLines.length} lines for character`);
+    console.debug(`Extracted ${extractedLines.length} lines for character (including ${precedingCount} preceding lines per match)`);
     return extractedLines;
   }
 
