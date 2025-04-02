@@ -6,8 +6,7 @@ import { currentLang } from './settings.js';
 import { renderInputView, leaveConverterView } from './views.js';
 import { createValidId } from './utils.js';
 
-// Track current step in the conversion process
-let currentStep = 1;
+// Using a unified approach with real-time feedback
 let parseResult = null;
 let cleanedScriptLines = [];
 
@@ -15,32 +14,41 @@ let cleanedScriptLines = [];
  * Setup event handlers for the converter view
  */
 export function setupConverterHandlers() {
-  const parseButton = document.getElementById('parseButton');
-  const exportButton = document.getElementById('exportButton');
-  const copyButton = document.getElementById('copyButton');
-  const downloadButton = document.getElementById('downloadButton');
-  const addRoleButton = document.getElementById('addRoleButton');
+  // Setting up unified view handlers
+  const unifiedEditor = document.getElementById('scriptEditor');
   const backButton = document.getElementById('converterBackButton');
   const topBackButton = document.getElementById('converterTopBackButton');
+  const copyButton = document.getElementById('copyScriptButton');
+  const downloadButton = document.getElementById('downloadScriptButton');
   
-  if (parseButton) {
-    parseButton.addEventListener('click', parseScript);
+  // Initialize the script editor with examples or saved content
+  if (unifiedEditor) {
+    // Try to load saved content or use an example
+    const savedContent = localStorage.getItem('script_converter_backup');
+    const initialContent = savedContent || getExampleScript();
+    unifiedEditor.value = initialContent;
+    
+    // Set up real-time parsing
+    unifiedEditor.addEventListener('input', debounceScriptParsing);
+    unifiedEditor.addEventListener('keydown', handleEditorKeydown);
+    
+    // Initial parsing
+    updateScriptParsing();
   }
   
-  if (exportButton) {
-    exportButton.addEventListener('click', exportScript);
-  }
+  // Set up toolbar buttons
+  document.querySelectorAll('.tool-button').forEach(button => {
+    button.addEventListener('click', () => handleToolAction(button.dataset.action));
+  });
   
+  // Copy button handler
   if (copyButton) {
     copyButton.addEventListener('click', copyScriptToClipboard);
   }
   
+  // Download button handler
   if (downloadButton) {
     downloadButton.addEventListener('click', downloadScript);
-  }
-  
-  if (addRoleButton) {
-    addRoleButton.addEventListener('click', addNewRoleField);
   }
   
   // Set up back button handlers
@@ -48,66 +56,57 @@ export function setupConverterHandlers() {
     backButton.addEventListener('click', () => {
       parseResult = null;
       cleanedScriptLines = [];
-      currentStep = 1;
       leaveConverterView();
     });
   }
   
   if (topBackButton) {
     topBackButton.addEventListener('click', () => {
-      if (parseResult || currentStep > 1) {
-        if (confirm(translations[currentLang].converter.confirmLeave || 'Leave converter? Your changes will be lost.')) {
+      if (parseResult || cleanedScriptLines.length > 0) {
+        const t = translations[currentLang].converter || {};
+        if (confirm(t.confirmLeave || 'Leave converter? Your changes will be lost.')) {
           parseResult = null;
           cleanedScriptLines = [];
-          currentStep = 1;
           leaveConverterView();
         }
       } else {
         parseResult = null;
         cleanedScriptLines = [];
-        currentStep = 1;
         leaveConverterView();
       }
     });
   }
-  
-  // Setup step navigation
-  document.querySelectorAll('.step-container').forEach(container => {
-    container.style.display = 'none';
-  });
-  
-  // Show initial step
-  showStep(1);
-  
-  // Add step navigation handlers
-  const nextStepButtons = document.querySelectorAll('.next-step-btn');
-  nextStepButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      const targetStep = parseInt(button.dataset.target);
-      if (targetStep === 2) {
-        prepareCleaningView();
-      } else if (targetStep === 3) {
-        finalizeCleanedScript();
-      } else if (targetStep === 4) {
-        exportScript();
-      } else {
-        showStep(targetStep);
-      }
-    });
-  });
-  
-  const prevStepButtons = document.querySelectorAll('.prev-step-btn');
-  prevStepButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      const targetStep = parseInt(button.dataset.target);
-      showStep(targetStep);
-    });
-  });
 }
 
 /**
- * Show a specific step and hide others
+ * Get an example script for new users
+ * @returns {string} Example script text
  */
+function getExampleScript() {
+  return `TITLE: Example Script
+
+CHARACTERS:
+ROMEO - Young man from Montague family
+JULIET - Young woman from Capulet family
+
+ACT 1
+SCENE 1
+
+ROMEO: But, soft! what light through yonder window breaks?
+It is the east, and Juliet is the sun.
+
+(Juliet appears on the balcony)
+
+JULIET: O Romeo, Romeo! wherefore art thou Romeo?
+Deny thy father and refuse thy name;
+Or, if thou wilt not, be but sworn my love,
+And I'll no longer be a Capulet.`;
+}
+
+/**
+ * Show a specific step and hide others - commented out for unified view
+ */
+/*
 function showStep(stepNumber) {
   currentStep = stepNumber;
   
@@ -128,10 +127,12 @@ function showStep(stepNumber) {
     }
   });
 }
+*/
 
 /**
- * Parse the input script text
+ * Parse the input script text - Commented out for unified view
  */
+/*
 function parseScript() {
   const t = translations[currentLang];
   const inputText = document.getElementById('converterInput').value;
@@ -150,29 +151,18 @@ function parseScript() {
     showToast(t.errorParse || 'Error parsing script', 3000, 'error');
   }
 }
+*/
 
 /**
- * Prepare the script cleaning view with the parsed script
+ * Prepare the script cleaning view with the parsed script - Modified for unified view
  * @param {string} originalText - The original unprocessed input text
  */
 function prepareCleaningView(originalText = '') {
-  if (!parseResult || !parseResult.processedLines) {
-    showToast(translations[currentLang].errorParse || 'Invalid script data', 3000, 'error');
-    console.error('Error: parseResult is null or missing processedLines');
-    return;
-  }
-
-  try {
-    // Store the processed lines for the preview pane
-    cleanedScriptLines = [...parseResult.processedLines];
-
-    // Use the original text for the editor if provided
-    setupInteractiveEditor(originalText || cleanedScriptLines.join('\n'));
-    updateDetectedCharactersList();
-  } catch (error) {
-    console.error('Error in prepareCleaningView:', error);
-    showToast(translations[currentLang].errorPrepareView || 'Error preparing cleaning view', 3000, 'error');
-  }
+  const scriptEditor = document.getElementById('scriptEditor');
+  if (!scriptEditor) return;
+  
+  scriptEditor.value = originalText;
+  updateScriptParsing();
 }
 
 /**
