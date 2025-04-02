@@ -21,7 +21,6 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-        # Remove the cache parameter entirely instead of setting it to false
     
     - name: Install dependencies
       run: npm install
@@ -40,7 +39,6 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: '18.x'
-        # Remove the cache parameter entirely instead of setting it to false
         
     - name: Install dependencies
       run: npm install
@@ -57,11 +55,26 @@ jobs:
         mkdir -p cypress/screenshots
         mkdir -p cypress/videos
       
+    # Debug server availability
+    - name: Check directory contents
+      run: ls -la
+      
+    # Use npm script to start the server instead of direct http-server command
     - name: Start HTTP server
-      run: npx http-server . -p 8080 &
+      run: npm run serve &
+      
+    # Add debug info to help diagnose server issues
+    - name: Debug server
+      run: |
+        sleep 5
+        echo "Checking if server is running:"
+        ps aux | grep http-server
+        echo "Checking network connections:"
+        netstat -tulpn | grep 8080 || echo "No process found on port 8080"
+        curl -v http://localhost:8080 || echo "Cannot connect to server"
       
     - name: Wait for server
-      run: npx wait-on http://localhost:8080 --timeout 60000
+      run: npx wait-on http://localhost:8080 --timeout 120000
       
     - name: Run Cypress tests
       uses: cypress-io/github-action@v6
