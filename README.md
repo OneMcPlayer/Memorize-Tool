@@ -184,7 +184,3 @@ This project combines my passion for theater education with modern AI-assisted d
 5. **Practical Experimentation**: The project demonstrates what's possible when combining human creativity and domain knowledge with modern development tools - resulting in a tool that was completed more efficiently while still reflecting my design vision.
 
 This approach acknowledges that valuable software can emerge from the intersection of domain expertise and modern development tools. Whether you're a theater enthusiast interested in using this tool or a curious developer exploring new development workflows, I hope you find something valuable here.
-
-## License
-
-This project is available under the MIT-AI Assisted Vibe Coding License. See the LICENSE file for details.
