@@ -3,5 +3,35 @@
     "title": "L'INVENTORE DEL CAVALLO",
     "format": "structured",
     "path": "js/data/scripts/inventore-cavallo.script"
+  },
+  "erano-un-po-nervosi": {
+    "title": "ERANO UN PO' NERVOSI",
+    "format": "structured",
+    "path": "js/data/scripts/erano-un-po-nervosi.script"
+  },
+  "la-rivoluzione": {
+    "title": "LA RIVOLUZIONE",
+    "format": "structured",
+    "path": "js/data/scripts/la-rivoluzione.script"
+  },
+  "se-gli-uomini-avessero-la-coda": {
+    "title": "SE GLI UOMINI AVESSERO LA CODA",
+    "format": "structured",
+    "path": "js/data/scripts/se-gli-uomini-avessero-la-coda.script"
+  },
+  "una-moglie-nervosa": {
+    "title": "UNA MOGLIE NERVOSA",
+    "format": "structured",
+    "path": "js/data/scripts/una-moglie-nervosa.script"
+  },
+  "visita-condoglianze": {
+    "title": "VISITA DI CONDOGLIANZE",
+    "format": "structured",
+    "path": "js/data/scripts/visita-condoglianze.script"
+  },
+  "150-la-gallina-canta": {
+    "title": "150 - LA GALLINA CANTA",
+    "format": "structured",
+    "path": "js/data/scripts/150-la-gallina-canta.script"
   }
 }
