@@ -70,3 +70,43 @@ export function findRoleByName(name, rolesList) {
   // If not found, return null.
   return null;
 }
+
+/**
+ * Parses roles from the structured script format (@roles section)
+ * 
+ * @param {string} scriptText - The full script text or roles section
+ * @returns {Array} - Array of role objects with name, aliases, and description
+ */
+export function parseStructuredRoles(scriptText) {
+  if (!scriptText) return []; // Return empty array for null/undefined/empty
+  
+  // Extract the roles section
+  const rolesMatch = scriptText.match(/@roles([\s\S]*?)@endroles/);
+  if (!rolesMatch) return []; // No roles section found
+  
+  const rolesSection = rolesMatch[1].trim();
+  const roleLines = rolesSection.split('\n');
+  const roles = [];
+  
+  for (const line of roleLines) {
+    if (!line.trim()) continue; // Skip empty lines
+    
+    // Match role definitions like: ROLE_NAME [ALIAS1, ALIAS2]: "Role description"
+    const roleMatch = line.match(/([A-Z_]+)(?:\s*\[([^\]]+)\])?\s*:\s*"([\s\S]*?)"/);
+    if (roleMatch) {
+      const name = roleMatch[1].trim();
+      const aliasStr = roleMatch[2] || '';
+      // Handle multiline descriptions by preserving line breaks
+      const description = roleMatch[3] ? roleMatch[3].trim() : '';
+      const aliases = aliasStr ? aliasStr.split(',').map(a => a.trim()) : [];
+      
+      roles.push({
+        name,
+        aliases,
+        description
+      });
+    }
+  }
+  
+  return roles;
+}
