@@ -1,35 +1,58 @@
-CENTOCINQUANTA LA GALLINA CANTA 
-PERSONAGGI  
-Cecilia, moglie di 
-Tito 
-Battista 
-Avvocato Bianchi 
-Avvocato Neri 
-Il Conte 
-La Contessa 
-Il Cuoco 
-La Cameriera 
-Il tenore Palewski 
-Suonatori  
-Salotto in casa di Tito. Tito ha la veste da camera e sfoglia un giornale. In fondo, 
-Battista il domestico, in frac, sta impalato sotto la porta in attesa di ordini. 
-I. 
-Cecilia, Tito, Battista. 
-CECILIA           
-(entrando in gran toletta, con un piccolo specchio in mano, nel quale 
-si guarda) Andiamo?  
-TITO               
-(guarda l'orologio) È presto cara. Sono appena le nove e mezzo e per 
-andare in casa dei vicini, basta mezzo minuto: si esce dalla nostra porta e s'infila la 
-loro. Non amo arrivare primo ai ricevimenti.  
-CECILIA           
-Palewski.  
-TITO                
-CECILIA           
-E tu sai bene che io non voglio perdere le romanze che canterà 
-Uhm, Palewski! Come fosse chissà chi!  
-Né più né meno che il più grande tenore vivente, per tua regola. 
-Conosce e canta tutte le opere, tutte le romanze e tutte le canzoni.  
+@title "CENTOCINQUANTA LA GALLINA CANTA"
+@author "Achille Campanile"
+
+@roles
+CECILIA: "Moglie di Tito"
+TITO: "Marito di Cecilia"
+BATTISTA: "Il domestico"
+AVVOCATO_BIANCHI: "Avvocato"
+AVVOCATO_NERI: "Avvocato"
+IL_CONTE: "Vicino di casa"
+LA_CONTESSA: "Vicina di casa"
+IL_CUOCO: "Lo chef francese"
+LA_CAMERIERA: "Cameriera"
+PALEWSKI: "Il tenore"
+SUONATORI: "Musicisti"
+@endroles
+
+@scene "Salotto in casa di Tito"
+{
+  direction {
+    """
+    Tito ha la veste da camera e sfoglia un giornale. In fondo, Battista il domestico, in frac, sta impalato sotto la porta in attesa di ordini.
+    """
+  }
+  
+  section "I" {
+    direction {
+      """
+      Cecilia, Tito, Battista.
+      """
+    }
+    
+    dialogue {
+      "CECILIA": """
+        (entrando in gran toletta, con un piccolo specchio in mano, nel quale si guarda) Andiamo?
+      """
+      
+      "TITO": """
+        (guarda l'orologio) È presto cara. Sono appena le nove e mezzo e per andare in casa dei vicini, basta mezzo minuto: si esce dalla nostra porta e s'infila la loro. Non amo arrivare primo ai ricevimenti.
+      """
+      
+      "CECILIA": """
+        E tu sai bene che io non voglio perdere le romanze che canterà Palewski.
+      """
+      
+      "TITO": """
+        Uhm, Palewski! Come fosse chissà chi!
+      """
+      
+      "CECILIA": """
+        Né più né meno che il più grande tenore vivente, per tua regola. Conosce e canta tutte le opere, tutte le romanze e tutte le canzoni.
+      """
+    }
+  }
+}
 TITO                
 Bene, bene. Sta' tranquilla che non perderemo il tuo Palewski. C'è un 
 mezzo semplicissimo. Appena udremo i primi accordi dell'orchestra, faremo il nostro 
