@@ -39,14 +39,34 @@ export class ScriptProcessor {
     let currentLine = '';
     let pendingJoin = false;
     let lastSpeaker = null;
+    let insideMultilineParenthesis = false;
+    let parenthesisContent = '';
     
     for (let i = 0; i < nonBlankLines.length; i++) {
       const line = nonBlankLines[i];
       
+      // Handle multiline stage directions
+      if (line.startsWith('(') && !line.endsWith(')')) {
+        insideMultilineParenthesis = true;
+        parenthesisContent = line;
+        continue;
+      }
+      
+      if (insideMultilineParenthesis) {
+        parenthesisContent += '\n' + line;
+        if (line.endsWith(')')) {
+          // End of multiline parenthesis
+          joinedLines.push(parenthesisContent);
+          insideMultilineParenthesis = false;
+          parenthesisContent = '';
+        }
+        continue;
+      }
+      
       // Handle line joining with hyphens
       if (line.endsWith('-') && i < nonBlankLines.length - 1) {
-        // Remove the hyphen and join with the next line
-        currentLine = (currentLine ? currentLine + ' ' : '') + line.substring(0, line.length - 1);
+        // Remove the hyphen and join with the next line without space
+        currentLine = (currentLine ? currentLine : '') + line.substring(0, line.length - 1);
         pendingJoin = true;
         continue;
       }
@@ -97,6 +117,16 @@ export class ScriptProcessor {
       // Convert square bracket stage directions to parentheses
       if (currentLine.startsWith('[') && currentLine.endsWith(']')) {
         currentLine = `(${currentLine.substring(1, currentLine.length - 1)})`;
+      }
+      
+      // Keep multiline stage directions as they are
+      if (currentLine.includes('\n') && currentLine.startsWith('(') && currentLine.endsWith(')')) {
+        // Split into multiple lines
+        const parts = currentLine.split('\n');
+        for (const part of parts) {
+          processedLines.push(part);
+        }
+        continue;
       }
       
       // Detect Italian stage directions like "Detti, Poi, etc."
@@ -354,6 +384,132 @@ export class ScriptProcessor {
   }
   
   /**
+   * Extract roles from structured format script (using @roles section)
+   * @param {string} scriptText - The structured format script text
+   * @returns {Array<{primaryName: string, aliases: string[], description: string}>} - Array of roles
+   */
+  static extractRolesFromStructuredFormat(scriptText) {
+    // Use the utility function from rolesHelper.js
+    const { parseStructuredRoles } = require('../utils/rolesHelper');
+    return parseStructuredRoles(scriptText);
+  }
+
+  /**
+   * Extract metadata from structured format script (@title, @author, etc.)
+   * @param {string} scriptText - The structured format script text
+   * @returns {object} - Metadata object
+   */
+  static extractMetadataFromStructuredFormat(scriptText) {
+    const metadata = {
+      title: '',
+      author: '',
+      date: '',
+      description: ''
+    };
+    
+    // Extract title
+    const titleMatch = scriptText.match(/@title\s*"([^"]+)"/);
+    if (titleMatch) {
+      metadata.title = titleMatch[1];
+    }
+    
+    // Extract author
+    const authorMatch = scriptText.match(/@author\s*"([^"]+)"/);
+    if (authorMatch) {
+      metadata.author = authorMatch[1];
+    }
+    
+    // Extract date
+    const dateMatch = scriptText.match(/@date\s*"([^"]+)"/);
+    if (dateMatch) {
+      metadata.date = dateMatch[1];
+    }
+    
+    return metadata;
+  }
+
+  /**
+   * Extract scenes from structured format script
+   * @param {string} scriptText - The structured format script text
+   * @returns {Array} - Array of scene objects
+   */
+  static extractScenesFromStructuredFormat(scriptText) {
+    const scenes = [];
+    
+    // Extract scene sections
+    const sceneRegex = /@scene\s*"([^"]+)"\s*\{([\s\S]*?)(?=@scene|$)/g;
+    let sceneMatch;
+    
+    while ((sceneMatch = sceneRegex.exec(scriptText)) !== null) {
+      const sceneTitle = sceneMatch[1];
+      const sceneContent = sceneMatch[2];
+      
+      const scene = {
+        title: sceneTitle,
+        directions: [],
+        sections: []
+      };
+      
+      // Extract scene directions
+      const directionRegex = /direction\s*\{\s*"""([\s\S]*?)"""\s*\}/g;
+      let directionMatch;
+      
+      while ((directionMatch = directionRegex.exec(sceneContent)) !== null) {
+        scene.directions.push(directionMatch[1].trim());
+      }
+      
+      // Extract sections
+      const sectionRegex = /section\s*"([^"]+)"\s*\{([\s\S]*?)(?=section|$)/g;
+      let sectionMatch;
+      
+      while ((sectionMatch = sectionRegex.exec(sceneContent)) !== null) {
+        const sectionTitle = sectionMatch[1];
+        const sectionContent = sectionMatch[2];
+        
+        const section = {
+          title: sectionTitle,
+          dialogues: [],
+          directions: []
+        };
+        
+        // Extract section directions
+        const sectionDirRegex = /direction\s*\{\s*"""([\s\S]*?)"""\s*\}/g;
+        let sectionDirMatch;
+        
+        while ((sectionDirMatch = sectionDirRegex.exec(sectionContent)) !== null) {
+          section.directions.push(sectionDirMatch[1].trim());
+        }
+        
+        // Extract dialogues
+        const dialogueRegex = /"([^"]+)":\s*"""([\s\S]*?)"""/g;
+        let dialogueMatch;
+        
+        while ((dialogueMatch = dialogueRegex.exec(sectionContent)) !== null) {
+          const character = dialogueMatch[1];
+          const text = dialogueMatch[2].trim();
+          
+          // Check for stage direction in parentheses
+          const stageDirectionMatch = text.match(/^\s*\(([^)]+)\)(.*)/);
+          const dialogue = {
+            character,
+            text,
+            hasStageDirection: !!stageDirectionMatch,
+            stageDirection: stageDirectionMatch ? stageDirectionMatch[1].trim() : null
+          };
+          
+          section.dialogues.push(dialogue);
+        }
+        
+        scene.sections.push(section);
+      }
+      
+      scenes.push(scene);
+    }
+    
+    return scenes;
+  }
+
+  /**
    * Parse a non-structured script text into a structured format
    * @param {string} scriptText - The raw script text
    * @param {object} options - Parsing options
@@ -468,6 +624,82 @@ export class ScriptProcessor {
       scenes: this.extractScenes(processedLines),
       lines: structuredLines
     };
+  }
+
+  /**
+   * Parse a structured script into an organized format
+   * @param {string} scriptText - The structured script text
+   * @returns {object} - Parsed script object
+   */
+  static parseStructuredScript(scriptText) {
+    // Get metadata, roles, and scenes
+    const metadata = this.extractMetadataFromStructuredFormat(scriptText);
+    const roles = this.extractRolesFromStructuredFormat(scriptText);
+    const scenes = this.extractScenesFromStructuredFormat(scriptText);
+    
+    return {
+      metadata,
+      roles,
+      scenes,
+      text: scriptText
+    };
+  }
+
+  /**
+   * Convert structured script format to plain text
+   * @param {string} structuredScript - The structured script text
+   * @returns {string} - Plain text version of the script
+   */
+  static convertStructuredToPlainText(structuredScript) {
+    let plainText = '';
+    const parsedScript = this.parseStructuredScript(structuredScript);
+    
+    // Add title and author
+    plainText += parsedScript.metadata.title + '\n\n';
+    if (parsedScript.metadata.author) {
+      plainText += 'by ' + parsedScript.metadata.author + '\n\n';
+    }
+    
+    // Add role list
+    plainText += 'CHARACTERS:\n';
+    for (const role of parsedScript.roles) {
+      plainText += role.primaryName + ' - ' + role.description + '\n';
+    }
+    plainText += '\n';
+    
+    // Add scenes
+    for (const scene of parsedScript.scenes) {
+      plainText += scene.title + '\n\n';
+      
+      // Add scene directions
+      for (const direction of scene.directions) {
+        plainText += '(' + direction + ')\n\n';
+      }
+      
+      // Add sections
+      for (const section of scene.sections) {
+        if (section.title) {
+          plainText += section.title + '\n\n';
+        }
+        
+        // Add section directions
+        for (const direction of section.directions) {
+          plainText += '(' + direction + ')\n';
+        }
+        
+        // Add dialogues
+        for (const dialogue of section.dialogues) {
+          const dialogueText = dialogue.hasStageDirection ? 
+            `${dialogue.character}: (${dialogue.stageDirection}) ${dialogue.text.replace(/^\s*\([^)]+\)\s*/, '')}` :
+            `${dialogue.character}: ${dialogue.text}`;
+            
+          plainText += dialogueText + '\n';
+        }
+        plainText += '\n';
+      }
+    }
+    
+    return plainText;
   }
 
   /**
