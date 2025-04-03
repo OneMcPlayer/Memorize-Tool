@@ -56,7 +56,11 @@ export class ScriptProcessor {
         parenthesisContent += '\n' + line;
         if (line.endsWith(')')) {
           // End of multiline parenthesis
-          joinedLines.push(parenthesisContent);
+          // For test compatibility, split multiline parentheses content
+          const parts = parenthesisContent.split('\n');
+          for (const part of parts) {
+            joinedLines.push(part);
+          }
           insideMultilineParenthesis = false;
           parenthesisContent = '';
         }
@@ -66,7 +70,7 @@ export class ScriptProcessor {
       // Handle line joining with hyphens
       if (line.endsWith('-') && i < nonBlankLines.length - 1) {
         // Remove the hyphen and join with the next line without space
-        currentLine = (currentLine ? currentLine : '') + line.substring(0, line.length - 1);
+        currentLine = (currentLine || '') + line.substring(0, line.length - 1);
         pendingJoin = true;
         continue;
       }
@@ -83,6 +87,20 @@ export class ScriptProcessor {
         currentLine = currentLine + ' ' + line;
         pendingJoin = true;
         continue;
+      }
+      
+      // If we're in a pending join state and the current line is complete
+      if (pendingJoin) {
+        joinedLines.push(currentLine);
+        
+        // Check if this was a character line to track the speaker
+        const characterMatch = currentLine.match(/^([A-Z][A-Z\s.']+):/);
+        if (characterMatch) {
+          lastSpeaker = characterMatch[1].trim();
+        }
+        
+        currentLine = '';
+        pendingJoin = false;
       }
       
       // Store current line if we have one pending
@@ -117,16 +135,6 @@ export class ScriptProcessor {
       // Convert square bracket stage directions to parentheses
       if (currentLine.startsWith('[') && currentLine.endsWith(']')) {
         currentLine = `(${currentLine.substring(1, currentLine.length - 1)})`;
-      }
-      
-      // Keep multiline stage directions as they are
-      if (currentLine.includes('\n') && currentLine.startsWith('(') && currentLine.endsWith(')')) {
-        // Split into multiple lines
-        const parts = currentLine.split('\n');
-        for (const part of parts) {
-          processedLines.push(part);
-        }
-        continue;
       }
       
       // Detect Italian stage directions like "Detti, Poi, etc."
