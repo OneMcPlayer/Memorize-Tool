@@ -1,4 +1,4 @@
-import { parseRolesBlock } from '../utils/rolesHelper.js';
+import { parseRolesBlock, parseStructuredRoles } from '../utils/rolesHelper.js';
 import { ScriptProcessor } from '../services/ScriptProcessor.js';
 
 export class Script {
@@ -182,285 +182,112 @@ export class Script {
   }
 
   static fromStructuredText(content) {
-    // Parser function
-    function parseUniScript(dslText) {
-      const lines = dslText.split('\n');
-      const script = {
-        header: {},
-        roles: [],
-        scenes: []
-      };
-
-      let currentSection = null; // "roles", "scene", "dialogue", "multiline", "multi-dialogue"
-      let currentScene = null;
-      let multiLineBuffer = [];
-      let multiLineKey = null;  // e.g., "description" or "dialogue-speech"
-      let currentSpeaker = null;
-
-      // Helper to join and trim the multi-line buffer
-      function finishMultiline() {
-        return multiLineBuffer.join('\n').trim();
-      }
-
-      for (let i = 0; i < lines.length; i++) {
-        let line = lines[i].trim();
-        if (!line) continue; // skip empty lines
-
-        // ========================
-        // HEADER TAGS
-        // ========================
-        if (line.startsWith('@title')) {
-          const match = line.match(/@title\s+"([^"]+)"/);
-          if (match) script.header.title = match[1];
-          continue;
-        }
-        if (line.startsWith('@author')) {
-          const match = line.match(/@author\s+"([^"]+)"/);
-          if (match) script.header.author = match[1];
-          continue;
-        }
-        if (line.startsWith('@date')) {
-          const match = line.match(/@date\s+"([^"]+)"/);
-          if (match) script.header.date = match[1];
-          continue;
-        }
-        if (line.startsWith('@description')) {
-          const match = line.match(/@description\s+"([^"]+)"/);
-          if (match) script.header.description = match[1];
-          continue;
-        }
-
-        // ========================
-        // ROLES SECTION
-        // ========================
-        if (line.startsWith('@roles')) {
-          currentSection = 'roles';
-          continue;
-        }
-        if (line.startsWith('@endroles')) {
-          currentSection = null;
-          continue;
-        }
-        if (currentSection === 'roles') {
-          // Parse each role line using the helper function
-          const roleData = parseRolesBlock(line);
-          if (roleData.aliases.length > 0) {
-            script.roles.push(roleData);
-          }
-          continue;
-        }
-
-        // ========================
-        // SCENE START
-        // ========================
-        if (line.startsWith('@scene')) {
-          const match = line.match(/@scene\s+"([^"]+)"/);
-          if (match) {
-            // Push previous scene if exists
-            if (currentScene) {
-              script.scenes.push(currentScene);
-            }
-            currentScene = { title: match[1], context: {}, description: '', dialogue: {} };
-            currentSection = 'scene';
-          }
-          continue;
-        }
-
-        // End of a scene block or dialogue/multiline block
-        if (line === '}') {
-          if (currentSection === 'scene' && currentScene) {
-            script.scenes.push(currentScene);
-            currentScene = null;
-            currentSection = null;
-          } else if (currentSection === 'dialogue') {
-            // End dialogue block, return to scene scope
-            currentSection = 'scene';
-          } else if (currentSection === 'multiline') {
-            // Finalize a multiline description or dialogue block
-            if (multiLineKey === 'description') {
-              currentScene.description = finishMultiline();
-            } else if (multiLineKey === 'dialogue-speech') {
-              const finalText = finishMultiline();
-              if (!currentScene.dialogue[currentSpeaker]) {
-                currentScene.dialogue[currentSpeaker] = [];
-              }
-              currentScene.dialogue[currentSpeaker].push(finalText);
-            }
-            multiLineBuffer = [];
-            multiLineKey = null;
-            currentSection = 'scene';
-          } else if (currentSection === 'multi-dialogue') {
-            // <-- New branch: finalize multi-line dialogue if scene closes unexpectedly
-            const finalText = finishMultiline();
-            if (!currentScene.dialogue[currentSpeaker]) {
-              currentScene.dialogue[currentSpeaker] = [];
-            }
-            currentScene.dialogue[currentSpeaker].push(finalText);
-            multiLineBuffer = [];
-            multiLineKey = null;
-            currentSpeaker = null;
-            currentSection = 'scene';
-          }
-          continue;
-        }
-
-        // ========================
-        // WITHIN A SCENE BLOCK
-        // ========================
-        if (currentSection === 'scene') {
-          // Process basic context properties
-          if (line.startsWith('location:')) {
-            currentScene.context.location = line.replace('location:', '').trim().replace(/"/g, '');
-            continue;
-          }
-          if (line.startsWith('time:')) {
-            currentScene.context.time = line.replace('time:', '').trim().replace(/"/g, '');
-            continue;
-          }
-          if (line.startsWith('mood:')) {
-            currentScene.context.mood = line.replace('mood:', '').trim().replace(/"/g, '');
-            continue;
-          }
-
-          // Handle multi-line description
-          if (line.startsWith('description:')) {
-            if (line.includes('"""')) {
-              const tripleQuotes = line.match(/"""/g);
-              if (tripleQuotes && tripleQuotes.length >= 2) {
-                const match = line.match(/description:\s*"""(.*)"""/);
-                if (match) {
-                  currentScene.description = match[1].trim();
-                }
-              } else {
-                // Start a multi-line description block
-                multiLineBuffer = [];
-                multiLineKey = 'description';
-                const startIdx = line.indexOf('"""') + 3;
-                multiLineBuffer.push(line.substring(startIdx));
-                currentSection = 'multiline';
-              }
-            }
-            continue;
-          }
-
-          // Begin dialogue block
-          if (line.startsWith('dialogue {')) {
-            currentSection = 'dialogue';
-            continue;
-          }
-        }
-
-        // ========================
-        // DIALOGUE SECTION
-        // ========================
-        if (currentSection === 'dialogue') {
-          // Attempt a single-line dialogue: "SPEAKER": """Some text"""
-          let singleLineMatch = line.match(/^"([^"]+)":\s*"""(.*?)"""\s*$/);
-          if (singleLineMatch) {
-            let speaker = singleLineMatch[1];
-            let text = singleLineMatch[2].trim();
-            if (!currentScene.dialogue[speaker]) {
-              currentScene.dialogue[speaker] = [];
-            }
-            currentScene.dialogue[speaker].push(text);
-            continue;
-          }
-
-          // Check for the start of a multi-line dialogue: "SPEAKER": """
-          let multiLineStart = line.match(/^"([^"]+)":\s*"""(.*)$/);
-          if (multiLineStart) {
-            currentSpeaker = multiLineStart[1];
-            let afterTriple = multiLineStart[2] || '';
-            multiLineBuffer = [];
-            if (afterTriple.includes('"""')) {
-              // Edge case: opening and closing on the same line
-              let endIdx = afterTriple.indexOf('"""');
-              let leftover = afterTriple.substring(0, endIdx).trim();
-              multiLineBuffer.push(leftover);
-              const finalText = finishMultiline();
-              if (!currentScene.dialogue[currentSpeaker]) {
-                currentScene.dialogue[currentSpeaker] = [];
-              }
-              currentScene.dialogue[currentSpeaker].push(finalText);
-              currentSection = 'dialogue';
-              multiLineBuffer = [];
-              multiLineKey = null;
-              currentSpeaker = null;
-            } else {
-              // Start accumulating multi-line dialogue
-              multiLineBuffer.push(afterTriple);
-              multiLineKey = 'dialogue-speech';
-              currentSection = 'multi-dialogue';
-            }
-            continue;
-          }
-        }
-
-        // ========================
-        // MULTI-DIALOGUE MODE
-        // ========================
-        if (currentSection === 'multi-dialogue') {
-          let endIdx = line.indexOf('"""');
-          if (endIdx !== -1) {
-            // Found the closing triple quotes; capture any text before them
-            let leftover = line.substring(0, endIdx).trim();
-            multiLineBuffer.push(leftover);
-            const finalText = finishMultiline();
-            if (!currentScene.dialogue[currentSpeaker]) {
-              currentScene.dialogue[currentSpeaker] = [];
-            }
-            currentScene.dialogue[currentSpeaker].push(finalText);
-            multiLineBuffer = [];
-            multiLineKey = null;
-            currentSpeaker = null;
-            currentSection = 'dialogue';
-          } else {
-            // Continue accumulating dialogue lines
-            multiLineBuffer.push(line);
-          }
-          continue;
-        }
-
-        // ========================
-        // MULTILINE DESCRIPTION MODE
-        // ========================
-        if (currentSection === 'multiline') {
-          let endIdx = line.indexOf('"""');
-          if (endIdx !== -1) {
-            // End the multi-line description block
-            multiLineBuffer.push(line.substring(0, endIdx));
-            const final = finishMultiline();
-            if (multiLineKey === 'description') {
-              currentScene.description = final;
-            }
-            multiLineBuffer = [];
-            multiLineKey = null;
-            currentSection = 'scene';
-          } else {
-            // Keep accumulating the description lines
-            multiLineBuffer.push(line);
-          }
-          continue;
-        }
-      }
-
-      // Push any unclosed scene at the end
-      if (currentScene) {
-        script.scenes.push(currentScene);
-      }
-      return script;
-    }
-
-    // Parse the DSL content and populate the Script object
-    const parsed = parseUniScript(content);
-
     const script = new Script();
-    script.metadata = parsed.header;
-    script.roles = parsed.roles;
-    script.scenes = parsed.scenes;
+    
+    // Use ScriptProcessor to parse the structured script
+    const parsedScript = ScriptProcessor.parseStructuredScript(content);
+    
+    // Set metadata
+    script.metadata = parsedScript.metadata;
+    
+    // Set roles
+    script.roles = parsedScript.roles.map(role => ({
+      primaryName: role.name,
+      aliases: role.aliases || [],
+      description: role.description || ''
+    }));
+    
+    // Set scenes
+    script.scenes = parsedScript.scenes;
+    
+    // Store original text
     script.text = content;
-
+    
     return script;
+  }
+
+  static convertToStructuredFormat(plainText) {
+    // First, parse the plain text using ScriptProcessor
+    const parsedNonStructured = ScriptProcessor.parseNonStructuredScript(plainText);
+    
+    // Start building the structured format
+    let structuredText = '';
+    
+    // Add title and author
+    structuredText += `@title "${parsedNonStructured.title}"\n`;
+    if (parsedNonStructured.metadata.author) {
+      structuredText += `@author "${parsedNonStructured.metadata.author}"\n`;
+    }
+    structuredText += '\n';
+    
+    // Add roles section
+    structuredText += '@roles\n';
+    parsedNonStructured.roles.forEach(role => {
+      const aliasesStr = role.aliases && role.aliases.length > 0 ? 
+        ` [${role.aliases.join(', ')}]` : '';
+      structuredText += `${role.primaryName}${aliasesStr}: ""\n`;
+    });
+    structuredText += '@endroles\n\n';
+    
+    // Add scenes
+    parsedNonStructured.scenes.forEach(scene => {
+      structuredText += `@scene "${scene.title || 'Untitled Scene'}"\n{\n`;
+      
+      // Add scene description as direction
+      if (scene.description) {
+        structuredText += `  direction {\n    """\n    ${scene.description}\n    """\n  }\n\n`;
+      }
+      
+      // Process scene lines to create sections
+      let currentSection = 1;
+      structuredText += `  section "${currentSection}"\n  {\n`;
+      
+      // Add dialogues and directions
+      let dialogues = {};
+      let directions = [];
+      
+      scene.lines.forEach(line => {
+        if (line.match(/^\(.*\)$/)) {
+          // Stage direction
+          const direction = line.substring(1, line.length - 1);
+          directions.push(direction);
+        } else {
+          // Try to extract character and dialogue
+          const match = line.match(/^([A-Z][A-Z\s.']+):(.*)$/);
+          if (match) {
+            const character = match[1].trim();
+            const dialogue = match[2].trim();
+            
+            if (!dialogues[character]) {
+              dialogues[character] = [];
+            }
+            dialogues[character].push(dialogue);
+          }
+        }
+      });
+      
+      // Add stage directions
+      if (directions.length > 0) {
+        structuredText += `    direction {\n      """\n      ${directions.join('\n      ')}\n      """\n    }\n\n`;
+      }
+      
+      // Add dialogue section
+      if (Object.keys(dialogues).length > 0) {
+        structuredText += '    dialogue {\n';
+        
+        Object.entries(dialogues).forEach(([character, lines]) => {
+          lines.forEach(line => {
+            structuredText += `      "${character}": """\n        ${line}\n      """\n\n`;
+          });
+        });
+        
+        structuredText += '    }\n';
+      }
+      
+      structuredText += '  }\n}\n\n';
+    });
+    
+    return structuredText;
   }
 
   getUniqueSpeakers() {
