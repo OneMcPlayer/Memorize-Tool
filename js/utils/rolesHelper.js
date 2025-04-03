@@ -85,27 +85,25 @@ export function parseStructuredRoles(scriptText) {
   if (!rolesMatch) return []; // No roles section found
   
   const rolesSection = rolesMatch[1].trim();
-  const roleLines = rolesSection.split('\n');
   const roles = [];
   
-  for (const line of roleLines) {
-    if (!line.trim()) continue; // Skip empty lines
+  // Process the whole roles section at once instead of line by line
+  // Use regex to find all role definitions, capturing multiline descriptions
+  const roleRegex = /([A-Z_]+)(?:\s*\[([^\]]+)\])?\s*:\s*"([\s\S]*?)(?:"\s*$|"\s*\n)/gm;
+  let match;
+  
+  while ((match = roleRegex.exec(rolesSection)) !== null) {
+    const name = match[1].trim();
+    const aliasStr = match[2] || '';
+    // Handle multiline descriptions
+    const description = match[3] ? match[3].trim() : '';
+    const aliases = aliasStr ? aliasStr.split(',').map(a => a.trim()) : [];
     
-    // Match role definitions like: ROLE_NAME [ALIAS1, ALIAS2]: "Role description"
-    const roleMatch = line.match(/([A-Z_]+)(?:\s*\[([^\]]+)\])?\s*:\s*"([\s\S]*?)"/);
-    if (roleMatch) {
-      const name = roleMatch[1].trim();
-      const aliasStr = roleMatch[2] || '';
-      // Handle multiline descriptions by preserving line breaks
-      const description = roleMatch[3] ? roleMatch[3].trim() : '';
-      const aliases = aliasStr ? aliasStr.split(',').map(a => a.trim()) : [];
-      
-      roles.push({
-        name,
-        aliases,
-        description
-      });
-    }
+    roles.push({
+      name,
+      aliases,
+      description
+    });
   }
   
   return roles;
