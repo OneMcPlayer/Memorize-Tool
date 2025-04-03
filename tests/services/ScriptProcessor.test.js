@@ -523,4 +523,234 @@ TERESA (al signor Pelaez): Grazie, grazie.`;
       expect(pelaezLines.length).toBeGreaterThan(0);
     });
   });
+
+  // New tests for structured script format
+  describe('structured script format', () => {
+    // Sample script in structured format resembling the scripts folder examples
+    const structuredScript = `@title "LA PROVA"
+@author "Test Author"
+
+@roles
+GIOVANNI: "Protagonista"
+MARIA: "Co-protagonista"
+CARLO [CAR, CARLETTO]: "Amico di Giovanni"
+@endroles
+
+@scene "Prima scena"
+{
+  direction {
+    """
+    La scena si svolge in un salotto. Giovanni sta leggendo un libro.
+    """
+  }
+  
+  section "I" {
+    dialogue {
+      "GIOVANNI": """
+        (alzando lo sguardo) Che giornata meravigliosa!
+      """
+      
+      "MARIA": """
+        (entrando) Hai ragione, è proprio bella fuori.
+      """
+
+      "GIOVANNI": """
+        Stavo pensando di fare una passeggiata. Vuoi venire?
+      """
+    }
+    
+    direction {
+      """
+      Maria si siede accanto a Giovanni.
+      """
+    }
+
+    dialogue {
+      "MARIA": """
+        Mi piacerebbe molto.
+      """
+      
+      "CARLO": """
+        (entrando all'improvviso) Ciao a tutti! Disturbo?
+      """
+    }
+  }
+}`;
+
+    test('should parse roles from structured format', () => {
+      // This test checks if roles are correctly extracted from the @roles section
+      const roles = ScriptProcessor.extractRolesFromStructuredFormat(structuredScript);
+      
+      // Check number of roles and their properties
+      expect(roles).toHaveLength(3);
+      
+      // Find each role and check its properties
+      const giovanni = roles.find(r => r.primaryName === 'GIOVANNI');
+      const maria = roles.find(r => r.primaryName === 'MARIA');
+      const carlo = roles.find(r => r.primaryName === 'CARLO');
+      
+      expect(giovanni).toBeDefined();
+      expect(giovanni.description).toBe('Protagonista');
+      expect(giovanni.aliases).toHaveLength(0);
+      
+      expect(maria).toBeDefined();
+      expect(maria.description).toBe('Co-protagonista');
+      expect(maria.aliases).toHaveLength(0);
+      
+      expect(carlo).toBeDefined();
+      expect(carlo.description).toBe('Amico di Giovanni');
+      expect(carlo.aliases).toEqual(['CAR', 'CARLETTO']);
+    });
+
+    test('should extract metadata from structured format', () => {
+      // This test checks if title, author, and other metadata are correctly extracted
+      const metadata = ScriptProcessor.extractMetadataFromStructuredFormat(structuredScript);
+      
+      expect(metadata.title).toBe('LA PROVA');
+      expect(metadata.author).toBe('Test Author');
+    });
+
+    test('should extract scenes from structured format', () => {
+      // This test checks if scenes are correctly parsed from the script
+      const scenes = ScriptProcessor.extractScenesFromStructuredFormat(structuredScript);
+      
+      expect(scenes).toHaveLength(1);
+      expect(scenes[0].title).toBe('Prima scena');
+      
+      // Check if scene contains directions
+      const directions = scenes[0].directions;
+      expect(directions).toHaveLength(1);
+      expect(directions[0]).toContain('La scena si svolge in un salotto');
+      
+      // Check if scene contains sections
+      const sections = scenes[0].sections;
+      expect(sections).toHaveLength(1);
+      expect(sections[0].title).toBe('I');
+      
+      // Check if dialogue is correctly extracted
+      const dialogues = sections[0].dialogues;
+      expect(dialogues).toHaveLength(3); // There are 3 dialogue exchanges
+      
+      // Check first dialogue
+      expect(dialogues[0].character).toBe('GIOVANNI');
+      expect(dialogues[0].text).toContain('Che giornata meravigliosa');
+      expect(dialogues[0].hasStageDirection).toBe(true);
+      expect(dialogues[0].stageDirection).toContain('alzando lo sguardo');
+    });
+
+    test('should process complete structured script', () => {
+      // This test checks the complete processing of a structured script
+      const parsedScript = ScriptProcessor.parseStructuredScript(structuredScript);
+      
+      // Check basic metadata
+      expect(parsedScript.title).toBe('LA PROVA');
+      expect(parsedScript.author).toBe('Test Author');
+      
+      // Check roles
+      expect(parsedScript.roles).toHaveLength(3);
+      
+      // Check scenes structure
+      expect(parsedScript.scenes).toHaveLength(1);
+      
+      // Check dialogue extraction
+      const firstScene = parsedScript.scenes[0];
+      expect(firstScene.sections[0].dialogues[0].character).toBe('GIOVANNI');
+      expect(firstScene.sections[0].dialogues[1].character).toBe('MARIA');
+      expect(firstScene.sections[0].dialogues[2].character).toBe('GIOVANNI');
+      
+      // Check stage direction extraction
+      expect(firstScene.directions[0]).toContain('Giovanni sta leggendo un libro');
+      
+      // Check for inner section directions
+      expect(firstScene.sections[0].directions[0]).toContain('Maria si siede accanto a Giovanni');
+    });
+
+    test('should convert structured script to plain text', () => {
+      // This test checks the conversion from structured to plain format
+      const plainText = ScriptProcessor.convertStructuredToPlainText(structuredScript);
+      
+      // Check that the plain text contains expected content
+      expect(plainText).toContain('LA PROVA');
+      expect(plainText).toContain('GIOVANNI:');
+      expect(plainText).toContain('MARIA:');
+      expect(plainText).toContain('CARLO:');
+      
+      // Check that stage directions are preserved
+      expect(plainText).toContain('(alzando lo sguardo)');
+      expect(plainText).toContain('(entrando)');
+      
+      // Check that scene description is preserved
+      expect(plainText).toContain('La scena si svolge in un salotto');
+    });
+
+    test('should handle real script example from scripts folder', () => {
+      // This test uses a fragment of an actual script from the scripts folder
+      const realScriptFragment = `@title "CENTOCINQUANTA LA GALLINA CANTA"
+@author "Achille Campanile"
+
+@roles
+CECILIA: "Moglie di Tito"
+TITO: "Marito di Cecilia"
+BATTISTA: "Il domestico"
+@endroles
+
+@scene "Salotto in casa di Tito"
+{
+  direction {
+    """
+    Tito ha la veste da camera e sfoglia un giornale. In fondo, Battista il domestico, in frac, sta impalato sotto la porta in attesa di ordini.
+    """
+  }
+  
+  section "I" {
+    direction {
+      """
+      Cecilia, Tito, Battista.
+      """
+    }
+    
+    dialogue {
+      "CECILIA": """
+        (entrando in gran toletta, con un piccolo specchio in mano, nel quale si guarda) Andiamo?
+      """
+      
+      "TITO": """
+        (guarda l'orologio) È presto cara. Sono appena le nove e mezzo e per andare in casa dei vicini, basta mezzo minuto: si esce dalla nostra porta e s'infila la loro. Non amo arrivare primo ai ricevimenti.
+      """
+      
+      "CECILIA": """
+        E tu sai bene che io non voglio perdere le romanze che canterà Palewski.
+      """
+    }
+  }
+}`;
+
+      const parsedScript = ScriptProcessor.parseStructuredScript(realScriptFragment);
+      
+      // Verify basic metadata
+      expect(parsedScript.title).toBe('CENTOCINQUANTA LA GALLINA CANTA');
+      expect(parsedScript.author).toBe('Achille Campanile');
+      
+      // Verify roles
+      const roles = parsedScript.roles;
+      expect(roles).toHaveLength(3);
+      expect(roles.map(r => r.primaryName)).toContain('CECILIA');
+      expect(roles.map(r => r.primaryName)).toContain('TITO');
+      expect(roles.map(r => r.primaryName)).toContain('BATTISTA');
+      
+      // Verify scene info
+      expect(parsedScript.scenes[0].title).toBe('Salotto in casa di Tito');
+      
+      // Verify dialogue content
+      const dialogues = parsedScript.scenes[0].sections[0].dialogues;
+      expect(dialogues).toHaveLength(3);
+      expect(dialogues[0].character).toBe('CECILIA');
+      expect(dialogues[1].character).toBe('TITO');
+      expect(dialogues[2].character).toBe('CECILIA');
+      
+      // Check that stage directions are processed
+      expect(dialogues[0].stageDirection).toContain('entrando in gran toletta');
+      expect(dialogues[1].stageDirection).toContain('guarda l\'orologio');
+    });
+  });
 });
