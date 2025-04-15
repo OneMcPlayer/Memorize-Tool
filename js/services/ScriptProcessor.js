@@ -1,3 +1,5 @@
+import { parseStructuredRoles } from '../utils/rolesHelper.js';
+
 export class ScriptProcessor {
   // Private helper function to match character names
   static matchesCharacter(line, characterNames) {
@@ -397,8 +399,6 @@ export class ScriptProcessor {
    * @returns {Array<{primaryName: string, aliases: string[], description: string}>} - Array of roles
    */
   static extractRolesFromStructuredFormat(scriptText) {
-    // Use the utility function from rolesHelper.js
-    const { parseStructuredRoles } = require('../utils/rolesHelper');
     return parseStructuredRoles(scriptText);
   }
 
