@@ -183,25 +183,29 @@ class Script {
 
   static fromStructuredText(content) {
     const script = new Script();
-    // Usa ScriptProcessor per il parsing
     const parsedScript = ScriptProcessor.parseStructuredScript(content);
-    // Setta metadata
-    script.metadata = parsedScript.metadata;
-    // Setta anche title, author, date direttamente se presenti
+    script.metadata = { ...parsedScript.metadata };
+    if (script.metadata.description === '') delete script.metadata.description;
     if (parsedScript.title) script.metadata.title = parsedScript.title;
     if (parsedScript.author) script.metadata.author = parsedScript.author;
     if (parsedScript.date) script.metadata.date = parsedScript.date;
-    if (parsedScript.description) script.metadata.description = parsedScript.description;
-    // Setta ruoli
     script.roles = (parsedScript.roles || []).map(role => ({
       primaryName: role.name || role.primaryName,
       aliases: role.aliases || [],
       description: role.description || ''
     }));
-    // Setta scene
     script.scenes = parsedScript.scenes;
-    // Test: se la scena ha location/time/description, aggiungi context
     script.scenes.forEach(scene => {
+      // Estrai location/time/description DSL se presenti
+      const dslLocation = content.match(new RegExp(`@scene\s*"${scene.title}"[\s\S]*?location:\s*"([^"]+)"`));
+      const dslTime = content.match(new RegExp(`@scene\s*"${scene.title}"[\s\S]*?time:\s*"([^"]+)"`));
+      const dslDesc = content.match(new RegExp(`@scene\s*"${scene.title}"[\s\S]*?description:\s*"""([\s\S]*?)"""`));
+      if (dslLocation) scene.location = dslLocation[1];
+      if (dslTime) scene.time = dslTime[1];
+      if (dslDesc) scene.description = dslDesc[1].trim();
+      if (scene.directions && scene.directions.length > 0 && !scene.description) {
+        scene.description = scene.directions[0];
+      }
       if (scene.location || scene.time || scene.description) {
         scene.context = {
           location: scene.location || '',
@@ -209,8 +213,18 @@ class Script {
           description: scene.description || ''
         };
       }
+      if (scene.sections && scene.sections.length > 0) {
+        const dialogueObj = {};
+        scene.sections.forEach(section => {
+          if (section.dialogues) {
+            section.dialogues.forEach(d => {
+              if (d.character && d.text) dialogueObj[d.character] = d.text.trim();
+            });
+          }
+        });
+        if (Object.keys(dialogueObj).length > 0) scene.dialogue = dialogueObj;
+      }
     });
-    // Salva testo originale
     script.text = content;
     return script;
   }
@@ -239,8 +253,32 @@ class Script {
     structuredText += '@endroles\n\n';
     
     // Add scenes
-    parsedNonStructured.scenes.forEach(scene => {
-      structuredText += `@scene "${scene.title || 'Untitled Scene'}"\n{\n`;
+    parsedNonStructured.scenes.forEach((scene, idx, arr) => {
+      // Unisci titolo atto e scena se consecutivi
+      let sceneTitle = scene.title || 'Untitled Scene';
+      let location = '';
+      // Cerca pattern tipo 'ATTO I' seguito da 'SCENA 1 - ...'
+      if (idx > 0 && arr[idx-1].title && arr[idx-1].title.match(/^ATTO /i) && sceneTitle.match(/^SCENA /i)) {
+        const match = sceneTitle.match(/^SCENA (\d+)(?: - (.*))?/i);
+        if (match) {
+          sceneTitle = arr[idx-1].title + ' - SCENA ' + match[1];
+          if (match[2]) location = match[2].trim();
+        }
+      } else {
+        // Cerca pattern tipo 'SCENA 1 - Verona, ...'
+        const match = sceneTitle.match(/^(SCENA \d+)(?: - (.*))?/i);
+        if (match) {
+          sceneTitle = match[1];
+          if (match[2]) location = match[2].trim();
+        }
+      }
+      structuredText += `@scene "${sceneTitle}"
+{
+`;
+      if (location) structuredText += `location: "${location}"
+`;
+      structuredText += `{
+`;
       
       // Add scene description as direction
       if (scene.description) {

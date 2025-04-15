@@ -56,8 +56,9 @@ export class ScriptProcessor {
         parenthesisContent.push(line);
         if (line.endsWith(')')) {
           // End of multiline parenthesis
-          for (const part of parenthesisContent) {
-            joinedLines.push(part);
+          // Per compatibilità test: ogni riga tra parentesi va come riga separata
+          for (let j = 0; j < parenthesisContent.length; j++) {
+            joinedLines.push(parenthesisContent[j]);
           }
           insideMultilineParenthesis = false;
           parenthesisContent = [];
