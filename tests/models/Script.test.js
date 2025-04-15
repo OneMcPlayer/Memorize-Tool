@@ -1,4 +1,4 @@
-const Script = require('../../js/models/Script');
+import Script from '../../js/models/Script.js';
 
 // Mock the imported module
 jest.mock('../../js/utils/rolesHelper.js', () => ({

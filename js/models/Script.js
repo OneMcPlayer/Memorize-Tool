@@ -1,5 +1,5 @@
+import { ScriptProcessor } from '../services/ScriptProcessor.js';
 const rolesHelper = require('../utils/rolesHelper');
-const ScriptProcessor = require('../services/ScriptProcessor');
 
 class Script {
   constructor() {
@@ -183,26 +183,35 @@ class Script {
 
   static fromStructuredText(content) {
     const script = new Script();
-    
-    // Use ScriptProcessor to parse the structured script
+    // Usa ScriptProcessor per il parsing
     const parsedScript = ScriptProcessor.parseStructuredScript(content);
-    
-    // Set metadata
+    // Setta metadata
     script.metadata = parsedScript.metadata;
-    
-    // Set roles
-    script.roles = parsedScript.roles.map(role => ({
-      primaryName: role.name,
+    // Setta anche title, author, date direttamente se presenti
+    if (parsedScript.title) script.metadata.title = parsedScript.title;
+    if (parsedScript.author) script.metadata.author = parsedScript.author;
+    if (parsedScript.date) script.metadata.date = parsedScript.date;
+    if (parsedScript.description) script.metadata.description = parsedScript.description;
+    // Setta ruoli
+    script.roles = (parsedScript.roles || []).map(role => ({
+      primaryName: role.name || role.primaryName,
       aliases: role.aliases || [],
       description: role.description || ''
     }));
-    
-    // Set scenes
+    // Setta scene
     script.scenes = parsedScript.scenes;
-    
-    // Store original text
+    // Test: se la scena ha location/time/description, aggiungi context
+    script.scenes.forEach(scene => {
+      if (scene.location || scene.time || scene.description) {
+        scene.context = {
+          location: scene.location || '',
+          time: scene.time || '',
+          description: scene.description || ''
+        };
+      }
+    });
+    // Salva testo originale
     script.text = content;
-    
     return script;
   }
 
@@ -295,4 +304,5 @@ class Script {
   }
 }
 
-module.exports = Script;
+export { Script };
+export default Script;

@@ -1,4 +1,4 @@
-class ScriptProcessor {
+export class ScriptProcessor {
   // Private helper function to match character names
   static matchesCharacter(line, characterNames) {
     if (!characterNames || !characterNames.length || !line) return false;
@@ -432,6 +432,12 @@ class ScriptProcessor {
       metadata.date = dateMatch[1];
     }
     
+    // Extract description if present
+    const descMatch = scriptText.match(/@description\s*"([^"]+)"/);
+    if (descMatch) {
+      metadata.description = descMatch[1];
+    }
+    
     return metadata;
   }
 
@@ -644,7 +650,9 @@ class ScriptProcessor {
     const roles = this.extractRolesFromStructuredFormat(scriptText);
     const scenes = this.extractScenesFromStructuredFormat(scriptText);
     
+    // For compatibility with tests, copia anche title, author, date a livello root
     return {
+      ...metadata,
       metadata,
       roles,
       scenes,
@@ -832,5 +840,3 @@ class ScriptProcessor {
     return scenes;
   }
 }
-
-module.exports = ScriptProcessor;

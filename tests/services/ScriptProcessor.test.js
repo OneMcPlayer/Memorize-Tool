@@ -1,4 +1,4 @@
-import { ScriptProcessor } from '../../js/services/ScriptProcessor';
+import { ScriptProcessor } from '../../js/services/ScriptProcessor.js';
 
 describe('ScriptProcessor', () => {
   beforeEach(() => {
