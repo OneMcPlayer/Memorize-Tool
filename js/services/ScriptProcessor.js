@@ -399,7 +399,8 @@ export class ScriptProcessor {
    * @returns {Array<{primaryName: string, aliases: string[], description: string}>} - Array of roles
    */
   static extractRolesFromStructuredFormat(scriptText) {
-    return parseStructuredRoles(scriptText);
+    const rolesHelper = require('../utils/rolesHelper');
+    return rolesHelper.parseStructuredRoles(scriptText);
   }
 
   /**
