@@ -40,38 +40,44 @@ export class ScriptProcessor {
     let pendingJoin = false;
     let lastSpeaker = null;
     let insideMultilineParenthesis = false;
-    let parenthesisContent = '';
+    let parenthesisContent = [];
     
     for (let i = 0; i < nonBlankLines.length; i++) {
       const line = nonBlankLines[i];
       
-      // Handle multiline stage directions
+      // Handle multiline stage directions (split each line as separate array element)
       if (line.startsWith('(') && !line.endsWith(')')) {
         insideMultilineParenthesis = true;
-        parenthesisContent = line;
+        parenthesisContent = [line];
         continue;
       }
       
       if (insideMultilineParenthesis) {
-        parenthesisContent += '\n' + line;
+        parenthesisContent.push(line);
         if (line.endsWith(')')) {
           // End of multiline parenthesis
-          // For test compatibility, split multiline parentheses content
-          const parts = parenthesisContent.split('\n');
-          for (const part of parts) {
+          for (const part of parenthesisContent) {
             joinedLines.push(part);
           }
           insideMultilineParenthesis = false;
-          parenthesisContent = '';
+          parenthesisContent = [];
         }
         continue;
       }
       
-      // Handle line joining with hyphens
+      // Handle line joining with hyphens (no space)
       if (line.endsWith('-') && i < nonBlankLines.length - 1) {
-        // Remove the hyphen and join with the next line without space
         currentLine = (currentLine || '') + line.substring(0, line.length - 1);
         pendingJoin = true;
+        continue;
+      }
+      
+      if (pendingJoin) {
+        // Join next line with no space
+        currentLine += nonBlankLines[i];
+        joinedLines.push(currentLine);
+        currentLine = '';
+        pendingJoin = false;
         continue;
       }
       
@@ -398,7 +404,12 @@ export class ScriptProcessor {
    */
   static extractRolesFromStructuredFormat(scriptText) {
     const rolesHelper = require('../utils/rolesHelper');
-    return rolesHelper.parseStructuredRoles(scriptText);
+    // Mappa i ruoli per restituire primaryName, aliases, description
+    return rolesHelper.parseStructuredRoles(scriptText).map(r => ({
+      primaryName: r.name,
+      aliases: r.aliases || [],
+      description: r.description || ''
+    }));
   }
 
   /**
@@ -469,6 +480,11 @@ export class ScriptProcessor {
       
       while ((directionMatch = directionRegex.exec(sceneContent)) !== null) {
         scene.directions.push(directionMatch[1].trim());
+      }
+      
+      // Unisci directions consecutive in una sola se necessario
+      if (scene.directions.length > 1) {
+        scene.directions = [scene.directions.join('\n')];
       }
       
       // Extract sections
