@@ -1,6 +1,4 @@
-import { parseStructuredRoles } from '../utils/rolesHelper.js';
-
-export class ScriptProcessor {
+class ScriptProcessor {
   // Private helper function to match character names
   static matchesCharacter(line, characterNames) {
     if (!characterNames || !characterNames.length || !line) return false;
@@ -834,3 +832,5 @@ export class ScriptProcessor {
     return scenes;
   }
 }
+
+module.exports = ScriptProcessor;

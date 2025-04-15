@@ -1,4 +1,4 @@
-import { Script } from '../../js/models/Script.js';
+const Script = require('../../js/models/Script');
 
 // Mock the imported module
 jest.mock('../../js/utils/rolesHelper.js', () => ({
@@ -10,6 +10,26 @@ jest.mock('../../js/utils/rolesHelper.js', () => ({
       description: parts[1]?.trim() || '',
       aliases: parts[0]?.trim() ? [parts[0].trim()] : []
     };
+  }),
+  parseStructuredRoles: jest.fn((text) => {
+    // Add mock implementation for parseStructuredRoles
+    const roles = [];
+    const matches = text.match(/@roles[\s\S]*?@endroles/);
+    if (matches) {
+      const rolesSection = matches[0];
+      const roleLines = rolesSection.split('\n').filter(line => line.includes(':'));
+      for (const line of roleLines) {
+        const [name, rest] = line.split(':');
+        const aliasMatch = name.match(/\[(.*?)\]/);
+        const cleanName = name.replace(/\[.*?\]/, '').trim();
+        roles.push({
+          name: cleanName,
+          aliases: aliasMatch ? aliasMatch[1].split(',').map(a => a.trim()) : [],
+          description: (rest || '').replace(/['"]/g, '').trim()
+        });
+      }
+    }
+    return roles;
   })
 }));
 

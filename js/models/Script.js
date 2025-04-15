@@ -1,7 +1,7 @@
-import { parseRolesBlock, parseStructuredRoles } from '../utils/rolesHelper.js';
-import { ScriptProcessor } from '../services/ScriptProcessor.js';
+const rolesHelper = require('../utils/rolesHelper');
+const ScriptProcessor = require('../services/ScriptProcessor');
 
-export class Script {
+class Script {
   constructor() {
     this.metadata = {};
     this.roles = [];
@@ -294,3 +294,5 @@ export class Script {
     return Array.from(new Set(this.lines.map(line => line.speaker)));
   }
 }
+
+module.exports = Script;
