@@ -20,7 +20,7 @@ function getRoleDescription(text) {
   return '';
 }
 
-export function parseRolesBlock(rolesText) {
+function parseRolesBlock(rolesText) {
   if (!rolesText) return []; // Return empty array for null/undefined/empty
   
   // Split the text by lines and parse each character line
@@ -48,7 +48,7 @@ export function parseRolesBlock(rolesText) {
   return roles;
 }
 
-export function findRoleByName(name, rolesList) {
+function findRoleByName(name, rolesList) {
   // Handle null/undefined inputs
   if (!name || !rolesList) return null;
   
@@ -77,7 +77,7 @@ export function findRoleByName(name, rolesList) {
  * @param {string} scriptText - The full script text or roles section
  * @returns {Array} - Array of role objects with name, aliases, and description
  */
-export function parseStructuredRoles(scriptText) {
+function parseStructuredRoles(scriptText) {
   if (!scriptText) return []; // Return empty array for null/undefined/empty
   
   // Extract the roles section
@@ -108,3 +108,9 @@ export function parseStructuredRoles(scriptText) {
   
   return roles;
 }
+
+module.exports = {
+  parseRolesBlock,
+  findRoleByName,
+  parseStructuredRoles
+};
