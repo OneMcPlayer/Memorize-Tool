@@ -53,6 +53,30 @@ export const translations = {
     fullScript: "Full Script",
     closeButton: "Close",
 
+    // Speech recognition and TTS translations
+    playContext: "Play context",
+    noContextToPlay: "No context to play",
+    ttsError: "Error playing audio",
+    sttNotSupported: "Speech recognition not supported in this browser",
+    sttError: "Error recognizing speech",
+    startListening: "Start listening",
+    stopListening: "Stop listening",
+    listening: "Listening...",
+    speak: "Speak your line",
+    viewReport: "View Report",
+    sessionReport: "Session Report",
+    totalLines: "Total Lines",
+    totalAttempts: "Total Attempts",
+    duration: "Duration",
+    attemptsPerLine: "Attempts Per Line",
+    performance: "Performance",
+    averageScore: "Average Score",
+    excellent: "Excellent",
+    good: "Good",
+    fair: "Fair",
+    poor: "Poor",
+    newSession: "New Session",
+
     // Script Converter Translations
     converter: {
       title: "Script Converter",
@@ -163,6 +187,30 @@ export const translations = {
     viewFullScriptButton: "Visualizza Copione Completo",
     fullScript: "Copione Completo",
     closeButton: "Chiudi",
+
+    // Speech recognition and TTS translations
+    playContext: "Riproduci contesto",
+    noContextToPlay: "Nessun contesto da riprodurre",
+    ttsError: "Errore nella riproduzione audio",
+    sttNotSupported: "Riconoscimento vocale non supportato in questo browser",
+    sttError: "Errore nel riconoscimento vocale",
+    startListening: "Inizia ascolto",
+    stopListening: "Ferma ascolto",
+    listening: "In ascolto...",
+    speak: "Pronuncia la battuta",
+    viewReport: "Visualizza Report",
+    sessionReport: "Report Sessione",
+    totalLines: "Battute Totali",
+    totalAttempts: "Tentativi Totali",
+    duration: "Durata",
+    attemptsPerLine: "Tentativi Per Battuta",
+    performance: "Prestazione",
+    averageScore: "Punteggio Medio",
+    excellent: "Eccellente",
+    good: "Buono",
+    fair: "Discreto",
+    poor: "Insufficiente",
+    newSession: "Nuova Sessione",
 
     // Script Converter Translations
     converter: {
