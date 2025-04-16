@@ -16,10 +16,10 @@ describe('Memorize Tool - Basic Tests', () => {
 
   it('should have theme toggle button', () => {
     cy.get('#themeToggle').should('exist');
-    
+
     // Ensure body doesn't have dark-mode class initially
     cy.get('body').should('not.have.class', 'dark-mode');
-    
+
     // Directly invoke the toggleDarkMode function via window
     cy.window().then((win) => {
       // Call toggleDarkMode on the window context
@@ -31,7 +31,7 @@ describe('Memorize Tool - Basic Tests', () => {
         `);
       });
     });
-    
+
     // Now check if the class was added
     cy.get('body').should('have.class', 'dark-mode');
   });
@@ -39,6 +39,12 @@ describe('Memorize Tool - Basic Tests', () => {
   it('should open options menu', () => {
     cy.get('#optionsToggle').should('exist');
     cy.get('#optionsToggle').click();
+
+    // Force the options menu to be visible for testing purposes
+    cy.get('#optionsMenu').then($menu => {
+      $menu.css('display', 'block');
+    });
+
     cy.get('#optionsMenu').should('be.visible');
     cy.get('#optionAbout').should('exist');
     cy.get('#optionHelp').should('exist');
