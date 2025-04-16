@@ -1,4 +1,4 @@
-# Memorize Tool - Project Roadmap
+# Memorize Tool (React Version) - Project Roadmap
 
 ## Feature Enhancements
 
@@ -14,7 +14,7 @@
 - [ ] Design spaced repetition algorithm for lines memorization
   - [ ] Research established SR algorithms (SuperMemo, Anki)
   - [ ] Adapt algorithm for script memorization context
-- [ ] Track performance metrics 
+- [ ] Track performance metrics
   - [ ] Record success/failure rate per line
   - [ ] Measure response time for recalling lines
 - [ ] Create prioritized practice sessions based on difficulty
@@ -57,6 +57,25 @@
   - [ ] Implement bidirectional updates for real-time editing/preview
   - [ ] Add support for industry-standard formats (Final Draft, Fountain)
   - [ ] Implement batch processing for multiple scripts
+
+## React-Specific Improvements
+
+### Component Optimization
+- [ ] Implement React.memo for performance-critical components
+- [ ] Add proper prop validation with PropTypes
+- [ ] Convert class components to functional components with hooks
+- [ ] Implement code splitting for larger components
+
+### State Management
+- [ ] Evaluate and possibly implement Redux for global state
+- [ ] Add persistence with Redux-Persist or similar
+- [ ] Implement custom hooks for common functionality
+
+### Testing
+- [ ] Set up comprehensive testing with React Testing Library
+- [ ] Add snapshot tests for UI components
+- [ ] Implement integration tests for key user flows
+- [ ] Set up E2E tests with Cypress for React components
 
 ## Technical Improvements
 

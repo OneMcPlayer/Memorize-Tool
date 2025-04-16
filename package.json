@@ -1,32 +1,42 @@
 {
   "name": "memorize-tool",
-  "version": "1.0.0",
-  "description": "A tool for memorizing theatrical scripts",
-  "main": "index.js",
-  "scripts": {
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "cy:open": "cypress open",
-    "cy:run": "cypress run",
-    "test:e2e": "cypress run",
-    "serve": "http-server . -p 8080"
+  "version": "2.0.0",
+  "private": true,
+  "dependencies": {
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^13.5.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-scripts": "5.0.1",
+    "web-vitals": "^2.1.4"
   },
-  "keywords": [
-    "script",
-    "memorize",
-    "theater"
-  ],
-  "author": "",
-  "license": "MIT",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
   "devDependencies": {
-    "@babel/core": "^7.22.9",
-    "@babel/preset-env": "^7.22.9",
-    "babel-jest": "^29.6.1",
-    "cypress": "^13.7.0",
-    "http-server": "^14.1.1",
-    "jest": "^29.6.1",
-    "jest-environment-jsdom": "^29.6.1",
-    "wait-on": "^7.2.0"
+    "cypress": "^14.3.0"
   }
 }

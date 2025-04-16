@@ -1,0 +1,502 @@
+import React, { useState, useEffect } from 'react';
+import { useAppContext } from '../../context/AppContext';
+import { translations } from '../../data/translations';
+import { showToast, readFileContent } from '../../utils';
+import ScriptModal from '../common/ScriptModal';
+import './InputView.css';
+
+const InputView = ({ onStartPractice }) => {
+  const {
+    currentLang,
+    isAdvancedMode,
+    setScriptLines,
+    setExtractedLines,
+    setPrecedingCount,
+    resetScriptState
+  } = useAppContext();
+
+  const [scriptInput, setScriptInput] = useState('');
+  const [characterName, setCharacterName] = useState('');
+  const [contextLines, setContextLines] = useState(2);
+  const [selectedLibraryScript, setSelectedLibraryScript] = useState('');
+  const [availableScripts, setAvailableScripts] = useState([]);
+  const [activeTab, setActiveTab] = useState('library');
+  const [detectedCharacters, setDetectedCharacters] = useState([]);
+  const [currentStep, setCurrentStep] = useState(1); // 1: Select Script, 2: Select Character, 3: Set Context Lines
+  const [showFullScript, setShowFullScript] = useState(false);
+
+  // Reset script state when component mounts
+  useEffect(() => {
+    resetScriptState();
+
+    // Load available scripts from library
+    setAvailableScripts([
+      { id: 'sample-script', title: 'Sample Script' }
+    ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Handle script input change
+  const handleScriptInputChange = (e) => {
+    const newScript = e.target.value;
+    setScriptInput(newScript);
+
+    // Detect characters in the script
+    if (newScript.trim()) {
+      detectCharacters(newScript);
+    } else {
+      setDetectedCharacters([]);
+    }
+  };
+
+  // Detect characters in the script
+  const detectCharacters = (script) => {
+    // Regular expression to find character names (lines that end with a colon)
+    const characterRegex = /^([A-Z][A-Z\s.']+):/gm;
+    const characters = new Set();
+    let match;
+
+    console.log('Detecting characters in script:', script.substring(0, 100) + '...');
+
+    while ((match = characterRegex.exec(script)) !== null) {
+      const character = match[1].trim();
+      console.log('Found character:', character);
+      characters.add(character);
+    }
+
+    const detectedChars = Array.from(characters);
+    console.log('All detected characters:', detectedChars);
+    setDetectedCharacters(detectedChars);
+  };
+
+  // Handle character name change
+  const handleCharacterNameChange = (e) => {
+    setCharacterName(e.target.value);
+  };
+
+  // Handle context lines change
+  const handleContextLinesChange = (e) => {
+    const value = parseInt(e.target.value) || 0;
+    setContextLines(Math.max(0, Math.min(5, value)));
+  };
+
+  // Handle library script selection
+  const handleLibraryScriptChange = (e) => {
+    setSelectedLibraryScript(e.target.value);
+    setCharacterName(''); // Reset character selection when script changes
+
+    // Load script content and detect characters
+    if (e.target.value) {
+      // In a real implementation, we would fetch the script content
+      // For now, let's simulate with some sample content
+      const sampleScriptContent = getSampleScriptContent(e.target.value);
+
+      // Make sure we're using the correct line endings
+      const normalizedContent = sampleScriptContent.replace(/\r\n/g, '\n');
+      setScriptInput(normalizedContent);
+
+      console.log('Script content set:', normalizedContent);
+
+      if (normalizedContent.trim()) {
+        detectCharacters(normalizedContent);
+        setCurrentStep(2); // Move to character selection step
+      }
+    } else {
+      setCurrentStep(1); // Stay on script selection if no script selected
+      setDetectedCharacters([]);
+    }
+  };
+
+  // Get sample script content
+  const getSampleScriptContent = (scriptId) => {
+    // Sample script content for testing
+    if (scriptId === 'sample-script') {
+      return `NARRATOR: In a small town, two friends meet on a sunny day.
+ALICE: Hello, Bob! How are you today?
+BOB: I'm doing well, thank you. How about yourself?
+ALICE: I'm great! I was just thinking about our project.
+BOB: Oh, the science project? I've been working on it all week.
+ALICE: Me too! I think we're making good progress.
+BOB: Definitely. I finished the research part yesterday.
+ALICE: Perfect! I've completed the introduction and methodology sections.
+BOB: That's excellent news. Shall we meet at the library tomorrow?
+ALICE: That sounds like a plan. What time works for you?
+BOB: How about 3 PM after classes?
+ALICE: 3 PM works perfectly for me. I'll bring my notes.
+BOB: Great! I'll bring the research materials and my laptop.
+NARRATOR: The two friends continue their conversation as they walk down the street, excited about their collaboration.`;
+    }
+
+    return '';
+  };
+
+  // Handle file upload
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      const content = await readFileContent(file);
+      setScriptInput(content);
+      setActiveTab('paste');
+
+      // Detect characters in the uploaded script
+      if (content.trim()) {
+        detectCharacters(content);
+      }
+    } catch (error) {
+      showToast(translations[currentLang].errorReadingFile, 3000, 'error');
+    }
+  };
+
+
+
+  // Handle character selection
+  const handleCharacterSelect = (e) => {
+    setCharacterName(e.target.value);
+    if (e.target.value) {
+      setCurrentStep(3); // Move to context lines step
+    } else {
+      setCurrentStep(2); // Stay on character selection if no character selected
+    }
+  };
+
+  // Handle extract button click
+  const handleExtract = () => {
+    const t = translations[currentLang];
+
+    // Validate inputs
+    if (activeTab === 'paste' && (!scriptInput.trim() || !characterName.trim())) {
+      showToast(t.errorNoInput, 3000, 'error');
+      return;
+    }
+
+    if (activeTab === 'library' && (!selectedLibraryScript || !characterName.trim())) {
+      showToast(t.errorNoInput, 3000, 'error');
+      return;
+    }
+
+    if (activeTab === 'file' && (!scriptInput.trim() || !characterName.trim())) {
+      showToast(t.errorNoInput, 3000, 'error');
+      return;
+    }
+
+    // Process script and extract lines for the selected character
+
+    // Split the script into lines - ensure we're using the correct line separator
+    const lines = scriptInput.split('\n');
+    console.log('Split script into lines:', lines.length, 'lines');
+
+    // Set the script lines in the context
+    setScriptLines(lines);
+
+    // Set preceding count
+    setPrecedingCount(contextLines);
+
+    // Extract lines for the selected character
+    const extractedLines = [];
+
+    // For debugging
+    console.log('Script lines:', lines);
+    console.log('Looking for character:', characterName);
+
+    lines.forEach((line, index) => {
+      // Skip empty lines
+      if (!line.trim()) return;
+
+      // Check if this line belongs to the selected character
+      const colonIndex = line.indexOf(':');
+      if (colonIndex > 0) {
+        const speaker = line.substring(0, colonIndex).trim();
+        const dialogue = line.substring(colonIndex + 1).trim();
+
+        console.log(`Line ${index}: Speaker="${speaker}", Dialogue="${dialogue}"`);
+
+        // Case-insensitive comparison to be more forgiving
+        if (speaker.toUpperCase() === characterName.toUpperCase()) {
+          console.log(`Found match for ${characterName} at line ${index}`);
+          extractedLines.push({
+            index,
+            line: dialogue,
+            speaker: characterName
+          });
+        }
+      }
+    });
+
+    // If no lines were found, show an error
+    if (extractedLines.length === 0) {
+      showToast(t.errorNoLines + characterName, 3000, 'error');
+      return;
+    }
+
+    setExtractedLines(extractedLines);
+
+    // Start practice
+    onStartPractice();
+  };
+
+  // Render the appropriate input form based on mode
+  const renderInputForm = () => {
+    const t = translations[currentLang];
+
+    if (isAdvancedMode) {
+      return (
+        <div className="input-form advanced-mode">
+          <div className="tabs">
+            <button
+              className={`tab-btn ${activeTab === 'library' ? 'active' : ''}`}
+              onClick={() => setActiveTab('library')}
+            >
+              Library
+            </button>
+            <button
+              className={`tab-btn ${activeTab === 'paste' ? 'active' : ''}`}
+              onClick={() => setActiveTab('paste')}
+            >
+              Paste
+            </button>
+            <button
+              className={`tab-btn ${activeTab === 'file' ? 'active' : ''}`}
+              onClick={() => setActiveTab('file')}
+            >
+              File
+            </button>
+          </div>
+
+          <div className="tab-content">
+            {activeTab === 'library' && (
+              <select
+                id="scriptLibrary"
+                value={selectedLibraryScript}
+                onChange={handleLibraryScriptChange}
+              >
+                <option value="">Select a script...</option>
+                {availableScripts.map(script => (
+                  <option key={script.id} value={script.id}>
+                    {script.title}
+                  </option>
+                ))}
+              </select>
+            )}
+
+            {activeTab === 'paste' && (
+              <textarea
+                id="scriptInput"
+                value={scriptInput}
+                onChange={handleScriptInputChange}
+                placeholder={t.scriptPlaceholder}
+                rows={10}
+              />
+            )}
+
+            {activeTab === 'file' && (
+              <div id="scriptFile">
+                <input
+                  type="file"
+                  accept=".txt,.script"
+                  onChange={handleFileUpload}
+                />
+                <p>Drop your script file here or click to browse</p>
+              </div>
+            )}
+          </div>
+
+          <div className="character-input">
+            {detectedCharacters.length > 0 ? (
+              <div className="character-select-container">
+                <label htmlFor="characterSelect">{t.selectCharacter || 'Select Character'}:</label>
+                <select
+                  id="characterSelect"
+                  value={characterName}
+                  onChange={(e) => setCharacterName(e.target.value)}
+                  className="character-select"
+                >
+                  <option value="">{t.selectCharacterPrompt || 'Select a character...'}</option>
+                  {detectedCharacters.map((character, index) => (
+                    <option key={index} value={character}>
+                      {character}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div className="character-input-container">
+                <input
+                  type="text"
+                  id="characterName"
+                  value={characterName}
+                  onChange={handleCharacterNameChange}
+                  placeholder={t.characterPlaceholder}
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="context-input">
+            <input
+              type="number"
+              id="precedingCount"
+              value={contextLines}
+              onChange={handleContextLinesChange}
+              min="0"
+              max="5"
+              placeholder={t.contextLinesPlaceholder}
+            />
+            <p className="help-text">{t.contextHelp}</p>
+          </div>
+
+          <div className="center">
+            <button id="extractButton" onClick={handleExtract}>
+              {t.extractButton}
+            </button>
+          </div>
+
+          <div className="shortcuts-info">
+            <p>{t.shortcuts}</p>
+            <ul>
+              <li>{t.shortcutExtract}</li>
+              <li>{t.shortcutReveal}</li>
+              <li>{t.shortcutRestart}</li>
+            </ul>
+          </div>
+        </div>
+      );
+    } else {
+      // Basic mode - Iterative approach
+      return (
+        <div className="input-form basic-mode">
+          {/* Step 1: Script Selection */}
+          <div className="step-container">
+            <div className="step-header">
+              <span className="step-number">1</span>
+              <h3>{t.selectScriptStep || 'Select a Script'}</h3>
+            </div>
+            <select
+              id="scriptLibrary"
+              value={selectedLibraryScript}
+              onChange={handleLibraryScriptChange}
+              className={currentStep === 1 ? 'active-step' : ''}
+            >
+              <option value="">{t.selectScriptPrompt || 'Select a script...'}</option>
+              {availableScripts.map(script => (
+                <option key={script.id} value={script.id}>
+                  {script.title}
+                </option>
+              ))}
+            </select>
+
+            {/* View Full Script button - only shown after a script is selected */}
+            {selectedLibraryScript && (
+              <div className="center script-view-button">
+                <button
+                  onClick={() => setShowFullScript(true)}
+                  className="secondary-btn view-script-btn"
+                >
+                  {t.viewFullScriptButton || 'View Full Script'}
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Step 2: Character Selection - Only shown after script is selected */}
+          {currentStep >= 2 && (
+            <div className="step-container">
+              <div className="step-header">
+                <span className="step-number">2</span>
+                <h3>{t.selectCharacterStep || 'Select Your Character'}</h3>
+              </div>
+              <div className="character-input">
+                {detectedCharacters.length > 0 ? (
+                  <div className="character-select-container">
+                    <select
+                      id="characterSelect"
+                      value={characterName}
+                      onChange={handleCharacterSelect}
+                      className={`character-select ${currentStep === 2 ? 'active-step' : ''}`}
+                    >
+                      <option value="">{t.selectCharacterPrompt || 'Select a character...'}</option>
+                      {detectedCharacters.map((character, index) => (
+                        <option key={index} value={character}>
+                          {character}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : (
+                  <div className="character-input-container">
+                    <input
+                      type="text"
+                      id="characterName"
+                      value={characterName}
+                      onChange={handleCharacterNameChange}
+                      placeholder={t.characterPlaceholder}
+                      className={currentStep === 2 ? 'active-step' : ''}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Context Lines - Only shown after character is selected */}
+          {currentStep >= 3 && (
+            <div className="step-container">
+              <div className="step-header">
+                <span className="step-number">3</span>
+                <h3>{t.setContextStep || 'Set Context Lines'}</h3>
+              </div>
+              <div className="context-input">
+                <input
+                  type="number"
+                  id="precedingCount"
+                  value={contextLines}
+                  onChange={handleContextLinesChange}
+                  min="0"
+                  max="5"
+                  placeholder={t.contextLinesPlaceholder}
+                  className={currentStep === 3 ? 'active-step' : ''}
+                />
+                <p className="help-text">{t.contextHelp}</p>
+              </div>
+
+              <div className="center">
+                <button
+                  id="extractButton"
+                  onClick={handleExtract}
+                  className="primary-btn"
+                >
+                  {t.extractButton}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+  };
+
+  const t = translations[currentLang];
+
+  return (
+    <div className="input-view">
+      <h1>{t.title}</h1>
+      <p dangerouslySetInnerHTML={{ __html: isAdvancedMode ? t.descriptionAdvanced : t.descriptionBasic }} />
+
+      {renderInputForm()}
+
+      {/* Script Modal */}
+      <ScriptModal
+        isOpen={showFullScript}
+        onClose={() => setShowFullScript(false)}
+        script={scriptInput}
+        title={availableScripts.find(s => s.id === selectedLibraryScript)?.title}
+        lang={currentLang}
+      />
+      {/* For debugging */}
+      {console.log('Current script input:', scriptInput)}
+    </div>
+  );
+};
+
+export default InputView;
