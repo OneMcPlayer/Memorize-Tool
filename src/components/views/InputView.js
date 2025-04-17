@@ -3,7 +3,7 @@ import { useAppContext } from '../../context/AppContext';
 import { translations } from '../../data/translations';
 import { showToast, readFileContent } from '../../utils';
 import ScriptModal from '../common/ScriptModal';
-import { getAvailableScripts, getScriptContent } from '../../data/scripts';
+import { getAvailableScripts, getScriptContent, convertJsonScriptToText } from '../../data/scripts';
 import './InputView.css';
 
 const InputView = ({ onStartPractice }) => {
@@ -86,23 +86,38 @@ const InputView = ({ onStartPractice }) => {
 
     // Load script content and detect characters
     if (e.target.value) {
-      // In a real implementation, we would fetch the script content
-      // For now, let's simulate with some sample content
-      const sampleScriptContent = getSampleScriptContent(e.target.value);
+      // Get the script content (could be JSON or text)
+      const scriptData = getSampleScriptContent(e.target.value);
 
-      // Make sure we're using the correct line endings
-      const normalizedContent = sampleScriptContent.replace(/\r\n/g, '\n');
-      setScriptInput(normalizedContent);
+      // Check if we have a JSON script
+      if (scriptData && scriptData.lines) {
+        // For JSON scripts, extract characters directly
+        const characters = [...new Set(scriptData.lines.map(line => line.speaker))];
+        setDetectedCharacters(characters);
 
-      console.log('Script content set:', normalizedContent);
+        // Convert JSON to text format for display and processing
+        const textContent = convertJsonScriptToText(scriptData);
+        setScriptInput(textContent);
 
-      if (normalizedContent.trim()) {
-        detectCharacters(normalizedContent);
-        setCurrentStep(2); // Move to character selection step
+        console.log('Script content set from JSON:', textContent.substring(0, 100) + '...');
+      } else {
+        // For text scripts (backward compatibility)
+        // Make sure we're using the correct line endings
+        const normalizedContent = scriptData.replace(/\r\n/g, '\n');
+        setScriptInput(normalizedContent);
+
+        console.log('Script content set from text:', normalizedContent.substring(0, 100) + '...');
+
+        if (normalizedContent.trim()) {
+          detectCharacters(normalizedContent);
+        }
       }
+
+      setCurrentStep(2); // Move to character selection step
     } else {
       setCurrentStep(1); // Stay on script selection if no script selected
       setDetectedCharacters([]);
+      setScriptInput('');
     }
   };
 
@@ -186,10 +201,12 @@ const InputView = ({ onStartPractice }) => {
       if (!line.trim()) return;
 
       // Check if this line belongs to the selected character
-      const colonIndex = line.indexOf(':');
-      if (colonIndex > 0) {
-        const speaker = line.substring(0, colonIndex).trim();
-        const dialogue = line.substring(colonIndex + 1).trim();
+      // Look for character name followed by colon at the beginning of the line
+      // This handles cases where there might be colons in the dialogue
+      const match = line.match(/^([A-Za-z0-9À-ÿ\s]+):\s*(.*)$/);
+      if (match) {
+        const speaker = match[1].trim();
+        const dialogue = match[2].trim();
 
         console.log(`Line ${index}: Speaker="${speaker}", Dialogue="${dialogue}"`);
 

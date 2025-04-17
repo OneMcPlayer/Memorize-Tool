@@ -1,0 +1,63 @@
+{
+  "title": "Sample Script",
+  "author": "Demo Author",
+  "language": "en",
+  "lines": [
+    {
+      "speaker": "NARRATOR",
+      "line": "In a small town, two friends meet on a sunny day."
+    },
+    {
+      "speaker": "ALICE",
+      "line": "Hello, Bob! How are you today?"
+    },
+    {
+      "speaker": "BOB",
+      "line": "I'm doing well, thank you. How about yourself?"
+    },
+    {
+      "speaker": "ALICE",
+      "line": "I'm great! I was just thinking about our project."
+    },
+    {
+      "speaker": "BOB",
+      "line": "Oh, the science project? I've been working on it all week."
+    },
+    {
+      "speaker": "ALICE",
+      "line": "Me too! I think we're making good progress."
+    },
+    {
+      "speaker": "BOB",
+      "line": "Definitely. I finished the research part yesterday."
+    },
+    {
+      "speaker": "ALICE",
+      "line": "Perfect! I've completed the introduction and methodology sections."
+    },
+    {
+      "speaker": "BOB",
+      "line": "That's excellent news. Shall we meet at the library tomorrow?"
+    },
+    {
+      "speaker": "ALICE",
+      "line": "That sounds like a plan. What time works for you?"
+    },
+    {
+      "speaker": "BOB",
+      "line": "How about 3 PM after classes?"
+    },
+    {
+      "speaker": "ALICE",
+      "line": "3 PM works perfectly for me. I'll bring my notes."
+    },
+    {
+      "speaker": "BOB",
+      "line": "Great! I'll bring the research materials and my laptop."
+    },
+    {
+      "speaker": "NARRATOR",
+      "line": "The two friends continue their conversation as they walk down the street, excited about their collaboration."
+    }
+  ]
+}
