@@ -59,6 +59,7 @@ const Header = ({ onOpenConverter, onOpenAbout }) => {
           id="languageSelect"
           value={currentLang}
           onChange={handleLanguageChange}
+          data-testid="languageSelect"
         >
           <option value="en">English</option>
           <option value="it">Italiano</option>

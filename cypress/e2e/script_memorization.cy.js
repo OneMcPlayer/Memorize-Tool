@@ -68,11 +68,12 @@ describe('Script Memorization Feature', () => {
     cy.get('.progress-fill').should('have.attr', 'style').and('include', 'width: 0%');
 
     // Go through the first line only (to avoid recursive complexity)
-    // Verify the line
+    // Verify the line - this now automatically reveals the line
     cy.contains('Verify My Line').click();
 
-    // Reveal the line
-    cy.contains('Reveal').should('be.visible').click();
+    // Verify that the line is revealed
+    cy.get('#card.revealed').should('exist');
+    cy.get('.card-content').should('contain', 'ALICE');
 
     // Wait for progress bar to update
     cy.wait(500);

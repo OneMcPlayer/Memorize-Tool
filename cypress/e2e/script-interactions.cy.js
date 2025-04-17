@@ -50,8 +50,8 @@ ALICE: I'm doing great, thank you!`;
 
     cy.get('textarea').first().type(sampleScript);
 
-    // Click the parse button using its ID instead of text content
-    cy.get('#parseButton').click();
+    // Click the parse button
+    cy.contains('Parse').click();
 
     // Create the preview element if it doesn't exist
     cy.get('body').then($body => {
