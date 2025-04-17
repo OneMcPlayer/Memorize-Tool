@@ -113,7 +113,7 @@ This is a fully working demo version of the React port with the following improv
 
 ## 📜 Original Version
 
-The original vanilla JavaScript version of this application is archived in the `archive-vanilla-js` directory. It was built with pure HTML, CSS, and JavaScript without any dependencies.
+The original vanilla JavaScript version of this application was built with pure HTML, CSS, and JavaScript without any dependencies. It has been migrated to this React version.
 
 ## 📝 License
 
