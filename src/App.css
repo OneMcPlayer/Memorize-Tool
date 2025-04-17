@@ -228,19 +228,34 @@ body.dark-mode #themeToggle {
 
 /* Mobile styles */
 @media (max-width: 768px) {
+  body {
+    height: auto;
+    min-height: 100vh;
+  }
+
   .app-content {
     width: 95%;
-    padding: 20px;
-    margin: 10px;
+    padding: 15px;
+    margin: 60px auto 10px;
+    max-height: none;
+    box-sizing: border-box;
+  }
+
+  .header-controls {
+    top: 10px;
+    left: 10px;
+    right: 10px;
   }
 
   h1 {
     font-size: 1.5em;
+    margin-top: 0;
   }
 
   button {
     width: 100%;
     margin: 5px 0;
+    touch-action: manipulation; /* Improves touch responsiveness */
   }
 
   .center button {
@@ -266,6 +281,58 @@ body.dark-mode #themeToggle {
 
   .tab-content {
     margin-bottom: 15px;
+  }
+
+  /* Fix for iOS Safari 100vh issue */
+  @supports (-webkit-touch-callout: none) {
+    body, .app-container {
+      height: -webkit-fill-available;
+    }
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .app-content {
+    width: 100%;
+    padding: 12px;
+    margin: 50px auto 5px;
+    border-radius: 10px;
+  }
+
+  .header-controls {
+    top: 5px;
+    left: 5px;
+    right: 5px;
+  }
+
+  #languageSelect {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+
+  #themeToggle {
+    font-size: 20px;
+    padding: 8px;
+  }
+
+  .toast {
+    padding: 8px 16px;
+    font-size: 14px;
+    bottom: 10px;
+  }
+}
+
+/* Landscape orientation */
+@media (max-height: 500px) and (orientation: landscape) {
+  .app-content {
+    margin: 45px auto 5px;
+    padding: 10px;
+    max-height: 85vh;
+  }
+
+  .header-controls {
+    top: 5px;
   }
 }
 

@@ -295,19 +295,146 @@ body.dark-mode .character-name {
 @media (max-width: 768px) {
   .practice-view {
     padding: 10px;
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .practice-view h1 {
+    font-size: 1.5em;
+    margin-bottom: 15px;
+  }
+
+  .progress-bar {
+    height: 8px;
+    margin-bottom: 15px;
+  }
+
+  .context-section {
+    padding: 12px;
+    margin-bottom: 15px;
+    max-height: 30vh;
+  }
+
+  .context-line {
+    padding: 4px 0;
+    font-size: 14px;
   }
 
   #card {
     padding: 15px;
     min-height: 80px;
+    margin-bottom: 15px;
   }
 
   .card-content {
     font-size: 16px;
   }
 
+  .character-name {
+    font-size: 18px;
+    margin: 8px 0;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    margin: 15px 0;
+  }
+
+  .action-buttons button {
+    margin: 5px 0;
+    width: 100%;
+  }
+
   button {
-    padding: 8px 16px;
+    padding: 12px 16px; /* Larger touch target */
+    font-size: 16px;
+    margin: 5px 0;
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .complete-message {
+    padding: 20px;
+  }
+
+  .complete-message h2 {
+    font-size: 22px;
+  }
+
+  .complete-message p {
+    font-size: 16px;
+  }
+
+  .complete-stats {
+    font-size: 14px;
+    padding: 6px 12px;
+  }
+
+  .restart-btn {
+    margin-top: 10px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .practice-view h1 {
+    font-size: 1.3em;
+  }
+
+  #card {
+    padding: 12px;
+    min-height: 70px;
+  }
+
+  .card-content {
+    font-size: 15px;
+  }
+
+  .character-name {
+    font-size: 16px;
+  }
+
+  button {
+    padding: 10px 14px;
+    font-size: 15px;
+  }
+}
+
+/* Landscape orientation */
+@media (max-height: 500px) and (orientation: landscape) {
+  .practice-view {
+    padding: 5px;
+  }
+
+  .practice-view h1 {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+  }
+
+  .progress-bar {
+    height: 6px;
+    margin-bottom: 10px;
+  }
+
+  .context-section {
+    padding: 8px;
+    margin-bottom: 10px;
+    max-height: 25vh;
+  }
+
+  #card {
+    min-height: 60px;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+
+  .action-buttons {
+    margin: 10px 0;
+  }
+
+  button {
+    padding: 8px 12px;
     font-size: 14px;
   }
 }
