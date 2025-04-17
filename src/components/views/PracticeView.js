@@ -88,7 +88,8 @@ const PracticeView = ({ onBack }) => {
     try {
       // Play each context line sequentially
       for (const line of currentData.context) {
-        const text = line.speaker ? `${line.speaker}: ${getPlainText(line.line)}` : getPlainText(line);
+        // Only speak the line text, not the speaker name
+        const text = line.line ? getPlainText(line.line) : getPlainText(line);
         await tts.speak(text);
       }
     } catch (error) {
