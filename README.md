@@ -2,8 +2,9 @@
 
 A modern, browser-based application designed to help actors and theater students effectively memorize their lines by practicing them in context. Built with React, this tool provides an interactive interface for script practice.
 
-![Version](https://img.shields.io/badge/version-2.0.0-green.svg)
-![React](https://img.shields.io/badge/react-18.x-blue.svg)
+![Version](https://img.shields.io/badge/version-2.0.0--react--demo-green.svg)
+![React](https://img.shields.io/badge/react-19.x-blue.svg)
+![Mobile](https://img.shields.io/badge/mobile-friendly-brightgreen.svg)
 
 ## 📖 Overview
 
@@ -92,6 +93,23 @@ The Cypress tests verify:
 - Line extraction for specific characters
 - Progress through practice mode
 - Navigation between lines
+
+## 🏷️ Version Information
+
+### Current Version: v2.0.0-react-demo
+
+This is a fully working demo version of the React port with the following improvements:
+
+- Complete rewrite using React and modern JavaScript
+- Mobile-friendly responsive design
+- Landscape and portrait orientation support
+- Touch-optimized interface
+- Fixed issue with last line display in practice mode
+
+### Release History
+
+- **v2.0.0-react-demo**: Current React demo version with mobile improvements
+- **v1.0.0-vanilla-js**: Original vanilla JavaScript version
 
 ## 📜 Original Version
 
