@@ -3,6 +3,7 @@ import { useAppContext } from '../../context/AppContext';
 import { translations } from '../../data/translations';
 import { showToast, readFileContent } from '../../utils';
 import ScriptModal from '../common/ScriptModal';
+import { getAvailableScripts, getScriptContent } from '../../data/scripts';
 import './InputView.css';
 
 const InputView = ({ onStartPractice }) => {
@@ -30,9 +31,7 @@ const InputView = ({ onStartPractice }) => {
     resetScriptState();
 
     // Load available scripts from library
-    setAvailableScripts([
-      { id: 'sample-script', title: 'Sample Script' }
-    ]);
+    setAvailableScripts(getAvailableScripts());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -107,27 +106,9 @@ const InputView = ({ onStartPractice }) => {
     }
   };
 
-  // Get sample script content
+  // Get script content from the script library
   const getSampleScriptContent = (scriptId) => {
-    // Sample script content for testing
-    if (scriptId === 'sample-script') {
-      return `NARRATOR: In a small town, two friends meet on a sunny day.
-ALICE: Hello, Bob! How are you today?
-BOB: I'm doing well, thank you. How about yourself?
-ALICE: I'm great! I was just thinking about our project.
-BOB: Oh, the science project? I've been working on it all week.
-ALICE: Me too! I think we're making good progress.
-BOB: Definitely. I finished the research part yesterday.
-ALICE: Perfect! I've completed the introduction and methodology sections.
-BOB: That's excellent news. Shall we meet at the library tomorrow?
-ALICE: That sounds like a plan. What time works for you?
-BOB: How about 3 PM after classes?
-ALICE: 3 PM works perfectly for me. I'll bring my notes.
-BOB: Great! I'll bring the research materials and my laptop.
-NARRATOR: The two friends continue their conversation as they walk down the street, excited about their collaboration.`;
-    }
-
-    return '';
+    return getScriptContent(scriptId);
   };
 
   // Handle file upload
