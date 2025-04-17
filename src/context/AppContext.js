@@ -85,62 +85,62 @@ export const AppProvider = ({ children }) => {
     }
 
     const currentEntry = extractedLines[currentLineIndex];
+    console.log('Current line:', currentEntry);
 
-    // Make sure we handle both cases where lines have an 'index' property
-    // and when they don't (for test compatibility)
+    // Get all script lines for context
     let contextLines = [];
+
+    // For normal practice mode (not tests)
     if (typeof currentEntry.index === 'number') {
-      // If this is not the first line of the character
+      // Find the previous line of the same character if this isn't the first line
+      let previousLineIndex = -1;
+
       if (currentLineIndex > 0) {
-        const previousEntry = extractedLines[currentLineIndex - 1];
+        // Find the previous line of the same character
+        const previousCharacterLines = extractedLines
+          .slice(0, currentLineIndex)
+          .filter(line => line.speaker === currentEntry.speaker);
 
-        // Get all script lines between the previous line of this character and the current line
-        // This ensures we include lines from other characters that appear in between
-        const startIndex = previousEntry.index + 1; // Start after the previous line
-        const endIndex = currentEntry.index; // End before the current line
-
-        // Only include context if we have a reasonable number of lines
-        if (endIndex - startIndex <= precedingCount * 3) { // Limit to avoid too many context lines
-          contextLines = scriptLines.slice(startIndex, endIndex);
-
-          // Format the context lines to include speaker information
-          contextLines = contextLines.map(line => {
-            const colonIndex = line.indexOf(':');
-            if (colonIndex > 0) {
-              const speaker = line.substring(0, colonIndex).trim();
-              const dialogue = line.substring(colonIndex + 1).trim();
-              return { speaker, line: dialogue };
-            }
-            return line;
-          });
-
-          // If we have more context lines than requested, trim from the beginning
-          if (contextLines.length > precedingCount && precedingCount > 0) {
-            contextLines = contextLines.slice(-precedingCount);
-          }
-        } else {
-          // If there are too many lines between, just get the preceding count
-          const startIndex = Math.max(0, currentEntry.index - precedingCount);
-          contextLines = scriptLines.slice(startIndex, currentEntry.index);
-
-          // Format the context lines
-          contextLines = contextLines.map(line => {
-            const colonIndex = line.indexOf(':');
-            if (colonIndex > 0) {
-              const speaker = line.substring(0, colonIndex).trim();
-              const dialogue = line.substring(colonIndex + 1).trim();
-              return { speaker, line: dialogue };
-            }
-            return line;
-          });
+        if (previousCharacterLines.length > 0) {
+          const previousLine = previousCharacterLines[previousCharacterLines.length - 1];
+          previousLineIndex = previousLine.index;
+          console.log('Previous line of same character found at index:', previousLineIndex);
         }
+      }
+
+      // If we found a previous line of the same character, get all lines between
+      if (previousLineIndex >= 0) {
+        // Get all lines between the previous line and the current line
+        const startIndex = previousLineIndex + 1;
+        const endIndex = currentEntry.index;
+
+        console.log('Getting context between indices:', startIndex, 'to', endIndex);
+
+        // Get the raw lines
+        const rawContextLines = scriptLines.slice(startIndex, endIndex);
+        console.log('Raw context lines:', rawContextLines);
+
+        // Format the context lines to include speaker information
+        contextLines = rawContextLines.map(line => {
+          const colonIndex = line.indexOf(':');
+          if (colonIndex > 0) {
+            const speaker = line.substring(0, colonIndex).trim();
+            const dialogue = line.substring(colonIndex + 1).trim();
+            return { speaker, line: dialogue };
+          }
+          return line;
+        });
       } else {
-        // For the first line, just get preceding context based on count
+        // If this is the first line or we couldn't find a previous line,
+        // just get the preceding count of lines
         const startIndex = Math.max(0, currentEntry.index - precedingCount);
-        contextLines = scriptLines.slice(startIndex, currentEntry.index);
+        const rawContextLines = scriptLines.slice(startIndex, currentEntry.index);
+
+        console.log('Getting first context lines:', startIndex, 'to', currentEntry.index);
+        console.log('Raw context lines:', rawContextLines);
 
         // Format the context lines
-        contextLines = contextLines.map(line => {
+        contextLines = rawContextLines.map(line => {
           const colonIndex = line.indexOf(':');
           if (colonIndex > 0) {
             const speaker = line.substring(0, colonIndex).trim();
@@ -150,6 +150,8 @@ export const AppProvider = ({ children }) => {
           return line;
         });
       }
+
+      console.log('Final formatted context lines:', contextLines);
     } else {
       // For tests - get the preceding lines based on current index
       const startIndex = Math.max(0, currentLineIndex - precedingCount);
