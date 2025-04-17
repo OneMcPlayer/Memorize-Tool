@@ -1,0 +1,723 @@
+{
+  "title": "L’INVENTORE DEL CAVALLO",
+  "author": "Achille Campanile",
+  "language": "it",
+  "lines": [
+    {
+      "speaker": "INVENTORE",
+      "line": "\"L'INVENTORE del cavallo\""
+    },
+    {
+      "speaker": "POETA",
+      "line": "\"Il POETA maledetto\""
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "\"Il PRESIDENTE\""
+    },
+    {
+      "speaker": "SCIENZIATO",
+      "line": "\"Lo SCIENZIATO\""
+    },
+    {
+      "speaker": "SEGRETARIO",
+      "line": "\"Il SEGRETARIO perpetuo\""
+    },
+    {
+      "speaker": "USCIERE",
+      "line": "\"L'USCIERE\""
+    },
+    {
+      "speaker": "ENCICLOPEDICA",
+      "line": "\"L'ENCICLOPEDICA\""
+    },
+    {
+      "speaker": "FOTOGRAFO",
+      "line": "\"FOTOGRAFO\""
+    },
+    {
+      "speaker": "CLINICO",
+      "line": "\"Il CLINICO\""
+    },
+    {
+      "speaker": "MINISTRO",
+      "line": "\"MINISTRO della P. I.\""
+    },
+    {
+      "speaker": "ACCADEMICI",
+      "line": "\"Accademia di Immortali\""
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "(scampanella) Segretario, date lettura dell'ordine del giorno."
+    },
+    {
+      "speaker": "SEGRETARIO",
+      "line": "(prende posto e legge) Ordine del giorno della seduta straordi naria dell'Accademia di Scienze, Lettere ed Arti: ricevimento e nomina ad Accademico onorario del professor Bolibine, Inventore del cavallo. Presentazione ai membri dell'Accademia e di scorso illustrativo del professor Bolibine sul l'invenzione del cavallo."
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "(scampanella e s'alza) Illustri colleghi! Tra poco sarà in mezzo a noi l'illustre profes sor Bolibine, che, con la preziosa invenzione del cavallo, ha dato nuovo lustro a tutto il mondo civile, rendendo un inestimabile servizio alla causa del progresso che noi tutti serviamo. Pensate: aver inventato il cavallo! Un animale così utile e così nobile! Noi non esitiamo a proclamare il Bolibine, un benemerito dell'u manità. A questa seduta ecce zionale è assicurato l'intervento di S. E. il Mini stro della pubblica Istruzione, il quale, con la sua presenza, renderà più solenne la tornata. È superfluo che vi esorti... (resta a bocca aperta e non può continuare. Tutti gli si affollano intorno e gli picchiano le spalle)"
+    },
+    {
+      "speaker": "SEGRETARIO",
+      "line": "Che ha? Si sente male?"
+    },
+    {
+      "speaker": "ENCICLOPEDICA",
+      "line": "Non ci faccia spaventare, Presi dente! (il PRESIDENTE indica la bocca)"
+    },
+    {
+      "speaker": "USCIERE",
+      "line": "(accorrendo) Non è niente. Gli è ri masta la dentiera attraverso. (gli accomoda la dentiera con un pugno)"
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "L'incidente è chiuso. (scampanella) È superfluo, dicevo, che vi esorti ad accogliere coi dovuti onori l'insigne Inventore del cavallo. (pausa: prende sul tavolo una lettera) Intanto, comunico all'Assemblea che il nostro illustre collega prof. Boltke, il quale da lungo tempo era ammalato, s'è completamente ristabilito e do mani tornerà fra noi. (segni di compiacimento generale)"
+    },
+    {
+      "speaker": "SCIENZIATO",
+      "line": "(sordissimo ha seguito il discorso con la mano dietro l'orecchio) Domando la parola!"
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "La parola al professor Poziakoff."
+    },
+    {
+      "speaker": "SCIENZIATO",
+      "line": "(s'alza, cava di tasca uno scartafaccio e legge) La dolorosa notizia della morte dell'il lustre collega professor Boltke (i vicini lo tirano per la giacca, ma lui continua) mi riempie di cordoglio. Scompare con lui una figura..."
+    },
+    {
+      "speaker": "ENCICLOPEDICA",
+      "line": "(forte, all'orecchio dello Scienziato) Ma non è morto!..."
+    },
+    {
+      "speaker": "SCIENZIATO",
+      "line": "Eh?..."
+    },
+    {
+      "speaker": "ENCICLOPEDICA",
+      "line": "È guarito! Non è morto!"
+    },
+    {
+      "speaker": "SCIENZIATO",
+      "line": "Ah! ( intasca lo scarta faccio e si rimette a sedere)."
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "(scampanella) L'incidente è chiuso. Conti nuano ad arrivare telegrammi inneggianti all'in ventore del cavallo E poiché manca ancora del tempo al suo arrivo... (guarda l'orologio e s'inter rompe)"
+    },
+    {
+      "speaker": "ENCICLOPEDICA",
+      "line": "Che è? Un'altra volta la dentiera at traverso?"
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "Disdetta! Il mio orologio è fermo! (Il PRESIDENTE scuote l'orologio e lo porta all'orecchio)"
+    },
+    {
+      "speaker": "SEGRETARIO",
+      "line": "Forse è guasta la spirale. (prende l'orolo gio e l'esamina)"
+    },
+    {
+      "speaker": "ENCICLOPEDICA",
+      "line": "(prendendo l'orologio) Io credo che bisogna cambiare il bilanciere."
+    },
+    {
+      "speaker": "POETA",
+      "line": "(prende l'orologio) Oppure è necessario riparare la molla."
+    },
+    {
+      "speaker": "USCIERE",
+      "line": "Forse bisogna cari carlo."
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "Oh! Proviamo. (carica l'orologio e lo porta all'orecchio) Cammina!"
+    },
+    {
+      "speaker": "TUTTI",
+      "line": "Oh!"
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "Regoliamolo. Che ore sono?"
+    },
+    {
+      "speaker": "POETA",
+      "line": "Mezzanotte!"
+    },
+    {
+      "speaker": "TUTTI",
+      "line": "Eh?!"
+    },
+    {
+      "speaker": "POETA",
+      "line": "(c. s.) Mezzanotte!"
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "E come abbiamo fatto quest'ora?"
+    },
+    {
+      "speaker": "ENCICLOPEDICA",
+      "line": "Dio, come il tempo vola!"
+    },
+    {
+      "speaker": "SEGRETARIO",
+      "line": "E l’Inventore del cavallo, che doveva ve nire nel pomeriggio?"
+    },
+    {
+      "speaker": "POETA",
+      "line": "Che stupido!"
+    },
+    {
+      "speaker": "TUTTI",
+      "line": "Eh?..."
+    },
+    {
+      "speaker": "POETA",
+      "line": "Ho sbagliato: non è mezzanotte! È mezzogiorno!"
+    },
+    {
+      "speaker": "TUTTI",
+      "line": "Ah!..."
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "(suona il campanello) L'incidente è chiuso. Facciano silenzio, illustri colleghi. E, giacché è ancora presto, possiamo far tesoro del tempo in attesa che arrivi l'insigne Inventore del cavallo. Checco!"
+    },
+    {
+      "speaker": "CLINICO",
+      "line": "Dimmi."
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "Vogliamo scambiarci qualche pensiero?"
+    },
+    {
+      "speaker": "CLINICO",
+      "line": "Volentieri."
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "Allora cominciamo subito. Segretario, verbalizzate. Che preferi sci, l'estate o l'inverno?"
+    },
+    {
+      "speaker": "CLINICO",
+      "line": "(tace, come per raccogliere le idee) Che vuoi, il freddo è freddo, e il caldo è caldo. Viene Natale, Pasqua, Ferragosto; poi un altro Natale, un'altra Pasqua, un altro Fer ragosto. Passano i mesi, le stagioni, gli anni; sopraggiunge le vecchiaia. Dopo un secolo ne viene un altro e la storia si rinnova sempre."
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "Com'è vero quello che dici!"
+    },
+    {
+      "speaker": "CLINICO",
+      "line": "Quanto alla ricchezza, non va considerata un bene sotto tutti i riguardi. (approvazioni)"
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "Dici delle grandi verità."
+    },
+    {
+      "speaker": "CLINICO",
+      "line": "Sai chi è felice? Chi non ha niente. Si sono visti tanti milionari ridotti al suicidio. Perché?"
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "Se non lo sai tu, lo domandi a me?"
+    },
+    {
+      "speaker": "CLINICO",
+      "line": "Perché pur avendo ricchezze ed agi, non avevano la felicità, col trallerarillallero, col trallerarillallà! (applausi, congratulazioni)"
+    },
+    {
+      "speaker": "VOCI",
+      "line": "Bene! (il PRESIDENTE scampanella)"
+    },
+    {
+      "speaker": "CLINICO",
+      "line": "E tu, che preferisci, L'estate o l'inverno?"
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "Io non mi lamento del caldo, perché sono un pensatore."
+    },
+    {
+      "speaker": "CLINICO",
+      "line": "Forse i pensatori non soffrono il caldo?"
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "Se avessi la pazienza di la sciarmi svolgere il mio pensiero, non faresti la figura che fai con questa osservazione! E sei pregato di non interrompermi, pezzo di mascalzone!"
+    },
+    {
+      "speaker": "CLINICO",
+      "line": "Rettile!"
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "Vampiro! (tutti sono intimoriti, pausa) Dicevo, dunque, che non mi lamento del caldo perché sono un pensatore. E che cosa ho pen sato?"
+    },
+    {
+      "speaker": "CLINICO",
+      "line": "Vattelappesca!"
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "(fulmina con un'occhiata il CLINICO) E che cosa ho pensato? Ho pensato che d'in verno si desidera l'estate e d'estate l'inverno."
+    },
+    {
+      "speaker": "CLINICO",
+      "line": "Che scoperta!"
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "Oh, insomma! Vuoi finire di provocarmi ? (dà un gran pugno al CLINICO)"
+    },
+    {
+      "speaker": "CLINICO",
+      "line": "Scherzi di mano, scherzi di villano."
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "Non ammetto interruzioni. Ecco. Sei riuscito a irritarmi. Non parlo più."
+    },
+    {
+      "speaker": "CLINICO",
+      "line": "Via, ti prego! Per questa volta facciamo la pace."
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "E sia. Dov'ero rimasto? Adesso debbo ricominciare. Io non mi lamento del caldo, perché sono un pensatore. E che cosa ho pensato? Ho pensato che d'in verno si desidera l'estate e d'estate l'inverno. (fissa minaccioso il CLINICO) Ebbene, io d'inverno faccio conto che sia estate e d'estate mi figuro che sia inverno. Così trovo sempre la mia estate freschissima e il mio inverno niente affatto rigido. E nel mio inverno non desidero l'estate né desidero l'inverno nella mia estate! (applausi fragorosi)"
+    },
+    {
+      "speaker": "VOCI",
+      "line": "Affissione! Affissione!"
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "(scampanella e s'asciuga il sudore, poi fa cenno di voler parlare) Dimenticavo di dire che le mezze stagioni non le ho spostate. (Chiude gli occhi e s'abbandona nel seggiolone come se dor misse)."
+    },
+    {
+      "speaker": "ENCICLOPEDICA",
+      "line": "(tira per la manica il PRESIDENTE) Pre sidente, che fa di bello? Dorme?"
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "(apre gli occhi) Al solito, penso."
+    },
+    {
+      "speaker": "ENCICLOPEDICA",
+      "line": "A che pensa in questo momento, se non sono indiscreta?"
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "Adesso ho pensato che molto spesso l'avidità si associa all'opulenza e i più avidi non sono sempre i più poveri."
+    },
+    {
+      "speaker": "ENCICLOPEDICA",
+      "line": "(prendendo appunti) E' vero. Presidente! E adesso a che pensa?"
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "Adesso, penso ai casi miei. (l'ENCICLOPEDICA prende appunti)."
+    },
+    {
+      "speaker": "SCIENZIATO",
+      "line": "Presidente, vede il Poeta Maledetto? Mi tira le pallottoline!"
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "Ah, POETA Maledetto! (scam panella) Checco!"
+    },
+    {
+      "speaker": "CLINICO",
+      "line": "Dimmi."
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "Vogliamo scambiarci qualche altro pen siero?"
+    },
+    {
+      "speaker": "CLINICO",
+      "line": "Con piacere. Comincia tu."
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "(pensa.) Che bella gior nata."
+    },
+    {
+      "speaker": "CLINICO",
+      "line": "Sì. Un po' calda, se vogliamo."
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "È vero, ma può darsi che verso sera l'aria rinfreschi."
+    },
+    {
+      "speaker": "CLINICO",
+      "line": "Speriamo."
+    },
+    {
+      "speaker": "SEGRETARIO",
+      "line": "(che sta verbalizzando) Come?"
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "(suggerisce) Speriamo. (poi, al Clinico) Quanto tempo è che non piove?"
+    },
+    {
+      "speaker": "CLINICO",
+      "line": "Dev'essere circa un anno."
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "Esagerato, al solito! Non saranno nep pure tre mesi."
+    },
+    {
+      "speaker": "CLINICO",
+      "line": "Hai ragione. Si sente proprio il biso gno d'un bell'acquazzone, d'uno di quegli acquazzoni formidabili, che durano un paio d'ore, come quello di ieri."
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "Quello di ieri l'altro fu anche più forte e durò sei ore. Ricordi?"
+    },
+    {
+      "speaker": "CLINICO",
+      "line": "Se ricordo! E quello di tre giorni fa..."
+    },
+    {
+      "speaker": "USCIERE",
+      "line": "Il professor Bolibine, Inventore del cavallo!"
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "Sia il benvenuto tra noi l'illustre scien ziato a cui si deve la preziosa invenzione del ca vallo. (inchini reciproci)"
+    },
+    {
+      "speaker": "INVENTORE",
+      "line": "Illustri colleghi, grande è l'emozione con la quale faccio il mio ingresso in questo luogo sacro al sapere."
+    },
+    {
+      "speaker": "USCIERE",
+      "line": "Sua Eccel lenza il Ministro della Pubblica Istruzione! (Il Ministro entra e s'affretta a stringere la mano a tutti)"
+    },
+    {
+      "speaker": "FOTOGRAFO",
+      "line": "Fermi tutti! (sta sotto il panno nero. Tutti restano in atteggiamenti diversi, come im pietriti) La posa sarà un po' lunga perché c'è poca luce. Prego: sarà una splendida fotografia. Possono parlare, se vogliono. Purché non si muovano."
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "Allora, facciamo le presentazioni ufficiali. Questi sono gli Accademici. Ecco il professor Poziakoff, un benefattore dell'umanità; ha inventato il sistema per trasformare, durante i mesi estivi, la bombetta in paglietta."
+    },
+    {
+      "speaker": "SCIENZIATO",
+      "line": "(all’inventore che gli tende la mano) Non c'è male, grazie, e lei?"
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "È un po', sordo. Ed ecco l'illustre accademica signorina Yvonne De Fleuriel, storica, poliglotta, Enciclopedica: sa tutte le date della storia, financo le più lontane e insignificanti. Signorina, dite una data lontanissima."
+    },
+    {
+      "speaker": "ENCICLOPEDICA",
+      "line": "Tre aprile del 2413 avanti Cristo."
+    },
+    {
+      "speaker": "INVENTORE",
+      "line": "È straordinaria!"
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "Purtroppo, ella non sa i fatti che av vennero in queste date. Ma le date le sa tutte. Sa, inoltre l'inglese alla perfezione."
+    },
+    {
+      "speaker": "MINISTRO",
+      "line": "Come me."
+    },
+    {
+      "speaker": "ENCICLOPEDICA",
+      "line": "Impossibile. Le parole che conosco io, di inglese, non le conosce nessuno."
+    },
+    {
+      "speaker": "MINISTRO",
+      "line": "diamine. Io posseggo il lessico intera mente."
+    },
+    {
+      "speaker": "ENCICLOPEDICA",
+      "line": "Bene, prenda la parola « Ndrbl »."
+    },
+    {
+      "speaker": "MINISTRO",
+      "line": "Come?"
+    },
+    {
+      "speaker": "ENCICLOPEDICA",
+      "line": "« Ndrbl ». Sa dirmi che significa?"
+    },
+    {
+      "speaker": "MINISTRO",
+      "line": "Effettivamente questa pa rola non la conosco. Che cosa significa?"
+    },
+    {
+      "speaker": "ENCICLOPEDICA",
+      "line": "Ah, ah! Lo vengo a dire proprio a lei! Lo so solo io e, come questa, ne conosco moltissime altre che nessuno, al mondo, cono sce. S'immagini un po', le parole inglesi che so io non le sanno nemmeno gli inglesi!"
+    },
+    {
+      "speaker": "MINISTRO",
+      "line": "È straordinaria."
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "(al Fotografo) Ma dovremo stare molto tempo in questa posizione?..."
+    },
+    {
+      "speaker": "USCIERE",
+      "line": "Fotografo!"
+    },
+    {
+      "speaker": "MINISTRO",
+      "line": "Gli è cresciuta la barba!"
+    },
+    {
+      "speaker": "CLINICO",
+      "line": "Sarà un bene dovuto alla lunga posa."
+    },
+    {
+      "speaker": "INVENTORE",
+      "line": "Un bene? Forse vuol dire un male!"
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "No. Quello è l'illustre e compianto Francesco Ilario Rossi, il Clinico di fama mon diale, a cui si deve la teoria secondo la quale le malattie sarebbero la crisi risolutiva d'uno stato morboso dell'organismo. Egli perciò le chiama benattìe, e non malattie, dato che dopo di esse l'individuo risana, nel caso che non muoia. Se gli si chiedono notizie d'un ammalato grave, risponde: « Sta benone, credo che gli si stia som ministrando l'ossigeno »."
+    },
+    {
+      "speaker": "INVENTORE",
+      "line": "Benissimo."
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "Se poi trova l'ammalato in fin di vita, dice: « Mi pare che stia molto bene: chiamate il prete ». Provi a interrogarlo."
+    },
+    {
+      "speaker": "INVENTORE",
+      "line": "Volentieri. (al Clinico) Come sta?"
+    },
+    {
+      "speaker": "CLINICO",
+      "line": "Non c'è bene, grazie. Ho un po' di ben di capo e di bene allo stomaco; e anche un gran ben di denti. Ma, sa, i miei beni sono tanti che ne morrò. Che vuole? Si va di bene in peggio!"
+    },
+    {
+      "speaker": "INVENTORE",
+      "line": "Coraggio. Non tutto il bene viene per nuocere."
+    },
+    {
+      "speaker": "CLINICO",
+      "line": "Oh, del resto, chi è causa del suo ben, pianga se stesso Questa è la sapienza dell'albero del bene e del bene."
+    },
+    {
+      "speaker": "INVENTORE",
+      "line": "Bene! Cioè: male... nel senso..."
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "(interrompendo) E infine, permetta che le presenti il nostro grande Poeta, il Poeta Male detto."
+    },
+    {
+      "speaker": "POETA",
+      "line": "Sì, io sono un Poeta infelice."
+    },
+    {
+      "speaker": "INVENTORE",
+      "line": "Infelice? E perché?"
+    },
+    {
+      "speaker": "POETA",
+      "line": "Perché non so fare le rime."
+    },
+    {
+      "speaker": "INVENTORE",
+      "line": "Non è un gran male. Faccia i versi sciolti."
+    },
+    {
+      "speaker": "POETA",
+      "line": "Non so fare neppure i versi sciolti."
+    },
+    {
+      "speaker": "INVENTORE",
+      "line": "Fa niente. Quando ci sono i concetti poetici, si può fare anche della poesia in prosa."
+    },
+    {
+      "speaker": "POETA",
+      "line": "Purtroppo, a me man cano anche i concetti poetici."
+    },
+    {
+      "speaker": "INVENTORE",
+      "line": "Se non le dispiace, vorrei sentire qualche cosetta di suo."
+    },
+    {
+      "speaker": "POETA",
+      "line": "Volentieri. Dirò: « L'Amore ». (si mette in posa e declama leggendo) L'amore... l'amore... l'amore... Tarazun, tarazun, tiritò, piripoccolo trallallà."
+    },
+    {
+      "speaker": "INVENTORE",
+      "line": "Bene!"
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "(a parte) Declama sempre la stessa poesia."
+    },
+    {
+      "speaker": "POETA",
+      "line": "Tiriti, tiriti, biribò, parapà, parapà, parapà!"
+    },
+    {
+      "speaker": "INVENTORE",
+      "line": "Benissimo. Per oggi basta."
+    },
+    {
+      "speaker": "POETA",
+      "line": "(velocemente) Corocò, corocò, coccodè, firifìzzoli, chicchiricà."
+    },
+    {
+      "speaker": "INVENTORE",
+      "line": "Chicchiricà?"
+    },
+    {
+      "speaker": "POETA",
+      "line": "Sta per chicchirichì: licenza poetica. Corocò, corocò, coccodè, firifìzzoli chicchiricà marachella del perepè, parapà, parapà, parapà!"
+    },
+    {
+      "speaker": "TUTTI",
+      "line": "Bene! (applausi)"
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "(scampanella) Ed ora, illustre professor Bolibine, ci parli un po' della sua invenzione."
+    },
+    {
+      "speaker": "MINISTRO",
+      "line": "Ma come le è venuto in mente d'inven tare un così strano animale?"
+    },
+    {
+      "speaker": "INVENTORE",
+      "line": "Se le dovessi dire, non lo so io stesso. M'è venuto così, a forza di studi."
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "È una vera trovata. Ma com'è fatto precisamente?"
+    },
+    {
+      "speaker": "INVENTORE",
+      "line": "Voi volete una conferenza vera e propria. E sia! (va al tavolo, estrae uno scartafaccio) Ho qui alcuni appunti e le tavole illustrative. (si rischiara la voce) Illustri colleghi, la mia invenzione è semplice e, posso oggi dirlo con fierezza, riuscita. Alto, nobile, pratico ed economico, ecco il cavallo! (svolge il primo rotolo col disegno d'un cavallo e con una bacchetta batte sul cavallo)"
+    },
+    {
+      "speaker": "TUTTI",
+      "line": "Oh!..."
+    },
+    {
+      "speaker": "INVENTORE",
+      "line": "Come lor signori possono vedere da questa tavola illustrativa che mi permetto sot toporre alla loro attenzione, ho diviso il cavallo in tre parti: testa, corpo, estremità. L'ho fatto di quattro gambe, gli ho messo la coda. (indica) Gambe... coda.. Dal mio primo cavallo (svolge un secondo rotolo con un bruttissimo cavallo deforme) ancora, come si vede, rudimentale, all'ultimo (indica il primo) grande è il cammino che ho percorso. Ma mi propongo di perfezio nare sempre più la mia invenzione, con oppor tune modifiche. Finora, per esempio, mi sono limitato a produrre cavalli nei soli colori bianchi, neri, grigi, caffellatte. In seguito intendo arrivare a produrne anche turchini, verdi e rossi. (pre senta il terzo quadro) Questi saranno di molto effetto nei giorni di festa. Quanto alle applica zioni pratiche della mia invenzione, come tutti possono immaginare, esse sono infinite. Anzitutto, il cavallo si può attaccare alle carrozze, ai carretti, ai calessi. Il cavallo può, infatti, ti rare. Né basta: ci si può benissimo andare sopra. Inoltre ci si possono fare le corse... le corse al galoppo, al trotto... Ci si possono fare una quan tità di graziosi giuochi al Circo Equestre. Come vedono, infiniti sono gli usi ai quali l'animale da me inventato può servire."
+    },
+    {
+      "speaker": "ENCICLOPEDICA",
+      "line": "Perdoni, professore. La coda a che cosa serve?"
+    },
+    {
+      "speaker": "INVENTORE",
+      "line": "La coda gliel'ho data un po' come orna mento, un po' anche per cacciare le mosche. Ma intendo abolirla, in un secondo tempo. Come ho detto, la mia invenzione è suscetti bile di perfezionamenti destinati a renderla sempre più effettiva. Per esempio, finora tira calci: provvederò a eliminare questo difetto. Così pure, la coda è destinata a scomparire; cerco, insomma d'arrivare a un tipo di ca vallo più semplice, economico e alla portata di tutti, di cui possono vedere un abbozzo nella quarta tavola illustrativa. (svolge la quarta tavola su cui è disegnato un orribile cavallo con due gambe sole, senza coda, senza orecchi, ecc.)"
+    },
+    {
+      "speaker": "TUTTI",
+      "line": "Oh! bene! bravo! (applausi, acclamazioni, strette di mano)"
+    },
+    {
+      "speaker": "MINISTRO",
+      "line": "(appunta una medaglia sul petto dell'In ventore) A nome della Nazione intera e del go verno, mi è grato unire i miei ai sensi per cui... questo alto consesso... a cavallo... auspicando un'era di fecondo lavoro, di civili conquiste, di gloria e di libertà! (applausi)"
+    },
+    {
+      "speaker": "USCIERE",
+      "line": "(entra con le insegne d'Accademico su un cuscino. Il PRESIDENTE investe solennemente il neo accademico e poi l'abbraccia, secondo il rito. Un valletto porta una gran corona d'alloro che offre all'INVENTORE. Intanto gli Accademici, qua e là esaminano le tavole e le discutono animatamente)"
+    },
+    {
+      "speaker": "ENCICLOPEDICA",
+      "line": "Che grande invenzione!"
+    },
+    {
+      "speaker": "CLINICO",
+      "line": "Che mente!"
+    },
+    {
+      "speaker": "FOTOGRAFO",
+      "line": "Fermi tutti!"
+    },
+    {
+      "speaker": "SEGRETARIO",
+      "line": "Oh... passano i soldati, andiamo a vedere.."
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "Aprite le finestre."
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "Oh, i bersaglieri... Ecco la fanteria... ma che è laggiù? (la musica cresce)"
+    },
+    {
+      "speaker": "ENCICLOPEDICA",
+      "line": "Un reggimento di cavalleria..."
+    },
+    {
+      "speaker": "SCIENZIATO",
+      "line": "Un reggimento...?"
+    },
+    {
+      "speaker": "POETA",
+      "line": "Di cavalleria..."
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "Ma allora... il cavallo... esisteva già!?... (l’inventore è accasciato. Tutti lo guardano indi gnati) Imbroglione!..."
+    },
+    {
+      "speaker": "ENCICLOPEDICA",
+      "line": "Impostore!"
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "Restituisca le insegne!"
+    },
+    {
+      "speaker": "POETA",
+      "line": "Bugiardo!"
+    },
+    {
+      "speaker": "MINISTRO",
+      "line": "Mi ridia la medaglia! (alla moglie) An diamocene! (escono)"
+    },
+    {
+      "speaker": "SEGRETARIO",
+      "line": "Sì, andiamocene anche noi!"
+    },
+    {
+      "speaker": "PRESIDENTE",
+      "line": "(strappa le insegne all'INVENTORE che è più morto che vivo) Vergogna!"
+    },
+    {
+      "speaker": "FOTOGRAFO",
+      "line": "Fermo un momento, per favore. (L'in ventore si ferma, con la rivoltella sulla tempia) Sorrida! (l’Inventore sorride)È fatto."
+    },
+    {
+      "speaker": "INVENTORE",
+      "line": "Posso, ora?"
+    },
+    {
+      "speaker": "FOTOGRAFO",
+      "line": "Sì."
+    },
+    {
+      "speaker": "INVENTORE",
+      "line": "Grazie. (spara e muore)"
+    }
+  ]
+}

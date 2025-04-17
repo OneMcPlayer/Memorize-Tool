@@ -1,0 +1,215 @@
+{
+  "title": "ERANO UN PO’ NERVOSI",
+  "author": "Achille Campanile",
+  "language": "it",
+  "lines": [
+    {
+      "speaker": "GIULIA",
+      "line": "\"Giulia\""
+    },
+    {
+      "speaker": "RITA",
+      "line": "\"Rita\""
+    },
+    {
+      "speaker": "CESARINA",
+      "line": "\"Cesarina\""
+    },
+    {
+      "speaker": "GAIUS",
+      "line": "\"Il professor Gaius di Danimarca\""
+    },
+    {
+      "speaker": "LUCCIOLA",
+      "line": "\"Il cavalier Lucciola\""
+    },
+    {
+      "speaker": "CAMERIERA",
+      "line": "\"La Cameriera\""
+    },
+    {
+      "speaker": "SIGNORA",
+      "line": "\"La signora\""
+    },
+    {
+      "speaker": "SOFFERENTI",
+      "line": "\"Vari sofferenti, uomini e signore, che non parlano\""
+    },
+    {
+      "speaker": "PROLOGO_INUTILE",
+      "line": "Spettatore, hai tu mai avuto il mal di denti? No? Questo dramma non è per te."
+    },
+    {
+      "speaker": "LUCCIOLA",
+      "line": "C’è gente dentro?"
+    },
+    {
+      "speaker": "CAMERIERA",
+      "line": "Nossignore. Il professore non comincia a ricevere che fra mezz’ora."
+    },
+    {
+      "speaker": "GIULIA",
+      "line": "Così, le dicevo che io ho la passione del mal di denti."
+    },
+    {
+      "speaker": "RITA",
+      "line": "E’ dentista?"
+    },
+    {
+      "speaker": "GIULIA",
+      "line": "No. Sono aficionada di questo genere di piaceri. E’ un gusto che non tutti capiscono. Godo a far le sedute dal dentista, a sentirmi trapanare i denti, a sentirmeli strappare. E sopratutto godo a quelle belle trafitte che ti arrivano all’anima."
+    },
+    {
+      "speaker": "RITA",
+      "line": "Ih! Ma questa mi pare, scusi, una forma di degenerazione."
+    },
+    {
+      "speaker": "GIULIA",
+      "line": "Certi mi dicono perfino depravata. Ma io mi faccio venire il mal di denti per venire dal dentista. L’unica cosa che mi dispiace è che potrò godere questi piaceri soltanto finché avrò denti. Perdutili, addio divertimento. Ma intanto ne profitto."
+    },
+    {
+      "speaker": "GIULIA",
+      "line": "Ah!"
+    },
+    {
+      "speaker": "RITA",
+      "line": "Che c’è?"
+    },
+    {
+      "speaker": "GIULIA",
+      "line": "Una trafitta! (Nuova trafitta). Ah! Che delizia!"
+    },
+    {
+      "speaker": "RITA",
+      "line": "Beata lei."
+    },
+    {
+      "speaker": "GIULIA",
+      "line": "Lei non ha la passione del mal di denti?"
+    },
+    {
+      "speaker": "RITA",
+      "line": "No: ho il mal di denti, ma non ho la passione. Purtroppo."
+    },
+    {
+      "speaker": "GIULIA",
+      "line": "E lei?"
+    },
+    {
+      "speaker": "CESARINA",
+      "line": "Io francamente tutto questo suo entusiasmo non lo capisco. Se debbo esser sincera, una vera e propria passione per il mal di denti non l’ho. Si, mi piace, ma relativamente. Ho frequentato parecchi gabinetti dentistici, ma più per necessità che per diletto. Le dirò anche che io di solito ai dentisti mostro i denti. Non mi lascio intimidire. Ma anche se non sono una persona dalla facile ammirazione, davanti a un dentista rimango a bocca aperta."
+    },
+    {
+      "speaker": "GIULIA",
+      "line": "Certo, sanno fare cose straordinarie. Andate da loro per una cosetta da niente, sbrigativa ,almeno così credete; loro vi danno un’occhiata alla dentatura e scoprono tutto: lì bisogna far questo, laggiù quest’altro, mettiamo, togliamo…"
+    },
+    {
+      "speaker": "CESARINA",
+      "line": "Parlano di ponti, contrafforti, rivestiture di cemento, armature, come vi dovessero costruire una città in bocca."
+    },
+    {
+      "speaker": "GIULIA",
+      "line": "Adesso, poi, fanno addirittura le bocche nuove."
+    },
+    {
+      "speaker": "CESARINA",
+      "line": "E come! quelle belle dentature delle dive, sono quasi tutte artificiali. Ma non come la vecchia dentiera che i nonni la sera si toglievano e mettevano in un bicchiere d’acqua, dove sorrideva per conto tutta la notte. Quelli di oggi sono denti finti, ma per dare l’illusione perfetta, fanno in modo che perfino dolgano."
+    },
+    {
+      "speaker": "GIULIA",
+      "line": "Pare che sia un’operazione poco dolorosa. Il fastidio maggiore si prova all’altezza della regione mammellare destra, al portafogli. Perché son cose da ricconi, queste. E chi può spendere molto, può anche cambiarli ogni tanto. Si possono avere denti da estate e denti da inverno: denti per cibi speciali, per pollo arrosto, per bistecca, per verdura; denti per banchetti, o per picnic, o per una semplice merenda; denti per campagna, per città, per sorrisi, per morsi, per mostrarli minacciosamente; denti da sera, denti da passeggio, insomma denti per tutte le occasioni: chi più ne ha, ne metta."
+    },
+    {
+      "speaker": "LUCCIOLA",
+      "line": "Permette?"
+    },
+    {
+      "speaker": "GAIUS",
+      "line": "(continuando a leggere, mette una mano sulle riviste) No."
+    },
+    {
+      "speaker": "GIULIA",
+      "line": "(riprendendo il discorso) Ricordo l’anticamera d’un dentista dove i clienti, per ingannare l’attesa, giocavano a « anello-anello ». Lo spettacolo era interessante, perché capita raramente di veder fare quel gioco da una brigata composta soltanto di persone con guance gonfie e facce fasciate, e che gemono negli spasimi del mal di denti. (Trafitta; è estasiata, poi)"
+    },
+    {
+      "speaker": "LA_SIGNORA",
+      "line": "Permette?"
+    },
+    {
+      "speaker": "GAIUS",
+      "line": "(continuando a leggere; secco) No."
+    },
+    {
+      "speaker": "GIULIA",
+      "line": "(a Cesarina, mentre si svolge l’azione muta sopra descritta) Io ne ho conosciuti di dentisti. Oh, se ne ho conosciuti! Ne ho conosciuto uno, per esempio, che nessuno pagava. Tutti andavano a farsi strappare i denti a sbafo. Era un’indegna cuccagna. Lui strappava i denti a tutti, mentre continuava l’ignobile orgia scroccatoria. (Trafitta). Ah! (Come se provasse un piacere paradisiaco)."
+    },
+    {
+      "speaker": "CESARINA",
+      "line": "Io non lo capisco tutto questo gusto."
+    },
+    {
+      "speaker": "CAMERIERA",
+      "line": "(a Gaius, a bassa voce) Permette? (Cercando di portargli via qualche rivista)."
+    },
+    {
+      "speaker": "GAIUS",
+      "line": "(Senza alzare il capo dalla lettura, risponde di no col gesto e si tira i periodici più vicino. La Cameriera torna dal cavalier Lucciola e apre le braccia desolata. Poi se ne va, richiudendo la porta. Il cavalier Lucciola protesta con la signora e con la signorina; fra essi serpeggia il malumore contro l’accentratore di periodici. Il vecchio signore ultimo arrivato, che non sa niente di questo, s’avvicina come gli altri al professor Gaius e si svolge la stessa scena a bassa voce: «Permette? »  «No».)"
+    },
+    {
+      "speaker": "PRIMO_PAZIENTE",
+      "line": "Io ho conosciuto un dentista che non usava anestetici per addormentare la parte, né cloroformio. Appena il paziente era seduto nella poltrona, lui lo stordiva con un terribile pugno in faccia, poi lavorava indisturbato sul cliente esanime."
+    },
+    {
+      "speaker": "SECONDO_PAZIENTE",
+      "line": "(che per dominare gli spasimi passeggia ballonzolando) Io ho conosciuto anche un dentista che stava tutto il giorno ad occhieggiare dietro le persiane, per vedere se venivano clienti, ma non saliva mai nessuno. Era un omaccione grande e grosso, in camice bianco e una lampadina accesa sulla fronte, per abbagliare il paziente. Da far paura. I suoi assistenti si aggiravano per le stanze deserte, stringendo le tenaglie con aria minacciosa. Ogni volta che suonava il campanello, tutti correvano ai loro posti e si preparavano per strappar denti. Ma clienti non venivano mai."
+    },
+    {
+      "speaker": "CESARINA",
+      "line": "(soffrendo il mal di denti) Che roba!"
+    },
+    {
+      "speaker": "SECONDO_PAZIENTE",
+      "line": "(c. s.) Qualche volta il dentista adescava passanti chiamandoli da dietro  le persiane: «Ps, ps! » e col dito faceva cenno di salire su, come le donne di malaffare nei vicoli della Suburra. (Trafitta di Giulia e Cesarina; Giulia con espressione di estasi, Cesarina con una smorfia di dolore). Una volta salì un tale."
+    },
+    {
+      "speaker": "CESARINA",
+      "line": "Aveva mal di denti?"
+    },
+    {
+      "speaker": "SECONDO_PAZIENTE",
+      "line": "No. Un ingenuo, un merlo. Non saprei definirlo altrimenti. Quando, dopo un’ora, tornò all’aperto, aveva gli occhi del pazzo e mormorava: « Questa è un’associazione a delinquere, non è un gabinetto dentistico»."
+    },
+    {
+      "speaker": "TERZO_PAZIENTE",
+      "line": "(solitario e sdegnoso) Eh, molta strada ha fatto l’arte dentaria dal tempo in cui per strappare un solo misero dente, magari cariato, il dentista pareva chissà che facesse e il cliente smaniava e si considerava un eroe o un martire. Invece, adesso, là! Tutti i denti via. Anche se sani. Canini, incisivi, molari, giudizio, sopra, sotto, il dentista li strappa tutti. E se gli capita sotto mano qualche altra cosa da strappare, nell’entusiasmo è capace di strappare anche quella."
+    },
+    {
+      "speaker": "GIULIA",
+      "line": "Ho conosciuto anche un dentista... (S’interrompe per osservare quel che succede intorno ai periodici)."
+    },
+    {
+      "speaker": "LUCCIOLA",
+      "line": "(si stacca dal gruppo dei sofferenti indignati e si pianta decisamente davanti al professor Gaius di Danimarca; ansa per la tensione nervosa; si capisce che è li lì per scattare; a Gaius) Faccia circolare i periodici."
+    },
+    {
+      "speaker": "LUCCIOLA",
+      "line": "Dico a lei: faccia circolare i periodici."
+    },
+    {
+      "speaker": "PROFESSOR_GAIUS",
+      "line": "Signore, queste riviste arretrate è dato trovarle soltanto nelle anticamere dei dentisti. Io mi sottopongo a lunghe e dolorose cure, unicamente per leggere questi periodici."
+    },
+    {
+      "speaker": "LUCCIOLA",
+      "line": "E che crede, io perché vengo qui? Ho anch’io diritto di leggere. Dovrebb’essere, oltre tutto,  una questione di sensibilità. E di correttezza."
+    },
+    {
+      "speaker": "IL_VECCHIO_SIGNORE",
+      "line": "(indignato a Gaius) Oh, mascalzone!"
+    },
+    {
+      "speaker": "GIULIA",
+      "line": "(a Cesarina e a Rita, riprendendo come niente fosse il discorso interrotto) Dicevo dunque che ho conosciuto anche un dentista..."
+    }
+  ]
+}

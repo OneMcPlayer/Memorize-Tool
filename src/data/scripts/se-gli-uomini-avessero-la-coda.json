@@ -1,0 +1,507 @@
+{
+  "title": "SE GLI UOMINI AVESSERO LA CODA",
+  "author": "Achille Campanile",
+  "language": "it",
+  "lines": [
+    {
+      "speaker": "LUISA",
+      "line": "\"LUISA, cameriera\""
+    },
+    {
+      "speaker": "ADOLFO",
+      "line": "\"ADOLFO\""
+    },
+    {
+      "speaker": "GARZONE",
+      "line": "\"IL GARZONE DI BOTTEGA\""
+    },
+    {
+      "speaker": "INVITATI",
+      "line": "\"INVITATI\""
+    },
+    {
+      "speaker": "PASSANTI",
+      "line": "\"PASSANTI\""
+    },
+    {
+      "speaker": "MUSICI",
+      "line": "\"MUSICI\""
+    },
+    {
+      "speaker": "PAGGETTI",
+      "line": "\"PAGGETTI\""
+    },
+    {
+      "speaker": "DOMESTICI",
+      "line": "\"DOMESTICI\""
+    },
+    {
+      "speaker": "DAME",
+      "line": "\"DAME\""
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "(è adagiata su un divano e legge scacciando le mosche con un molle ondeggiar della coda)"
+    },
+    {
+      "speaker": "LUISA",
+      "line": "(entra, che ha una graziosa coda simile a quella d'un cane volpino e aspetta che il minuetto sia terminato) C'è il codiere, signora."
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Che entri."
+    },
+    {
+      "speaker": "VOCE",
+      "line": "Tra lalallà lalallà lalallà, là là Tralallà, lalallà, lalallà"
+    },
+    {
+      "speaker": "ADOLFO",
+      "line": "(entra col ragazzo di bottega. Adolfo è fornito d'una ricca coda molto curata e arricciata, il ragazzo ha il suo bravo codino ritto e reca la borsa con gli strumenti, cantando) Oh, che bel vivere, che bel piacere, per un codiere di qualità, di qualità. (inchinandosi) Riverisco la più bella dama della città e dintorni,"
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Siete in ritardo, Adolfo. (Scherzosamente severa) Dovrei tirarvi la coda."
+    },
+    {
+      "speaker": "ADOLFO",
+      "line": "Alle tre avevo la coda della contessa Nespoli che si è fatta la permanente."
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Va anche lei al ballo degli Ambasciatori?"
+    },
+    {
+      "speaker": "ADOLFO",
+      "line": "Direi di no se non avessi l'assoluta certezza di dir cosa inesatta. Un da fare, con questo ballo, da alzar l'idea. Ho dovuto fare la coda a mezza città: tingerla alla baronessa, arricciarla alla marchesa, pettinarla alla Contessa, platinarla di qua,, metterla in piega di là, spuntarla di su, raderla di giù, sfumarla, ondularla, decolorarla. E non sono che al principio."
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "È vero che la duchessa Castagna ha la coda finta?"
+    },
+    {
+      "speaker": "ADOLFO",
+      "line": "Non è assolutamente vero che si possa negare che non sia inesatto affermare esser falso che sia vero; ma non lo ripetete a nessuno."
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Non ci riuscirei nemmeno. Insomma è vero o è falso?"
+    },
+    {
+      "speaker": "ADOLFO",
+      "line": "È falso che non sia vero."
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Allora è vero che non sia falso."
+    },
+    {
+      "speaker": "ADOLFO",
+      "line": "Direi di no se non avessi la matematica certezza d'esprimere il contrario del mio pensiero"
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Sia lodato il cielo. A proposito, ho letto nei giornali che in America le signore cominciano a tagliarsi la coda. È vero? Ma rispondetemi brevemente."
+    },
+    {
+      "speaker": "ADOLFO",
+      "line": "Direi..."
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "No, dite senz'altro."
+    },
+    {
+      "speaker": "ADOLFO",
+      "line": "L'ha tentato qualcuno, baronessa, ma non attacca. Sarebbe una moda antiestetica. Ridicola. Pettine"
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "È naturale che ragioniate così, voi codieri."
+    },
+    {
+      "speaker": "ADOLFO",
+      "line": "No, io trovo che una signora senza coda non è bella. Mi farebbe l'effetto di quei cagnolini ai quali s'usa di mozzare barbaramente la coda. Col pompon in punta al solito, baronessa?"
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Sì. Certo anche a me pare che senza coda sarei ridicola. Ma se la moda l'imponesse non esiterei a sacrificarla."
+    },
+    {
+      "speaker": "ADOLFO",
+      "line": "No, no, baronessa, non c'è pericolo. È una questione d'estetica."
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Credo anch'io. No, no, niente ricciolo in punta."
+    },
+    {
+      "speaker": "ADOLFO",
+      "line": "Vi astenete anche voi dal non andare al ballo degli Ambasciatori?"
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Cioè, Adolfo?"
+    },
+    {
+      "speaker": "ADOLFO",
+      "line": "Ci andate?"
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Ah. Direi di sì"
+    },
+    {
+      "speaker": "ADOLFO",
+      "line": "(cantando) Oh, fortunato quel ballo se a piedi o a cavallo, se in tram o in tassì ..."
+    },
+    {
+      "speaker": "RAGAZZO",
+      "line": "(cantando) per intrecciare la danza, con molta baldanza ci va quella lì."
+    },
+    {
+      "speaker": "ADOLFO",
+      "line": "Guardiam di qua, guardiam di là, beltà non par ch'a lei sia par. Non c'è nessuna, sia bionda o bruna, che, appetto a tal, ci cal."
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "(soddisfatta) Va bene."
+    },
+    {
+      "speaker": "ADOLFO",
+      "line": "(fa per andarsene) Riverisco, baronessa."
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Aspettate. (Giorgia dà la mancia a entrambi)."
+    },
+    {
+      "speaker": "ADOLFO",
+      "line": "Grazie, signora baronessa."
+    },
+    {
+      "speaker": "RAGAZZO",
+      "line": "Mancia!"
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "(suona il campanello, poi si guarda la coda allo specchio soddisfatta)"
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Mettete un po' d'ordine, Luisa."
+    },
+    {
+      "speaker": "LUISA",
+      "line": "Subito, signora baronessa. (Volta le spalle a un mobile e si mette a spolverarlo con la propria coda che muove a guisa di piumino per la polvere. Indi passa a spolverare con lo stesso sistema gli altri mobili) Occorre altro?"
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "No, Luisa, non ho più bisogno di voi. Uscite pure."
+    },
+    {
+      "speaker": "LUISA",
+      "line": "Grazie, signora baronessa. (Via scodinzolando)."
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "(va a chiudere la porta a chiave, indi apre il balcone e fa un cenno a qualcuno nel giardino)"
+    },
+    {
+      "speaker": "VISCONTE_CARLO",
+      "line": "Mia divina. Era mezz'ora che aspettavo nel giardino e credo d'aver preso un leggero raffreddore."
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Alzatevi, Carlo. Se mi sono decisa a concedervi questo convegno in assenza di mio marito ciò non deve farvi concepire insensate speranze. L'ho fatto unicamente per dirvi ancora una volta che io sono fedele a mio marito."
+    },
+    {
+      "speaker": "VISCONTE_CARLO",
+      "line": "Ma allora perché mi avete fatto venire qui?"
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Per dirvi questo. E anche perché mi avevate assicurato che vi sareste ucciso se non vi avessi concesso un abboccamento."
+    },
+    {
+      "speaker": "VISCONTE_CARLO",
+      "line": "Cielo, non siete dunque insensibile alle mie sofferenze?"
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Ho un cuore anch'io."
+    },
+    {
+      "speaker": "VISCONTE_CARLO",
+      "line": "Ditemelo ancora!"
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Ho un cuore anch'io."
+    },
+    {
+      "speaker": "VISCONTE_CARLO",
+      "line": "Ancora."
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Ho..."
+    },
+    {
+      "speaker": "VISCONTE_CARLO",
+      "line": "Ma non c'è pericolo che vostro marito torni all'improvviso?"
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Giulio non verrà che al momento di uscire per il ballo degli Ambasciatori, dove immagino verrete anche voi."
+    },
+    {
+      "speaker": "VISCONTE_CARLO",
+      "line": "Certamente. (Giorgia scodinzola suo malgrado) Oh, mia divina, udendo che sarò anch'io al ballo degli Ambasciatori avete scodinzolato: dunque mi amate, confessàtelo."
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Non ho scodinzolato, vi assicuro."
+    },
+    {
+      "speaker": "VISCONTE_CARLO",
+      "line": "Ho visto coi miei occhi."
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Ebbene, ho scodinzolato pensando a tutt'altro. Pensavo, figuratevi, a mio marito."
+    },
+    {
+      "speaker": "VISCONTE_CARLO",
+      "line": "Eppure giurerei che ha scodinzolato per me. Abbiamo dunque tre ore di tempo. Volete che vi declami un sonetto con la coda?"
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Sapete declamare con la coda?"
+    },
+    {
+      "speaker": "VISCONTE_CARLO",
+      "line": "Il sonetto è con la coda."
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Ohibò, non amo i versi."
+    },
+    {
+      "speaker": "VISCONTE_CARLO",
+      "line": "Come avete passato il pomeriggio?"
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Ho avuto il codiere."
+    },
+    {
+      "speaker": "VISCONTE_CARLO",
+      "line": "Permettete che vi ammiri. (Giorgia si volta. Carlo esamina la coda). Magnifica. Ricordate la prima volta che vi seguii per la strada e voi mi scacciaste con un colpo di coda? Questa bella coda che mi ha fatto innamorare."
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Anche voi avete una simpatica coda."
+    },
+    {
+      "speaker": "VISCONTE_CARLO",
+      "line": "Non vi nascondo che essa mi ha procurato qualche successo con le donne. Ma voi, mia divina, come potete sopportare Giulio, un uomo con una coda simile?"
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "In un uomo non è la coda quello che conta."
+    },
+    {
+      "speaker": "VISCONTE_CARLO",
+      "line": "Lo dite voi. Se sapeste invece quale importanza ha una bella coda nei rapporti galanti. Quale peso ha per riuscire in amore! Tuttavia apprezzo i vostri sentimenti; ma non potete negare che Giulio ha una coda spelacchiata e cascante."
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "È un uomo di pensiero."
+    },
+    {
+      "speaker": "VISCONTE_CARLO",
+      "line": "E con questo?"
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Fa una vita molto sedentaria."
+    },
+    {
+      "speaker": "VISCONTE_CARLO",
+      "line": "Che vuoi dire? Io vado a cavallo. A proposito, sapete che cosa ho scoperto? Il principe Glazunoski ha la coda finta. Ma, per carità, è un segreto."
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Ah, sì? Come la duchessa Castagna."
+    },
+    {
+      "speaker": "VISCONTE_CARLO",
+      "line": "Sì, pare che abbia perso la sua in un duello."
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "In un duello? È molto strano."
+    },
+    {
+      "speaker": "VISCONTE_CARLO",
+      "line": "Già, difatti è strano, ora che ci penso. E la duchessa Castagna come ha perso la sua?"
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Scendendo dall'autobus."
+    },
+    {
+      "speaker": "VISCONTE_CARLO",
+      "line": "Ma parlavamo della vostra coda. Permettete? (Carezzandogliela). Com'è bella, folta, espressiva!"
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Mi fate il solletico. Smettete."
+    },
+    {
+      "speaker": "VISCONTE_CARLO",
+      "line": "Se mi amaste non direste così."
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Che scoperta!"
+    },
+    {
+      "speaker": "VOCE_DI_GIULIO",
+      "line": "Giorgia. Apri."
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Mio marito!"
+    },
+    {
+      "speaker": "VOCE_DI_GIULIO",
+      "line": "Apri, insomma, o vado a chiamare la polizia."
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Oh, sì, preferisco. Va' a chiamare la polizia."
+    },
+    {
+      "speaker": "VOCE_DI_GIULIO",
+      "line": "No, ora che ci penso. Apri subito."
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Nascondetevi sul balcone. Via, via! (Spinge Carlo fuori del balcone e chiude la porta)."
+    },
+    {
+      "speaker": "VOCE_DI_GIULIO",
+      "line": "Apri, insomma. Chi c'è?"
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "(apre) - M'ero addormentata."
+    },
+    {
+      "speaker": "GIULIO",
+      "line": "(entra e si guarda intorno sospettoso) - Qui c'era un uomo."
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Sei pazzo? Stavo leggendo e ho preso sonno."
+    },
+    {
+      "speaker": "GIULIO",
+      "line": "Non volevo credere, ma ora so. Dove l'hai nascosto?"
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Ti giuro, Giulio..."
+    },
+    {
+      "speaker": "GIULIO",
+      "line": "Dimmi dov'è nascosto. Ah! Il diavolo insegna a fare le pentole, ma non i coperchi. Lì, lì, guarda: dalla porta del balcone spunta una coda, rimasta presa fra i due battenti. Ora non mi sfugge, il vile! (Afferra la coda)."
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Giulio, lascia quella coda! Non sappiamo di chi è."
+    },
+    {
+      "speaker": "GIULIO",
+      "line": "Ma ora lo sapremo. (Tira la coda di Carlo che si stacca, Giulio va a gambe all'aria, mentre s'ode un grido doloroso del visconte Carlo. Giulio si rialza, corre sul balcone, indi rientra,' ha sempre in pugno come un trofeo di vittoria la coda dell'avversario). È scappato, il vile, è saltato giù. Non ho potuto vederlo in faccia."
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Giulio, ti giuro, forse era un ladro."
+    },
+    {
+      "speaker": "GIULIO",
+      "line": "Ma ho la sua coda e saprò riconoscerlo. Vèstiti, andiamo al ballo degli Ambasciatori. O egli è al ballo e lo scoprirò perché sarà scodato o avrà una coda finta; oppure non verrà al ballo e non sarà difficile scoprire chi è l'assente. Ho la prova in pugno e non può sfuggirmi!"
+    },
+    {
+      "speaker": "PRIMO_INVITATO",
+      "line": "Non capisco il contegno del barone Giulio. È tutta la sera che con una scusa o con l'altra fa in modo di dare una tiratina alla coda altrui. Una persona seria, mettersi a fare questi scherzi! È davvero inconcepibile."
+    },
+    {
+      "speaker": "SECONDO_INVITATO",
+      "line": "In verità, non mi spiego il suo comportamento. Anche a me ha dato una strappata alla coda. E la cosa strana è che va facendo questi scherzi puerili con una faccia tetra, direi quasi di funerale."
+    },
+    {
+      "speaker": "PRIMO_INVITATO",
+      "line": "- Guardàtelo là. Sta girando attorno al marchese De Guigny. Scommetto che vuol tirargli la coda. (Giulio riesce ad afferrare la coda del marchese De Guigny e le dà una potente strappata)."
+    },
+    {
+      "speaker": "MARCHESE_DE_GUIGNY",
+      "line": "- Signore, come vi permettete?"
+    },
+    {
+      "speaker": "GIULIO",
+      "line": "- Scusate, un qui pro quo."
+    },
+    {
+      "speaker": "MARCHESE_DE_GUIGNY",
+      "line": "- Fate attenzione a simili errori che potrebbero costarvi molto caro."
+    },
+    {
+      "speaker": "MAGGIORDOMO",
+      "line": "(annunzia) Il principe Glazunoski."
+    },
+    {
+      "speaker": "GIORGIA",
+      "line": "Santo cielo! Ha la coda finta. Ohimè, che mai avverrà? Ohimè, che mai avverrà?"
+    },
+    {
+      "speaker": "LE_SIGNORE",
+      "line": "(stringendosi sgomente intorno a Giorgia. Sull'aria della Cavalleria Rusticana) Comare Lola, andiamo via di qua."
+    },
+    {
+      "speaker": "GIULIO",
+      "line": "(in un momento propizio dà una strappata alla coda del principe Glazunoshi, che gli resta in mano essendo finta; con un grido di trionfo)i Siete voi, dunque!"
+    },
+    {
+      "speaker": "PRINCIPE_GLAZUNOSKI",
+      "line": "(che non s'è accorto di nulla) Che cosa?"
+    },
+    {
+      "speaker": "GIULIO",
+      "line": "L'amante di mia moglie."
+    },
+    {
+      "speaker": "PRINCIPE_GLAZUNOSKI",
+      "line": "Evvia! Non conosco né voi né vostra moglie."
+    },
+    {
+      "speaker": "GIULIO",
+      "line": "(estrae da una tasca e gli mette sotto gli occhi la coda di Carlo) - Conoscete però questa coda."
+    },
+    {
+      "speaker": "PRINCIPE_GLAZUNOSKI",
+      "line": "No."
+    },
+    {
+      "speaker": "GIULIO",
+      "line": "(mostrandogli I'altra coda che gli ha testé strappato) Allora conoscerete questa. Era finta."
+    },
+    {
+      "speaker": "PRINCIPE_GLAZUNOSKI",
+      "line": "(s'accorge d'essere senza coda) Uh! (Ululando fugge a nascondersi per la vergogna)."
+    }
+  ]
+}
