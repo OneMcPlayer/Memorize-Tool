@@ -11,14 +11,12 @@ const ScriptModal = ({ isOpen, onClose, script, title, lang }) => {
   const formatScript = (scriptText) => {
     if (!scriptText) return [];
 
-    // For debugging
-    console.log('Script text:', scriptText);
-
     // Process the script to handle multiple characters in a single line
     const processedLines = [];
 
     // First, split by newlines
-    const rawLines = scriptText.split('\\n');
+    // Make sure we're using the correct line separator
+    const rawLines = scriptText.split('\n');
 
     // Process each line to extract multiple character dialogues if present
     rawLines.forEach(line => {

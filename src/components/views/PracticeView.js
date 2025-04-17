@@ -27,6 +27,8 @@ const PracticeView = ({ onBack }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const updateCurrentLineData = useCallback(() => {
     const data = getCurrentLineData();
+
+
     setCurrentData(data);
 
     if (data) {
@@ -34,7 +36,7 @@ const PracticeView = ({ onBack }) => {
       const progressPercent = Math.round(
         (currentLineIndex / (extractedLines.length - 1)) * 100
       );
-      console.log(`Progress: ${progressPercent}% (Line ${currentLineIndex + 1} of ${extractedLines.length})`);
+
       setProgress(progressPercent);
     }
   }, [getCurrentLineData, extractedLines, currentLineIndex]);

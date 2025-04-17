@@ -85,8 +85,6 @@ export const AppProvider = ({ children }) => {
     }
 
     const currentEntry = extractedLines[currentLineIndex];
-    console.log('Current line:', currentEntry);
-
     // Get all script lines for context
     let contextLines = [];
 
@@ -104,8 +102,8 @@ export const AppProvider = ({ children }) => {
         if (previousCharacterLines.length > 0) {
           const previousLine = previousCharacterLines[previousCharacterLines.length - 1];
           // Get all lines between the previous line and the current line
+          // Always include all lines between the previous line and the current line
           startIndex = previousLine.index + 1;
-          console.log('Previous line of same character found at index:', previousLine.index);
         } else {
           // If this is the first line of the character, use the precedingCount
           startIndex = Math.max(0, currentEntry.index - precedingCount);
@@ -117,9 +115,6 @@ export const AppProvider = ({ children }) => {
 
       // Get all lines between the start index and the current line
       const rawContextLines = scriptLines.slice(startIndex, currentEntry.index);
-
-      console.log('Getting context lines:', startIndex, 'to', currentEntry.index);
-      console.log('Raw context lines:', rawContextLines);
 
       // Format the context lines to include speaker information
       contextLines = rawContextLines.map(line => {
@@ -133,7 +128,7 @@ export const AppProvider = ({ children }) => {
         return line;
       });
 
-      console.log('Final formatted context lines:', contextLines);
+
     } else {
       // For tests - get the preceding lines based on current index
       const startIndex = Math.max(0, currentLineIndex - precedingCount);

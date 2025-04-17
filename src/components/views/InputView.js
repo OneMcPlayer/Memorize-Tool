@@ -18,7 +18,7 @@ const InputView = ({ onStartPractice }) => {
 
   const [scriptInput, setScriptInput] = useState('');
   const [characterName, setCharacterName] = useState('');
-  const [contextLines, setContextLines] = useState(2);
+  const [contextLines, setContextLines] = useState(5); // Increased from 2 to 5 to show more context
   const [selectedLibraryScript, setSelectedLibraryScript] = useState('');
   const [availableScripts, setAvailableScripts] = useState([]);
   const [activeTab, setActiveTab] = useState('library');
@@ -55,16 +55,12 @@ const InputView = ({ onStartPractice }) => {
     const characters = new Set();
     let match;
 
-    console.log('Detecting characters in script:', script.substring(0, 100) + '...');
-
     while ((match = characterRegex.exec(script)) !== null) {
       const character = match[1].trim();
-      console.log('Found character:', character);
       characters.add(character);
     }
 
     const detectedChars = Array.from(characters);
-    console.log('All detected characters:', detectedChars);
     setDetectedCharacters(detectedChars);
   };
 
@@ -99,14 +95,12 @@ const InputView = ({ onStartPractice }) => {
         const textContent = convertJsonScriptToText(scriptData);
         setScriptInput(textContent);
 
-        console.log('Script content set from JSON:', textContent.substring(0, 100) + '...');
+
       } else {
         // For text scripts (backward compatibility)
         // Make sure we're using the correct line endings
         const normalizedContent = scriptData.replace(/\r\n/g, '\n');
         setScriptInput(normalizedContent);
-
-        console.log('Script content set from text:', normalizedContent.substring(0, 100) + '...');
 
         if (normalizedContent.trim()) {
           detectCharacters(normalizedContent);
@@ -181,7 +175,7 @@ const InputView = ({ onStartPractice }) => {
 
     // Split the script into lines - ensure we're using the correct line separator
     const lines = scriptInput.split('\n');
-    console.log('Split script into lines:', lines.length, 'lines');
+
 
     // Set the script lines in the context
     setScriptLines(lines);
@@ -192,9 +186,7 @@ const InputView = ({ onStartPractice }) => {
     // Extract lines for the selected character
     const extractedLines = [];
 
-    // For debugging
-    console.log('Script lines:', lines);
-    console.log('Looking for character:', characterName);
+
 
     lines.forEach((line, index) => {
       // Skip empty lines
@@ -208,11 +200,8 @@ const InputView = ({ onStartPractice }) => {
         const speaker = match[1].trim();
         const dialogue = match[2].trim();
 
-        console.log(`Line ${index}: Speaker="${speaker}", Dialogue="${dialogue}"`);
-
         // Case-insensitive comparison to be more forgiving
         if (speaker.toUpperCase() === characterName.toUpperCase()) {
-          console.log(`Found match for ${characterName} at line ${index}`);
           extractedLines.push({
             index,
             line: dialogue,
@@ -487,12 +476,11 @@ const InputView = ({ onStartPractice }) => {
       <ScriptModal
         isOpen={showFullScript}
         onClose={() => setShowFullScript(false)}
-        script={scriptInput}
+        script={scriptInput} // This is the script text that will be displayed
         title={availableScripts.find(s => s.id === selectedLibraryScript)?.title}
         lang={currentLang}
       />
-      {/* For debugging */}
-      {console.log('Current script input:', scriptInput)}
+
     </div>
   );
 };

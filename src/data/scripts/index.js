@@ -36,7 +36,7 @@ export const getScriptContent = (scriptId) => {
     case 'la-rivoluzione':
       return laRivoluzioneJson;
     default:
-      console.warn(`Script with ID "${scriptId}" not found`);
+      // Script not found
       return '';
   }
 };
@@ -51,6 +51,7 @@ export const convertJsonScriptToText = (scriptJson) => {
     return '';
   }
 
+  // Make sure to properly format each line with the speaker and dialogue
   return scriptJson.lines.map(line => `${line.speaker}: ${line.line}`).join('\n');
 };
 
