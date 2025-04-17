@@ -90,8 +90,66 @@ export const AppProvider = ({ children }) => {
     // and when they don't (for test compatibility)
     let contextLines = [];
     if (typeof currentEntry.index === 'number') {
-      const startIndex = Math.max(0, currentEntry.index - precedingCount);
-      contextLines = scriptLines.slice(startIndex, currentEntry.index);
+      // If this is not the first line of the character
+      if (currentLineIndex > 0) {
+        const previousEntry = extractedLines[currentLineIndex - 1];
+
+        // Get all script lines between the previous line of this character and the current line
+        // This ensures we include lines from other characters that appear in between
+        const startIndex = previousEntry.index + 1; // Start after the previous line
+        const endIndex = currentEntry.index; // End before the current line
+
+        // Only include context if we have a reasonable number of lines
+        if (endIndex - startIndex <= precedingCount * 3) { // Limit to avoid too many context lines
+          contextLines = scriptLines.slice(startIndex, endIndex);
+
+          // Format the context lines to include speaker information
+          contextLines = contextLines.map(line => {
+            const colonIndex = line.indexOf(':');
+            if (colonIndex > 0) {
+              const speaker = line.substring(0, colonIndex).trim();
+              const dialogue = line.substring(colonIndex + 1).trim();
+              return { speaker, line: dialogue };
+            }
+            return line;
+          });
+
+          // If we have more context lines than requested, trim from the beginning
+          if (contextLines.length > precedingCount && precedingCount > 0) {
+            contextLines = contextLines.slice(-precedingCount);
+          }
+        } else {
+          // If there are too many lines between, just get the preceding count
+          const startIndex = Math.max(0, currentEntry.index - precedingCount);
+          contextLines = scriptLines.slice(startIndex, currentEntry.index);
+
+          // Format the context lines
+          contextLines = contextLines.map(line => {
+            const colonIndex = line.indexOf(':');
+            if (colonIndex > 0) {
+              const speaker = line.substring(0, colonIndex).trim();
+              const dialogue = line.substring(colonIndex + 1).trim();
+              return { speaker, line: dialogue };
+            }
+            return line;
+          });
+        }
+      } else {
+        // For the first line, just get preceding context based on count
+        const startIndex = Math.max(0, currentEntry.index - precedingCount);
+        contextLines = scriptLines.slice(startIndex, currentEntry.index);
+
+        // Format the context lines
+        contextLines = contextLines.map(line => {
+          const colonIndex = line.indexOf(':');
+          if (colonIndex > 0) {
+            const speaker = line.substring(0, colonIndex).trim();
+            const dialogue = line.substring(colonIndex + 1).trim();
+            return { speaker, line: dialogue };
+          }
+          return line;
+        });
+      }
     } else {
       // For tests - get the preceding lines based on current index
       const startIndex = Math.max(0, currentLineIndex - precedingCount);
