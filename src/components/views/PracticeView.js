@@ -89,7 +89,26 @@ const PracticeView = ({ onBack }) => {
       // Play each context line sequentially
       for (const line of currentData.context) {
         // Only speak the line text, not the speaker name
-        const text = line.line ? getPlainText(line.line) : getPlainText(line);
+        let text;
+
+        // Handle different possible data structures
+        if (typeof line === 'string') {
+          // If line is a simple string
+          text = getPlainText(line);
+        } else if (line.line) {
+          // If line has a line property (most common case)
+          text = getPlainText(line.line);
+        } else if (line.text) {
+          // If line has a text property (alternative format)
+          text = getPlainText(line.text);
+        } else {
+          // Fallback - convert the whole object to string
+          text = getPlainText(JSON.stringify(line));
+        }
+
+        // Log for debugging
+        console.log('Speaking text:', text);
+
         await tts.speak(text);
       }
     } catch (error) {
