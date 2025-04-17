@@ -39,14 +39,12 @@ const PracticeView = ({ onBack }) => {
     updateCurrentLineData();
   }, [updateCurrentLineData]);
 
-  // Handle reveal button click
-  const handleReveal = () => {
-    setRevealed(true);
-  };
+
 
   // Handle verify button click (after reading context)
   const handleVerify = () => {
     setReadingContext(false);
+    setRevealed(true); // Mostra immediatamente la battuta dell'utente
   };
 
 
@@ -196,25 +194,14 @@ const PracticeView = ({ onBack }) => {
             ) : (
               <div className="card-content">
                 <p className="your-line-prompt">{t.yourLinePrompt || 'Your line:'}</p>
-                <p className="character-name">{currentData.current.speaker}</p>
-
-
-
-                <p className="press-reveal">{t.pressReveal}</p>
               </div>
             )}
           </div>
 
           <div className="center">
-            {!revealed ? (
-              <button id="revealButton" onClick={handleReveal} className="primary-btn">
-                {t.revealButton}
-              </button>
-            ) : (
-              <button id="nextButton" onClick={handleNext} className="primary-btn">
-                {currentData.isLastLine ? t.restartButton : t.nextButton}
-              </button>
-            )}
+            <button id="nextButton" onClick={handleNext} className="primary-btn">
+              {currentData.isLastLine ? t.restartButton : t.nextButton}
+            </button>
           </div>
         </>
       )}
