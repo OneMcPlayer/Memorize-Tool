@@ -4,42 +4,6 @@
   "language": "it",
   "lines": [
     {
-      "speaker": "LUISA",
-      "line": "\"LUISA, cameriera\""
-    },
-    {
-      "speaker": "ADOLFO",
-      "line": "\"ADOLFO\""
-    },
-    {
-      "speaker": "GARZONE",
-      "line": "\"IL GARZONE DI BOTTEGA\""
-    },
-    {
-      "speaker": "INVITATI",
-      "line": "\"INVITATI\""
-    },
-    {
-      "speaker": "PASSANTI",
-      "line": "\"PASSANTI\""
-    },
-    {
-      "speaker": "MUSICI",
-      "line": "\"MUSICI\""
-    },
-    {
-      "speaker": "PAGGETTI",
-      "line": "\"PAGGETTI\""
-    },
-    {
-      "speaker": "DOMESTICI",
-      "line": "\"DOMESTICI\""
-    },
-    {
-      "speaker": "DAME",
-      "line": "\"DAME\""
-    },
-    {
       "speaker": "GIORGIA",
       "line": "(è adagiata su un divano e legge scacciando le mosche con un molle ondeggiar della coda)"
     },
@@ -208,7 +172,7 @@
       "line": "(va a chiudere la porta a chiave, indi apre il balcone e fa un cenno a qualcuno nel giardino)"
     },
     {
-      "speaker": "VISCONTE_CARLO",
+      "speaker": "VISCONTE CARLO",
       "line": "Mia divina. Era mezz'ora che aspettavo nel giardino e credo d'aver preso un leggero raffreddore."
     },
     {
@@ -216,7 +180,7 @@
       "line": "Alzatevi, Carlo. Se mi sono decisa a concedervi questo convegno in assenza di mio marito ciò non deve farvi concepire insensate speranze. L'ho fatto unicamente per dirvi ancora una volta che io sono fedele a mio marito."
     },
     {
-      "speaker": "VISCONTE_CARLO",
+      "speaker": "VISCONTE CARLO",
       "line": "Ma allora perché mi avete fatto venire qui?"
     },
     {
@@ -224,7 +188,7 @@
       "line": "Per dirvi questo. E anche perché mi avevate assicurato che vi sareste ucciso se non vi avessi concesso un abboccamento."
     },
     {
-      "speaker": "VISCONTE_CARLO",
+      "speaker": "VISCONTE CARLO",
       "line": "Cielo, non siete dunque insensibile alle mie sofferenze?"
     },
     {
@@ -232,7 +196,7 @@
       "line": "Ho un cuore anch'io."
     },
     {
-      "speaker": "VISCONTE_CARLO",
+      "speaker": "VISCONTE CARLO",
       "line": "Ditemelo ancora!"
     },
     {
@@ -240,7 +204,7 @@
       "line": "Ho un cuore anch'io."
     },
     {
-      "speaker": "VISCONTE_CARLO",
+      "speaker": "VISCONTE CARLO",
       "line": "Ancora."
     },
     {
@@ -248,7 +212,7 @@
       "line": "Ho..."
     },
     {
-      "speaker": "VISCONTE_CARLO",
+      "speaker": "VISCONTE CARLO",
       "line": "Ma non c'è pericolo che vostro marito torni all'improvviso?"
     },
     {
@@ -256,7 +220,7 @@
       "line": "Giulio non verrà che al momento di uscire per il ballo degli Ambasciatori, dove immagino verrete anche voi."
     },
     {
-      "speaker": "VISCONTE_CARLO",
+      "speaker": "VISCONTE CARLO",
       "line": "Certamente. (Giorgia scodinzola suo malgrado) Oh, mia divina, udendo che sarò anch'io al ballo degli Ambasciatori avete scodinzolato: dunque mi amate, confessàtelo."
     },
     {
@@ -264,7 +228,7 @@
       "line": "Non ho scodinzolato, vi assicuro."
     },
     {
-      "speaker": "VISCONTE_CARLO",
+      "speaker": "VISCONTE CARLO",
       "line": "Ho visto coi miei occhi."
     },
     {
@@ -272,7 +236,7 @@
       "line": "Ebbene, ho scodinzolato pensando a tutt'altro. Pensavo, figuratevi, a mio marito."
     },
     {
-      "speaker": "VISCONTE_CARLO",
+      "speaker": "VISCONTE CARLO",
       "line": "Eppure giurerei che ha scodinzolato per me. Abbiamo dunque tre ore di tempo. Volete che vi declami un sonetto con la coda?"
     },
     {
@@ -280,7 +244,7 @@
       "line": "Sapete declamare con la coda?"
     },
     {
-      "speaker": "VISCONTE_CARLO",
+      "speaker": "VISCONTE CARLO",
       "line": "Il sonetto è con la coda."
     },
     {
@@ -288,7 +252,7 @@
       "line": "Ohibò, non amo i versi."
     },
     {
-      "speaker": "VISCONTE_CARLO",
+      "speaker": "VISCONTE CARLO",
       "line": "Come avete passato il pomeriggio?"
     },
     {
@@ -296,7 +260,7 @@
       "line": "Ho avuto il codiere."
     },
     {
-      "speaker": "VISCONTE_CARLO",
+      "speaker": "VISCONTE CARLO",
       "line": "Permettete che vi ammiri. (Giorgia si volta. Carlo esamina la coda). Magnifica. Ricordate la prima volta che vi seguii per la strada e voi mi scacciaste con un colpo di coda? Questa bella coda che mi ha fatto innamorare."
     },
     {
@@ -304,7 +268,7 @@
       "line": "Anche voi avete una simpatica coda."
     },
     {
-      "speaker": "VISCONTE_CARLO",
+      "speaker": "VISCONTE CARLO",
       "line": "Non vi nascondo che essa mi ha procurato qualche successo con le donne. Ma voi, mia divina, come potete sopportare Giulio, un uomo con una coda simile?"
     },
     {
@@ -312,7 +276,7 @@
       "line": "In un uomo non è la coda quello che conta."
     },
     {
-      "speaker": "VISCONTE_CARLO",
+      "speaker": "VISCONTE CARLO",
       "line": "Lo dite voi. Se sapeste invece quale importanza ha una bella coda nei rapporti galanti. Quale peso ha per riuscire in amore! Tuttavia apprezzo i vostri sentimenti; ma non potete negare che Giulio ha una coda spelacchiata e cascante."
     },
     {
@@ -320,7 +284,7 @@
       "line": "È un uomo di pensiero."
     },
     {
-      "speaker": "VISCONTE_CARLO",
+      "speaker": "VISCONTE CARLO",
       "line": "E con questo?"
     },
     {
@@ -328,7 +292,7 @@
       "line": "Fa una vita molto sedentaria."
     },
     {
-      "speaker": "VISCONTE_CARLO",
+      "speaker": "VISCONTE CARLO",
       "line": "Che vuoi dire? Io vado a cavallo. A proposito, sapete che cosa ho scoperto? Il principe Glazunoski ha la coda finta. Ma, per carità, è un segreto."
     },
     {
@@ -336,7 +300,7 @@
       "line": "Ah, sì? Come la duchessa Castagna."
     },
     {
-      "speaker": "VISCONTE_CARLO",
+      "speaker": "VISCONTE CARLO",
       "line": "Sì, pare che abbia perso la sua in un duello."
     },
     {
@@ -344,7 +308,7 @@
       "line": "In un duello? È molto strano."
     },
     {
-      "speaker": "VISCONTE_CARLO",
+      "speaker": "VISCONTE CARLO",
       "line": "Già, difatti è strano, ora che ci penso. E la duchessa Castagna come ha perso la sua?"
     },
     {
@@ -352,7 +316,7 @@
       "line": "Scendendo dall'autobus."
     },
     {
-      "speaker": "VISCONTE_CARLO",
+      "speaker": "VISCONTE CARLO",
       "line": "Ma parlavamo della vostra coda. Permettete? (Carezzandogliela). Com'è bella, folta, espressiva!"
     },
     {
@@ -360,7 +324,7 @@
       "line": "Mi fate il solletico. Smettete."
     },
     {
-      "speaker": "VISCONTE_CARLO",
+      "speaker": "VISCONTE CARLO",
       "line": "Se mi amaste non direste così."
     },
     {
@@ -368,7 +332,7 @@
       "line": "Che scoperta!"
     },
     {
-      "speaker": "VOCE_DI_GIULIO",
+      "speaker": "VOCE DI GIULIO",
       "line": "Giorgia. Apri."
     },
     {
@@ -376,7 +340,7 @@
       "line": "Mio marito!"
     },
     {
-      "speaker": "VOCE_DI_GIULIO",
+      "speaker": "VOCE DI GIULIO",
       "line": "Apri, insomma, o vado a chiamare la polizia."
     },
     {
@@ -384,7 +348,7 @@
       "line": "Oh, sì, preferisco. Va' a chiamare la polizia."
     },
     {
-      "speaker": "VOCE_DI_GIULIO",
+      "speaker": "VOCE DI GIULIO",
       "line": "No, ora che ci penso. Apri subito."
     },
     {
@@ -392,7 +356,7 @@
       "line": "Nascondetevi sul balcone. Via, via! (Spinge Carlo fuori del balcone e chiude la porta)."
     },
     {
-      "speaker": "VOCE_DI_GIULIO",
+      "speaker": "VOCE DI GIULIO",
       "line": "Apri, insomma. Chi c'è?"
     },
     {
@@ -436,19 +400,19 @@
       "line": "Ma ho la sua coda e saprò riconoscerlo. Vèstiti, andiamo al ballo degli Ambasciatori. O egli è al ballo e lo scoprirò perché sarà scodato o avrà una coda finta; oppure non verrà al ballo e non sarà difficile scoprire chi è l'assente. Ho la prova in pugno e non può sfuggirmi!"
     },
     {
-      "speaker": "PRIMO_INVITATO",
+      "speaker": "PRIMO INVITATO",
       "line": "Non capisco il contegno del barone Giulio. È tutta la sera che con una scusa o con l'altra fa in modo di dare una tiratina alla coda altrui. Una persona seria, mettersi a fare questi scherzi! È davvero inconcepibile."
     },
     {
-      "speaker": "SECONDO_INVITATO",
+      "speaker": "SECONDO INVITATO",
       "line": "In verità, non mi spiego il suo comportamento. Anche a me ha dato una strappata alla coda. E la cosa strana è che va facendo questi scherzi puerili con una faccia tetra, direi quasi di funerale."
     },
     {
-      "speaker": "PRIMO_INVITATO",
+      "speaker": "PRIMO INVITATO",
       "line": "- Guardàtelo là. Sta girando attorno al marchese De Guigny. Scommetto che vuol tirargli la coda. (Giulio riesce ad afferrare la coda del marchese De Guigny e le dà una potente strappata)."
     },
     {
-      "speaker": "MARCHESE_DE_GUIGNY",
+      "speaker": "MARCHESE DE GUIGNY",
       "line": "- Signore, come vi permettete?"
     },
     {
@@ -456,7 +420,7 @@
       "line": "- Scusate, un qui pro quo."
     },
     {
-      "speaker": "MARCHESE_DE_GUIGNY",
+      "speaker": "MARCHESE DE GUIGNY",
       "line": "- Fate attenzione a simili errori che potrebbero costarvi molto caro."
     },
     {
@@ -468,7 +432,7 @@
       "line": "Santo cielo! Ha la coda finta. Ohimè, che mai avverrà? Ohimè, che mai avverrà?"
     },
     {
-      "speaker": "LE_SIGNORE",
+      "speaker": "LE SIGNORE",
       "line": "(stringendosi sgomente intorno a Giorgia. Sull'aria della Cavalleria Rusticana) Comare Lola, andiamo via di qua."
     },
     {
@@ -476,7 +440,7 @@
       "line": "(in un momento propizio dà una strappata alla coda del principe Glazunoshi, che gli resta in mano essendo finta; con un grido di trionfo)i Siete voi, dunque!"
     },
     {
-      "speaker": "PRINCIPE_GLAZUNOSKI",
+      "speaker": "PRINCIPE GLAZUNOSKI",
       "line": "(che non s'è accorto di nulla) Che cosa?"
     },
     {
@@ -484,7 +448,7 @@
       "line": "L'amante di mia moglie."
     },
     {
-      "speaker": "PRINCIPE_GLAZUNOSKI",
+      "speaker": "PRINCIPE GLAZUNOSKI",
       "line": "Evvia! Non conosco né voi né vostra moglie."
     },
     {
@@ -492,7 +456,7 @@
       "line": "(estrae da una tasca e gli mette sotto gli occhi la coda di Carlo) - Conoscete però questa coda."
     },
     {
-      "speaker": "PRINCIPE_GLAZUNOSKI",
+      "speaker": "PRINCIPE GLAZUNOSKI",
       "line": "No."
     },
     {
@@ -500,7 +464,7 @@
       "line": "(mostrandogli I'altra coda che gli ha testé strappato) Allora conoscerete questa. Era finta."
     },
     {
-      "speaker": "PRINCIPE_GLAZUNOSKI",
+      "speaker": "PRINCIPE GLAZUNOSKI",
       "line": "(s'accorge d'essere senza coda) Uh! (Ululando fugge a nascondersi per la vergogna)."
     }
   ]

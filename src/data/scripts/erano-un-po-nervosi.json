@@ -4,39 +4,7 @@
   "language": "it",
   "lines": [
     {
-      "speaker": "GIULIA",
-      "line": "\"Giulia\""
-    },
-    {
-      "speaker": "RITA",
-      "line": "\"Rita\""
-    },
-    {
-      "speaker": "CESARINA",
-      "line": "\"Cesarina\""
-    },
-    {
-      "speaker": "GAIUS",
-      "line": "\"Il professor Gaius di Danimarca\""
-    },
-    {
-      "speaker": "LUCCIOLA",
-      "line": "\"Il cavalier Lucciola\""
-    },
-    {
-      "speaker": "CAMERIERA",
-      "line": "\"La Cameriera\""
-    },
-    {
-      "speaker": "SIGNORA",
-      "line": "\"La signora\""
-    },
-    {
-      "speaker": "SOFFERENTI",
-      "line": "\"Vari sofferenti, uomini e signore, che non parlano\""
-    },
-    {
-      "speaker": "PROLOGO_INUTILE",
+      "speaker": "PROLOGO INUTILE",
       "line": "Spettatore, hai tu mai avuto il mal di denti? No? Questo dramma non è per te."
     },
     {
@@ -132,7 +100,7 @@
       "line": "(riprendendo il discorso) Ricordo l’anticamera d’un dentista dove i clienti, per ingannare l’attesa, giocavano a « anello-anello ». Lo spettacolo era interessante, perché capita raramente di veder fare quel gioco da una brigata composta soltanto di persone con guance gonfie e facce fasciate, e che gemono negli spasimi del mal di denti. (Trafitta; è estasiata, poi)"
     },
     {
-      "speaker": "LA_SIGNORA",
+      "speaker": "LA SIGNORA",
       "line": "Permette?"
     },
     {
@@ -156,11 +124,11 @@
       "line": "(Senza alzare il capo dalla lettura, risponde di no col gesto e si tira i periodici più vicino. La Cameriera torna dal cavalier Lucciola e apre le braccia desolata. Poi se ne va, richiudendo la porta. Il cavalier Lucciola protesta con la signora e con la signorina; fra essi serpeggia il malumore contro l’accentratore di periodici. Il vecchio signore ultimo arrivato, che non sa niente di questo, s’avvicina come gli altri al professor Gaius e si svolge la stessa scena a bassa voce: «Permette? »  «No».)"
     },
     {
-      "speaker": "PRIMO_PAZIENTE",
+      "speaker": "PRIMO PAZIENTE",
       "line": "Io ho conosciuto un dentista che non usava anestetici per addormentare la parte, né cloroformio. Appena il paziente era seduto nella poltrona, lui lo stordiva con un terribile pugno in faccia, poi lavorava indisturbato sul cliente esanime."
     },
     {
-      "speaker": "SECONDO_PAZIENTE",
+      "speaker": "SECONDO PAZIENTE",
       "line": "(che per dominare gli spasimi passeggia ballonzolando) Io ho conosciuto anche un dentista che stava tutto il giorno ad occhieggiare dietro le persiane, per vedere se venivano clienti, ma non saliva mai nessuno. Era un omaccione grande e grosso, in camice bianco e una lampadina accesa sulla fronte, per abbagliare il paziente. Da far paura. I suoi assistenti si aggiravano per le stanze deserte, stringendo le tenaglie con aria minacciosa. Ogni volta che suonava il campanello, tutti correvano ai loro posti e si preparavano per strappar denti. Ma clienti non venivano mai."
     },
     {
@@ -168,7 +136,7 @@
       "line": "(soffrendo il mal di denti) Che roba!"
     },
     {
-      "speaker": "SECONDO_PAZIENTE",
+      "speaker": "SECONDO PAZIENTE",
       "line": "(c. s.) Qualche volta il dentista adescava passanti chiamandoli da dietro  le persiane: «Ps, ps! » e col dito faceva cenno di salire su, come le donne di malaffare nei vicoli della Suburra. (Trafitta di Giulia e Cesarina; Giulia con espressione di estasi, Cesarina con una smorfia di dolore). Una volta salì un tale."
     },
     {
@@ -176,11 +144,11 @@
       "line": "Aveva mal di denti?"
     },
     {
-      "speaker": "SECONDO_PAZIENTE",
+      "speaker": "SECONDO PAZIENTE",
       "line": "No. Un ingenuo, un merlo. Non saprei definirlo altrimenti. Quando, dopo un’ora, tornò all’aperto, aveva gli occhi del pazzo e mormorava: « Questa è un’associazione a delinquere, non è un gabinetto dentistico»."
     },
     {
-      "speaker": "TERZO_PAZIENTE",
+      "speaker": "TERZO PAZIENTE",
       "line": "(solitario e sdegnoso) Eh, molta strada ha fatto l’arte dentaria dal tempo in cui per strappare un solo misero dente, magari cariato, il dentista pareva chissà che facesse e il cliente smaniava e si considerava un eroe o un martire. Invece, adesso, là! Tutti i denti via. Anche se sani. Canini, incisivi, molari, giudizio, sopra, sotto, il dentista li strappa tutti. E se gli capita sotto mano qualche altra cosa da strappare, nell’entusiasmo è capace di strappare anche quella."
     },
     {
@@ -196,7 +164,7 @@
       "line": "Dico a lei: faccia circolare i periodici."
     },
     {
-      "speaker": "PROFESSOR_GAIUS",
+      "speaker": "PROFESSOR GAIUS",
       "line": "Signore, queste riviste arretrate è dato trovarle soltanto nelle anticamere dei dentisti. Io mi sottopongo a lunghe e dolorose cure, unicamente per leggere questi periodici."
     },
     {
@@ -204,7 +172,7 @@
       "line": "E che crede, io perché vengo qui? Ho anch’io diritto di leggere. Dovrebb’essere, oltre tutto,  una questione di sensibilità. E di correttezza."
     },
     {
-      "speaker": "IL_VECCHIO_SIGNORE",
+      "speaker": "IL VECCHIO SIGNORE",
       "line": "(indignato a Gaius) Oh, mascalzone!"
     },
     {
