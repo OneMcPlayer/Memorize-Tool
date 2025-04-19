@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { testDirectAudio, testGoogleTTS, testAlternativeTTS, runAllTests } from '../../utils/audioTest';
+import ttsService from '../../utils/ttsService';
 import './AudioTestComponent.css';
 
 const AudioTestComponent = () => {
@@ -9,15 +10,57 @@ const AudioTestComponent = () => {
   const [userInteracted, setUserInteracted] = useState(false);
   const [manualTestUrl, setManualTestUrl] = useState('');
   const [manualTestResult, setManualTestResult] = useState(null);
+  const [ttsStatus, setTtsStatus] = useState({
+    initialized: false,
+    webSpeechAvailable: false,
+    voices: []
+  });
+
+  // Initialize TTS service when component mounts
+  useEffect(() => {
+    // Check if TTS is available
+    const webSpeechAvailable = 'speechSynthesis' in window;
+
+    // Get available voices
+    let voices = [];
+    if (webSpeechAvailable) {
+      voices = window.speechSynthesis.getVoices();
+
+      // If voices are not loaded yet, wait for them
+      if (voices.length === 0) {
+        window.speechSynthesis.onvoiceschanged = () => {
+          setTtsStatus({
+            initialized: true,
+            webSpeechAvailable,
+            voices: window.speechSynthesis.getVoices()
+          });
+        };
+      }
+    }
+
+    setTtsStatus({
+      initialized: true,
+      webSpeechAvailable,
+      voices
+    });
+
+    // Initialize the TTS service
+    ttsService.updateConfig({
+      useWebSpeech: webSpeechAvailable,
+      useGoogleTTS: true
+    });
+
+    console.log('TTS status:', { webSpeechAvailable, voiceCount: voices.length });
+  }, []);
 
   // Run the selected test
   const runTest = async () => {
     setLoading(true);
     setResults(null);
-    
+
     try {
       let testResults;
-      
+
       switch (selectedTest) {
         case 'direct':
           testResults = { directAudio: await testDirectAudio() };
@@ -33,7 +76,7 @@ const AudioTestComponent = () => {
           testResults = await runAllTests();
           break;
       }
-      
+
       setResults(testResults);
     } catch (err) {
       console.error('Error running tests:', err);
@@ -49,25 +92,48 @@ const AudioTestComponent = () => {
   // Handle user interaction to enable audio
   const handleUserInteraction = () => {
     setUserInteracted(true);
+
+    // Notify the TTS service that user has interacted
+    ttsService.userInteracted = true;
+  };
+
+  // Test the TTS service directly
+  const testTtsService = async () => {
+    try {
+      const testPhrase = 'This is a direct test of the TTS service';
+      await ttsService.speak(testPhrase, { lang: 'en-US' });
+      return {
+        success: true,
+        message: 'TTS service test completed successfully'
+      };
+    } catch (err) {
+      console.error('TTS service test error:', err);
+      return {
+        success: false,
+        error: err.message,
+        errorType: 'tts_error',
+        details: 'The TTS service failed to play audio. See console for details.'
+      };
+    }
   };
 
   // Run a manual test with a custom URL
   const runManualTest = async () => {
     setManualTestResult(null);
-    
+
     try {
       console.log('Running manual test with URL:', manualTestUrl);
-      
+
       const audio = new Audio(manualTestUrl);
-      
+
       audio.oncanplaythrough = () => {
         console.log('Manual test: Audio can play through');
       };
-      
+
       audio.onplay = () => {
         console.log('Manual test: Audio playback started');
       };
-      
+
       audio.onended = () => {
         console.log('Manual test: Audio playback ended');
         setManualTestResult({
@@ -75,7 +141,7 @@ const AudioTestComponent = () => {
           message: 'Manual audio test completed successfully'
         });
       };
-      
+
       audio.onerror = (err) => {
         console.error('Manual test: Audio error:', err);
         setManualTestResult({
@@ -84,7 +150,7 @@ const AudioTestComponent = () => {
           details: err.message || 'Unknown error'
         });
       };
-      
+
       try {
         await audio.play();
         console.log('Manual test: Audio play() promise resolved');
@@ -120,13 +186,13 @@ const AudioTestComponent = () => {
   return (
     <div className="audio-test-component">
       <h1>Audio Playback Test</h1>
-      
+
       {!userInteracted ? (
         <div className="user-interaction-prompt">
           <p>
             <strong>Note:</strong> Most browsers require user interaction before allowing audio playback.
           </p>
-          <button 
+          <button
             className="interaction-button"
             onClick={handleUserInteraction}
           >
@@ -138,7 +204,7 @@ const AudioTestComponent = () => {
           <div className="test-controls">
             <div className="test-selection">
               <label htmlFor="test-select">Select test to run:</label>
-              <select 
+              <select
                 id="test-select"
                 value={selectedTest}
                 onChange={(e) => setSelectedTest(e.target.value)}
@@ -146,11 +212,11 @@ const AudioTestComponent = () => {
                 <option value="all">All Tests</option>
                 <option value="direct">Direct Audio Test</option>
                 <option value="google">Google TTS Test</option>
-                <option value="alternative">Alternative TTS Test</option>
+                <option value="alternative">Web Speech API Test</option>
               </select>
             </div>
-            
-            <button 
+
+            <button
               className="run-button"
               onClick={runTest}
               disabled={loading}
@@ -158,11 +224,11 @@ const AudioTestComponent = () => {
               {loading ? 'Running Tests...' : 'Run Test'}
             </button>
           </div>
-          
+
           {results && (
             <div className="test-results">
               <h2>Test Results</h2>
-              
+
               {results.error ? (
                 <div className="error-result">
                   <h3>Error Running Tests</h3>
@@ -184,7 +250,7 @@ const AudioTestComponent = () => {
                       )}
                     </div>
                   )}
-                  
+
                   {results.googleTTS && (
                     <div className={`result-item ${results.googleTTS.success ? 'success' : 'failure'}`}>
                       <h3>Google TTS Test</h3>
@@ -199,7 +265,7 @@ const AudioTestComponent = () => {
                       )}
                     </div>
                   )}
-                  
+
                   {results.alternativeTTS && (
                     <div className={`result-item ${results.alternativeTTS.success ? 'success' : 'failure'}`}>
                       <h3>Alternative TTS Test</h3>
@@ -218,28 +284,47 @@ const AudioTestComponent = () => {
               )}
             </div>
           )}
-          
+
+          <div className="direct-test-section">
+            <h2>Direct TTS Test</h2>
+            <p>Test the TTS service directly:</p>
+
+            <div className="direct-test-controls">
+              <button
+                className="run-button"
+                onClick={async () => {
+                  setManualTestResult(await testTtsService());
+                }}
+              >
+                Test TTS Service
+              </button>
+              <p className="test-description">
+                This will test the TTS service with a sample phrase using the current configuration.
+              </p>
+            </div>
+          </div>
+
           <div className="manual-test-section">
             <h2>Manual Audio Test</h2>
             <p>Test audio playback with a custom URL:</p>
-            
+
             <div className="manual-test-controls">
-              <input 
+              <input
                 type="text"
                 value={manualTestUrl}
                 onChange={(e) => setManualTestUrl(e.target.value)}
                 placeholder="Enter audio URL to test"
                 className="url-input"
               />
-              
-              <button 
+
+              <button
                 className="generate-button"
                 onClick={generateGoogleTtsUrl}
               >
                 Generate Google TTS URL
               </button>
-              
-              <button 
+
+              <button
                 className="run-button"
                 onClick={runManualTest}
                 disabled={!manualTestUrl}
@@ -247,7 +332,7 @@ const AudioTestComponent = () => {
                 Test URL
               </button>
             </div>
-            
+
             {manualTestResult && (
               <div className={`manual-result ${manualTestResult.success ? 'success' : 'failure'}`}>
                 <h3>Manual Test Result</h3>
@@ -262,12 +347,37 @@ const AudioTestComponent = () => {
               </div>
             )}
           </div>
-          
+
           <div className="browser-info">
             <h2>Browser Information</h2>
             <p><strong>User Agent:</strong> {navigator.userAgent}</p>
             <p><strong>Audio Context Support:</strong> {typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined' ? 'Yes' : 'No'}</p>
-            <p><strong>Speech Synthesis Support:</strong> {typeof window.speechSynthesis !== 'undefined' ? 'Yes' : 'No'}</p>
+            <p><strong>Speech Synthesis Support:</strong> {ttsStatus.webSpeechAvailable ? 'Yes' : 'No'}</p>
+
+            {ttsStatus.webSpeechAvailable && (
+              <div className="voice-info">
+                <p><strong>Available Voices:</strong> {ttsStatus.voices.length}</p>
+                {ttsStatus.voices.length > 0 && (
+                  <details>
+                    <summary>Show available voices</summary>
+                    <ul className="voice-list">
+                      {ttsStatus.voices.map((voice, index) => (
+                        <li key={index}>
+                          {voice.name} ({voice.lang}) {voice.localService ? '(Local)' : '(Remote)'}
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
+              </div>
+            )}
+
+            <div className="tts-service-info">
+              <h3>TTS Service Configuration</h3>
+              <p><strong>Web Speech API:</strong> {ttsService.config.useWebSpeech ? 'Enabled' : 'Disabled'}</p>
+              <p><strong>Google TTS:</strong> {ttsService.config.useGoogleTTS ? 'Enabled' : 'Disabled'}</p>
+              <p><strong>Proxy Mode:</strong> {ttsService.config.useProxy ? 'Enabled' : 'Disabled'}</p>
+            </div>
           </div>
         </>
       )}

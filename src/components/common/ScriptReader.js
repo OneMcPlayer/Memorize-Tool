@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import audioPlayer from '../../utils/basicAudioPlayer';
+import ttsService from '../../utils/ttsService';
 
 const ScriptReader = ({ script, onClose }) => {
   const [voices, setVoices] = useState([]);
@@ -183,14 +184,15 @@ const ScriptReader = ({ script, onClose }) => {
 
       <div className="user-interaction-notice">
         <p>
-          <strong>Note:</strong> This feature uses Google Translate's text-to-speech service.
+          <strong>Note:</strong> This feature uses your browser's speech synthesis capabilities.
         </p>
         <ol>
           <li>Make sure your device volume is turned up</li>
           <li>Each character will speak in their assigned language</li>
           <li>You can change a character's language using the dropdown</li>
           <li>If audio doesn't play, try clicking the Play button again</li>
-          <li>Some browsers may block audio playback - check your browser settings</li>
+          <li>Some browsers may block audio playback until you interact with the page</li>
+          <li>If one voice method fails, the system will automatically try alternative methods</li>
         </ol>
       </div>
 

@@ -8,6 +8,7 @@ import PracticeView from './components/views/PracticeView';
 import ConverterView from './components/views/ConverterView';
 import AboutView from './components/views/AboutView';
 import AudioTestComponent from './components/test/AudioTestComponent';
+import TtsTestPage from './components/test/TtsTestPage';
 import './App.css';
 
 // View constants
@@ -16,7 +17,8 @@ const VIEWS = {
   PRACTICE: 'practice',
   CONVERTER: 'converter',
   ABOUT: 'about',
-  AUDIO_TEST: 'audio_test'
+  AUDIO_TEST: 'audio_test',
+  TTS_TEST: 'tts_test'
 };
 
 function App() {
@@ -58,6 +60,8 @@ function App() {
         return <AboutView onBack={() => setCurrentView(VIEWS.INPUT)} />;
       case VIEWS.AUDIO_TEST:
         return <AudioTestComponent />;
+      case VIEWS.TTS_TEST:
+        return <TtsTestPage />;
       case VIEWS.INPUT:
       default:
         return (
@@ -76,6 +80,7 @@ function App() {
           onOpenConverter={() => setCurrentView(VIEWS.CONVERTER)}
           onOpenAbout={() => setCurrentView(VIEWS.ABOUT)}
           onOpenAudioTest={() => setCurrentView(VIEWS.AUDIO_TEST)}
+          onOpenTtsTest={() => setCurrentView(VIEWS.TTS_TEST)}
         />
         <main className="app-content">
           {renderView()}

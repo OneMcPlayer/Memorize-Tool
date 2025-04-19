@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { translations } from '../../data/translations';
 
-const Header = ({ onOpenConverter, onOpenAbout, onOpenAudioTest }) => {
+const Header = ({ onOpenConverter, onOpenAbout, onOpenAudioTest, onOpenTtsTest }) => {
   const { currentLang, setLanguage, toggleDarkMode, isAdvancedMode, setAdvancedMode } = useAppContext();
   const [optionsVisible, setOptionsVisible] = useState(false);
   const optionsMenuRef = useRef(null);
@@ -133,6 +133,16 @@ const Header = ({ onOpenConverter, onOpenAbout, onOpenAudioTest }) => {
                   }}
                 >
                   Audio Test
+                </li>
+
+                <li
+                  id="optionTtsTest"
+                  onClick={() => {
+                    onOpenTtsTest();
+                    setOptionsVisible(false);
+                  }}
+                >
+                  TTS Test
                 </li>
               </ul>
             </div>
