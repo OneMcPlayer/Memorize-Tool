@@ -1,13 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import {
-  getAvailableVoices,
-  assignVoicesToCharacters,
-  speakText,
-  cancelSpeech,
-  pauseSpeech,
-  resumeSpeech,
-  isSpeechSynthesisSupported
-} from '../../utils/speechSynthesis';
+import tts from '../../utils/simpleSpeechSynthesis';
 
 const ScriptReader = ({ script, onClose }) => {
   const [voices, setVoices] = useState([]);
@@ -31,31 +23,45 @@ const ScriptReader = ({ script, onClose }) => {
     const loadVoices = async () => {
       try {
         setIsLoading(true);
-        console.log('Checking speech synthesis support...');
+        console.log('Initializing speech synthesis...');
 
-        if (!isSpeechSynthesisSupported()) {
+        if (!tts.isSupported()) {
           throw new Error('Speech synthesis is not supported in this browser');
         }
 
-        console.log('Speech synthesis is supported, getting voices...');
-        const availableVoices = await getAvailableVoices();
-        console.log(`Got ${availableVoices.length} voices`);
+        // Wait a bit for voices to load
+        setTimeout(() => {
+          const availableVoices = tts.getVoices();
+          console.log(`Got ${availableVoices.length} voices`);
 
-        if (availableVoices.length === 0) {
-          console.warn('No voices available, using default voice');
-          // Create a default voice if none are available
-          const defaultVoice = new SpeechSynthesisUtterance().voice;
-          setVoices(defaultVoice ? [defaultVoice] : []);
-        } else {
-          setVoices(availableVoices);
-        }
+          if (availableVoices.length === 0) {
+            console.warn('No voices available, using default voice');
+            setVoices([]);
+          } else {
+            setVoices(availableVoices);
+          }
 
-        // Auto-assign voices to characters
-        const voiceAssignments = assignVoicesToCharacters(characters, availableVoices);
-        console.log('Voice assignments:', voiceAssignments);
-        setCharacterVoices(voiceAssignments);
+          // Auto-assign voices to characters
+          const voiceAssignments = {};
+          characters.forEach((character, index) => {
+            // Try to find a voice that matches the character's language or name
+            let voice = availableVoices.find(v =>
+              v.name.toLowerCase().includes(character.toLowerCase())
+            );
 
-        setIsLoading(false);
+            // If no match by name, try to assign different voices to different characters
+            if (!voice && availableVoices.length > 0) {
+              voice = availableVoices[index % availableVoices.length];
+            }
+
+            voiceAssignments[character] = voice;
+          });
+
+          console.log('Voice assignments:', voiceAssignments);
+          setCharacterVoices(voiceAssignments);
+
+          setIsLoading(false);
+        }, 500);
       } catch (err) {
         console.error('Error loading voices:', err);
         setError(err.message);
@@ -68,7 +74,7 @@ const ScriptReader = ({ script, onClose }) => {
     // Clean up speech synthesis when component unmounts
     return () => {
       console.log('Cleaning up speech synthesis');
-      cancelSpeech();
+      tts.stop();
     };
   }, [characters]);
 
@@ -95,15 +101,8 @@ const ScriptReader = ({ script, onClose }) => {
         setCurrentLineIndex(0);
       }
 
-      // Check if we have voices available
-      if (!voices || voices.length === 0) {
-        console.warn('No voices available, using default voice');
-      }
-
-      // Cancel any ongoing speech before starting
-      if (window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-      }
+      // Stop any ongoing speech
+      tts.stop();
 
       // Play from current line to the end
       for (let i = Math.max(0, currentLineIndex); i < script.length; i++) {
@@ -121,9 +120,12 @@ const ScriptReader = ({ script, onClose }) => {
 
         // Only speak the dialogue, not the speaker name
         try {
-          // Speak the text and wait for it to complete or timeout
-          // The speakText function will handle audio playback
-          await speakText(line.line, voice, rate, 1, volume);
+          // Speak the text using our TTS service
+          await tts.speak(line.line, {
+            voice: voice,
+            rate: rate,
+            volume: volume
+          });
 
           // Add a small pause between lines
           if (i < script.length - 1) { // Don't pause after the last line
@@ -144,15 +146,13 @@ const ScriptReader = ({ script, onClose }) => {
       console.error('Error during playback:', err);
       setError(`Error during playback: ${err.message}`);
       setIsPlaying(false);
-      if (window.speechSynthesis) {
-        window.speechSynthesis.cancel(); // Make sure to cancel any ongoing speech
-      }
+      tts.stop(); // Make sure to stop any ongoing speech
     }
   };
 
   // Stop playback
   const stopPlayback = () => {
-    cancelSpeech();
+    tts.stop();
     setIsPlaying(false);
     setIsPaused(false);
     setCurrentLineIndex(-1);
@@ -160,13 +160,14 @@ const ScriptReader = ({ script, onClose }) => {
 
   // Pause playback
   const pausePlayback = () => {
-    pauseSpeech();
+    // Note: Our simple TTS implementation doesn't support pause/resume
+    // So we just stop playback
+    tts.stop();
     setIsPaused(true);
   };
 
   // Resume playback
   const resumePlayback = () => {
-    resumeSpeech();
     setIsPaused(false);
     playScript(); // Continue from current line
   };
@@ -195,14 +196,13 @@ const ScriptReader = ({ script, onClose }) => {
 
       <div className="user-interaction-notice">
         <p>
-          <strong>Note:</strong> This feature uses audio playback to read the script.
+          <strong>Note:</strong> This feature uses your browser's text-to-speech capabilities.
         </p>
         <ol>
           <li>Make sure your device volume is turned up</li>
-          <li>Your browser may ask for permission to play audio</li>
-          <li>Each character will speak with their assigned voice/language</li>
-          <li>Some browsers may block automatic audio playback</li>
-          <li>If audio doesn't play, try clicking on the page first</li>
+          <li>Each character will speak with their assigned voice</li>
+          <li>If no speech is heard, try clicking the Play button again</li>
+          <li>Some browsers may have limited text-to-speech support</li>
         </ol>
       </div>
 
