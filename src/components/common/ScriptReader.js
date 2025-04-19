@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import tts from '../../utils/simpleSpeechSynthesis';
+import audioPlayer from '../../utils/basicAudioPlayer';
 
 const ScriptReader = ({ script, onClose }) => {
   const [voices, setVoices] = useState([]);
@@ -18,69 +18,58 @@ const ScriptReader = ({ script, onClose }) => {
     return [...new Set(script.map(line => line.speaker))];
   }, [script]);
 
-  // Load available voices
+  // Set up language preferences for characters
   useEffect(() => {
-    const loadVoices = async () => {
-      try {
-        setIsLoading(true);
-        console.log('Initializing speech synthesis...');
+    try {
+      setIsLoading(true);
+      console.log('Initializing audio player...');
 
-        if (!tts.isSupported()) {
-          throw new Error('Speech synthesis is not supported in this browser');
-        }
-
-        // Wait a bit for voices to load
-        setTimeout(() => {
-          const availableVoices = tts.getVoices();
-          console.log(`Got ${availableVoices.length} voices`);
-
-          if (availableVoices.length === 0) {
-            console.warn('No voices available, using default voice');
-            setVoices([]);
-          } else {
-            setVoices(availableVoices);
-          }
-
-          // Auto-assign voices to characters
-          const voiceAssignments = {};
-          characters.forEach((character, index) => {
-            // Try to find a voice that matches the character's language or name
-            let voice = availableVoices.find(v =>
-              v.name.toLowerCase().includes(character.toLowerCase())
-            );
-
-            // If no match by name, try to assign different voices to different characters
-            if (!voice && availableVoices.length > 0) {
-              voice = availableVoices[index % availableVoices.length];
-            }
-
-            voiceAssignments[character] = voice;
-          });
-
-          console.log('Voice assignments:', voiceAssignments);
-          setCharacterVoices(voiceAssignments);
-
-          setIsLoading(false);
-        }, 500);
-      } catch (err) {
-        console.error('Error loading voices:', err);
-        setError(err.message);
-        setIsLoading(false);
+      if (!audioPlayer.isSupported()) {
+        throw new Error('Audio playback is not supported in this browser');
       }
-    };
 
-    loadVoices();
+      // Define some language preferences for different characters
+      const languagePreferences = [
+        { lang: 'en-US', name: 'English (US)' },
+        { lang: 'en-GB', name: 'English (UK)' },
+        { lang: 'it-IT', name: 'Italian' },
+        { lang: 'fr-FR', name: 'French' },
+        { lang: 'de-DE', name: 'German' },
+        { lang: 'es-ES', name: 'Spanish' },
+        { lang: 'ru-RU', name: 'Russian' },
+        { lang: 'ja-JP', name: 'Japanese' },
+      ];
 
-    // Clean up speech synthesis when component unmounts
+      setVoices(languagePreferences);
+
+      // Auto-assign languages to characters
+      const voiceAssignments = {};
+      characters.forEach((character, index) => {
+        // Assign a language to each character
+        const voice = languagePreferences[index % languagePreferences.length];
+        voiceAssignments[character] = voice;
+      });
+
+      console.log('Language assignments:', voiceAssignments);
+      setCharacterVoices(voiceAssignments);
+
+      setIsLoading(false);
+    } catch (err) {
+      console.error('Error initializing audio player:', err);
+      setError(err.message);
+      setIsLoading(false);
+    }
+
+    // Clean up when component unmounts
     return () => {
-      console.log('Cleaning up speech synthesis');
-      tts.stop();
+      console.log('Cleaning up audio player');
+      audioPlayer.stop();
     };
   }, [characters]);
 
-  // Handle voice selection for a character
-  const handleVoiceChange = (character, voiceURI) => {
-    const selectedVoice = voices.find(voice => voice.voiceURI === voiceURI);
+  // Handle language selection for a character
+  const handleVoiceChange = (character, langCode) => {
+    const selectedVoice = voices.find(voice => voice.lang === langCode);
 
     setCharacterVoices(prev => ({
       ...prev,
@@ -101,8 +90,8 @@ const ScriptReader = ({ script, onClose }) => {
         setCurrentLineIndex(0);
       }
 
-      // Stop any ongoing speech
-      tts.stop();
+      // Stop any ongoing audio
+      audioPlayer.stop();
 
       // Play from current line to the end
       for (let i = Math.max(0, currentLineIndex); i < script.length; i++) {
@@ -115,15 +104,14 @@ const ScriptReader = ({ script, onClose }) => {
         const line = script[i];
         console.log(`Playing line ${i}: ${line.speaker}: ${line.line}`);
 
-        // Get the voice for this character
+        // Get the language preference for this character
         const voice = characterVoices[line.speaker];
 
-        // Only speak the dialogue, not the speaker name
+        // Only play the dialogue, not the speaker name
         try {
-          // Speak the text using our TTS service
-          await tts.speak(line.line, {
+          // Play the text using our audio player
+          await audioPlayer.playText(line.line, {
             voice: voice,
-            rate: rate,
             volume: volume
           });
 
@@ -132,7 +120,7 @@ const ScriptReader = ({ script, onClose }) => {
             await new Promise(resolve => setTimeout(resolve, 300));
           }
         } catch (lineError) {
-          console.error(`Error speaking line ${i}:`, lineError);
+          console.error(`Error playing line ${i}:`, lineError);
           // Continue with next line instead of stopping completely
           await new Promise(resolve => setTimeout(resolve, 500));
         }
@@ -146,13 +134,13 @@ const ScriptReader = ({ script, onClose }) => {
       console.error('Error during playback:', err);
       setError(`Error during playback: ${err.message}`);
       setIsPlaying(false);
-      tts.stop(); // Make sure to stop any ongoing speech
+      audioPlayer.stop(); // Make sure to stop any ongoing audio
     }
   };
 
   // Stop playback
   const stopPlayback = () => {
-    tts.stop();
+    audioPlayer.stop();
     setIsPlaying(false);
     setIsPaused(false);
     setCurrentLineIndex(-1);
@@ -160,9 +148,9 @@ const ScriptReader = ({ script, onClose }) => {
 
   // Pause playback
   const pausePlayback = () => {
-    // Note: Our simple TTS implementation doesn't support pause/resume
+    // Note: Our audio player doesn't support pause/resume
     // So we just stop playback
-    tts.stop();
+    audioPlayer.stop();
     setIsPaused(true);
   };
 
@@ -196,13 +184,14 @@ const ScriptReader = ({ script, onClose }) => {
 
       <div className="user-interaction-notice">
         <p>
-          <strong>Note:</strong> This feature uses your browser's text-to-speech capabilities.
+          <strong>Note:</strong> This feature uses Google Translate's text-to-speech service.
         </p>
         <ol>
           <li>Make sure your device volume is turned up</li>
-          <li>Each character will speak with their assigned voice</li>
-          <li>If no speech is heard, try clicking the Play button again</li>
-          <li>Some browsers may have limited text-to-speech support</li>
+          <li>Each character will speak in their assigned language</li>
+          <li>You can change a character's language using the dropdown</li>
+          <li>If audio doesn't play, try clicking the Play button again</li>
+          <li>Some browsers may block audio playback - check your browser settings</li>
         </ol>
       </div>
 
@@ -215,12 +204,12 @@ const ScriptReader = ({ script, onClose }) => {
               <label htmlFor={`voice-${character}`}>{character}:</label>
               <select
                 id={`voice-${character}`}
-                value={characterVoices[character]?.voiceURI || ''}
+                value={characterVoices[character]?.lang || ''}
                 onChange={(e) => handleVoiceChange(character, e.target.value)}
               >
                 {voices.map(voice => (
-                  <option key={voice.voiceURI} value={voice.voiceURI}>
-                    {voice.name} ({voice.lang})
+                  <option key={voice.lang} value={voice.lang}>
+                    {voice.name}
                   </option>
                 ))}
               </select>
