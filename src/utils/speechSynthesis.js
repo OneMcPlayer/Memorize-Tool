@@ -72,99 +72,95 @@ export const groupVoicesByLanguage = (voices) => {
   return groupedVoices;
 };
 
-// Speak text with a specific voice
+// Speak text with a specific voice - using a more direct approach
 export const speakText = (text, voice, rate = 1, pitch = 1, volume = 1) => {
   return new Promise((resolve, reject) => {
-    if (!window.speechSynthesis) {
-      reject(new Error('Speech synthesis not supported'));
-      return;
-    }
-
-    // If text is empty, resolve immediately
-    if (!text || text.trim() === '') {
-      console.log('Empty text, skipping speech');
-      setTimeout(resolve, 500); // Small delay to simulate speech
-      return;
-    }
-
-    // Chrome has a bug where it stops speaking after about 15 seconds
-    // This is a workaround to keep it going
-    const resetSpeechSynthesis = () => {
-      if (window.speechSynthesis.speaking) {
-        console.log('Resetting speech synthesis to prevent timeout');
-        window.speechSynthesis.pause();
-        setTimeout(() => {
-          window.speechSynthesis.resume();
-          timeoutId = setTimeout(resetSpeechSynthesis, 5000);
-        }, 50);
+    try {
+      if (!window.speechSynthesis) {
+        reject(new Error('Speech synthesis not supported'));
+        return;
       }
-    };
-    let timeoutId = setTimeout(resetSpeechSynthesis, 5000);
 
-    // Create a new utterance
-    const utterance = new SpeechSynthesisUtterance(text);
+      // If text is empty, resolve immediately
+      if (!text || text.trim() === '') {
+        console.log('Empty text, skipping speech');
+        setTimeout(resolve, 500); // Small delay to simulate speech
+        return;
+      }
 
-    // Set properties
-    if (voice) utterance.voice = voice;
-    utterance.rate = rate;
-    utterance.pitch = pitch;
-    utterance.volume = volume;
+      console.log('Preparing to speak:', text.substring(0, 30) + '...');
 
-    // Log the utterance details for debugging
-    console.log('Speaking:', {
-      text,
-      voice: voice ? voice.name : 'Default',
-      rate,
-      pitch,
-      volume
-    });
+      // Force cancel any ongoing speech
+      window.speechSynthesis.cancel();
 
-    // Set callbacks
-    utterance.onstart = () => {
-      console.log('Speech started for:', text.substring(0, 20) + '...');
-    };
+      // Create a new utterance
+      const utterance = new SpeechSynthesisUtterance(text);
 
-    utterance.onend = () => {
-      console.log('Speech ended for:', text.substring(0, 20) + '...');
-      clearTimeout(timeoutId);
-      resolve();
-    };
+      // Set properties
+      if (voice) {
+        console.log('Setting voice:', voice.name);
+        utterance.voice = voice;
+      } else {
+        console.log('Using default voice');
+      }
 
-    utterance.onerror = (error) => {
-      console.error('Speech error:', error);
-      clearTimeout(timeoutId);
-      reject(error);
-    };
+      utterance.rate = rate;
+      utterance.pitch = pitch;
+      utterance.volume = volume;
 
-    // Make sure synthesis is not paused
-    if (window.speechSynthesis.paused) {
-      window.speechSynthesis.resume();
-    }
-
-    // Cancel any ongoing speech
-    window.speechSynthesis.cancel();
-
-    // Add a small delay before speaking to ensure the previous cancel takes effect
-    setTimeout(() => {
-      try {
-        // Speak the utterance
-        window.speechSynthesis.speak(utterance);
-
-        // Some browsers need a user interaction to start speech
-        // This is a workaround to try to force speech to start
-        if (!window.speechSynthesis.speaking) {
-          console.log('Speech not starting, trying again...');
-          window.speechSynthesis.cancel(); // Cancel any pending speech
-          setTimeout(() => {
-            window.speechSynthesis.speak(utterance);
-          }, 150);
+      // Set up a timeout to detect if speech doesn't start
+      let speechStarted = false;
+      const startTimeout = setTimeout(() => {
+        if (!speechStarted) {
+          console.warn('Speech did not start within timeout, forcing resolution');
+          resolve(); // Force resolve if speech doesn't start
         }
-      } catch (err) {
-        console.error('Error starting speech:', err);
-        clearTimeout(timeoutId);
-        reject(err);
-      }
-    }, 100);
+      }, 2000);
+
+      // Set callbacks
+      utterance.onstart = () => {
+        console.log('Speech started!');
+        speechStarted = true;
+        clearTimeout(startTimeout);
+      };
+
+      utterance.onend = () => {
+        console.log('Speech ended');
+        clearTimeout(startTimeout);
+        resolve();
+      };
+
+      utterance.onerror = (error) => {
+        console.error('Speech error:', error);
+        clearTimeout(startTimeout);
+        // Don't reject, just resolve to continue with next line
+        resolve();
+      };
+
+      // Speak the utterance
+      console.log('Calling speechSynthesis.speak()...');
+      window.speechSynthesis.speak(utterance);
+
+      // Set up a backup timer to resolve the promise if callbacks don't fire
+      // Calculate a reasonable duration based on text length and rate
+      const wordsCount = text.split(/\s+/).length;
+      const estimatedDuration = (wordsCount / 3) * (1 / rate) * 1000; // ~3 words per second at rate=1
+      const maxDuration = Math.min(Math.max(estimatedDuration, 1000), 10000); // Between 1-10 seconds
+
+      console.log(`Setting backup timer for ${maxDuration}ms`);
+      setTimeout(() => {
+        if (!speechStarted) {
+          console.warn('Speech never started, forcing resolution');
+          resolve();
+        } else {
+          console.log('Backup timer expired, but speech was started');
+        }
+      }, maxDuration + 500); // Add 500ms buffer
+    } catch (err) {
+      console.error('Unexpected error in speakText:', err);
+      // Don't reject, just resolve to continue with next line
+      resolve();
+    }
   });
 };
 

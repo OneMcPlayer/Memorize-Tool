@@ -102,28 +102,32 @@ const ScriptReader = ({ script, onClose }) => {
 
       // Check if we have voices available
       if (!voices || voices.length === 0) {
-        throw new Error('No voices available for speech synthesis');
+        console.warn('No voices available, using default voice');
       }
 
       // Force a user interaction with speech synthesis
       // This helps browsers that require user interaction to allow speech
       window.speechSynthesis.cancel();
 
-      // Play a silent sound to initialize audio context in browsers that need it
-      try {
-        const silentUtterance = new SpeechSynthesisUtterance(' ');
-        silentUtterance.volume = 0;
-        window.speechSynthesis.speak(silentUtterance);
-        await new Promise(resolve => setTimeout(resolve, 100));
-        window.speechSynthesis.cancel();
-      } catch (e) {
-        console.log('Silent utterance failed, continuing anyway:', e);
-      }
+      // Create a test utterance to check if speech synthesis works
+      const testUtterance = new SpeechSynthesisUtterance('Test');
+      testUtterance.volume = 0.1; // Very quiet but not silent
+      testUtterance.onend = () => console.log('Test utterance completed');
+      testUtterance.onerror = (e) => console.warn('Test utterance failed:', e);
+
+      // Speak the test utterance
+      window.speechSynthesis.speak(testUtterance);
+
+      // Wait a moment to let the test utterance start
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Cancel any ongoing speech before starting the real playback
+      window.speechSynthesis.cancel();
 
       // Play from current line to the end
       for (let i = Math.max(0, currentLineIndex); i < script.length; i++) {
         if (!isPlaying) {
-          console.log('Playback stopped');
+          console.log('Playback stopped by user');
           break; // Stop if play was cancelled
         }
 
@@ -133,15 +137,16 @@ const ScriptReader = ({ script, onClose }) => {
 
         // Get the voice for this character
         const voice = characterVoices[line.speaker];
-        console.log('Using voice:', voice ? voice.name : 'Default voice');
 
         // Only speak the dialogue, not the speaker name
         try {
+          // Speak the text and wait for it to complete or timeout
           await speakText(line.line, voice, rate, pitch, volume);
-          console.log(`Finished line ${i}`);
 
           // Add a small pause between lines
-          await new Promise(resolve => setTimeout(resolve, 300));
+          if (i < script.length - 1) { // Don't pause after the last line
+            await new Promise(resolve => setTimeout(resolve, 300));
+          }
         } catch (lineError) {
           console.error(`Error speaking line ${i}:`, lineError);
           // Continue with next line instead of stopping completely
@@ -205,9 +210,15 @@ const ScriptReader = ({ script, onClose }) => {
 
       <div className="user-interaction-notice">
         <p>
-          <strong>Note:</strong> Some browsers require user interaction before allowing speech synthesis.
-          If you don't hear anything after clicking Play, try clicking somewhere on the page first.
+          <strong>Note:</strong> Speech synthesis may require specific browser permissions.
+          If you don't hear anything after clicking Play:
         </p>
+        <ol>
+          <li>Make sure your device volume is turned up</li>
+          <li>Try clicking on the page several times before pressing Play</li>
+          <li>Check if your browser (Chrome, Edge, etc.) has permissions to play audio</li>
+          <li>Some browsers may block speech synthesis in certain contexts</li>
+        </ol>
       </div>
 
       <div className="voice-controls">

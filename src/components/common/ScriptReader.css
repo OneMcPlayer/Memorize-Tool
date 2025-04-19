@@ -16,18 +16,30 @@
 }
 
 .user-interaction-notice {
-  background-color: #e3f2fd;
-  border-left: 4px solid #2196f3;
+  background-color: #fff3e0;
+  border-left: 4px solid #ff9800;
   padding: 10px 15px;
   margin-bottom: 20px;
   border-radius: 4px;
 }
 
 .user-interaction-notice p {
-  margin: 0;
-  color: #0d47a1;
+  margin: 0 0 10px 0;
+  color: #e65100;
   font-size: 0.9rem;
   line-height: 1.5;
+}
+
+.user-interaction-notice ol {
+  margin: 0;
+  padding-left: 25px;
+}
+
+.user-interaction-notice li {
+  color: #e65100;
+  font-size: 0.85rem;
+  margin-bottom: 5px;
+  line-height: 1.4;
 }
 
 .script-reader h3 {
