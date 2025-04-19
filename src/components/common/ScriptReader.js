@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import audioPlayer from '../../utils/basicAudioPlayer';
-import ttsService from '../../utils/ttsService';
 
 const ScriptReader = ({ script, onClose }) => {
   const [voices, setVoices] = useState([]);
