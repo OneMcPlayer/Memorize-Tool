@@ -5,6 +5,8 @@ import ScriptReader from './ScriptReader';
 import './ScriptReader.css';
 
 const ScriptModal = ({ isOpen, onClose, script, title, lang }) => {
+  const [showScriptReader, setShowScriptReader] = useState(false);
+
   if (!isOpen) return null;
 
   const t = translations[lang];
@@ -104,7 +106,6 @@ const ScriptModal = ({ isOpen, onClose, script, title, lang }) => {
     return parsedLines;
   };
 
-  const [showScriptReader, setShowScriptReader] = useState(false);
   const parsedScript = parseScriptForReader(script);
 
   return (
