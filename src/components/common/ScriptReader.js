@@ -30,19 +30,34 @@ const ScriptReader = ({ script, onClose }) => {
   useEffect(() => {
     const loadVoices = async () => {
       try {
+        setIsLoading(true);
+        console.log('Checking speech synthesis support...');
+
         if (!isSpeechSynthesisSupported()) {
           throw new Error('Speech synthesis is not supported in this browser');
         }
 
+        console.log('Speech synthesis is supported, getting voices...');
         const availableVoices = await getAvailableVoices();
-        setVoices(availableVoices);
+        console.log(`Got ${availableVoices.length} voices`);
+
+        if (availableVoices.length === 0) {
+          console.warn('No voices available, using default voice');
+          // Create a default voice if none are available
+          const defaultVoice = new SpeechSynthesisUtterance().voice;
+          setVoices(defaultVoice ? [defaultVoice] : []);
+        } else {
+          setVoices(availableVoices);
+        }
 
         // Auto-assign voices to characters
         const voiceAssignments = assignVoicesToCharacters(characters, availableVoices);
+        console.log('Voice assignments:', voiceAssignments);
         setCharacterVoices(voiceAssignments);
 
         setIsLoading(false);
       } catch (err) {
+        console.error('Error loading voices:', err);
         setError(err.message);
         setIsLoading(false);
       }
@@ -52,6 +67,7 @@ const ScriptReader = ({ script, onClose }) => {
 
     // Clean up speech synthesis when component unmounts
     return () => {
+      console.log('Cleaning up speech synthesis');
       cancelSpeech();
     };
   }, [characters]);
@@ -68,34 +84,57 @@ const ScriptReader = ({ script, onClose }) => {
 
   // Play the entire script
   const playScript = async () => {
-    setIsPlaying(true);
-    setIsPaused(false);
+    try {
+      console.log('Starting playback...');
+      setIsPlaying(true);
+      setIsPaused(false);
+      setError(null); // Clear any previous errors
 
-    // Start from the beginning if not already playing
-    if (currentLineIndex === -1) {
-      setCurrentLineIndex(0);
-    }
-
-    // Play from current line to the end
-    for (let i = Math.max(0, currentLineIndex); i < script.length; i++) {
-      if (!isPlaying) break; // Stop if play was cancelled
-
-      setCurrentLineIndex(i);
-      const line = script[i];
-      const voice = characterVoices[line.speaker];
-
-      // Only speak the dialogue, not the speaker name
-      try {
-        await speakText(line.line, voice, rate, pitch, volume);
-      } catch (err) {
-        setError(err.message);
-        break;
+      // Start from the beginning if not already playing
+      if (currentLineIndex === -1) {
+        setCurrentLineIndex(0);
       }
-    }
 
-    // Reset when finished
-    setIsPlaying(false);
-    setCurrentLineIndex(-1);
+      // Check if speech synthesis is supported
+      if (!window.speechSynthesis) {
+        throw new Error('Speech synthesis is not supported in this browser');
+      }
+
+      // Check if we have voices available
+      if (!voices || voices.length === 0) {
+        throw new Error('No voices available for speech synthesis');
+      }
+
+      // Play from current line to the end
+      for (let i = Math.max(0, currentLineIndex); i < script.length; i++) {
+        if (!isPlaying) {
+          console.log('Playback stopped');
+          break; // Stop if play was cancelled
+        }
+
+        setCurrentLineIndex(i);
+        const line = script[i];
+        console.log(`Playing line ${i}: ${line.speaker}: ${line.line}`);
+
+        // Get the voice for this character
+        const voice = characterVoices[line.speaker];
+        console.log('Using voice:', voice ? voice.name : 'Default voice');
+
+        // Only speak the dialogue, not the speaker name
+        await speakText(line.line, voice, rate, pitch, volume);
+        console.log(`Finished line ${i}`);
+      }
+
+      console.log('Playback complete');
+      // Reset when finished
+      setIsPlaying(false);
+      setCurrentLineIndex(-1);
+    } catch (err) {
+      console.error('Error during playback:', err);
+      setError(`Error during playback: ${err.message}`);
+      setIsPlaying(false);
+      cancelSpeech(); // Make sure to cancel any ongoing speech
+    }
   };
 
   // Stop playback
@@ -124,7 +163,17 @@ const ScriptReader = ({ script, onClose }) => {
   }
 
   if (error) {
-    return <div className="script-reader error">Error: {error}</div>;
+    return (
+      <div className="script-reader error">
+        <h2>Error</h2>
+        <p>{error}</p>
+        <p className="error-help">
+          Speech synthesis may not be fully supported in your browser, or your browser might be blocking it.
+          Try using a different browser like Chrome or Edge, or check your browser settings.
+        </p>
+        <button onClick={onClose} className="close-button">Close</button>
+      </div>
+    );
   }
 
   return (

@@ -175,16 +175,36 @@
   color: #f44336;
 }
 
+.script-reader.error h2 {
+  color: #f44336;
+  margin-bottom: 20px;
+}
+
+.script-reader.error p {
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+.script-reader.error .error-help {
+  background-color: #fff8e1;
+  border-left: 4px solid #ffc107;
+  padding: 15px;
+  margin: 20px 0;
+  color: #5d4037;
+  text-align: left;
+  border-radius: 4px;
+}
+
 @media (max-width: 600px) {
   .voice-assignments,
   .playback-settings {
     grid-template-columns: 1fr;
   }
-  
+
   .playback-controls {
     flex-direction: column;
   }
-  
+
   .playback-controls button {
     width: 100%;
   }
