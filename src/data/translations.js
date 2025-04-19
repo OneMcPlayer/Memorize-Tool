@@ -52,6 +52,7 @@ export const translations = {
     viewFullScriptButton: "View Full Script",
     fullScript: "Full Script",
     closeButton: "Close",
+    listenButton: "Listen to Script",
 
 
 
@@ -165,6 +166,7 @@ export const translations = {
     viewFullScriptButton: "Visualizza Copione Completo",
     fullScript: "Copione Completo",
     closeButton: "Chiudi",
+    listenButton: "Ascolta Copione",
 
 
 
