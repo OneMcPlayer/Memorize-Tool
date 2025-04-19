@@ -72,49 +72,7 @@ export const groupVoicesByLanguage = (voices) => {
   return groupedVoices;
 };
 
-// Use audio element as a fallback for speech synthesis
-const createAudioFallback = (text) => {
-  // This is a fallback that uses a text-to-speech API service
-  // Note: This is a free service with limitations, consider using a paid service for production
-  const encodedText = encodeURIComponent(text);
-  const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=en&client=tw-ob`;
-
-  return new Promise((resolve) => {
-    try {
-      const audio = new Audio(audioUrl);
-      audio.volume = 0.8;
-
-      audio.onended = () => {
-        console.log('Audio fallback ended');
-        resolve();
-      };
-
-      audio.onerror = () => {
-        console.warn('Audio fallback failed');
-        resolve();
-      };
-
-      // Set a timeout in case the audio doesn't play
-      const timeout = setTimeout(() => {
-        console.warn('Audio fallback timeout');
-        resolve();
-      }, 5000);
-
-      audio.oncanplaythrough = () => {
-        clearTimeout(timeout);
-        audio.play().catch(err => {
-          console.warn('Audio play failed:', err);
-          resolve();
-        });
-      };
-    } catch (err) {
-      console.error('Audio fallback error:', err);
-      resolve();
-    }
-  });
-};
-
-// Speak text with a specific voice - using a more direct approach
+// Simple audio-based text-to-speech using Google Translate TTS API
 export const speakText = (text, voice, rate = 1, pitch = 1, volume = 1) => {
   return new Promise((resolve) => {
     try {
@@ -125,95 +83,83 @@ export const speakText = (text, voice, rate = 1, pitch = 1, volume = 1) => {
         return;
       }
 
-      // Check if speech synthesis is supported
-      if (!window.speechSynthesis) {
-        console.warn('Speech synthesis not supported, using fallback');
-        return createAudioFallback(text).then(resolve);
+      console.log('Using audio-based TTS for:', text.substring(0, 30) + '...');
+
+      // Prepare the text - limit to 200 characters (Google Translate TTS API limit)
+      const trimmedText = text.length > 200 ? text.substring(0, 197) + '...' : text;
+      const encodedText = encodeURIComponent(trimmedText);
+
+      // Get language code based on voice preference, default to English
+      let langCode = 'en';
+      if (voice && voice.lang) {
+        // Extract primary language code (e.g., 'it' from 'it-IT')
+        langCode = voice.lang.split('-')[0];
       }
 
-      console.log('Preparing to speak:', text.substring(0, 30) + '...');
+      // Create audio URL using Google Translate TTS API
+      const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${langCode}&client=tw-ob`;
 
-      // Force cancel any ongoing speech
-      window.speechSynthesis.cancel();
+      console.log(`Creating audio with language: ${langCode}`);
 
-      // Create a new utterance
-      const utterance = new SpeechSynthesisUtterance(text);
+      // Create and play audio
+      const audio = new Audio(audioUrl);
 
-      // Set properties
-      if (voice) {
-        console.log('Setting voice:', voice.name);
-        utterance.voice = voice;
-      } else {
-        console.log('Using default voice');
-      }
+      // Apply volume setting
+      audio.volume = volume;
 
-      utterance.rate = rate;
-      utterance.pitch = pitch;
-      utterance.volume = volume;
-
-      // Track speech state
-      let speechStarted = false;
-      let speechEnded = false;
-      let errorOccurred = false;
-
-      // Set up a timeout to detect if speech doesn't start
-      const startTimeout = setTimeout(() => {
-        if (!speechStarted && !errorOccurred) {
-          console.warn('Speech did not start within timeout, using fallback');
-          // Try the audio fallback
-          createAudioFallback(text).then(resolve);
-        }
-      }, 2000);
-
-      // Set callbacks
-      utterance.onstart = () => {
-        console.log('Speech started!');
-        speechStarted = true;
+      // Set up event handlers
+      audio.onplay = () => {
+        console.log('Audio playback started');
       };
 
-      utterance.onend = () => {
-        console.log('Speech ended normally');
-        speechEnded = true;
-        clearTimeout(startTimeout);
+      audio.onended = () => {
+        console.log('Audio playback ended');
         resolve();
       };
 
-      utterance.onerror = (error) => {
-        errorOccurred = true;
-        console.error('Speech error:', error.error || 'unknown error');
-        clearTimeout(startTimeout);
-
-        // If the error is 'interrupted', try the audio fallback
-        if (error.error === 'interrupted') {
-          console.log('Speech was interrupted, using fallback');
-          createAudioFallback(text).then(resolve);
-        } else {
-          // For other errors, just continue
-          resolve();
-        }
+      audio.onerror = (err) => {
+        console.error('Audio playback error:', err);
+        resolve(); // Resolve anyway to continue with next line
       };
 
-      // Speak the utterance
-      console.log('Calling speechSynthesis.speak()...');
-      window.speechSynthesis.speak(utterance);
+      // Set a timeout in case the audio doesn't play or end event doesn't fire
+      const timeout = setTimeout(() => {
+        console.warn('Audio playback timeout - continuing');
+        resolve();
+      }, 7000); // Generous timeout
 
-      // Set up a backup timer to resolve the promise if callbacks don't fire
-      const wordsCount = text.split(/\s+/).length;
-      const estimatedDuration = (wordsCount / 3) * (1 / rate) * 1000; // ~3 words per second at rate=1
-      const maxDuration = Math.min(Math.max(estimatedDuration, 1000), 10000); // Between 1-10 seconds
+      // Start playback when ready
+      audio.oncanplaythrough = () => {
+        console.log('Audio ready to play');
+        audio.play()
+          .then(() => {
+            console.log('Audio play() promise resolved');
+          })
+          .catch(err => {
+            console.error('Audio play() promise rejected:', err);
+            clearTimeout(timeout);
+            resolve(); // Continue with next line
+          });
+      };
 
-      console.log(`Setting backup timer for ${maxDuration}ms`);
+      // Set another timeout in case oncanplaythrough never fires
       setTimeout(() => {
-        if (!speechEnded && !errorOccurred) {
-          console.warn('Speech timed out, forcing resolution');
-          window.speechSynthesis.cancel(); // Cancel any ongoing speech
-          resolve();
+        if (!audio.paused) {
+          console.log('Audio is already playing');
+          return;
         }
-      }, maxDuration + 1000); // Add 1 second buffer
+
+        console.log('Forcing audio play attempt');
+        audio.play().catch(err => {
+          console.error('Forced audio play failed:', err);
+          clearTimeout(timeout);
+          resolve();
+        });
+      }, 2000);
+
     } catch (err) {
       console.error('Unexpected error in speakText:', err);
-      // Try the audio fallback
-      createAudioFallback(text).then(resolve);
+      resolve(); // Continue with next line
     }
   });
 };

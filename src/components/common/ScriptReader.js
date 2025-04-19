@@ -17,8 +17,8 @@ const ScriptReader = ({ script, onClose }) => {
   const [currentLineIndex, setCurrentLineIndex] = useState(-1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [rate, setRate] = useState(1);
-  const [pitch, setPitch] = useState(1);
+  // We keep rate for compatibility with the speakText function
+  const [rate] = useState(1);
   const [volume, setVolume] = useState(1);
 
   // Extract unique characters from the script
@@ -122,8 +122,8 @@ const ScriptReader = ({ script, onClose }) => {
         // Only speak the dialogue, not the speaker name
         try {
           // Speak the text and wait for it to complete or timeout
-          // The speakText function will handle fallbacks internally
-          await speakText(line.line, voice, rate, pitch, volume);
+          // The speakText function will handle audio playback
+          await speakText(line.line, voice, rate, 1, volume);
 
           // Add a small pause between lines
           if (i < script.length - 1) { // Don't pause after the last line
@@ -195,15 +195,14 @@ const ScriptReader = ({ script, onClose }) => {
 
       <div className="user-interaction-notice">
         <p>
-          <strong>Note:</strong> This feature uses your browser's speech capabilities.
-          If you don't hear anything:
+          <strong>Note:</strong> This feature uses audio playback to read the script.
         </p>
         <ol>
           <li>Make sure your device volume is turned up</li>
-          <li>Try clicking on the page several times before pressing Play</li>
-          <li>The app will automatically try an alternative method if speech fails</li>
-          <li>Some browsers may require you to allow audio playback</li>
-          <li>If using Chrome, try Edge or Firefox for better speech support</li>
+          <li>Your browser may ask for permission to play audio</li>
+          <li>Each character will speak with their assigned voice/language</li>
+          <li>Some browsers may block automatic audio playback</li>
+          <li>If audio doesn't play, try clicking on the page first</li>
         </ol>
       </div>
 
@@ -231,34 +230,6 @@ const ScriptReader = ({ script, onClose }) => {
 
         <div className="playback-settings">
           <div className="setting">
-            <label htmlFor="rate">Speed:</label>
-            <input
-              id="rate"
-              type="range"
-              min="0.5"
-              max="2"
-              step="0.1"
-              value={rate}
-              onChange={(e) => setRate(parseFloat(e.target.value))}
-            />
-            <span>{rate.toFixed(1)}x</span>
-          </div>
-
-          <div className="setting">
-            <label htmlFor="pitch">Pitch:</label>
-            <input
-              id="pitch"
-              type="range"
-              min="0.5"
-              max="2"
-              step="0.1"
-              value={pitch}
-              onChange={(e) => setPitch(parseFloat(e.target.value))}
-            />
-            <span>{pitch.toFixed(1)}</span>
-          </div>
-
-          <div className="setting">
             <label htmlFor="volume">Volume:</label>
             <input
               id="volume"
@@ -270,6 +241,10 @@ const ScriptReader = ({ script, onClose }) => {
               onChange={(e) => setVolume(parseFloat(e.target.value))}
             />
             <span>{Math.round(volume * 100)}%</span>
+          </div>
+
+          <div className="setting-note">
+            <p>Note: Speed and pitch controls are not available with the audio playback method.</p>
           </div>
         </div>
       </div>
