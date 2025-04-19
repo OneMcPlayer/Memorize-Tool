@@ -105,6 +105,21 @@ const ScriptReader = ({ script, onClose }) => {
         throw new Error('No voices available for speech synthesis');
       }
 
+      // Force a user interaction with speech synthesis
+      // This helps browsers that require user interaction to allow speech
+      window.speechSynthesis.cancel();
+
+      // Play a silent sound to initialize audio context in browsers that need it
+      try {
+        const silentUtterance = new SpeechSynthesisUtterance(' ');
+        silentUtterance.volume = 0;
+        window.speechSynthesis.speak(silentUtterance);
+        await new Promise(resolve => setTimeout(resolve, 100));
+        window.speechSynthesis.cancel();
+      } catch (e) {
+        console.log('Silent utterance failed, continuing anyway:', e);
+      }
+
       // Play from current line to the end
       for (let i = Math.max(0, currentLineIndex); i < script.length; i++) {
         if (!isPlaying) {
@@ -121,8 +136,16 @@ const ScriptReader = ({ script, onClose }) => {
         console.log('Using voice:', voice ? voice.name : 'Default voice');
 
         // Only speak the dialogue, not the speaker name
-        await speakText(line.line, voice, rate, pitch, volume);
-        console.log(`Finished line ${i}`);
+        try {
+          await speakText(line.line, voice, rate, pitch, volume);
+          console.log(`Finished line ${i}`);
+
+          // Add a small pause between lines
+          await new Promise(resolve => setTimeout(resolve, 300));
+        } catch (lineError) {
+          console.error(`Error speaking line ${i}:`, lineError);
+          // Continue with next line instead of stopping completely
+        }
       }
 
       console.log('Playback complete');
@@ -179,6 +202,13 @@ const ScriptReader = ({ script, onClose }) => {
   return (
     <div className="script-reader">
       <h2>Script Reader</h2>
+
+      <div className="user-interaction-notice">
+        <p>
+          <strong>Note:</strong> Some browsers require user interaction before allowing speech synthesis.
+          If you don't hear anything after clicking Play, try clicking somewhere on the page first.
+        </p>
+      </div>
 
       <div className="voice-controls">
         <h3>Voice Settings</h3>

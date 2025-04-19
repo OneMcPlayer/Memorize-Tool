@@ -15,6 +15,21 @@
   color: #333;
 }
 
+.user-interaction-notice {
+  background-color: #e3f2fd;
+  border-left: 4px solid #2196f3;
+  padding: 10px 15px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+}
+
+.user-interaction-notice p {
+  margin: 0;
+  color: #0d47a1;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
 .script-reader h3 {
   margin-top: 20px;
   margin-bottom: 10px;

@@ -80,13 +80,23 @@ export const speakText = (text, voice, rate = 1, pitch = 1, volume = 1) => {
       return;
     }
 
+    // If text is empty, resolve immediately
+    if (!text || text.trim() === '') {
+      console.log('Empty text, skipping speech');
+      setTimeout(resolve, 500); // Small delay to simulate speech
+      return;
+    }
+
     // Chrome has a bug where it stops speaking after about 15 seconds
     // This is a workaround to keep it going
     const resetSpeechSynthesis = () => {
       if (window.speechSynthesis.speaking) {
+        console.log('Resetting speech synthesis to prevent timeout');
         window.speechSynthesis.pause();
-        window.speechSynthesis.resume();
-        timeoutId = setTimeout(resetSpeechSynthesis, 5000);
+        setTimeout(() => {
+          window.speechSynthesis.resume();
+          timeoutId = setTimeout(resetSpeechSynthesis, 5000);
+        }, 50);
       }
     };
     let timeoutId = setTimeout(resetSpeechSynthesis, 5000);
@@ -111,11 +121,11 @@ export const speakText = (text, voice, rate = 1, pitch = 1, volume = 1) => {
 
     // Set callbacks
     utterance.onstart = () => {
-      console.log('Speech started');
+      console.log('Speech started for:', text.substring(0, 20) + '...');
     };
 
     utterance.onend = () => {
-      console.log('Speech ended');
+      console.log('Speech ended for:', text.substring(0, 20) + '...');
       clearTimeout(timeoutId);
       resolve();
     };
@@ -134,8 +144,27 @@ export const speakText = (text, voice, rate = 1, pitch = 1, volume = 1) => {
     // Cancel any ongoing speech
     window.speechSynthesis.cancel();
 
-    // Speak the utterance
-    window.speechSynthesis.speak(utterance);
+    // Add a small delay before speaking to ensure the previous cancel takes effect
+    setTimeout(() => {
+      try {
+        // Speak the utterance
+        window.speechSynthesis.speak(utterance);
+
+        // Some browsers need a user interaction to start speech
+        // This is a workaround to try to force speech to start
+        if (!window.speechSynthesis.speaking) {
+          console.log('Speech not starting, trying again...');
+          window.speechSynthesis.cancel(); // Cancel any pending speech
+          setTimeout(() => {
+            window.speechSynthesis.speak(utterance);
+          }, 150);
+        }
+      } catch (err) {
+        console.error('Error starting speech:', err);
+        clearTimeout(timeoutId);
+        reject(err);
+      }
+    }, 100);
   });
 };
 
