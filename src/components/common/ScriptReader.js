@@ -9,8 +9,7 @@ const ScriptReader = ({ script, onClose }) => {
   const [currentLineIndex, setCurrentLineIndex] = useState(-1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  // We keep rate for compatibility with the speakText function
-  const [rate] = useState(1);
+  // Volume state for audio playback
   const [volume, setVolume] = useState(1);
 
   // Extract unique characters from the script
