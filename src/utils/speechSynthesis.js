@@ -72,20 +72,63 @@ export const groupVoicesByLanguage = (voices) => {
   return groupedVoices;
 };
 
+// Use audio element as a fallback for speech synthesis
+const createAudioFallback = (text) => {
+  // This is a fallback that uses a text-to-speech API service
+  // Note: This is a free service with limitations, consider using a paid service for production
+  const encodedText = encodeURIComponent(text);
+  const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=en&client=tw-ob`;
+
+  return new Promise((resolve) => {
+    try {
+      const audio = new Audio(audioUrl);
+      audio.volume = 0.8;
+
+      audio.onended = () => {
+        console.log('Audio fallback ended');
+        resolve();
+      };
+
+      audio.onerror = () => {
+        console.warn('Audio fallback failed');
+        resolve();
+      };
+
+      // Set a timeout in case the audio doesn't play
+      const timeout = setTimeout(() => {
+        console.warn('Audio fallback timeout');
+        resolve();
+      }, 5000);
+
+      audio.oncanplaythrough = () => {
+        clearTimeout(timeout);
+        audio.play().catch(err => {
+          console.warn('Audio play failed:', err);
+          resolve();
+        });
+      };
+    } catch (err) {
+      console.error('Audio fallback error:', err);
+      resolve();
+    }
+  });
+};
+
 // Speak text with a specific voice - using a more direct approach
 export const speakText = (text, voice, rate = 1, pitch = 1, volume = 1) => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     try {
-      if (!window.speechSynthesis) {
-        reject(new Error('Speech synthesis not supported'));
-        return;
-      }
-
       // If text is empty, resolve immediately
       if (!text || text.trim() === '') {
         console.log('Empty text, skipping speech');
         setTimeout(resolve, 500); // Small delay to simulate speech
         return;
+      }
+
+      // Check if speech synthesis is supported
+      if (!window.speechSynthesis) {
+        console.warn('Speech synthesis not supported, using fallback');
+        return createAudioFallback(text).then(resolve);
       }
 
       console.log('Preparing to speak:', text.substring(0, 30) + '...');
@@ -108,12 +151,17 @@ export const speakText = (text, voice, rate = 1, pitch = 1, volume = 1) => {
       utterance.pitch = pitch;
       utterance.volume = volume;
 
-      // Set up a timeout to detect if speech doesn't start
+      // Track speech state
       let speechStarted = false;
+      let speechEnded = false;
+      let errorOccurred = false;
+
+      // Set up a timeout to detect if speech doesn't start
       const startTimeout = setTimeout(() => {
-        if (!speechStarted) {
-          console.warn('Speech did not start within timeout, forcing resolution');
-          resolve(); // Force resolve if speech doesn't start
+        if (!speechStarted && !errorOccurred) {
+          console.warn('Speech did not start within timeout, using fallback');
+          // Try the audio fallback
+          createAudioFallback(text).then(resolve);
         }
       }, 2000);
 
@@ -121,20 +169,28 @@ export const speakText = (text, voice, rate = 1, pitch = 1, volume = 1) => {
       utterance.onstart = () => {
         console.log('Speech started!');
         speechStarted = true;
-        clearTimeout(startTimeout);
       };
 
       utterance.onend = () => {
-        console.log('Speech ended');
+        console.log('Speech ended normally');
+        speechEnded = true;
         clearTimeout(startTimeout);
         resolve();
       };
 
       utterance.onerror = (error) => {
-        console.error('Speech error:', error);
+        errorOccurred = true;
+        console.error('Speech error:', error.error || 'unknown error');
         clearTimeout(startTimeout);
-        // Don't reject, just resolve to continue with next line
-        resolve();
+
+        // If the error is 'interrupted', try the audio fallback
+        if (error.error === 'interrupted') {
+          console.log('Speech was interrupted, using fallback');
+          createAudioFallback(text).then(resolve);
+        } else {
+          // For other errors, just continue
+          resolve();
+        }
       };
 
       // Speak the utterance
@@ -142,24 +198,22 @@ export const speakText = (text, voice, rate = 1, pitch = 1, volume = 1) => {
       window.speechSynthesis.speak(utterance);
 
       // Set up a backup timer to resolve the promise if callbacks don't fire
-      // Calculate a reasonable duration based on text length and rate
       const wordsCount = text.split(/\s+/).length;
       const estimatedDuration = (wordsCount / 3) * (1 / rate) * 1000; // ~3 words per second at rate=1
       const maxDuration = Math.min(Math.max(estimatedDuration, 1000), 10000); // Between 1-10 seconds
 
       console.log(`Setting backup timer for ${maxDuration}ms`);
       setTimeout(() => {
-        if (!speechStarted) {
-          console.warn('Speech never started, forcing resolution');
+        if (!speechEnded && !errorOccurred) {
+          console.warn('Speech timed out, forcing resolution');
+          window.speechSynthesis.cancel(); // Cancel any ongoing speech
           resolve();
-        } else {
-          console.log('Backup timer expired, but speech was started');
         }
-      }, maxDuration + 500); // Add 500ms buffer
+      }, maxDuration + 1000); // Add 1 second buffer
     } catch (err) {
       console.error('Unexpected error in speakText:', err);
-      // Don't reject, just resolve to continue with next line
-      resolve();
+      // Try the audio fallback
+      createAudioFallback(text).then(resolve);
     }
   });
 };
