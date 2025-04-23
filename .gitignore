@@ -26,11 +26,26 @@ pids
 .env.local
 .env.*.local
 
+# SSL Certificates
+auth/certs/
+*.pem
+*.key
+*.crt
+*.csr
+
+# Authentication data
+auth/db.sqlite3
+auth/users_database.yml
+auth/notification.txt
+
+# Docker
+.docker/
+docker-compose.override.yml
+*.env
+
 # IDE settings
 .idea/
 .vscode/
-*.swp
-*.swo
 
 # OS generated files
 .DS_Store
@@ -40,3 +55,12 @@ pids
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*.swo
+.cache/
+tmp/
+temp/
