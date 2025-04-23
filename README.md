@@ -1,8 +1,8 @@
-# 🎭 Script Memorization Tool (React Version)
+# 🎭 Script Memorization Tool
 
 A modern, browser-based application designed to help actors and theater students effectively memorize their lines by practicing them in context. Built with React, this tool provides an interactive interface for script practice.
 
-![Version](https://img.shields.io/badge/version-2.0.0--react--demo-green.svg)
+![Version](https://img.shields.io/badge/version-2.1.0-green.svg)
 ![React](https://img.shields.io/badge/react-19.x-blue.svg)
 ![Mobile](https://img.shields.io/badge/mobile-friendly-brightgreen.svg)
 
@@ -96,24 +96,27 @@ The Cypress tests verify:
 
 ## 🏷️ Version Information
 
-### Current Version: v2.0.0-react-demo
+### Current Version: v2.1.0
 
-This is a fully working demo version of the React port with the following improvements:
+This is the stable React version with the following features and improvements:
 
 - Complete rewrite using React and modern JavaScript
 - Mobile-friendly responsive design
 - Landscape and portrait orientation support
 - Touch-optimized interface
 - Fixed issue with last line display in practice mode
+- Improved Cypress tests and GitHub Actions workflow
 
 ### Release History
 
-- **v2.0.0-react-demo**: Current React demo version with mobile improvements
+- **v2.1.0**: Current stable version with improved testing and workflow
+- **v2.1.0-react-stable**: Stable React implementation
+- **v2.0.0-react-demo**: React demo version with mobile improvements
 - **v1.0.0-vanilla-js**: Original vanilla JavaScript version
 
-## 📜 Original Version
+## 📜 Version History
 
-The original vanilla JavaScript version of this application was built with pure HTML, CSS, and JavaScript without any dependencies. It has been migrated to this React version.
+This application was originally built with vanilla JavaScript (HTML, CSS, and JavaScript without any dependencies). It has been completely migrated to React, which is now the default and recommended version.
 
 ## 📝 License
 
