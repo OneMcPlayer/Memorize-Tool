@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  # Authentication service is now handled by 1Password Passkey
+
+  # Reverse proxy
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/snippets:/etc/nginx/snippets
+      - ./certs:/etc/nginx/certs
+    ports:
+      - 80:80
+      - 443:443
+      - 8080:80
+      - 8443:443
+    restart: unless-stopped
+    depends_on:
+      - frontend
+      - server
+    networks:
+      - app-network
+
+  # React frontend
+  frontend:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: frontend
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  # Node.js backend
+  server:
+    image: node:18-alpine
+    container_name: server
+    restart: unless-stopped
+    ports:
+      - 5000:5000
+    volumes:
+      - ./server:/app/auth/server
+      - ./db:/app/auth/db
+      - ../server:/app
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+    networks:
+      - app-network
+    working_dir: /app
+    command: sh -c "npm install && node index.js"
+
+networks:
+  app-network:
+    driver: bridge
