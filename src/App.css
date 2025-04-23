@@ -41,13 +41,27 @@ body {
   color: #2c3e50;
 }
 
-#themeToggle {
+#themeToggle, #loginButton, #optionsToggle {
   background: none;
   border: none;
   font-size: 24px;
   cursor: pointer;
   padding: 10px;
   color: #2c3e50;
+}
+
+#loginButton {
+  font-size: 14px;
+  background: #3498db;
+  color: white;
+  border-radius: 5px;
+  padding: 5px 10px;
+  transition: all 0.2s ease;
+}
+
+#loginButton:hover {
+  background: #2980b9;
+  transform: translateY(-2px);
 }
 
 /* The main container for your script tool */
@@ -222,8 +236,17 @@ body.dark-mode #languageSelect {
   border-color: #fff;
 }
 
-body.dark-mode #themeToggle {
+body.dark-mode #themeToggle, body.dark-mode #optionsToggle {
   color: #fff;
+}
+
+body.dark-mode #loginButton {
+  background: #2980b9;
+  color: #fff;
+}
+
+body.dark-mode #loginButton:hover {
+  background: #3498db;
 }
 
 /* Mobile styles */
@@ -311,9 +334,14 @@ body.dark-mode #themeToggle {
     font-size: 12px;
   }
 
-  #themeToggle {
+  #themeToggle, #optionsToggle {
     font-size: 20px;
     padding: 8px;
+  }
+
+  #loginButton {
+    font-size: 12px;
+    padding: 4px 8px;
   }
 
   .toast {

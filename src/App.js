@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { AppProvider } from './context/AppContext';
+import { AuthProvider } from './context/AuthContext';
 import { ErrorHandler } from './utils/ErrorHandler';
 import { showToast } from './utils';
+import UserProfile from './components/UserProfile';
 import Header from './components/layout/Header';
 import InputView from './components/views/InputView';
 import PracticeView from './components/views/PracticeView';
@@ -20,7 +22,8 @@ const VIEWS = {
   ABOUT: 'about',
   AUDIO_TEST: 'audio_test',
   TTS_TEST: 'tts_test',
-  SERVER_TEST: 'server_test'
+  SERVER_TEST: 'server_test',
+  PROFILE: 'profile'
 };
 
 function App() {
@@ -66,6 +69,8 @@ function App() {
         return <TtsTestPage />;
       case VIEWS.SERVER_TEST:
         return <ServerTest onBack={() => setCurrentView(VIEWS.INPUT)} />;
+      case VIEWS.PROFILE:
+        return <UserProfile onBack={() => setCurrentView(VIEWS.INPUT)} />;
       case VIEWS.INPUT:
       default:
         return (
@@ -78,22 +83,25 @@ function App() {
   };
 
   return (
-    <AppProvider>
-      <div className="app-container">
-        <Header
-          onOpenConverter={() => setCurrentView(VIEWS.CONVERTER)}
-          onOpenAbout={() => setCurrentView(VIEWS.ABOUT)}
-          onOpenAudioTest={() => setCurrentView(VIEWS.AUDIO_TEST)}
-          onOpenTtsTest={() => setCurrentView(VIEWS.TTS_TEST)}
-          onOpenServerTest={() => setCurrentView(VIEWS.SERVER_TEST)}
-        />
-        <main className="app-content">
-          {renderView()}
-        </main>
-        <div className="toast"></div>
-        <div className="spinner"></div>
-      </div>
-    </AppProvider>
+    <AuthProvider>
+      <AppProvider>
+        <div className="app-container">
+          <Header
+            onOpenConverter={() => setCurrentView(VIEWS.CONVERTER)}
+            onOpenAbout={() => setCurrentView(VIEWS.ABOUT)}
+            onOpenAudioTest={() => setCurrentView(VIEWS.AUDIO_TEST)}
+            onOpenTtsTest={() => setCurrentView(VIEWS.TTS_TEST)}
+            onOpenServerTest={() => setCurrentView(VIEWS.SERVER_TEST)}
+            onOpenProfile={() => setCurrentView(VIEWS.PROFILE)}
+          />
+          <main className="app-content">
+            {renderView()}
+          </main>
+          <div className="toast"></div>
+          <div className="spinner"></div>
+        </div>
+      </AppProvider>
+    </AuthProvider>
   );
 }
 

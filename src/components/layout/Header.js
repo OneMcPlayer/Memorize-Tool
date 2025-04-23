@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAppContext } from '../../context/AppContext';
+import { useAuth } from '../../context/AuthContext';
 import { translations } from '../../data/translations';
 
-const Header = ({ onOpenConverter, onOpenAbout, onOpenAudioTest, onOpenTtsTest, onOpenServerTest }) => {
+const Header = ({ onOpenConverter, onOpenAbout, onOpenAudioTest, onOpenTtsTest, onOpenServerTest, onOpenProfile }) => {
   const { currentLang, setLanguage, toggleDarkMode, isAdvancedMode, setAdvancedMode } = useAppContext();
+  const { user, isAuthenticated, logout } = useAuth();
   const [optionsVisible, setOptionsVisible] = useState(false);
   const optionsMenuRef = useRef(null);
   const optionsToggleRef = useRef(null);
@@ -72,6 +74,15 @@ const Header = ({ onOpenConverter, onOpenAbout, onOpenAudioTest, onOpenTtsTest, 
             aria-label="Toggle dark mode"
           >
             🌓
+          </button>
+
+          <button
+            id="loginButton"
+            onClick={() => isAuthenticated ? logout() : window.location.href = '/login.html'}
+            aria-label={isAuthenticated ? 'Logout' : 'Login'}
+            style={{ marginRight: '5px' }}
+          >
+            {isAuthenticated ? '🔒 Logout' : '🔑 Login'}
           </button>
 
           <button
@@ -158,6 +169,18 @@ const Header = ({ onOpenConverter, onOpenAbout, onOpenAudioTest, onOpenTtsTest, 
                     }}
                   >
                     Server Test
+                  </li>
+                )}
+
+                {isAuthenticated && (
+                  <li
+                    id="optionProfile"
+                    onClick={() => {
+                      onOpenProfile();
+                      setOptionsVisible(false);
+                    }}
+                  >
+                    {user?.displayName || 'Profile'}
                   </li>
                 )}
               </ul>
