@@ -103,7 +103,12 @@ export const getPlainText = (line) => {
   if (line == null) return '';
   
   // Remove HTML tags and trim whitespace
-  return line.replace(/<[^>]*>/g, '').trim();
+  let previous;
+  do {
+    previous = line;
+    line = line.replace(/<[^>]*>/g, '');
+  } while (line !== previous);
+  return line.trim();
 };
 
 /**
