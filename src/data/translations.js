@@ -13,6 +13,7 @@ export const translations = {
     contextHelp:
       "💡 This number determines how many lines before your character's line will be shown as context.",
     extractButton: "Extract My Lines (Enter)",
+    testButton: "Test My Lines",
     shortcuts: "Keyboard shortcuts:",
     shortcutExtract: "Enter - Extract/Next Line",
     shortcutReveal: "Space - Reveal Line",
@@ -53,6 +54,14 @@ export const translations = {
     fullScript: "Full Script",
     closeButton: "Close",
     listenButton: "Listen to Script",
+
+    // Script Testing Mode
+    testingMode: "Script Testing Mode",
+    yourTurnPrompt: "It's your turn, {character}!",
+    saidMyLineButton: "I Said My Line",
+    needHelpButton: "Need Help?",
+    hideLineButton: "Hide Line",
+    testCompleteMessage: "You have completed testing all your lines!",
 
 
 
@@ -127,6 +136,7 @@ export const translations = {
     contextHelp:
       "💡 Questo numero determina quante battute prima della tua verranno mostrate come contesto.",
     extractButton: "Estrai le Mie Battute (Invio)",
+    testButton: "Testa le Mie Battute",
     shortcuts: "Scorciatoie da tastiera:",
     shortcutExtract: "Invio - Estrai/Prossima Battuta",
     shortcutReveal: "Spazio - Rivela Battuta",
@@ -167,6 +177,14 @@ export const translations = {
     fullScript: "Copione Completo",
     closeButton: "Chiudi",
     listenButton: "Ascolta Copione",
+
+    // Script Testing Mode
+    testingMode: "Modalità Test Copione",
+    yourTurnPrompt: "È il tuo turno, {character}!",
+    saidMyLineButton: "Ho Detto La Mia Battuta",
+    needHelpButton: "Ho Bisogno di Aiuto",
+    hideLineButton: "Nascondi Battuta",
+    testCompleteMessage: "Hai completato il test di tutte le tue battute!",
 
 
 

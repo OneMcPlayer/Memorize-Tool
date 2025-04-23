@@ -6,7 +6,7 @@ import ScriptModal from '../common/ScriptModal';
 import { getAvailableScripts, getScriptContent, convertJsonScriptToText } from '../../data/scripts';
 import './InputView.css';
 
-const InputView = ({ onStartPractice }) => {
+const InputView = ({ onStartPractice, onStartScriptTesting }) => {
   const {
     currentLang,
     isAdvancedMode,
@@ -337,6 +337,12 @@ const InputView = ({ onStartPractice }) => {
             <button id="extractButton" onClick={handleExtract}>
               {t.extractButton}
             </button>
+            <button id="testButton" onClick={() => {
+              handleExtract();
+              onStartScriptTesting();
+            }} className="test-button">
+              {t.testButton || 'Test My Lines'}
+            </button>
           </div>
 
           <div className="shortcuts-info">
@@ -454,6 +460,16 @@ const InputView = ({ onStartPractice }) => {
                   className="primary-btn"
                 >
                   {t.extractButton}
+                </button>
+                <button
+                  id="testButton"
+                  onClick={() => {
+                    handleExtract();
+                    onStartScriptTesting();
+                  }}
+                  className="secondary-btn test-button"
+                >
+                  {t.testButton || 'Test My Lines'}
                 </button>
               </div>
             </div>

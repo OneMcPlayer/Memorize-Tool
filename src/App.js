@@ -7,6 +7,7 @@ import UserProfile from './components/UserProfile';
 import Header from './components/layout/Header';
 import InputView from './components/views/InputView';
 import PracticeView from './components/views/PracticeView';
+import ScriptTestingView from './components/views/ScriptTestingView';
 import ConverterView from './components/views/ConverterView';
 import AboutView from './components/views/AboutView';
 import AudioTestComponent from './components/test/AudioTestComponent';
@@ -18,6 +19,7 @@ import './App.css';
 const VIEWS = {
   INPUT: 'input',
   PRACTICE: 'practice',
+  SCRIPT_TESTING: 'script_testing',
   CONVERTER: 'converter',
   ABOUT: 'about',
   AUDIO_TEST: 'audio_test',
@@ -59,6 +61,8 @@ function App() {
     switch (currentView) {
       case VIEWS.PRACTICE:
         return <PracticeView onBack={() => setCurrentView(VIEWS.INPUT)} />;
+      case VIEWS.SCRIPT_TESTING:
+        return <ScriptTestingView onBack={() => setCurrentView(VIEWS.INPUT)} />;
       case VIEWS.CONVERTER:
         return <ConverterView onBack={() => setCurrentView(VIEWS.INPUT)} />;
       case VIEWS.ABOUT:
@@ -76,6 +80,7 @@ function App() {
         return (
           <InputView
             onStartPractice={() => setCurrentView(VIEWS.PRACTICE)}
+            onStartScriptTesting={() => setCurrentView(VIEWS.SCRIPT_TESTING)}
             onOpenConverter={() => setCurrentView(VIEWS.CONVERTER)}
           />
         );
