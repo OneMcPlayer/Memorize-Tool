@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import audioPlayer from '../../utils/basicAudioPlayer';
+import ttsService from '../../utils/ttsService';
 
 const ScriptReader = ({ script, onClose }) => {
   const [voices, setVoices] = useState([]);
@@ -9,60 +9,124 @@ const ScriptReader = ({ script, onClose }) => {
   const [currentLineIndex, setCurrentLineIndex] = useState(-1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  // Volume state for audio playback
+  // Voice settings for TTS
   const [volume, setVolume] = useState(1);
+  const [rate, setRate] = useState(1);
+  const [pitch, setPitch] = useState(1);
 
   // Extract unique characters from the script
   const characters = useMemo(() => {
     return [...new Set(script.map(line => line.speaker))];
   }, [script]);
 
-  // Set up language preferences for characters
+  // Set up voices and character assignments
   useEffect(() => {
     try {
       setIsLoading(true);
-      console.log('Initializing audio player...');
+      console.log('Initializing TTS service...');
 
-      if (!audioPlayer.isSupported()) {
-        throw new Error('Audio playback is not supported in this browser');
-      }
-
-      // Define some language preferences for different characters
-      const languagePreferences = [
-        { lang: 'en-US', name: 'English (US)' },
-        { lang: 'en-GB', name: 'English (UK)' },
-        { lang: 'it-IT', name: 'Italian' },
-        { lang: 'fr-FR', name: 'French' },
-        { lang: 'de-DE', name: 'German' },
-        { lang: 'es-ES', name: 'Spanish' },
-        { lang: 'ru-RU', name: 'Russian' },
-        { lang: 'ja-JP', name: 'Japanese' },
-      ];
-
-      setVoices(languagePreferences);
-
-      // Auto-assign languages to characters
-      const voiceAssignments = {};
-      characters.forEach((character, index) => {
-        // Assign a language to each character
-        const voice = languagePreferences[index % languagePreferences.length];
-        voiceAssignments[character] = voice;
+      // Configure TTS service to prioritize Web Speech API
+      ttsService.updateConfig({
+        useWebSpeech: true,
+        useGoogleTTS: true
       });
 
-      console.log('Language assignments:', voiceAssignments);
-      setCharacterVoices(voiceAssignments);
+      // Check if TTS is available
+      if (!ttsService.isAvailable()) {
+        throw new Error('Text-to-speech is not supported in this browser');
+      }
 
-      setIsLoading(false);
+      // Get available voices from the TTS service
+      const availableVoices = ttsService.getVoices();
+
+      // If no voices are available yet, wait for them to load
+      if (availableVoices.length === 0 && 'speechSynthesis' in window) {
+        window.speechSynthesis.onvoiceschanged = () => {
+          const updatedVoices = window.speechSynthesis.getVoices();
+          processVoices(updatedVoices);
+        };
+      } else {
+        processVoices(availableVoices);
+      }
+
     } catch (err) {
-      console.error('Error initializing audio player:', err);
+      console.error('Error initializing TTS service:', err);
       setError(err.message);
       setIsLoading(false);
     }
 
+    // Process and organize available voices
+    function processVoices(availableVoices) {
+      try {
+        // If we have actual voices from the browser
+        if (availableVoices.length > 0) {
+          console.log(`Found ${availableVoices.length} voices from Web Speech API`);
+          setVoices(availableVoices);
+
+          // Group voices by language for better selection
+          const voicesByLang = {};
+          availableVoices.forEach(voice => {
+            const langCode = voice.lang.split('-')[0]; // Get primary language code
+            if (!voicesByLang[langCode]) {
+              voicesByLang[langCode] = [];
+            }
+            voicesByLang[langCode].push(voice);
+          });
+
+          // Auto-assign voices to characters
+          const voiceAssignments = {};
+          characters.forEach((character, index) => {
+            // Try to assign different languages to different characters
+            const langCodes = Object.keys(voicesByLang);
+            const langCode = langCodes[index % langCodes.length];
+            const langVoices = voicesByLang[langCode];
+
+            // Pick a voice from the selected language
+            const voice = langVoices[index % langVoices.length];
+            voiceAssignments[character] = voice;
+          });
+
+          console.log('Voice assignments:', voiceAssignments);
+          setCharacterVoices(voiceAssignments);
+        } else {
+          // Fallback to predefined language preferences if no voices are available
+          console.log('No voices available, using predefined language preferences');
+          const languagePreferences = [
+            { lang: 'en-US', name: 'English (US)' },
+            { lang: 'en-GB', name: 'English (UK)' },
+            { lang: 'it-IT', name: 'Italian' },
+            { lang: 'fr-FR', name: 'French' },
+            { lang: 'de-DE', name: 'German' },
+            { lang: 'es-ES', name: 'Spanish' },
+            { lang: 'ru-RU', name: 'Russian' },
+            { lang: 'ja-JP', name: 'Japanese' },
+          ];
+
+          setVoices(languagePreferences);
+
+          // Auto-assign languages to characters
+          const voiceAssignments = {};
+          characters.forEach((character, index) => {
+            const voice = languagePreferences[index % languagePreferences.length];
+            voiceAssignments[character] = voice;
+          });
+
+          console.log('Language assignments:', voiceAssignments);
+          setCharacterVoices(voiceAssignments);
+        }
+
+        setIsLoading(false);
+      } catch (err) {
+        console.error('Error processing voices:', err);
+        setError(err.message);
+        setIsLoading(false);
+      }
+    }
+
     // Clean up when component unmounts
     return () => {
-      console.log('Cleaning up audio player');
-      audioPlayer.stop();
+      console.log('Cleaning up TTS service');
+      ttsService.stop();
     };
   }, [characters]);
 
@@ -90,7 +154,7 @@ const ScriptReader = ({ script, onClose }) => {
       }
 
       // Stop any ongoing audio
-      audioPlayer.stop();
+      ttsService.stop();
 
       // Play from current line to the end
       for (let i = Math.max(0, currentLineIndex); i < script.length; i++) {
@@ -103,15 +167,17 @@ const ScriptReader = ({ script, onClose }) => {
         const line = script[i];
         console.log(`Playing line ${i}: ${line.speaker}: ${line.line}`);
 
-        // Get the language preference for this character
+        // Get the voice for this character
         const voice = characterVoices[line.speaker];
 
         // Only play the dialogue, not the speaker name
         try {
-          // Play the text using our audio player
-          await audioPlayer.playText(line.line, {
+          // Play the text using the TTS service
+          await ttsService.speak(line.line, {
             voice: voice,
-            volume: volume
+            volume: volume,
+            rate: rate,
+            pitch: pitch
           });
 
           // Add a small pause between lines
@@ -133,13 +199,13 @@ const ScriptReader = ({ script, onClose }) => {
       console.error('Error during playback:', err);
       setError(`Error during playback: ${err.message}`);
       setIsPlaying(false);
-      audioPlayer.stop(); // Make sure to stop any ongoing audio
+      ttsService.stop(); // Make sure to stop any ongoing audio
     }
   };
 
   // Stop playback
   const stopPlayback = () => {
-    audioPlayer.stop();
+    ttsService.stop();
     setIsPlaying(false);
     setIsPaused(false);
     setCurrentLineIndex(-1);
@@ -147,9 +213,9 @@ const ScriptReader = ({ script, onClose }) => {
 
   // Pause playback
   const pausePlayback = () => {
-    // Note: Our audio player doesn't support pause/resume
+    // Note: Our TTS service doesn't support pause/resume
     // So we just stop playback
-    audioPlayer.stop();
+    ttsService.stop();
     setIsPaused(true);
   };
 
@@ -180,100 +246,136 @@ const ScriptReader = ({ script, onClose }) => {
   return (
     <div className="script-reader">
       <h2>Script Reader</h2>
-
-      <div className="user-interaction-notice">
-        <p>
-          <strong>Note:</strong> This feature uses your browser's speech synthesis capabilities.
-        </p>
-        <ol>
-          <li>Make sure your device volume is turned up</li>
-          <li>Each character will speak in their assigned language</li>
-          <li>You can change a character's language using the dropdown</li>
-          <li>If audio doesn't play, try clicking the Play button again</li>
-          <li>Some browsers may block audio playback until you interact with the page</li>
-          <li>If one voice method fails, the system will automatically try alternative methods</li>
-        </ol>
-      </div>
-
-      <div className="voice-controls">
-        <h3>Voice Settings</h3>
-
-        <div className="voice-assignments">
-          {characters.map(character => (
-            <div key={character} className="character-voice">
-              <label htmlFor={`voice-${character}`}>{character}:</label>
-              <select
-                id={`voice-${character}`}
-                value={characterVoices[character]?.lang || ''}
-                onChange={(e) => handleVoiceChange(character, e.target.value)}
-              >
-                {voices.map(voice => (
-                  <option key={voice.lang} value={voice.lang}>
-                    {voice.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ))}
-        </div>
-
-        <div className="playback-settings">
-          <div className="setting">
-            <label htmlFor="volume">Volume:</label>
-            <input
-              id="volume"
-              type="range"
-              min="0"
-              max="1"
-              step="0.1"
-              value={volume}
-              onChange={(e) => setVolume(parseFloat(e.target.value))}
-            />
-            <span>{Math.round(volume * 100)}%</span>
-          </div>
-
-          <div className="setting-note">
-            <p>Note: Speed and pitch controls are not available with the audio playback method.</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="playback-controls">
-        {!isPlaying || isPaused ? (
-          <button
-            onClick={isPaused ? resumePlayback : playScript}
-            className="play-button"
-          >
-            {isPaused ? 'Resume' : 'Play'}
-          </button>
-        ) : (
-          <button
-            onClick={pausePlayback}
-            className="pause-button"
-          >
-            Pause
-          </button>
-        )}
-
-        <button
-          onClick={stopPlayback}
-          className="stop-button"
-          disabled={!isPlaying && currentLineIndex === -1}
-        >
-          Stop
-        </button>
-      </div>
-
-      {currentLineIndex >= 0 && (
-        <div className="current-line">
-          <strong>{script[currentLineIndex].speaker}:</strong> {script[currentLineIndex].line}
-        </div>
-      )}
-
       <button onClick={onClose} className="close-button">Close</button>
 
+      <div className="script-reader-content">
+        <div className="user-interaction-notice">
+          <p>
+            <strong>Note:</strong> This feature uses your browser's speech synthesis capabilities.
+          </p>
+          <ol>
+            <li>Make sure your device volume is turned up</li>
+            <li>Each character will speak in their assigned language</li>
+            <li>You can change a character's language using the dropdown</li>
+            <li>If audio doesn't play, try clicking the Play button again</li>
+            <li>Some browsers may block audio playback until you interact with the page</li>
+            <li>If one voice method fails, the system will automatically try alternative methods</li>
+          </ol>
+        </div>
+
+        <div className="voice-controls">
+          <h3>Voice Settings</h3>
+
+          <div className="voice-assignments">
+            {characters.map(character => (
+              <div key={character} className="character-voice">
+                <label htmlFor={`voice-${character}`}>{character}:</label>
+                <select
+                  id={`voice-${character}`}
+                  value={characterVoices[character]?.lang || ''}
+                  onChange={(e) => handleVoiceChange(character, e.target.value)}
+                >
+                  {voices.map(voice => (
+                    <option key={voice.lang} value={voice.lang}>
+                      {voice.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ))}
+          </div>
+
+          <div className="playback-settings">
+            <div className="setting">
+              <label htmlFor="volume">Volume:</label>
+              <input
+                id="volume"
+                type="range"
+                min="0"
+                max="1"
+                step="0.1"
+                value={volume}
+                onChange={(e) => setVolume(parseFloat(e.target.value))}
+              />
+              <span>{Math.round(volume * 100)}%</span>
+            </div>
+
+            <div className="setting">
+              <label htmlFor="rate">Speed:</label>
+              <input
+                id="rate"
+                type="range"
+                min="0.5"
+                max="2"
+                step="0.1"
+                value={rate}
+                onChange={(e) => setRate(parseFloat(e.target.value))}
+              />
+              <span>{rate.toFixed(1)}x</span>
+            </div>
+
+            <div className="setting">
+              <label htmlFor="pitch">Pitch:</label>
+              <input
+                id="pitch"
+                type="range"
+                min="0.5"
+                max="2"
+                step="0.1"
+                value={pitch}
+                onChange={(e) => setPitch(parseFloat(e.target.value))}
+              />
+              <span>{pitch.toFixed(1)}</span>
+            </div>
+          </div>
+        </div>
+
+        {currentLineIndex >= 0 && (
+          <div className="current-line">
+            <strong>{script[currentLineIndex].speaker}:</strong> {script[currentLineIndex].line}
+          </div>
+        )}
+      </div>
+
       <div className="script-reader-footer">
-        <p className="note">Note: Voice quality and availability depends on your browser and operating system.</p>
+        {isPlaying && (
+          <div className="audio-indicator" data-test="audio-playing-indicator">
+            <div className="audio-wave"></div>
+            <span>Audio playing...</span>
+          </div>
+        )}
+        <div className="playback-controls">
+          {!isPlaying || isPaused ? (
+            <button
+              onClick={isPaused ? resumePlayback : playScript}
+              className="play-button"
+              data-test="play-button"
+              aria-label={isPaused ? 'Resume playback' : 'Start playback'}
+            >
+              {isPaused ? 'Resume' : 'Play'}
+            </button>
+          ) : (
+            <button
+              onClick={pausePlayback}
+              className="pause-button"
+              data-test="pause-button"
+              aria-label="Pause playback"
+            >
+              Pause
+            </button>
+          )}
+
+          <button
+            onClick={stopPlayback}
+            className="stop-button"
+            data-test="stop-button"
+            aria-label="Stop playback"
+            disabled={!isPlaying && currentLineIndex === -1}
+          >
+            Stop
+          </button>
+        </div>
+        <p className="note">Voice quality and availability depends on your browser and operating system.</p>
       </div>
     </div>
   );

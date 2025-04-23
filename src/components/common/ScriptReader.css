@@ -6,13 +6,25 @@
   margin: 0 auto;
   padding: 20px;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
 }
 
 .script-reader h2 {
   margin-top: 0;
-  border-bottom: 1px solid #eee;
+  margin-bottom: 15px;
   padding-bottom: 10px;
   color: #333;
+  border-bottom: 1px solid #eee;
+  padding-right: 60px; /* Make room for the close button */
+}
+
+.script-reader-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 10px;
+  margin-bottom: 15px;
 }
 
 .user-interaction-notice {
@@ -127,7 +139,7 @@
   display: flex;
   justify-content: center;
   gap: 15px;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
 .playback-controls button {
@@ -196,9 +208,38 @@
 }
 
 .script-reader-footer {
-  margin-top: 20px;
   border-top: 1px solid #eee;
-  padding-top: 10px;
+  padding-top: 15px;
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+.audio-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
+  padding: 8px 12px;
+  background-color: #e8f5e9;
+  border-radius: 4px;
+  color: #2e7d32;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.audio-wave {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  background-color: #4caf50;
+  border-radius: 50%;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.8); opacity: 0.7; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(0.8); opacity: 0.7; }
 }
 
 .note {
@@ -238,17 +279,61 @@
   border-radius: 4px;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+  .script-reader {
+    max-height: 85vh;
+    padding: 15px;
+    width: 95%;
+    margin: 0 auto;
+  }
+
+  .script-reader h2 {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+  }
+
+  .script-reader-content {
+    padding-right: 5px;
+  }
+
   .voice-assignments,
   .playback-settings {
     grid-template-columns: 1fr;
   }
 
   .playback-controls {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
   }
 
   .playback-controls button {
-    width: 100%;
+    flex: 1;
+    min-width: 120px;
+    padding: 12px 15px;
+    font-size: 1rem;
+  }
+
+  .close-button {
+    top: 15px;
+    right: 15px;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+
+  .user-interaction-notice {
+    padding: 8px 12px;
+  }
+
+  .user-interaction-notice ol {
+    padding-left: 20px;
+  }
+
+  .character-voice select {
+    padding: 10px;
+    font-size: 1rem;
+  }
+
+  .setting input[type="range"] {
+    height: 30px;
   }
 }
