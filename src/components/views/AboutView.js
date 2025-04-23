@@ -30,7 +30,7 @@ const AboutView = ({ onBack }) => {
             <li>{currentLang === 'it' ? 'Pratica con contesto personalizzabile' : 'Practice with customizable context'}</li>
             <li>{currentLang === 'it' ? 'Modalità scura per una lettura confortevole' : 'Dark mode for comfortable reading'}</li>
             <li>{currentLang === 'it' ? 'Supporto multilingua' : 'Multiple language support'}</li>
-            <li>{currentLang === 'it' ? 'Convertitore di copioni (in modalità avanzata)' : 'Script converter (in advanced mode)'}</li>
+            <li>{currentLang === 'it' ? 'Convertitore di copioni (in modalità sperimentale)' : 'Script converter (in experimental mode)'}</li>
           </ul>
         </section>
 

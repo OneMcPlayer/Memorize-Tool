@@ -5,12 +5,12 @@ describe('Memorize Tool - Script Interactions', () => {
     cy.get('.spinner').should('not.be.visible', { timeout: 10000 });
   });
 
-  it('should show converter interface in advanced mode', () => {
+  it('should show converter interface in experimental mode', () => {
     // Open options menu
     cy.get('#optionsToggle').click();
     // Use force: true to click on elements that might be hidden initially
     cy.get('#optionsMenu').should('exist');
-    cy.get('#advancedModeToggle').click({ force: true });
+    cy.get('#experimentalModeToggle').click({ force: true });
 
     // Click on Script Converter option
     cy.get('#optionConverter').click({ force: true });
@@ -30,7 +30,7 @@ describe('Memorize Tool - Script Interactions', () => {
     });
 
     // Enable advanced mode
-    cy.get('#advancedModeToggle').click({ force: true });
+    cy.get('#experimentalModeToggle').click({ force: true });
 
     // Open converter
     cy.get('#optionConverter').click({ force: true });

@@ -86,11 +86,11 @@ const Header = ({ onOpenConverter, onOpenAbout, onOpenAudioTest, onOpenTtsTest }
           {optionsVisible && (
             <div id="optionsMenu" ref={optionsMenuRef}>
               <ul>
-                <li id="optionAdvanced">
+                <li id="optionExperimental">
                   <label>
                     <input
                       type="checkbox"
-                      id="advancedModeToggle"
+                      id="experimentalModeToggle"
                       checked={isAdvancedMode}
                       onChange={handleAdvancedModeToggle}
                     />
@@ -125,25 +125,29 @@ const Header = ({ onOpenConverter, onOpenAbout, onOpenAudioTest, onOpenTtsTest }
                   {translations[currentLang]?.about || 'About'}
                 </li>
 
-                <li
-                  id="optionAudioTest"
-                  onClick={() => {
-                    onOpenAudioTest();
-                    setOptionsVisible(false);
-                  }}
-                >
-                  Audio Test
-                </li>
+                {isAdvancedMode && (
+                  <li
+                    id="optionAudioTest"
+                    onClick={() => {
+                      onOpenAudioTest();
+                      setOptionsVisible(false);
+                    }}
+                  >
+                    Audio Test
+                  </li>
+                )}
 
-                <li
-                  id="optionTtsTest"
-                  onClick={() => {
-                    onOpenTtsTest();
-                    setOptionsVisible(false);
-                  }}
-                >
-                  TTS Test
-                </li>
+                {isAdvancedMode && (
+                  <li
+                    id="optionTtsTest"
+                    onClick={() => {
+                      onOpenTtsTest();
+                      setOptionsVisible(false);
+                    }}
+                  >
+                    TTS Test
+                  </li>
+                )}
               </ul>
             </div>
           )}

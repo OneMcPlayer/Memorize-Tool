@@ -14,7 +14,7 @@ The Script Memorization Tool helps performers learn their lines more effectively
 - Providing an interactive practice interface with reveal/next functionality
 - Offering a converter to transform plain text scripts into structured format
 
-### Advanced Features
+### Experimental Features
 - 🔄 **Script Converter**: Transform plain text scripts to structured format
 - 👥 **Role Management**: Define character roles with aliases and descriptions
 - 🔍 **Auto-Detection**: Intelligent parsing of character names and dialogue
