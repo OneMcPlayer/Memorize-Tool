@@ -1,0 +1,256 @@
+.script-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.script-modal-content {
+  background-color: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  animation: modal-appear 0.3s ease-out;
+}
+
+@keyframes modal-appear {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.script-modal-header {
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.script-modal-header h2 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 20px;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #7f8c8d;
+  transition: color 0.2s;
+}
+
+.close-button:hover {
+  color: #e74c3c;
+}
+
+.script-modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex-grow: 1;
+  line-height: 1.6;
+}
+
+.script-modal-footer {
+  padding: 15px 20px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.primary-btn {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.primary-btn:hover {
+  background-color: #2980b9;
+}
+
+.secondary-btn {
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.secondary-btn:hover {
+  background-color: #27ae60;
+}
+
+.listen-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.listen-btn::before {
+  content: '🔊';
+  font-size: 16px;
+}
+
+.script-container {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.script-line-group {
+  display: flex;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background-color: white;
+}
+
+.script-speaker-block {
+  width: 120px;
+  padding: 15px;
+  background-color: #3498db;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+}
+
+.script-dialogue-block {
+  flex: 1;
+  padding: 15px 20px;
+}
+
+.dialogue-paragraph {
+  margin: 0 0 8px 0;
+  line-height: 1.5;
+  color: #2c3e50;
+}
+
+.dialogue-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+.script-direction {
+  font-style: italic;
+  color: #7f8c8d;
+  margin: 15px 0;
+  padding: 10px 15px;
+  border-left: 3px solid #95a5a6;
+  background-color: #f9f9f9;
+  border-radius: 0 5px 5px 0;
+}
+
+/* Dark mode styles */
+body.dark-mode .script-modal-content {
+  background-color: #2c3e50;
+  color: #ecf0f1;
+}
+
+body.dark-mode .script-modal-header {
+  border-bottom-color: #34495e;
+}
+
+body.dark-mode .script-modal-header h2 {
+  color: #ecf0f1;
+}
+
+body.dark-mode .close-button {
+  color: #bdc3c7;
+}
+
+body.dark-mode .close-button:hover {
+  color: #e74c3c;
+}
+
+body.dark-mode .script-modal-footer {
+  border-top-color: #34495e;
+}
+
+body.dark-mode .script-line-group {
+  background-color: #34495e;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .script-speaker-block {
+  background-color: #2980b9;
+}
+
+body.dark-mode .script-dialogue-block {
+  color: #ecf0f1;
+}
+
+body.dark-mode .dialogue-paragraph {
+  color: #ecf0f1;
+}
+
+body.dark-mode .script-direction {
+  color: #bdc3c7;
+  background-color: #2c3e50;
+  border-left-color: #7f8c8d;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .script-modal-content {
+    width: 95%;
+  }
+
+  .script-modal-header h2 {
+    font-size: 18px;
+  }
+
+  .script-modal-body {
+    padding: 15px;
+  }
+
+  .script-line-group {
+    flex-direction: column;
+    margin-bottom: 15px;
+  }
+
+  .script-speaker-block {
+    width: 100%;
+    padding: 8px 15px;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .script-dialogue-block {
+    padding: 12px 15px;
+  }
+
+  .script-direction {
+    margin: 10px 0;
+    padding: 8px 12px;
+  }
+}

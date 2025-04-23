@@ -1,0 +1,294 @@
+.input-view {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.input-view h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
+
+.input-form {
+  margin-top: 20px;
+}
+
+/* Step-by-step interface styles */
+.step-container {
+  margin-bottom: 25px;
+  padding: 15px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  transition: all 0.3s ease;
+}
+
+.step-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #3498db;
+  color: white;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.step-header h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 18px;
+}
+
+.active-step {
+  border-color: #3498db !important;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.script-view-button {
+  margin-top: 15px;
+}
+
+.view-script-btn {
+  width: 100%;
+  max-width: 250px;
+  padding: 8px 15px;
+  font-size: 14px;
+  background-color: #7f8c8d;
+  transition: background-color 0.3s;
+}
+
+.view-script-btn:hover {
+  background-color: #95a5a6;
+}
+
+.tabs {
+  display: flex;
+  margin-bottom: 15px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 10px;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.tab-btn:first-child {
+  border-radius: 5px 0 0 5px;
+}
+
+.tab-btn:last-child {
+  border-radius: 0 5px 5px 0;
+}
+
+.tab-btn.active {
+  background: #3498db;
+  color: white;
+  border-color: #3498db;
+}
+
+.tab-content {
+  margin-bottom: 20px;
+}
+
+#scriptLibrary {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  margin-bottom: 15px;
+}
+
+#scriptInput {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  resize: vertical;
+  min-height: 150px;
+}
+
+#scriptFile {
+  width: 100%;
+  padding: 20px;
+  border: 2px dashed #ddd;
+  border-radius: 5px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+#scriptFile:hover {
+  border-color: #3498db;
+}
+
+.character-input {
+  margin-bottom: 15px;
+  position: relative;
+}
+
+.character-input-container {
+  display: flex;
+  position: relative;
+}
+
+#characterName {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.character-select-container {
+  width: 100%;
+}
+
+.character-select-container label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.character-select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  background-color: white;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="6"><path d="M0 0l6 6 6-6z" fill="%23666"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+}
+
+.character-select:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.context-input {
+  margin-bottom: 20px;
+}
+
+#precedingCount {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.help-text {
+  margin-top: 5px;
+  font-size: 14px;
+  color: #666;
+}
+
+.shortcuts-info {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 5px;
+  border-left: 4px solid #3498db;
+}
+
+.shortcuts-info p {
+  margin-top: 0;
+  font-weight: bold;
+}
+
+.shortcuts-info ul {
+  padding-left: 20px;
+  margin-bottom: 0;
+}
+
+/* Dark mode styles */
+body.dark-mode .input-view h1 {
+  color: #ecf0f1;
+}
+
+body.dark-mode .tab-btn {
+  background: #34495e;
+  border-color: #2c3e50;
+  color: #ecf0f1;
+}
+
+body.dark-mode .tab-btn.active {
+  background: #3498db;
+  border-color: #3498db;
+}
+
+body.dark-mode #scriptLibrary,
+body.dark-mode #scriptInput,
+body.dark-mode #characterName,
+body.dark-mode #precedingCount,
+body.dark-mode .character-select {
+  background: #2c3e50;
+  border-color: #34495e;
+  color: #ecf0f1;
+}
+
+body.dark-mode #scriptFile {
+  border-color: #34495e;
+  color: #ecf0f1;
+}
+
+body.dark-mode .character-select-container label,
+body.dark-mode .step-header h3 {
+  color: #ecf0f1;
+}
+
+body.dark-mode .step-container {
+  background-color: #2c3e50;
+}
+
+body.dark-mode .step-number {
+  background-color: #3498db;
+  color: #ecf0f1;
+}
+
+body.dark-mode .help-text {
+  color: #bdc3c7;
+}
+
+body.dark-mode .shortcuts-info {
+  background: #34495e;
+  border-left-color: #3498db;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .input-view {
+    padding: 10px;
+  }
+
+  .tab-btn {
+    padding: 8px 5px;
+    font-size: 14px;
+  }
+
+  #scriptInput {
+    min-height: 120px;
+  }
+}

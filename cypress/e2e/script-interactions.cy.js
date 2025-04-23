@@ -5,12 +5,12 @@ describe('Memorize Tool - Script Interactions', () => {
     cy.get('.spinner').should('not.be.visible', { timeout: 10000 });
   });
 
-  it('should show converter interface in advanced mode', () => {
+  it('should show converter interface in experimental mode', () => {
     // Open options menu
     cy.get('#optionsToggle').click();
     // Use force: true to click on elements that might be hidden initially
     cy.get('#optionsMenu').should('exist');
-    cy.get('#advancedModeToggle').click({ force: true });
+    cy.get('#experimentalModeToggle').click({ force: true });
 
     // Click on Script Converter option
     cy.get('#optionConverter').click({ force: true });
@@ -30,7 +30,7 @@ describe('Memorize Tool - Script Interactions', () => {
     });
 
     // Enable advanced mode
-    cy.get('#advancedModeToggle').click({ force: true });
+    cy.get('#experimentalModeToggle').click({ force: true });
 
     // Open converter
     cy.get('#optionConverter').click({ force: true });
@@ -50,8 +50,8 @@ ALICE: I'm doing great, thank you!`;
 
     cy.get('textarea').first().type(sampleScript);
 
-    // Click the parse button using its ID instead of text content
-    cy.get('#parseButton').click();
+    // Click the parse button
+    cy.contains('Parse').click();
 
     // Create the preview element if it doesn't exist
     cy.get('body').then($body => {

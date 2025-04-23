@@ -16,56 +16,56 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-    
+
     - name: Install dependencies
       run: npm install
-      
+
     - name: Run tests
       run: npm test
 
   cypress:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-    
+
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '18.x'
-        
+
     - name: Install dependencies
       run: npm install
-      
+
     # Install Cypress separately to ensure it's properly installed
     - name: Install Cypress
       run: npm install cypress --no-save
-      
+
     - name: Verify Cypress
       run: npx cypress verify
-      
+
     - name: Create cypress directory structure
       run: |
         mkdir -p cypress/screenshots
         mkdir -p cypress/videos
-      
-    # Use a modified approach to start the HTTP server
-    - name: Start HTTP server and run Cypress tests
+
+    # Start React app and run Cypress tests
+    - name: Start React app and run Cypress tests
       run: |
-        echo "Starting HTTP server with explicit host binding"
-        npx http-server . -p 8080 -a localhost &
+        echo "Starting React app"
+        npm start &
         SERVER_PID=$!
         echo "Server started with PID: $SERVER_PID"
-        
+
         # Give the server a moment to start
-        sleep 5
-        
+        sleep 20
+
         # Check if server is running
         if ps -p $SERVER_PID > /dev/null; then
           echo "Server is running with PID: $SERVER_PID"
@@ -73,22 +73,22 @@ jobs:
           echo "Server failed to start"
           exit 1
         fi
-        
+
         # Check if server is accessible
-        curl -v http://localhost:8080 || echo "Cannot connect to server with curl"
-        
+        curl -v http://localhost:3000 || echo "Cannot connect to server with curl"
+
         # Run Cypress tests directly
         npx cypress run --browser chrome --headless
-        
+
         # Store the exit code
         CYPRESS_EXIT_CODE=$?
-        
+
         # Kill the server
         kill $SERVER_PID || true
-        
+
         # Exit with Cypress exit code
         exit $CYPRESS_EXIT_CODE
-        
+
     - name: Upload screenshots on failure
       uses: actions/upload-artifact@v4
       if: failure()
@@ -96,7 +96,7 @@ jobs:
         name: cypress-screenshots
         path: cypress/screenshots
         if-no-files-found: ignore
-        
+
     - name: Upload videos
       uses: actions/upload-artifact@v4
       if: always()

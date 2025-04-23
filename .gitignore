@@ -1,12 +1,15 @@
 # Dependencies
 node_modules/
-package-lock.json
+/.pnp
+.pnp.js
 
 # Testing
-coverage/
-.nyc_output/
+/coverage
 cypress/videos/
 cypress/screenshots/
+
+# Production
+/build
 
 # Runtime data
 *.log

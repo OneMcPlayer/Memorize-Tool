@@ -1,9 +1,10 @@
-# 🎭 Script Memorization Tool
+# 🎭 Script Memorization Tool (React Version)
 
-A modern, browser-based application designed to help actors and theater students effectively memorize their lines by practicing them in context. Built with vanilla JavaScript, CSS, and HTML for maximum portability and ease of use without dependencies.
+A modern, browser-based application designed to help actors and theater students effectively memorize their lines by practicing them in context. Built with React, this tool provides an interactive interface for script practice.
 
-![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
-![Tests](https://img.shields.io/badge/tests-127_tests-blue.svg)
+![Version](https://img.shields.io/badge/version-2.0.0--react--demo-green.svg)
+![React](https://img.shields.io/badge/react-19.x-blue.svg)
+![Mobile](https://img.shields.io/badge/mobile-friendly-brightgreen.svg)
 
 ## 📖 Overview
 
@@ -13,40 +14,7 @@ The Script Memorization Tool helps performers learn their lines more effectively
 - Providing an interactive practice interface with reveal/next functionality
 - Offering a converter to transform plain text scripts into structured format
 
-Perfect for actors, drama students, and theater enthusiasts who need to memorize lines efficiently.
-
-## 🚦 Project Status
-
-This project is **under active development**:
-- 🔄 Ongoing improvements to code quality and usability
-- 📊 Support for different script formats is fully implemented
-- 🔧 Bug fixes are being addressed through test-driven development
-- 📱 Mobile-friendly functionality with touch gestures
-- 🤖 Actively exploring new AI-assisted enhancement opportunities
-
-## ✨ Features
-
-### Script Management
-- 📚 **Library Integration**: Load from built-in script library
-- 📝 **Custom Scripts**: Paste your own script text
-- 📁 **File Uploads**: Support for uploading script files
-- 🔄 **Format Support**: Handles both plain text and structured script formats
-
-### Practice Tools
-- 👥 **Role Selection**: Choose your character from automatically detected roles
-- 🔎 **Line Extraction**: Automatically isolate your character's lines
-- 📊 **Contextual Learning**: Display lines with adjustable preceding context (0-5 lines)
-- 📋 **Quick Access**: Copy lines to clipboard with one click
-- 🔁 **Repetition**: Practice mode with reveal/next functionality
-
-### User Experience
-- 🌐 **Multilingual**: Support for English and Italian
-- 🌓 **Theming**: Light/Dark theme toggle for different lighting conditions
-- ⌨️ **Efficiency**: Keyboard shortcuts for hands-on practice
-- 📱 **Mobile Support**: Touch gestures for tablet and smartphone use
-- 💾 **Preferences**: Remembers user settings between sessions
-
-### Advanced Features
+### Experimental Features
 - 🔄 **Script Converter**: Transform plain text scripts to structured format
 - 👥 **Role Management**: Define character roles with aliases and descriptions
 - 🔍 **Auto-Detection**: Intelligent parsing of character names and dialogue
@@ -55,132 +23,98 @@ This project is **under active development**:
 
 ### Installation
 
-1. Clone the repository or download the ZIP file
-2. No build process required - it's pure HTML, CSS, and JavaScript
-3. Simply open `index.html` in any modern web browser
+1. Clone the repository
+2. Install dependencies with `npm install`
+3. Start the development server with `npm start`
 
 ### Using the Tool
 
 1. **Load a Script**:
    - Select from the built-in library, or
-   - Paste your script text (in Advanced Mode), or
-   - Upload a script file (in Advanced Mode)
+   - Paste your script text, or
+   - Upload a script file
 
-2. **Prepare for Practice**:
-   - Select your character from the detected role list
-   - Set how many context lines you want to see (0-5)
-   - Click "Extract My Lines" to begin practicing
+2. **Select Your Character**:
+   - Enter your character's name
+   - Set the number of context lines to display
 
-3. **Practice Mode**:
-   - Use the "Reveal" button to see your current line
-   - Use "Next" to advance to the next line
-   - The progress bar shows your position in the script
-   - Restart at any time to begin again
-
-4. **Script Conversion** (Advanced):
-   - Use the Script Converter to transform a plain text script
-   - Edit character roles and descriptions
-   - Export to structured format for better organization
-
-## ⌨️ Keyboard Shortcuts
-
-| Key | Action |
-|-----|--------|
-| `Enter` | Extract lines / Go to next line |
-| `Space` | Reveal current line |
-| `Esc` | Restart practice session |
-| `Right Arrow` | Same as Reveal button |
-| `Left Arrow` | Same as Next button |
-
-## 📱 Touch Gestures
-
-| Gesture | Action |
-|---------|--------|
-| Swipe left | Next line |
-| Swipe right | Reveal line |
-
-## 📜 Script Formats
-
-The tool supports two script formats:
-
-### Plain Text
-Common in many scripts, with character names followed by their dialogue:
-
-```
-CHARACTER NAME: Their line of dialogue
-ANOTHER CHARACTER: Response to the previous line
-(Stage directions in parentheses)
-CHARACTER NAME: Another line by the first character
-```
-
-### Structured Format
-A more formal JSON-like format that allows for additional metadata:
-
-```
-@title "Play Title"
-@author "Author Name"
-@roles
-  - [CHARACTER | ALIAS1, ALIAS2]: "Character Description"
-  - [ANOTHER CHARACTER]: "Another Character Description"
-@scene "Scene Title"
-{
-  dialogue {
-    "CHARACTER": """
-      Their line of dialogue
-    """
-    "ANOTHER CHARACTER": """
-      Response to the previous line
-    """
-  }
-}
-```
+3. **Practice Your Lines**:
+   - Use the reveal button to see your lines
+   - Navigate through your lines with the next button
+   - Use keyboard shortcuts for faster practice
 
 ## 🧪 Development
 
 ### Project Structure
 
-- `/css` - Stylesheet files
-- `/js` - JavaScript modules
-  - `/core` - Core application functionality
-  - `/data` - Script library and data management
-  - `/models` - Script model classes
+- `/src` - React source code
+  - `/components` - React components
+  - `/context` - React context for state management
+  - `/hooks` - Custom React hooks
   - `/services` - Script processing logic
   - `/utils` - Helper functions
-- `/tests` - Test suite
-  - Unit tests for core functionality
-  - Service tests
-  - Model tests
+  - `/data` - Script library and data management
+
+### Available Scripts
+
+- `npm start` - Runs the app in development mode
+- `npm test` - Launches the test runner
+- `npm run build` - Builds the app for production
+- `npm run eject` - Ejects from Create React App
 
 ### Running Tests
 
-This project uses Jest for testing. To run the tests:
+This project uses Jest and React Testing Library for unit tests, and Cypress for end-to-end tests.
 
-1. Make sure you have Node.js installed
-2. Install dependencies with `npm install`
-3. Run tests with `npm test`
-4. For continuous testing: `npm run test:watch`
-5. For coverage reports: `npm run test:coverage`
+To run the unit tests:
 
-The test suite verifies critical functionality like:
-- Script parsing and processing
-- State management
-- Caching functionality
-- UI utility functions
+```
+npm test
+```
 
-## Why Vibe Coding?
+To run the Cypress tests:
 
-This project combines my passion for theater education with modern AI-assisted development to create a practical tool that solves a real problem for actors and theater students.
+```bash
+# Make sure the application is running first
+npm start
 
-### About This Development Approach
+# In a separate terminal, run the tests
+npx cypress run
 
-1. **Domain-First Focus**: As a theater enthusiast, I prioritized creating a tool that genuinely helps with line memorization rather than getting caught in technical complexities.
+# Or to open the Cypress Test Runner
+npx cypress open
+```
 
-2. **Rapid Prototyping**: AI assistance allowed for quick iteration through ideas, helping me test different approaches to script parsing and practice interfaces with actual theater scripts.
+#### Cypress Test Coverage
 
-3. **Learning Through Building**: This project became a practical way to explore web development concepts while creating something immediately useful for my theater work.
+The Cypress tests verify:
 
-4. **Community Contribution**: By sharing this tool and development approach, I hope to inspire other domain experts to consider how they might use AI-assisted development to create tools for their fields.
+- Script loading and character detection
+- Line extraction for specific characters
+- Progress through practice mode
+- Navigation between lines
 
-5. **Practical Experimentation**: The project demonstrates what's possible when combining human creativity and domain knowledge with modern development tools - resulting in a tool that was completed more efficiently while still reflecting my design vision.
+## 🏷️ Version Information
 
-This approach acknowledges that valuable software can emerge from the intersection of domain expertise and modern development tools. Whether you're a theater enthusiast interested in using this tool or a curious developer exploring new development workflows, I hope you find something valuable here.
+### Current Version: v2.0.0-react-demo
+
+This is a fully working demo version of the React port with the following improvements:
+
+- Complete rewrite using React and modern JavaScript
+- Mobile-friendly responsive design
+- Landscape and portrait orientation support
+- Touch-optimized interface
+- Fixed issue with last line display in practice mode
+
+### Release History
+
+- **v2.0.0-react-demo**: Current React demo version with mobile improvements
+- **v1.0.0-vanilla-js**: Original vanilla JavaScript version
+
+## 📜 Original Version
+
+The original vanilla JavaScript version of this application was built with pure HTML, CSS, and JavaScript without any dependencies. It has been migrated to this React version.
+
+## 📝 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

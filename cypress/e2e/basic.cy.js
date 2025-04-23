@@ -4,8 +4,8 @@ describe('Memorize Tool - Basic Tests', () => {
   });
 
   it('should load the application', () => {
-    cy.get('title').should('contain', 'Script Memorization Tool');
-    cy.get('#app').should('exist');
+    cy.title().should('contain', 'Script Memorization');
+    cy.get('.app-container').should('exist');
   });
 
   it('should have language selector', () => {
@@ -47,6 +47,5 @@ describe('Memorize Tool - Basic Tests', () => {
 
     cy.get('#optionsMenu').should('be.visible');
     cy.get('#optionAbout').should('exist');
-    cy.get('#optionHelp').should('exist');
   });
 });
