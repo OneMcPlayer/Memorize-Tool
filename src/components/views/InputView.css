@@ -223,6 +223,27 @@
   margin-bottom: 0;
 }
 
+.center {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.test-button {
+  background-color: #ff9800;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.test-button:hover {
+  background-color: #f57c00;
+}
+
 /* Dark mode styles */
 body.dark-mode .input-view h1 {
   color: #ecf0f1;
@@ -275,6 +296,14 @@ body.dark-mode .help-text {
 body.dark-mode .shortcuts-info {
   background: #34495e;
   border-left-color: #3498db;
+}
+
+body.dark-mode .test-button {
+  background-color: #e65100;
+}
+
+body.dark-mode .test-button:hover {
+  background-color: #ff9800;
 }
 
 /* Mobile styles */
