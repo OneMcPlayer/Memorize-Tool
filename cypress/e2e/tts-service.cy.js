@@ -3,7 +3,7 @@
 describe('TTS Service', () => {
   beforeEach(() => {
     // Visit the app
-    cy.visit('/Memorize-Tool');
+    cy.visit('/');
 
     // Mock the Web Speech API if it doesn't exist
     cy.window().then((win) => {
