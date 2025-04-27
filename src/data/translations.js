@@ -53,7 +53,6 @@ export const translations = {
     viewFullScriptButton: "View Full Script",
     fullScript: "Full Script",
     closeButton: "Close",
-    listenButton: "Listen to Script",
 
     // Script Testing Mode
     testingMode: "Script Testing Mode",
