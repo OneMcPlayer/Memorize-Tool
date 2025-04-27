@@ -230,6 +230,25 @@
   flex-wrap: wrap;
 }
 
+#extractButton {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 1.05em;
+  font-weight: 500;
+  min-width: 180px;
+}
+
+#extractButton:hover {
+  background-color: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
 .test-button {
   background-color: #ff9800;
   color: white;
@@ -242,6 +261,46 @@
 
 .test-button:hover {
   background-color: #f57c00;
+}
+
+.memorization-button {
+  background-color: #9c27b0;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 1.05em;
+  font-weight: 500;
+  min-width: 180px;
+  margin-left: 10px;
+}
+
+.memorization-button:hover {
+  background-color: #7b1fa2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.memorization-practice-button {
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 1.05em;
+  font-weight: 500;
+  min-width: 180px;
+  margin-left: 10px;
+}
+
+.memorization-practice-button:hover {
+  background-color: #1976D2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Dark mode styles */
@@ -304,6 +363,30 @@ body.dark-mode .test-button {
 
 body.dark-mode .test-button:hover {
   background-color: #ff9800;
+}
+
+body.dark-mode .memorization-button {
+  background-color: #7b1fa2;
+}
+
+body.dark-mode .memorization-button:hover {
+  background-color: #9c27b0;
+}
+
+body.dark-mode .memorization-practice-button {
+  background-color: #1976D2;
+}
+
+body.dark-mode .memorization-practice-button:hover {
+  background-color: #2196F3;
+}
+
+body.dark-mode #extractButton {
+  background-color: #388e3c;
+}
+
+body.dark-mode #extractButton:hover {
+  background-color: #4CAF50;
 }
 
 /* Mobile styles */

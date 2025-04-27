@@ -6,7 +6,7 @@ import ScriptModal from '../common/ScriptModal';
 import { getAvailableScripts, getScriptContent, convertJsonScriptToText } from '../../data/scripts';
 import './InputView.css';
 
-const InputView = ({ onStartPractice, onStartScriptTesting }) => {
+const InputView = ({ onStartPractice, onStartScriptTesting, onStartMemorizationTester, onStartMemorizationPractice }) => {
   const {
     currentLang,
     isAdvancedMode,
@@ -337,11 +337,11 @@ const InputView = ({ onStartPractice, onStartScriptTesting }) => {
             <button id="extractButton" onClick={handleExtract}>
               {t.extractButton}
             </button>
-            <button id="testButton" onClick={() => {
+            <button id="memorizationPracticeButton" onClick={() => {
               handleExtract();
-              onStartScriptTesting();
-            }} className="test-button">
-              {t.testButton || 'Test My Lines'}
+              onStartMemorizationPractice();
+            }} className="memorization-practice-button">
+              {t.memorizationPracticeButton || 'Interactive Practice'}
             </button>
           </div>
 
@@ -462,14 +462,14 @@ const InputView = ({ onStartPractice, onStartScriptTesting }) => {
                   {t.extractButton}
                 </button>
                 <button
-                  id="testButton"
+                  id="memorizationPracticeButton"
                   onClick={() => {
                     handleExtract();
-                    onStartScriptTesting();
+                    onStartMemorizationPractice();
                   }}
-                  className="secondary-btn test-button"
+                  className="secondary-btn memorization-practice-button"
                 >
-                  {t.testButton || 'Test My Lines'}
+                  {t.memorizationPracticeButton || 'Interactive Practice'}
                 </button>
               </div>
             </div>
