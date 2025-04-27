@@ -6,6 +6,7 @@ const path = require('path');
 // Import routes
 const scriptsRoutes = require('./routes/scripts');
 const userRoutes = require('./routes/user');
+const ttsRoutes = require('./routes/tts');
 
 // Import passkey routes
 let passkeyRoutes;
@@ -56,6 +57,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/scripts', scriptsRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/passkey', passkeyRoutes);
+app.use('/api/tts', ttsRoutes);
 
 // Serve static assets in production
 if (process.env.NODE_ENV === 'production') {
