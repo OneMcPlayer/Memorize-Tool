@@ -1,0 +1,154 @@
+.script-memorization-tester {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: var(--font-family);
+}
+
+.script-memorization-tester h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: var(--primary-color);
+}
+
+.loading, .error {
+  text-align: center;
+  padding: 40px;
+}
+
+.error {
+  color: #f44336;
+}
+
+.error p {
+  margin-bottom: 20px;
+}
+
+.intro-content {
+  background-color: var(--card-bg-color);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: var(--card-shadow);
+}
+
+.intro-description {
+  font-size: 1.1rem;
+  line-height: 1.5;
+  margin-bottom: 20px;
+  color: var(--text-color);
+}
+
+.feature-list {
+  margin-bottom: 25px;
+}
+
+.feature-list h2 {
+  font-size: 1.3rem;
+  margin-bottom: 15px;
+  color: var(--primary-color);
+}
+
+.feature-list ul {
+  padding-left: 25px;
+}
+
+.feature-list li {
+  margin-bottom: 10px;
+  line-height: 1.4;
+  color: var(--text-color);
+}
+
+.experimental-toggle {
+  background-color: rgba(255, 152, 0, 0.1);
+  border-left: 4px solid #ff9800;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+}
+
+.experimental-toggle label {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  color: #e65100;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.experimental-toggle input[type="checkbox"] {
+  margin-right: 10px;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.experimental-note {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #e65100;
+  line-height: 1.4;
+}
+
+.start-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 25px;
+}
+
+.start-btn, .back-btn {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 1rem;
+}
+
+.start-btn {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.start-btn:hover {
+  background-color: var(--primary-color-dark);
+}
+
+.back-btn {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+.back-btn:hover {
+  background-color: var(--secondary-color-dark);
+}
+
+/* Dark mode adjustments */
+.dark-mode .script-memorization-tester {
+  --card-bg-color: #2a2a2a;
+  --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .experimental-toggle {
+  background-color: rgba(255, 152, 0, 0.15);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .script-memorization-tester {
+    padding: 15px;
+  }
+  
+  .intro-content {
+    padding: 15px;
+  }
+  
+  .start-actions {
+    flex-direction: column;
+  }
+  
+  .start-btn, .back-btn {
+    width: 100%;
+  }
+}
