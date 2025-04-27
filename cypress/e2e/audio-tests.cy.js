@@ -4,16 +4,16 @@ describe('Audio Playback Tests', () => {
   beforeEach(() => {
     // Visit the audio test page
     cy.visit('/');
-    
+
     // Open the options menu
     cy.get('#optionsToggle').click();
-    
+
     // Click on the Audio Test option
     cy.get('#optionAudioTest').click();
-    
+
     // Click the user interaction button to enable audio
     cy.contains('Click here to enable audio playback').click();
-    
+
     // Wait for the test controls to appear
     cy.get('.test-controls').should('be.visible');
   });
@@ -28,16 +28,16 @@ describe('Audio Playback Tests', () => {
   it('should test direct audio playback', () => {
     // Select the direct audio test
     cy.get('#test-select').select('direct');
-    
+
     // Run the test
     cy.contains('Run Test').click();
-    
+
     // Wait for the test to complete
     cy.get('.test-results', { timeout: 10000 }).should('be.visible');
-    
+
     // Check if the test ran (we can't reliably check success in headless mode)
     cy.get('.result-item').should('exist');
-    
+
     // Log the result for manual review
     cy.get('.result-item').then(($el) => {
       cy.log('Direct Audio Test Result:', $el.text());
@@ -47,16 +47,16 @@ describe('Audio Playback Tests', () => {
   it('should test Google TTS API', () => {
     // Select the Google TTS test
     cy.get('#test-select').select('google');
-    
+
     // Run the test
     cy.contains('Run Test').click();
-    
+
     // Wait for the test to complete
     cy.get('.test-results', { timeout: 10000 }).should('be.visible');
-    
+
     // Check if the test ran
     cy.get('.result-item').should('exist');
-    
+
     // Log the result for manual review
     cy.get('.result-item').then(($el) => {
       cy.log('Google TTS Test Result:', $el.text());
@@ -66,16 +66,16 @@ describe('Audio Playback Tests', () => {
   it('should test alternative TTS API', () => {
     // Select the alternative TTS test
     cy.get('#test-select').select('alternative');
-    
+
     // Run the test
     cy.contains('Run Test').click();
-    
+
     // Wait for the test to complete
     cy.get('.test-results', { timeout: 10000 }).should('be.visible');
-    
+
     // Check if the test ran
     cy.get('.result-item').should('exist');
-    
+
     // Log the result for manual review
     cy.get('.result-item').then(($el) => {
       cy.log('Alternative TTS Test Result:', $el.text());
@@ -85,16 +85,16 @@ describe('Audio Playback Tests', () => {
   it('should run all tests', () => {
     // Select all tests
     cy.get('#test-select').select('all');
-    
+
     // Run the tests
     cy.contains('Run Test').click();
-    
+
     // Wait for the tests to complete
     cy.get('.test-results', { timeout: 15000 }).should('be.visible');
-    
+
     // Check if all three test results are displayed
     cy.get('.result-item').should('have.length.at.least', 3);
-    
+
     // Log all results for manual review
     cy.get('.result-item').each(($el, index) => {
       cy.log(`Test ${index + 1} Result:`, $el.text());
@@ -105,13 +105,13 @@ describe('Audio Playback Tests', () => {
     // Enter a test audio URL
     const testAudioUrl = 'https://translate.google.com/translate_tts?ie=UTF-8&q=This%20is%20a%20test&tl=en&client=tw-ob';
     cy.get('.url-input').type(testAudioUrl);
-    
+
     // Run the test
     cy.contains('Test URL').click();
-    
+
     // Wait for the test to complete
     cy.get('.manual-result', { timeout: 10000 }).should('be.visible');
-    
+
     // Log the result for manual review
     cy.get('.manual-result').then(($el) => {
       cy.log('Manual Test Result:', $el.text());
@@ -124,7 +124,7 @@ describe('Audio Playback Tests', () => {
     cy.contains('User Agent:').should('be.visible');
     cy.contains('Audio Context Support:').should('be.visible');
     cy.contains('Speech Synthesis Support:').should('be.visible');
-    
+
     // Log browser information for manual review
     cy.get('.browser-info').then(($el) => {
       cy.log('Browser Information:', $el.text());
@@ -132,124 +132,20 @@ describe('Audio Playback Tests', () => {
   });
 });
 
-// Test the ScriptReader component directly
-describe('ScriptReader Component Tests', () => {
-  beforeEach(() => {
-    // Visit the practice view
-    cy.visit('/');
-    
-    // Mock the script data
-    const mockScript = {
-      title: "Test Script",
-      lines: [
-        { speaker: "ALICE", line: "This is a test line from Alice." },
-        { speaker: "BOB", line: "This is a response from Bob." },
-        { speaker: "ALICE", line: "Another line from Alice." }
-      ]
-    };
-    
-    // Stub the window.fetch to return our mock data
-    cy.window().then((win) => {
-      cy.stub(win, 'fetch').resolves({
-        ok: true,
-        json: () => Promise.resolve(mockScript)
-      });
-    });
-    
-    // Stub the Audio constructor to prevent actual audio playback
-    cy.window().then((win) => {
-      cy.stub(win, 'Audio').callsFake((url) => {
-        const mockAudio = {
-          play: () => Promise.resolve(),
-          pause: () => {},
-          addEventListener: (event, callback) => {
-            if (event === 'canplaythrough') {
-              setTimeout(callback, 100);
-            }
-          },
-          oncanplaythrough: null,
-          onplay: null,
-          onended: null,
-          onerror: null,
-          src: url,
-          volume: 1
-        };
-        
-        // Simulate the audio events
-        setTimeout(() => {
-          if (mockAudio.oncanplaythrough) mockAudio.oncanplaythrough();
-          if (mockAudio.onplay) mockAudio.onplay();
-          setTimeout(() => {
-            if (mockAudio.onended) mockAudio.onended();
-          }, 500);
-        }, 100);
-        
-        return mockAudio;
-      });
-    });
-    
-    // Navigate to the practice view
-    cy.contains('Start Practice').click();
-    
-    // Wait for the practice view to load
-    cy.contains('Practice Mode').should('be.visible');
-  });
-
-  it('should open the script modal and show the script reader', () => {
-    // Click on the "View Full Script" button
-    cy.contains('View Full Script').click();
-    
-    // Verify the script modal is open
-    cy.get('.script-modal-content').should('be.visible');
-    
-    // Click on the "Listen to Script" button
-    cy.contains('Listen to Script').click();
-    
-    // Verify the script reader is shown
-    cy.contains('Script Reader').should('be.visible');
-    cy.get('.voice-assignments').should('be.visible');
-    
-    // Log the script reader state
-    cy.get('.script-reader').then(($el) => {
-      cy.log('Script Reader Content:', $el.text());
-    });
-  });
-
-  it('should attempt to play the script', () => {
-    // Open the script modal
-    cy.contains('View Full Script').click();
-    
-    // Click on the "Listen to Script" button
-    cy.contains('Listen to Script').click();
-    
-    // Click the play button
-    cy.get('.play-button').click();
-    
-    // Wait for a moment to allow playback to start
-    cy.wait(1000);
-    
-    // Check if the current line is displayed
-    cy.get('.current-line').should('exist');
-    
-    // Log the current line
-    cy.get('.current-line').then(($el) => {
-      cy.log('Current Line:', $el.text());
-    });
-  });
-});
+// ScriptReader component tests removed as the feature has been deprecated
 
 // Test the basicAudioPlayer utility directly
 describe('Basic Audio Player Utility Tests', () => {
   beforeEach(() => {
     // Visit the audio test page
     cy.visit('/');
-    
+
     // Open the options menu
     cy.get('#optionsToggle').click();
-    
+
     // Click on the Audio Test option
     cy.get('#optionAudioTest').click();
-    
+
     // Click the user interaction button to enable audio
     cy.contains('Click here to enable audio playback').click();
   });
@@ -261,7 +157,7 @@ describe('Basic Audio Player Utility Tests', () => {
       return import('/src/utils/basicAudioPlayer.js')
         .then(module => {
           const audioPlayer = module.default;
-          
+
           // Test the audio player
           return audioPlayer.playText('This is a test of the basic audio player', {
             voice: { lang: 'en-US' },
@@ -289,7 +185,7 @@ describe('Basic Audio Player Utility Tests', () => {
           };
         });
     };
-    
+
     // Execute the test function in the browser context
     cy.window().then(win => {
       cy.wrap(null).then(() => {
