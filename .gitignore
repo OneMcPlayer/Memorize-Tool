@@ -7,6 +7,7 @@ node_modules/
 /coverage
 cypress/videos/
 cypress/screenshots/
+cypress/fixtures/test-audio.mp3
 
 # Production
 /build
@@ -37,6 +38,7 @@ auth/certs/
 auth/db.sqlite3
 auth/users_database.yml
 auth/notification.txt
+auth/db/passkeys.db
 
 # Docker
 .docker/
@@ -64,3 +66,7 @@ Thumbs.db
 .cache/
 tmp/
 temp/
+
+# Server cache
+server/cache/
+server/cache/tts/

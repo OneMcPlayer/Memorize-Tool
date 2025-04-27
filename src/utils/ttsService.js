@@ -3,20 +3,22 @@
  *
  * A comprehensive TTS service that combines multiple approaches:
  * 1. Web Speech API (native browser support)
- * 2. ElevenLabs TTS API (high quality, requires API key)
- * 3. Google Translate TTS (fallback, no API key needed but has limitations)
+ * 2. Google Translate TTS (fallback, no API key needed but has limitations)
+ * 3. Support for character voices in script reading
  */
 
 class TTSService {
   constructor() {
     // Initialize state
     this.initialized = false;
-    this.webSpeechAvailable = 'speechSynthesis' in window;
+    this.webSpeechAvailable = typeof window !== 'undefined' && 'speechSynthesis' in window;
     this.currentAudio = null;
     this.isSpeaking = false;
     this.userInteracted = false;
     this.voices = [];
     this.defaultVoice = null;
+    this.characterVoices = {};
+    this.demoMode = true; // Set to true initially, will be turned off in production
 
     // For testing purposes
     this.lastSpokenText = '';
@@ -44,7 +46,7 @@ class TTSService {
     // Track user interaction to enable autoplay
     this.setupUserInteractionTracking();
 
-    console.log('TTS Service initialized. Web Speech available:', this.webSpeechAvailable);
+    console.log('TTS Service initialized. Web Speech available:', this.webSpeechAvailable, 'Demo mode:', this.demoMode);
   }
 
   // Check if we're in a test environment
@@ -385,6 +387,103 @@ class TTSService {
   // Update configuration
   updateConfig(newConfig) {
     this.config = { ...this.config, ...newConfig };
+  }
+
+  // Set character voices for script reading
+  setCharacterVoices(characterVoices) {
+    this.characterVoices = characterVoices;
+  }
+
+  // Get voice for a character
+  getVoiceForCharacter(character) {
+    return this.characterVoices[character] || this.defaultVoice;
+  }
+
+  // Toggle demo mode
+  setDemoMode(isDemo) {
+    this.demoMode = isDemo;
+    console.log(`TTS Service demo mode ${isDemo ? 'enabled' : 'disabled'}`);
+  }
+
+  // Check if in demo mode
+  isDemoMode() {
+    return this.demoMode;
+  }
+
+  // Speak a character's line
+  async speakCharacterLine(character, text, options = {}) {
+    if (this.demoMode) {
+      console.log(`[DEMO MODE] Character ${character} says: "${text.substring(0, 30)}..."`);
+
+      // In demo mode, we'll just simulate speaking with a delay
+      this.isSpeaking = true;
+
+      // Dispatch a custom event for demo mode
+      if (typeof document !== 'undefined') {
+        const event = new CustomEvent('tts-character-speak', {
+          detail: { character, text, options }
+        });
+        document.dispatchEvent(event);
+      }
+
+      // Simulate speech duration based on text length
+      const duration = Math.min(Math.max(text.length * 50, 500), 3000);
+      await new Promise(resolve => setTimeout(resolve, duration));
+
+      this.isSpeaking = false;
+      return Promise.resolve();
+    }
+
+    // Get the voice for this character
+    const voice = this.getVoiceForCharacter(character);
+
+    // Speak the line with the character's voice
+    return this.speak(text, {
+      ...options,
+      voice: voice
+    });
+  }
+
+  // Get all character voices
+  getCharacterVoices() {
+    return this.characterVoices;
+  }
+
+  // Group voices by language for easier selection
+  groupVoicesByLanguage() {
+    const groupedVoices = {};
+
+    this.voices.forEach(voice => {
+      const lang = voice.lang.split('-')[0]; // Get the primary language code (e.g., 'en' from 'en-US')
+
+      if (!groupedVoices[lang]) {
+        groupedVoices[lang] = [];
+      }
+
+      groupedVoices[lang].push(voice);
+    });
+
+    return groupedVoices;
+  }
+
+  // Get preferred voices for different languages
+  getPreferredVoices() {
+    const groupedVoices = this.groupVoicesByLanguage();
+    const preferredVoices = [];
+
+    // Try to get one voice per language
+    Object.keys(groupedVoices).forEach(lang => {
+      // Prefer non-local voices if available
+      const nonLocalVoice = groupedVoices[lang].find(voice => !voice.localService);
+      if (nonLocalVoice) {
+        preferredVoices.push(nonLocalVoice);
+      } else if (groupedVoices[lang].length > 0) {
+        // Otherwise use the first available voice
+        preferredVoices.push(groupedVoices[lang][0]);
+      }
+    });
+
+    return preferredVoices;
   }
 }
 

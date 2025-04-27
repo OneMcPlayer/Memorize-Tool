@@ -1,12 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './ScriptModal.css';
 import { translations } from '../../data/translations';
-import ScriptReader from './ScriptReader';
-import './ScriptReader.css';
 
 const ScriptModal = ({ isOpen, onClose, script, title, lang }) => {
-  const [showScriptReader, setShowScriptReader] = useState(false);
-
   if (!isOpen) return null;
 
   const t = translations[lang];
@@ -83,63 +79,25 @@ const ScriptModal = ({ isOpen, onClose, script, title, lang }) => {
     return formattedLines;
   };
 
-  // Convert script text to structured format for the ScriptReader
-  const parseScriptForReader = (scriptText) => {
-    if (!scriptText) return [];
-
-    const parsedLines = [];
-    const lines = scriptText.split('\n');
-
-    lines.forEach(line => {
-      if (!line.trim()) return; // Skip empty lines
-
-      const colonIndex = line.indexOf(':');
-
-      if (colonIndex > 0) {
-        // This is a character's line
-        const speaker = line.substring(0, colonIndex).trim();
-        const dialogue = line.substring(colonIndex + 1).trim();
-        parsedLines.push({ speaker, line: dialogue });
-      }
-    });
-
-    return parsedLines;
-  };
-
-  const parsedScript = parseScriptForReader(script);
+  // No longer needed since we removed the ScriptReader functionality
 
   return (
     <div className="script-modal-overlay" onClick={onClose}>
       <div className="script-modal-content" onClick={e => e.stopPropagation()}>
-        {showScriptReader ? (
-          <ScriptReader
-            script={parsedScript}
-            onClose={() => setShowScriptReader(false)}
-          />
-        ) : (
-          <>
-            <div className="script-modal-header">
-              <h2>{title || t.fullScript || 'Full Script'}</h2>
-              <button className="close-button" onClick={onClose}>×</button>
-            </div>
-            <div className="script-modal-body">
-              <div className="script-container">
-                {formatScript(script)}
-              </div>
-            </div>
-            <div className="script-modal-footer">
-              <button
-                onClick={() => setShowScriptReader(true)}
-                className="secondary-btn listen-btn"
-              >
-                {t.listenButton || 'Listen to Script'}
-              </button>
-              <button onClick={onClose} className="primary-btn">
-                {t.closeButton || 'Close'}
-              </button>
-            </div>
-          </>
-        )}
+        <div className="script-modal-header">
+          <h2>{title || t.fullScript || 'Full Script'}</h2>
+          <button className="close-button" onClick={onClose}>×</button>
+        </div>
+        <div className="script-modal-body">
+          <div className="script-container">
+            {formatScript(script)}
+          </div>
+        </div>
+        <div className="script-modal-footer">
+          <button onClick={onClose} className="primary-btn">
+            {t.closeButton || 'Close'}
+          </button>
+        </div>
       </div>
     </div>
   );

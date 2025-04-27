@@ -1,0 +1,164 @@
+.api-key-input {
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: 8px;
+  background-color: var(--bg-secondary);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.api-key-input h3 {
+  margin-top: 0;
+  color: var(--text-primary);
+}
+
+.api-key-description {
+  margin-bottom: 1rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.api-key-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.api-key-field {
+  display: flex;
+  position: relative;
+}
+
+.api-key-field input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  width: 100%;
+  padding-right: 45px; /* Space for the visibility toggle */
+  border-right: none;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.api-key-field input.saved {
+  border-color: var(--success-color);
+  background-color: rgba(var(--success-color-rgb), 0.05);
+}
+
+/* When input is saved, also style the visibility toggle */
+.api-key-field input.saved + .visibility-toggle {
+  border-color: var(--success-color);
+}
+
+.visibility-toggle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  width: 36px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-color);
+  border-left: none;
+  border-radius: 0 4px 4px 0;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+  margin: 0;
+  padding: 0;
+  z-index: 1;
+}
+
+.visibility-toggle:hover {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.api-key-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.save-key-btn, .clear-key-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s, opacity 0.2s;
+}
+
+.save-key-btn {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.save-key-btn:disabled {
+  background-color: var(--primary-color);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.clear-key-btn {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+.clear-key-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.api-key-info {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.api-key-link {
+  display: inline-block;
+  margin-top: 0.5rem;
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.api-key-link:hover {
+  text-decoration: underline;
+}
+
+/* Dark mode adjustments */
+.dark-mode .api-key-input {
+  background-color: var(--bg-secondary-dark);
+}
+
+.dark-mode .api-key-field input {
+  background-color: var(--input-bg-dark);
+  border-color: var(--border-color-dark);
+}
+
+.dark-mode .visibility-toggle {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary-dark);
+  border-color: var(--border-color-dark);
+}
+
+.dark-mode .visibility-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .api-key-actions {
+    flex-direction: column;
+  }
+
+  .save-key-btn, .clear-key-btn {
+    width: 100%;
+  }
+}
