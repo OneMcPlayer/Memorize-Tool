@@ -1,3 +1,32 @@
+:root {
+  --primary-color: #3498db;
+  --primary-color-dark: #2980b9;
+  --primary-color-rgb: 52, 152, 219;
+  --secondary-color: #7f8c8d;
+  --secondary-color-dark: #6c7a7a;
+  --secondary-color-rgb: 127, 140, 141;
+  --success-color: #2ecc71;
+  --success-color-rgb: 46, 204, 113;
+  --danger-color: #e74c3c;
+  --danger-color-rgb: 231, 76, 60;
+  --warning-color: #f39c12;
+  --warning-color-rgb: 243, 156, 18;
+  --text-primary: #2c3e50;
+  --text-secondary: #7f8c8d;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f7fa;
+  --border-color: #dcdfe6;
+  --input-bg: #ffffff;
+
+  /* Dark mode variables */
+  --text-primary-dark: #ecf0f1;
+  --text-secondary-dark: #bdc3c7;
+  --bg-primary-dark: #2c3e50;
+  --bg-secondary-dark: #34495e;
+  --border-color-dark: #4a6278;
+  --input-bg-dark: #2c3e50;
+}
+
 body {
   font-family: 'Segoe UI', Arial, sans-serif;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
