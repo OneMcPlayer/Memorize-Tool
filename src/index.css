@@ -11,3 +11,27 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Toast button styles */
+.toast-button {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 6px 12px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.toast-button:hover {
+  background-color: #45a049;
+}
+
+/* Make sure the toast has enough space for the button */
+.toast {
+  min-width: 250px;
+  padding-bottom: 12px;
+}

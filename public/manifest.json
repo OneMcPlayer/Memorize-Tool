@@ -1,6 +1,7 @@
 {
   "short_name": "Memorize Tool",
   "name": "Script Memorization Tool",
+  "description": "A tool to help actors memorize their lines with interactive practice",
   "icons": [
     {
       "src": "favicon.ico",
@@ -15,16 +16,37 @@
     {
       "src": "logo192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
       "src": "logo512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "orientation": "portrait",
+  "theme_color": "#3498db",
+  "background_color": "#f5f7fa",
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Start Practice",
+      "short_name": "Practice",
+      "description": "Start script practice session",
+      "url": "/?action=practice",
+      "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Interactive Practice",
+      "short_name": "Interactive",
+      "description": "Start interactive memorization practice",
+      "url": "/?action=interactive",
+      "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
+    }
+  ]
 }
