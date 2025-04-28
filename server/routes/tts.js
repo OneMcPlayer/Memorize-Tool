@@ -62,11 +62,22 @@ function saveToCache(cacheKey, data) {
 }
 
 /**
+ * Health check endpoint for TTS
+ */
+router.get('/health', (req, res) => {
+  res.json({
+    status: 'TTS service is running',
+    cacheDir: cacheDir,
+    fetchAvailable: typeof fetch === 'function'
+  });
+});
+
+/**
  * Proxy route for OpenAI's TTS API with caching
  */
 router.post('/speech', async (req, res) => {
   try {
-    const { text, voice = 'nova', speed = 1.0, model = 'tts-1-hd', apiKey } = req.body;
+    const { text, voice = 'coral', speed = 1.0, model = 'tts-1-hd', apiKey } = req.body;
 
     if (!text) {
       return res.status(400).json({ error: 'Text is required' });
@@ -87,13 +98,33 @@ router.post('/speech', async (req, res) => {
     if (checkCache(cacheKey)) {
       console.log('TTS cache hit for:', text.substring(0, 30) + '...', `(model: ${ttsModel})`);
       const audioData = getFromCache(cacheKey);
+
+      // Set headers
       res.setHeader('Content-Type', 'audio/mpeg');
       res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
+
+      // Add cache status headers to inform the client this was a cache hit
+      res.setHeader('X-TTS-Cache-Status', 'HIT');
+      res.setHeader('X-TTS-Cache-Source', 'SERVER');
+      res.setHeader('X-TTS-Cache-Key', cacheKey);
+
       return res.send(audioData);
     }
 
     // Not in cache, call OpenAI API
     console.log('TTS cache miss for:', text.substring(0, 30) + '...', `(model: ${ttsModel})`);
+
+    // Send debug info in response headers for client to display
+    res.setHeader('X-OpenAI-TTS-Debug', JSON.stringify({
+      type: 'api_call',
+      model: ttsModel,
+      voice: voice,
+      textLength: text.length,
+      timestamp: new Date().toISOString()
+    }));
+
+    // Fetch is now available as a CommonJS module
+
     const response = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
       headers: {
@@ -122,13 +153,40 @@ router.post('/speech', async (req, res) => {
     // Save to cache
     saveToCache(cacheKey, audioBuffer);
 
-    // Send response
+    // Send response with cache status headers
     res.setHeader('Content-Type', 'audio/mpeg');
     res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
+    res.setHeader('X-TTS-Cache-Status', 'MISS');
+    res.setHeader('X-TTS-Cache-Source', 'OPENAI');
+    res.setHeader('X-TTS-Cache-Key', cacheKey);
     res.send(audioBuffer);
   } catch (error) {
     console.error('TTS proxy error:', error);
-    res.status(500).json({ error: 'Failed to generate speech' });
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      code: error.code
+    });
+
+    // Send a more detailed error response
+    let errorMessage = 'Failed to generate speech';
+    let errorDetails = error.message;
+
+    // Check for specific error types
+    if (error.code === 'ECONNREFUSED') {
+      errorMessage = 'Connection to OpenAI API failed';
+      errorDetails = 'The OpenAI API is not reachable. Please check your internet connection.';
+    } else if (error.name === 'FetchError') {
+      errorMessage = 'Network error';
+      errorDetails = 'Failed to fetch from OpenAI API. Please check your internet connection.';
+    }
+
+    res.status(500).json({
+      error: errorMessage,
+      details: errorDetails,
+      timestamp: new Date().toISOString()
+    });
   }
 });
 

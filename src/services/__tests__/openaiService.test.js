@@ -105,7 +105,7 @@ describe('OpenAI Service', () => {
       // Setup
       const testKey = 'test-key';
       const testText = 'Hello, world!';
-      const testVoice = 'nova';
+      const testVoice = 'coral';
       const testSpeed = 1.0;
 
       openaiService.setApiKey(testKey);
@@ -153,7 +153,7 @@ describe('OpenAI Service', () => {
       // Setup
       openaiService.setApiKey('test-key');
       const testText = 'Hello, world!';
-      const testVoice = 'nova';
+      const testVoice = 'coral';
       const testSpeed = 1.0;
       const testModel = openaiService.ttsModel;
       const cacheKey = `${testText}_${testVoice}_${testSpeed}_${testModel}`;
