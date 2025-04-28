@@ -1,0 +1,68 @@
+.mobile-nav-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-around;
+  background-color: var(--bg-primary);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  padding: env(safe-area-inset-bottom) 0 8px;
+  border-top: 1px solid var(--border-color);
+  height: 60px;
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 8px 0;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 12px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-nav-item.active {
+  color: var(--primary-color);
+}
+
+.mobile-nav-icon {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+.mobile-nav-label {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* Dark mode styles */
+body.dark-mode .mobile-nav-bar {
+  background-color: var(--bg-primary-dark);
+  border-top-color: var(--border-color-dark);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .mobile-nav-item {
+  color: var(--text-secondary-dark);
+}
+
+body.dark-mode .mobile-nav-item.active {
+  color: var(--primary-color);
+}
+
+/* iPhone X and newer safe area support */
+@supports (padding: max(0px)) {
+  .mobile-nav-bar {
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+    height: calc(60px + env(safe-area-inset-bottom));
+  }
+}

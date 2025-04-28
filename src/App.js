@@ -5,6 +5,10 @@ import { ErrorHandler } from './utils/ErrorHandler';
 import { showToast } from './utils';
 import UserProfile from './components/UserProfile';
 import Header from './components/layout/Header';
+import MobileNavBar from './components/layout/MobileNavBar';
+import InstallPrompt from './components/common/InstallPrompt';
+import OfflineIndicator from './components/common/OfflineIndicator';
+import ApiDebugPanel from './components/common/ApiDebugPanel';
 import InputView from './components/views/InputView';
 import PracticeView from './components/views/PracticeView';
 import ScriptMemorizationPractice from './components/views/ScriptMemorizationPractice';
@@ -31,6 +35,7 @@ const VIEWS = {
 function App() {
   const [currentView, setCurrentView] = useState(VIEWS.INPUT);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   // Initialize the application
   useEffect(() => {
@@ -41,8 +46,23 @@ function App() {
           showToast(error.message, 3000, 'error');
         });
 
+        // Detect mobile device
+        const checkMobile = () => {
+          setIsMobile(window.innerWidth < 768);
+        };
+
+        // Initial check
+        checkMobile();
+
+        // Listen for resize events
+        window.addEventListener('resize', checkMobile);
+
         // Mark as initialized
         setIsInitialized(true);
+
+        return () => {
+          window.removeEventListener('resize', checkMobile);
+        };
       } catch (error) {
         console.error('Failed to initialize app:', error);
         showToast('Error initializing application', 3000, 'error');
@@ -90,7 +110,8 @@ function App() {
   return (
     <AuthProvider>
       <AppProvider>
-        <div className="app-container">
+        <div className={`app-container ${isMobile ? 'mobile-layout' : ''}`}>
+          <OfflineIndicator />
           <Header
             onOpenConverter={() => setCurrentView(VIEWS.CONVERTER)}
             onOpenAbout={() => setCurrentView(VIEWS.ABOUT)}
@@ -99,9 +120,17 @@ function App() {
             onOpenServerTest={() => setCurrentView(VIEWS.SERVER_TEST)}
             onOpenProfile={() => setCurrentView(VIEWS.PROFILE)}
           />
-          <main className="app-content">
+          <main className={`app-content ${isMobile ? 'mobile-content' : ''}`}>
             {renderView()}
           </main>
+          {isMobile && (
+            <MobileNavBar
+              currentView={currentView}
+              onChangeView={setCurrentView}
+            />
+          )}
+          <InstallPrompt />
+          <ApiDebugPanel />
           <div className="toast"></div>
           <div className="spinner"></div>
         </div>

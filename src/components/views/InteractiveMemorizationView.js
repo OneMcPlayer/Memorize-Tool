@@ -194,6 +194,15 @@ const InteractiveMemorizationView = ({
         // Get the current TTS model
         const model = openaiService.getTtsModels()[ttsModelKey];
 
+        // Show a toast for the current line
+        import('../../utils').then(utils => {
+          utils.showToast(
+            `Processing line for ${line.speaker}...`,
+            2000,
+            'info'
+          );
+        });
+
         // Generate and play TTS audio
         const audioBlob = await openaiService.textToSpeech(line.line, {
           voice: voice,
@@ -209,7 +218,36 @@ const InteractiveMemorizationView = ({
       }
     } catch (err) {
       console.error('Error playing other character lines:', err);
-      setError('Error playing audio. Please try again.');
+
+      // Provide more detailed error messages based on the error type
+      let errorMessage = 'Error playing audio. Please try again.';
+
+      if (err.message.includes('API key')) {
+        errorMessage = 'OpenAI API key error. Please check your API key.';
+      } else if (err.message.includes('network') || err.message.includes('fetch')) {
+        errorMessage = 'Network error. Please check your internet connection.';
+      } else if (err.message.includes('Proxy')) {
+        errorMessage = 'Server connection error. Please refresh the page and try again.';
+      } else if (err.message.includes('SyntaxError')) {
+        errorMessage = 'Error processing server response. Please try again.';
+      } else if (err.message.includes('Rate limit')) {
+        errorMessage = 'OpenAI rate limit reached. Your requests are being queued and will be processed automatically. Please wait...';
+
+        // Don't set error state for rate limit errors, as they will be handled automatically
+        import('../../utils').then(utils => {
+          utils.showToast(errorMessage, 5000, 'warning');
+        });
+
+        // Return early without setting error state
+        return;
+      }
+
+      // Import showToast dynamically to avoid circular dependencies
+      import('../../utils').then(utils => {
+        utils.showToast(errorMessage, 5000, 'error');
+      });
+
+      setError(errorMessage);
     } finally {
       setIsPlaying(false);
       setWaitingForUserLine(true);
@@ -225,13 +263,32 @@ const InteractiveMemorizationView = ({
       setIsCorrect(null);
       setShowComparison(false);
 
-      // Get microphone access
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      streamRef.current = stream;
+      // Show a toast to indicate recording is starting
+      import('../../utils').then(utils => {
+        utils.showToast(
+          'Starting recording... Please speak your line clearly.',
+          3000,
+          'info'
+        );
+      });
 
-      // Create media recorder
-      const mediaRecorder = new MediaRecorder(stream);
+      // Get microphone access
+      console.log('Requesting microphone access...');
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        }
+      });
+      streamRef.current = stream;
+      console.log('Microphone access granted');
+
+      // Create media recorder with higher quality settings
+      const options = { mimeType: 'audio/webm;codecs=opus' };
+      const mediaRecorder = new MediaRecorder(stream, options);
       mediaRecorderRef.current = mediaRecorder;
+      console.log('MediaRecorder created with options:', options);
 
       // Set up event handlers
       mediaRecorder.ondataavailable = (event) => {
@@ -246,14 +303,37 @@ const InteractiveMemorizationView = ({
           const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
           audioChunksRef.current = [];
 
+          // Show a toast to indicate processing
+          import('../../utils').then(utils => {
+            utils.showToast(
+              'Processing your speech...',
+              3000,
+              'info'
+            );
+          });
+
+          console.log('Audio recorded, size:', Math.round(audioBlob.size / 1024), 'KB');
+
+          if (audioBlob.size < 1024) {
+            throw new Error('Audio recording is too short. Please try again and speak clearly.');
+          }
+
           // Convert speech to text
           const text = await openaiService.speechToText(audioBlob);
+          console.log('Speech recognition result:', text);
           setRecordedText(text);
 
           // Compare with expected line
           const expectedLine = currentData.current?.line || '';
           const similarity = calculateSimilarity(text, expectedLine);
           const isCorrect = similarity >= 0.7; // 70% similarity threshold
+
+          console.log('Line comparison:', {
+            expected: expectedLine,
+            actual: text,
+            similarity: similarity,
+            isCorrect: isCorrect
+          });
 
           setIsCorrect(isCorrect);
           setShowComparison(true);
@@ -264,11 +344,44 @@ const InteractiveMemorizationView = ({
             correctLines: prev.correctLines + (isCorrect ? 1 : 0),
             accuracy: ((prev.correctLines + (isCorrect ? 1 : 0)) / (prev.totalLines + 1)) * 100
           }));
+
+          // Show a toast with the result
+          import('../../utils').then(utils => {
+            utils.showToast(
+              `Line ${isCorrect ? 'correct' : 'incorrect'} (${Math.round(similarity * 100)}% match)`,
+              3000,
+              isCorrect ? 'success' : 'error'
+            );
+          });
         } catch (err) {
           console.error('Error processing speech:', err);
-          showToast('Error processing speech. Please try again.', 3000, 'error');
+
+          // Provide more detailed error messages based on the error type
+          let errorMessage = 'Error processing speech. Please try again.';
+
+          if (err.message.includes('API key')) {
+            errorMessage = 'OpenAI API key error. Please check your API key.';
+          } else if (err.message.includes('network') || err.message.includes('fetch')) {
+            errorMessage = 'Network error. Please check your internet connection.';
+          } else if (err.message.includes('too short')) {
+            errorMessage = 'Audio recording is too short. Please try again and speak clearly.';
+          } else if (err.message.includes('Rate limit')) {
+            errorMessage = 'OpenAI rate limit reached. Your request will be processed automatically. Please wait...';
+          }
+
+          import('../../utils').then(utils => {
+            utils.showToast(errorMessage, 5000, 'error');
+          });
+
+          // If this is not a rate limit error, reset the recording state
+          if (!err.message.includes('Rate limit')) {
+            setIsRecording(false);
+          }
         } finally {
-          setIsRecording(false);
+          // Only set recording to false if we're not in a rate limit situation
+          if (!isRecording || !openaiService.getQueueLength()) {
+            setIsRecording(false);
+          }
         }
       };
 
@@ -285,13 +398,55 @@ const InteractiveMemorizationView = ({
 
   // Stop recording
   const stopRecording = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-      mediaRecorderRef.current.stop();
-    }
+    try {
+      console.log('Stopping recording...');
 
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
+      if (mediaRecorderRef.current) {
+        console.log('MediaRecorder state:', mediaRecorderRef.current.state);
+
+        if (mediaRecorderRef.current.state === 'recording') {
+          mediaRecorderRef.current.stop();
+          console.log('MediaRecorder stopped');
+
+          // Show a toast to indicate recording has stopped
+          import('../../utils').then(utils => {
+            utils.showToast(
+              'Recording stopped. Processing your speech...',
+              3000,
+              'info'
+            );
+          });
+        } else {
+          console.log('MediaRecorder was not recording');
+        }
+      } else {
+        console.log('No MediaRecorder found');
+      }
+
+      if (streamRef.current) {
+        console.log('Stopping audio tracks...');
+        streamRef.current.getTracks().forEach(track => {
+          track.stop();
+          console.log('Track stopped:', track.kind);
+        });
+        streamRef.current = null;
+      } else {
+        console.log('No stream found');
+      }
+    } catch (err) {
+      console.error('Error stopping recording:', err);
+
+      // Show a toast with the error
+      import('../../utils').then(utils => {
+        utils.showToast(
+          'Error stopping recording: ' + err.message,
+          3000,
+          'error'
+        );
+      });
+
+      // Reset recording state
+      setIsRecording(false);
     }
   };
 

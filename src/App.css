@@ -283,14 +283,22 @@ body.dark-mode #loginButton:hover {
   body {
     height: auto;
     min-height: 100vh;
+    overscroll-behavior: none; /* Prevents pull-to-refresh */
   }
 
-  .app-content {
-    width: 95%;
+  /* Mobile layout adjustments */
+  .mobile-layout {
+    padding-bottom: 70px; /* Space for bottom navigation */
+  }
+
+  .mobile-content {
+    width: 100%;
     padding: 15px;
-    margin: 60px auto 10px;
+    margin: 60px auto 0;
     max-height: none;
     box-sizing: border-box;
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .header-controls {
@@ -308,6 +316,7 @@ body.dark-mode #loginButton:hover {
     width: 100%;
     margin: 5px 0;
     touch-action: manipulation; /* Improves touch responsiveness */
+    min-height: 44px; /* Minimum touch target size */
   }
 
   .center button {
@@ -323,6 +332,14 @@ body.dark-mode #loginButton:hover {
 
   textarea {
     max-height: 200px;
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+
+  input[type="text"],
+  input[type="number"],
+  select {
+    font-size: 16px; /* Prevents iOS zoom on focus */
+    height: 44px; /* Better touch target */
   }
 
   #scriptFile {
@@ -333,6 +350,41 @@ body.dark-mode #loginButton:hover {
 
   .tab-content {
     margin-bottom: 15px;
+  }
+
+  /* Improved scrolling */
+  .app-content {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Add pull-to-refresh visual indicator */
+  .app-content::before {
+    content: '';
+    display: block;
+    height: 0;
+    transition: height 0.3s ease;
+  }
+
+  .app-content.pull-refresh::before {
+    height: 50px;
+  }
+
+  /* Swipe gesture area */
+  .swipe-area {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    z-index: 10;
+  }
+
+  .swipe-area-left {
+    left: 0;
+  }
+
+  .swipe-area-right {
+    right: 0;
   }
 
   /* Fix for iOS Safari 100vh issue */
