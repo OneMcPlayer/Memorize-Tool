@@ -33,3 +33,19 @@ Cypress.Commands.add('selectScript', (scriptName) => {
 Cypress.Commands.add('toggleHideMode', () => {
   cy.get('#hideToggle').click();
 });
+
+// Custom command to handle user interaction prompt
+Cypress.Commands.add('handleUserInteraction', () => {
+  // Set userInteracted flag directly in the window object
+  cy.window().then((win) => {
+    // Check if there's a user interaction prompt
+    if (win.document.querySelector('.user-interaction-prompt')) {
+      // Simulate user interaction by setting the flag directly
+      win.ttsService.userInteracted = true;
+
+      // Force a re-render by dispatching a custom event
+      const event = new win.CustomEvent('user-interaction-completed');
+      win.document.dispatchEvent(event);
+    }
+  });
+});

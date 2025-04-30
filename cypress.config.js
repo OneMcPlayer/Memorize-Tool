@@ -12,6 +12,7 @@ module.exports = defineConfig({
           launchOptions.args.push('--allow-file-access-from-files');
           launchOptions.args.push('--use-fake-ui-for-media-stream');
           launchOptions.args.push('--use-fake-device-for-media-stream');
+          launchOptions.args.push(`--use-file-for-fake-audio-capture=${config.projectRoot}/cypress/fixtures/fake-audio.wav`);
         }
 
         // Allow autoplay for audio in Firefox

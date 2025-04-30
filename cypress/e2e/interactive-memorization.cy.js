@@ -20,11 +20,14 @@ describe('Interactive Memorization Practice', () => {
     // Visit the app
     cy.visit('/');
 
-    // Add a sample script - find the textarea by its role
-    cy.get('textarea').first().type('Romeo: But soft, what light through yonder window breaks?\nJuliet: O Romeo, Romeo, wherefore art thou Romeo?');
+    // Select a sample script from the dropdown instead of typing in a textarea
+    cy.get('#scriptLibrary').select('sample-script');
 
-    // Set context lines to 1 for simplicity - find by label text
-    cy.contains('label', 'Context Lines').parent().find('input[type="number"]').clear().type('1');
+    // Wait for character selection to appear
+    cy.contains('Select Your Character').should('be.visible');
+
+    // Select a character
+    cy.get('select#characterSelect').select('ALICE');
   });
 
   it('should navigate to the interactive memorization practice page', () => {
@@ -119,7 +122,7 @@ describe('Interactive Memorization Practice', () => {
     });
   });
 
-  it('should play other character lines and handle user input', () => {
+  it('should play other character lines and handle user input with pause functionality', () => {
     // Navigate to the practice page with API key set
     cy.get('button').contains(/Interactive|Practice|Memorization/i).click();
     cy.get('button').contains(/Start|Begin|Practice/i).click();
@@ -130,34 +133,67 @@ describe('Interactive Memorization Practice', () => {
     // Wait for any API requests to complete
     cy.wait(3000);
 
-    // Look for help button and click it if found
+    // Verify the user's turn prompt appears
     cy.get('body').then($body => {
-      if ($body.find('button:contains("Help"), button:contains("Need Help")').length) {
-        cy.contains('button', /Help|Need Help/i).click();
+      // Check if we're at the user's turn
+      if ($body.find('div:contains("It\'s your turn")').length) {
+        // Verify the "I Said My Line" button is present
+        cy.contains('button', 'I Said My Line').should('exist');
 
-        // Look for hide button and click it if found
-        cy.get('body').then($body2 => {
-          if ($body2.find('button:contains("Hide"), button:contains("Hide Line")').length) {
-            cy.contains('button', /Hide|Hide Line/i).click();
-          }
-        });
+        // Click the "I Said My Line" button
+        cy.contains('button', 'I Said My Line').click();
+
+        // Verify that the user's line is shown
+        cy.contains('button', 'Continue to Next Line').should('exist');
+
+        // Click to continue to the next line
+        cy.contains('button', 'Continue to Next Line').click();
+      } else {
+        // If we're not at the user's turn yet, look for the Need Help button
+        if ($body.find('button:contains("Help"), button:contains("Need Help")').length) {
+          cy.contains('button', /Help|Need Help/i).click();
+
+          // Verify the Continue to Next Line button appears
+          cy.contains('button', 'Continue to Next Line').should('exist');
+
+          // Click to continue
+          cy.contains('button', 'Continue to Next Line').click();
+        }
       }
     });
+  });
 
-    // Look for recording button and click it if found
+  it('should verify the modified pause functionality without STT', () => {
+    // Navigate to the practice page with API key set
+    cy.get('button').contains(/Interactive|Practice|Memorization/i).click();
+    cy.get('button').contains(/Start|Begin|Practice/i).click();
+
+    // Start the practice
+    cy.get('button').contains(/Start|Begin|Practice/i).click();
+
+    // Wait for any API requests to complete
+    cy.wait(3000);
+
+    // Verify the instructions text reflects the new behavior
+    cy.contains('When it\'s your turn, say your line out loud and click "I Said My Line"').should('exist');
+    cy.contains('The system will pause and show you your line').should('exist');
+
+    // Verify the user's turn prompt appears
     cy.get('body').then($body => {
-      if ($body.find('button:contains("Record"), button:contains("Start Recording")').length) {
-        cy.contains('button', /Record|Start Recording/i).click();
+      // Check if we're at the user's turn
+      if ($body.find('div:contains("It\'s your turn")').length) {
+        // Verify the "I Said My Line" button is present (not "Start Recording")
+        cy.contains('button', 'I Said My Line').should('exist');
+        cy.contains('button', 'Start Recording').should('not.exist');
 
-        // Wait a moment for recording to start
-        cy.wait(1000);
+        // Click the "I Said My Line" button
+        cy.contains('button', 'I Said My Line').click();
 
-        // Look for next button and click it if found
-        cy.get('body').then($body2 => {
-          if ($body2.find('button:contains("Next"), button:contains("Next Line")').length) {
-            cy.contains('button', /Next|Next Line/i).click();
-          }
-        });
+        // Verify that the user's line is shown
+        cy.contains('button', 'Continue to Next Line').should('exist');
+
+        // Click to continue to the next line
+        cy.contains('button', 'Continue to Next Line').click();
       }
     });
   });

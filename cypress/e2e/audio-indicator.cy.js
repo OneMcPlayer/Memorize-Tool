@@ -2,8 +2,8 @@
 
 describe('Audio Indicator', () => {
   beforeEach(() => {
-    // Visit the app
-    cy.visit('/Memorize-Tool');
+    // Visit the app at the root URL
+    cy.visit('/');
 
     // Mock the Web Speech API if it doesn't exist
     cy.window().then((win) => {
@@ -43,9 +43,18 @@ describe('Audio Indicator', () => {
       }
     });
 
-    // Open the TTS Test page
-    cy.get('#optionsToggle').click();
-    cy.get('#optionTtsTest').click();
+    // Open the options menu
+    cy.get('.header-right button').last().click();
+
+    // Enable advanced mode if not already enabled
+    cy.get('#experimentalModeToggle').then(($checkbox) => {
+      if (!$checkbox.is(':checked')) {
+        cy.get('#experimentalModeToggle').click();
+      }
+    });
+
+    // Click on TTS Test option
+    cy.contains('TTS Test').click();
   });
 
   it('should show the TTS test page', () => {
