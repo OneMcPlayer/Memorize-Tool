@@ -44,12 +44,7 @@ const AboutView = ({ onBack }) => {
           </p>
         </section>
 
-        <section className="about-section">
-          <h2>📝 {currentLang === 'it' ? 'Licenza' : 'License'}</h2>
-          <p>
-            {currentLang === 'it' ? 'Questo progetto è rilasciato sotto licenza MIT.' : 'This project is licensed under the MIT License.'}
-          </p>
-        </section>
+
       </div>
 
       <div className="center">

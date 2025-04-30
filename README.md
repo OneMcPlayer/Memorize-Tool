@@ -118,6 +118,4 @@ This is the stable React version with the following features and improvements:
 
 This application was originally built with vanilla JavaScript (HTML, CSS, and JavaScript without any dependencies). It has been completely migrated to React, which is now the default and recommended version.
 
-## 📝 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
