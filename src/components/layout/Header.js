@@ -3,7 +3,7 @@ import { useAppContext } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import { translations } from '../../data/translations';
 
-const Header = ({ onOpenConverter, onOpenAbout, onOpenAudioTest, onOpenTtsTest, onOpenServerTest, onOpenProfile }) => {
+const Header = ({ onOpenConverter, onOpenAbout, onOpenAudioTest, onOpenTtsTest, onOpenSttTest, onOpenServerTest, onOpenProfile }) => {
   const { currentLang, setLanguage, toggleDarkMode, isAdvancedMode, setAdvancedMode } = useAppContext();
   const { user, isAuthenticated, logout } = useAuth();
   const [optionsVisible, setOptionsVisible] = useState(false);
@@ -157,6 +157,18 @@ const Header = ({ onOpenConverter, onOpenAbout, onOpenAudioTest, onOpenTtsTest, 
                     }}
                   >
                     TTS Test
+                  </li>
+                )}
+
+                {isAdvancedMode && (
+                  <li
+                    id="optionSttTest"
+                    onClick={() => {
+                      onOpenSttTest();
+                      setOptionsVisible(false);
+                    }}
+                  >
+                    STT Test
                   </li>
                 )}
 

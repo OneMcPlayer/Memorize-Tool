@@ -16,6 +16,7 @@ import ConverterView from './components/views/ConverterView';
 import AboutView from './components/views/AboutView';
 import AudioTestComponent from './components/test/AudioTestComponent';
 import TtsTestPage from './components/test/TtsTestPage';
+import SttTestComponent from './components/test/SttTestComponent';
 import ServerTest from './components/ServerTest';
 import './App.css';
 
@@ -28,6 +29,7 @@ const VIEWS = {
   ABOUT: 'about',
   AUDIO_TEST: 'audio_test',
   TTS_TEST: 'tts_test',
+  STT_TEST: 'stt_test',
   SERVER_TEST: 'server_test',
   PROFILE: 'profile'
 };
@@ -91,6 +93,8 @@ function App() {
         return <AudioTestComponent />;
       case VIEWS.TTS_TEST:
         return <TtsTestPage />;
+      case VIEWS.STT_TEST:
+        return <SttTestComponent />;
       case VIEWS.SERVER_TEST:
         return <ServerTest onBack={() => setCurrentView(VIEWS.INPUT)} />;
       case VIEWS.PROFILE:
@@ -117,6 +121,7 @@ function App() {
             onOpenAbout={() => setCurrentView(VIEWS.ABOUT)}
             onOpenAudioTest={() => setCurrentView(VIEWS.AUDIO_TEST)}
             onOpenTtsTest={() => setCurrentView(VIEWS.TTS_TEST)}
+            onOpenSttTest={() => setCurrentView(VIEWS.STT_TEST)}
             onOpenServerTest={() => setCurrentView(VIEWS.SERVER_TEST)}
             onOpenProfile={() => setCurrentView(VIEWS.PROFILE)}
           />
