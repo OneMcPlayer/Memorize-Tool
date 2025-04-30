@@ -36,24 +36,6 @@ services:
     networks:
       - app-network
 
-  # Nginx for development - routes traffic to React dev server
-  nginx:
-    image: nginx:alpine
-    container_name: nginx-dev
-    restart: unless-stopped
-    ports:
-      - "80:80"      # Standard HTTP port
-    volumes:
-      - ./test-nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./auth/nginx/conf.d:/etc/nginx/conf.d
-      - ./auth/nginx/snippets:/etc/nginx/snippets
-      - ./public:/usr/share/nginx/html
-    depends_on:
-      - frontend
-      - server
-    networks:
-      - app-network
-
 networks:
   app-network:
     driver: bridge
