@@ -25,7 +25,8 @@ The Script Memorization Tool helps performers learn their lines more effectively
 
 1. Clone the repository
 2. Install dependencies with `npm install`
-3. Start the development server with `npm start`
+3. Start the development environment with `./start-dev.sh` (this runs both the frontend and API)
+   - Alternatively run `npm run dev` if you prefer using npm scripts directly
 
 ### Using the Tool
 
@@ -57,7 +58,8 @@ The Script Memorization Tool helps performers learn their lines more effectively
 
 ### Available Scripts
 
-- `npm start` - Runs the app in development mode
+- `npm run dev` - Starts the React frontend and Node.js API together (recommended for development)
+- `npm start` - Runs only the React development server
 - `npm test` - Launches the test runner
 - `npm run build` - Builds the app for production
 - `npm run eject` - Ejects from Create React App
@@ -75,8 +77,8 @@ npm test
 To run the Cypress tests:
 
 ```bash
-# Make sure the application is running first
-npm start
+# Make sure the application (frontend + API) is running first
+./start-dev.sh
 
 # In a separate terminal, run the tests
 npx cypress run
