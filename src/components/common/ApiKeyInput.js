@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import openaiService from '../../services/openaiService';
+import { useAuth } from '../../context/AuthContext';
+import { showToast } from '../../utils';
 import './ApiKeyInput.css';
 
 /**
@@ -12,6 +14,7 @@ const ApiKeyInput = ({ onKeySet, translations, currentLang }) => {
   const [apiKey, setApiKey] = useState('');
   const [isVisible, setIsVisible] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const { user, isAuthenticated, setUser } = useAuth();
 
   // Get translations
   const t = translations[currentLang] || {};
@@ -23,8 +26,16 @@ const ApiKeyInput = ({ onKeySet, translations, currentLang }) => {
       setApiKey(savedKey);
       setIsSaved(true);
       if (onKeySet) onKeySet(true);
+      return;
     }
-  }, [onKeySet]);
+
+    if (isAuthenticated && user?.openaiApiKey) {
+      openaiService.setApiKey(user.openaiApiKey);
+      setApiKey(user.openaiApiKey);
+      setIsSaved(true);
+      if (onKeySet) onKeySet(true);
+    }
+  }, [onKeySet, isAuthenticated, user]);
 
   // Handle API key change
   const handleApiKeyChange = (e) => {
@@ -33,20 +44,92 @@ const ApiKeyInput = ({ onKeySet, translations, currentLang }) => {
   };
 
   // Handle save button click
-  const handleSave = () => {
-    if (apiKey.trim()) {
-      openaiService.setApiKey(apiKey.trim());
-      setIsSaved(true);
-      if (onKeySet) onKeySet(true);
+  const persistApiKey = async (key) => {
+    if (!isAuthenticated) return;
+
+    const authToken = localStorage.getItem('authToken');
+    if (!authToken) return;
+
+    try {
+      const response = await fetch('/api/user/api-key', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`
+        },
+        body: JSON.stringify({ apiKey: key })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to persist API key');
+      }
+
+      if (setUser) {
+        setUser(prev => {
+          if (!prev) return prev;
+          const updated = { ...prev, openaiApiKey: key };
+          localStorage.setItem('authUser', JSON.stringify(updated));
+          return updated;
+        });
+      }
+    } catch (error) {
+      console.error('Error saving API key to profile:', error);
+      showToast('Saved locally, but syncing with your profile failed.', 4000, 'warning');
     }
   };
 
+  const removePersistedApiKey = async () => {
+    if (!isAuthenticated) return;
+
+    const authToken = localStorage.getItem('authToken');
+    if (!authToken) return;
+
+    try {
+      const response = await fetch('/api/user/api-key', {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${authToken}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete API key');
+      }
+
+      if (setUser) {
+        setUser(prev => {
+          if (!prev) return prev;
+          const updated = { ...prev, openaiApiKey: null };
+          localStorage.setItem('authUser', JSON.stringify(updated));
+          return updated;
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting API key from profile:', error);
+      showToast('Removed locally, but syncing with your profile failed.', 4000, 'warning');
+    }
+  };
+
+  const handleSave = async () => {
+    const trimmedKey = apiKey.trim();
+    if (!trimmedKey) return;
+
+    openaiService.setApiKey(trimmedKey);
+    setIsSaved(true);
+    if (onKeySet) onKeySet(true);
+
+    await persistApiKey(trimmedKey);
+    showToast('API key saved', 2500, 'success');
+  };
+
   // Handle clear button click
-  const handleClear = () => {
+  const handleClear = async () => {
     setApiKey('');
     openaiService.setApiKey('');
     setIsSaved(false);
     if (onKeySet) onKeySet(false);
+    await removePersistedApiKey();
+    showToast('API key removed', 2500, 'info');
   };
 
   // Toggle visibility of the API key

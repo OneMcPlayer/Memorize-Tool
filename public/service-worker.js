@@ -1,4 +1,6 @@
 // Service Worker for Script Memorization Tool
+const swUrl = new URL(self.location.href);
+const IS_DEV_MODE = swUrl.searchParams.has('dev-sw');
 const CACHE_NAME = 'memorize-tool-v2';
 const CORE_ASSETS_TO_CACHE = [
   '/',
@@ -16,6 +18,12 @@ const CORE_ASSETS_TO_CACHE = [
 
 // Install event - cache assets
 self.addEventListener('install', (event) => {
+  if (IS_DEV_MODE) {
+    // In development we skip caching to avoid interfering with hot reload
+    event.waitUntil(self.skipWaiting());
+    return;
+  }
+
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
@@ -54,6 +62,11 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
+  if (IS_DEV_MODE) {
+    event.waitUntil(self.clients.claim());
+    return;
+  }
+
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
@@ -70,6 +83,10 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event - serve from cache or network
 self.addEventListener('fetch', (event) => {
+  if (IS_DEV_MODE) {
+    return;
+  }
+
   // Skip cross-origin requests
   if (!event.request.url.startsWith(self.location.origin)) {
     return;

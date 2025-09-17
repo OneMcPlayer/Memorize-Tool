@@ -53,9 +53,9 @@ export const createScript = async (scriptData) => {
 };
 
 // Check server health
-export const checkServerHealth = async () => {
+export const checkServerHealth = async (options = {}) => {
   try {
-    const response = await fetch('/api/health');
+    const response = await fetch('/api/health', options);
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }

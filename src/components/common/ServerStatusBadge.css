@@ -1,0 +1,47 @@
+.server-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.15);
+  color: inherit;
+  font-size: 0.8rem;
+  line-height: 1;
+  cursor: default;
+}
+
+.server-status-indicator {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background-color: currentColor;
+  display: inline-block;
+  position: relative;
+}
+
+.server-status-badge.server-status-checking .server-status-indicator {
+  color: #f1c40f;
+  animation: server-status-pulse 1.2s infinite ease-in-out;
+}
+
+.server-status-badge.server-status-online .server-status-indicator {
+  color: #2ecc71;
+}
+
+.server-status-badge.server-status-offline {
+  background-color: rgba(255, 77, 79, 0.15);
+}
+
+.server-status-badge.server-status-offline .server-status-indicator {
+  color: #ff4d4f;
+}
+
+@keyframes server-status-pulse {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}

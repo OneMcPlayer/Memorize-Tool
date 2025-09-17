@@ -187,7 +187,8 @@ export function AuthProvider({ children }) {
     isAuthenticated: !!user,
     loading,
     logout,
-    refreshToken
+    refreshToken,
+    setUser
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

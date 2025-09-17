@@ -14,10 +14,6 @@ import PracticeView from './components/views/PracticeView';
 import ScriptMemorizationPractice from './components/views/ScriptMemorizationPractice';
 import ConverterView from './components/views/ConverterView';
 import AboutView from './components/views/AboutView';
-import AudioTestComponent from './components/test/AudioTestComponent';
-import TtsTestPage from './components/test/TtsTestPage';
-import SttTestComponent from './components/test/SttTestComponent';
-import ServerTest from './components/ServerTest';
 import './App.css';
 
 // View constants
@@ -27,10 +23,6 @@ const VIEWS = {
   SCRIPT_MEMORIZATION_PRACTICE: 'script_memorization_practice',
   CONVERTER: 'converter',
   ABOUT: 'about',
-  AUDIO_TEST: 'audio_test',
-  TTS_TEST: 'tts_test',
-  STT_TEST: 'stt_test',
-  SERVER_TEST: 'server_test',
   PROFILE: 'profile'
 };
 
@@ -89,14 +81,6 @@ function App() {
         return <ConverterView onBack={() => setCurrentView(VIEWS.INPUT)} />;
       case VIEWS.ABOUT:
         return <AboutView onBack={() => setCurrentView(VIEWS.INPUT)} />;
-      case VIEWS.AUDIO_TEST:
-        return <AudioTestComponent />;
-      case VIEWS.TTS_TEST:
-        return <TtsTestPage />;
-      case VIEWS.STT_TEST:
-        return <SttTestComponent />;
-      case VIEWS.SERVER_TEST:
-        return <ServerTest onBack={() => setCurrentView(VIEWS.INPUT)} />;
       case VIEWS.PROFILE:
         return <UserProfile onBack={() => setCurrentView(VIEWS.INPUT)} />;
       case VIEWS.INPUT:
@@ -119,10 +103,6 @@ function App() {
           <Header
             onOpenConverter={() => setCurrentView(VIEWS.CONVERTER)}
             onOpenAbout={() => setCurrentView(VIEWS.ABOUT)}
-            onOpenAudioTest={() => setCurrentView(VIEWS.AUDIO_TEST)}
-            onOpenTtsTest={() => setCurrentView(VIEWS.TTS_TEST)}
-            onOpenSttTest={() => setCurrentView(VIEWS.STT_TEST)}
-            onOpenServerTest={() => setCurrentView(VIEWS.SERVER_TEST)}
             onOpenProfile={() => setCurrentView(VIEWS.PROFILE)}
           />
           <main className={`app-content ${isMobile ? 'mobile-content' : ''}`}>

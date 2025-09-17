@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import { translations } from '../../data/translations';
+import ServerStatusBadge from '../common/ServerStatusBadge';
 
-const Header = ({ onOpenConverter, onOpenAbout, onOpenAudioTest, onOpenTtsTest, onOpenSttTest, onOpenServerTest, onOpenProfile }) => {
+const Header = ({ onOpenConverter, onOpenAbout, onOpenProfile }) => {
   const { currentLang, setLanguage, toggleDarkMode, isAdvancedMode, setAdvancedMode } = useAppContext();
   const { user, isAuthenticated, logout } = useAuth();
   const [optionsVisible, setOptionsVisible] = useState(false);
@@ -68,6 +69,8 @@ const Header = ({ onOpenConverter, onOpenAbout, onOpenAudioTest, onOpenTtsTest, 
         </select>
 
         <div className="header-right">
+          <ServerStatusBadge />
+
           <button
             id="themeToggle"
             onClick={handleThemeToggle}
@@ -135,54 +138,6 @@ const Header = ({ onOpenConverter, onOpenAbout, onOpenAudioTest, onOpenTtsTest, 
                 >
                   {translations[currentLang]?.about || 'About'}
                 </li>
-
-                {isAdvancedMode && (
-                  <li
-                    id="optionAudioTest"
-                    onClick={() => {
-                      onOpenAudioTest();
-                      setOptionsVisible(false);
-                    }}
-                  >
-                    Audio Test
-                  </li>
-                )}
-
-                {isAdvancedMode && (
-                  <li
-                    id="optionTtsTest"
-                    onClick={() => {
-                      onOpenTtsTest();
-                      setOptionsVisible(false);
-                    }}
-                  >
-                    TTS Test
-                  </li>
-                )}
-
-                {isAdvancedMode && (
-                  <li
-                    id="optionSttTest"
-                    onClick={() => {
-                      onOpenSttTest();
-                      setOptionsVisible(false);
-                    }}
-                  >
-                    STT Test
-                  </li>
-                )}
-
-                {isAdvancedMode && (
-                  <li
-                    id="optionServerTest"
-                    onClick={() => {
-                      onOpenServerTest();
-                      setOptionsVisible(false);
-                    }}
-                  >
-                    Server Test
-                  </li>
-                )}
 
                 {isAuthenticated && (
                   <li

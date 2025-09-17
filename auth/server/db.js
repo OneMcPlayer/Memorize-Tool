@@ -49,6 +49,16 @@ db.serialize(() => {
     )
   `);
 
+  // Create user settings table (stores optional preferences like API keys)
+  db.run(`
+    CREATE TABLE IF NOT EXISTS user_settings (
+      user_id TEXT PRIMARY KEY,
+      openai_api_key TEXT,
+      updated_at INTEGER NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    )
+  `);
+
   console.log('Database initialized successfully');
 });
 
@@ -121,6 +131,63 @@ const userDb = {
             return reject(err);
           }
           resolve({ userId, last_login: now });
+        }
+      );
+    });
+  }
+};
+
+// User settings functions
+const userSettingsDb = {
+  // Get settings for a user
+  getSettings: (userId) => {
+    return new Promise((resolve, reject) => {
+      db.get(
+        'SELECT * FROM user_settings WHERE user_id = ?',
+        [userId],
+        (err, row) => {
+          if (err) {
+            console.error('Error getting user settings:', err);
+            return reject(err);
+          }
+          resolve(row);
+        }
+      );
+    });
+  },
+
+  // Upsert the OpenAI API key for a user
+  setOpenAiApiKey: (userId, apiKey) => {
+    return new Promise((resolve, reject) => {
+      const now = Date.now();
+      db.run(
+        `INSERT INTO user_settings (user_id, openai_api_key, updated_at)
+         VALUES (?, ?, ?)
+         ON CONFLICT(user_id) DO UPDATE SET openai_api_key = excluded.openai_api_key, updated_at = excluded.updated_at`,
+        [userId, apiKey, now],
+        function(err) {
+          if (err) {
+            console.error('Error saving OpenAI API key:', err);
+            return reject(err);
+          }
+          resolve({ userId, openai_api_key: apiKey, updated_at: now });
+        }
+      );
+    });
+  },
+
+  // Remove the OpenAI API key for a user
+  clearOpenAiApiKey: (userId) => {
+    return new Promise((resolve, reject) => {
+      db.run(
+        'DELETE FROM user_settings WHERE user_id = ?',
+        [userId],
+        function(err) {
+          if (err) {
+            console.error('Error clearing OpenAI API key:', err);
+            return reject(err);
+          }
+          resolve({ removed: this.changes > 0 });
         }
       );
     });
@@ -346,6 +413,7 @@ module.exports = {
   user: userDb,
   passkey: passkeyDb,
   token: tokenDb,
+  userSettings: userSettingsDb,
   
   // Close the database connection
   close: () => {

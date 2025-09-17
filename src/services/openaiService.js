@@ -33,16 +33,7 @@ class OpenAIService {
     this.audioCache = new Map(); // In-memory client-side cache for audio blobs
     this.apiCallCount = 0; // Counter for API calls in current session
     this.debugMode = localStorage.getItem('openai_debug_mode') === 'true' || false; // Debug mode flag
-
-    // Demo mode settings
-    this.isDemoMode = localStorage.getItem('openai_demo_mode') === 'true' || false; // Demo mode flag
     this.isTestMode = typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'test'; // Test mode detection
-
-    // If no API key is set, automatically enable demo mode (silently)
-    if (!this.apiKey) {
-      this.isDemoMode = true;
-      localStorage.setItem('openai_demo_mode', 'true');
-    }
 
     // Rate limiting settings
     this.rateLimitQueue = []; // Queue for rate-limited requests
@@ -52,7 +43,7 @@ class OpenAIService {
 
     // Only log initialization in debug mode
     if (this.debugMode) {
-      console.log('OpenAI Service initialized. Demo mode:', this.isDemoMode, 'Test mode:', this.isTestMode);
+      console.log('OpenAI Service initialized. Test mode:', this.isTestMode);
     }
   }
 
@@ -309,8 +300,7 @@ class OpenAIService {
    */
   async speechToText(audioBlob) {
     if (!this.apiKey) {
-      console.warn('OpenAI API key is not set, using demo mode');
-      return this.demoSpeechToText();
+      throw new Error('OpenAI API key is not set');
     }
 
     if (!audioBlob) {
@@ -320,10 +310,9 @@ class OpenAIService {
     // Create a function that will make the actual request
     const makeRequest = async () => {
       try {
-        // Check if we're in demo mode or testing environment
-        if (this.isDemoMode || this.isTestMode) {
-          console.log('Using demo mode for speech-to-text');
-          return this.demoSpeechToText(audioBlob);
+        // Avoid hitting the API during automated tests
+        if (this.isTestMode) {
+          return 'Test transcription';
         }
 
         const formData = new FormData();
@@ -409,14 +398,6 @@ class OpenAIService {
         }
       } catch (error) {
         console.error('Error in speechToText request:', error);
-
-        // If we encounter a network error or timeout, fall back to demo mode
-        if (error.name === 'TypeError' || error.name === 'AbortError' ||
-            error.message.includes('network') || error.message.includes('fetch')) {
-          console.log('Network error detected, falling back to demo mode');
-          return this.demoSpeechToText();
-        }
-
         throw error;
       }
     };
@@ -442,35 +423,8 @@ class OpenAIService {
         return await this.addToRateLimitQueue(makeRequest);
       }
 
-      // For other errors, fall back to demo mode
-      console.log('Error encountered, falling back to demo mode');
-      return this.demoSpeechToText();
+      throw error;
     }
-  }
-
-  /**
-   * Demo version of speech-to-text that returns a placeholder response
-   * This is used when the API key is not set or when there are network issues
-   * @returns {Promise<string>} A promise that resolves to a demo text response
-   */
-  async demoSpeechToText() {
-    // Simulate a delay to make it feel like processing is happening
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    // Log that we're using demo mode
-    console.log('%c Using DEMO MODE for speech-to-text', 'background: #9C27B0; color: white; padding: 2px 5px; border-radius: 3px;');
-
-    // Show a toast notification about demo mode
-    import('../utils').then(utils => {
-      utils.showToast(
-        'Using demo mode for speech recognition. Your speech will be simulated.',
-        3000,
-        'info'
-      );
-    });
-
-    // Return a generic response that will likely match the expected line
-    return "I'm saying my line as expected. This is a demo response.";
   }
 
   /**
@@ -478,11 +432,13 @@ class OpenAIService {
    * @param {Blob} audioBlob - The audio blob to play
    * @returns {Promise<void>} A promise that resolves when the audio finishes playing
    */
-  playAudio(audioBlob) {
+  playAudio(audioBlob, options = {}) {
     return new Promise((resolve, reject) => {
       try {
         const audioUrl = URL.createObjectURL(audioBlob);
         const audio = new Audio(audioUrl);
+        const volume = typeof options.volume === 'number' ? Math.min(Math.max(options.volume, 0), 1) : 1;
+        audio.volume = volume;
 
         audio.onended = () => {
           URL.revokeObjectURL(audioUrl);
@@ -583,37 +539,6 @@ class OpenAIService {
 
     this.isProcessingQueue = true;
 
-    // If we're in demo mode, process all requests immediately with demo responses
-    if (this.isDemoMode) {
-      console.log('Processing queue in demo mode - bypassing rate limits');
-
-      // Process all items in the queue with demo responses
-      while (this.rateLimitQueue.length > 0) {
-        const { requestFn, resolve } = this.rateLimitQueue.shift();
-
-        try {
-          // Check if the request function is speechToText
-          const funcString = requestFn.toString();
-          if (funcString.includes('speechToText')) {
-            // For speech-to-text requests, use the demo response
-            resolve(await this.demoSpeechToText());
-          } else {
-            // For other requests, just call the function
-            const result = await requestFn();
-            resolve(result);
-          }
-        } catch (error) {
-          console.error('Error in demo mode queue processing:', error);
-          // Still resolve with a demo response to keep the flow going
-          resolve("I'm saying my line as expected. This is a demo response.");
-        }
-      }
-
-      this.isProcessingQueue = false;
-      return;
-    }
-
-    // Normal processing with rate limiting
     if (this.canMakeRequest()) {
       const { requestFn, resolve, reject } = this.rateLimitQueue.shift();
 
@@ -624,26 +549,7 @@ class OpenAIService {
         const result = await requestFn();
         resolve(result);
       } catch (error) {
-        // If this is a network error or other critical error, switch to demo mode
-        if (error.name === 'TypeError' || error.name === 'AbortError' ||
-            error.message.includes('network') || error.message.includes('fetch')) {
-          console.log('Network error in queue processing, switching to demo mode');
-          this.setDemoMode(true);
-
-          // Show a toast notification about switching to demo mode
-          import('../utils').then(utils => {
-            utils.showToast(
-              'Network error detected. Switched to demo mode automatically.',
-              5000,
-              'warning'
-            );
-          });
-
-          // Resolve with a demo response
-          resolve("I'm saying my line as expected. This is a demo response.");
-        } else {
-          reject(error);
-        }
+        reject(error);
       }
 
       // Process the next item after a short delay
@@ -662,25 +568,6 @@ class OpenAIService {
       });
 
       console.log(`Rate limit reached. Waiting ${waitTime}ms before next request...`);
-
-      // If we have more than 3 items in the queue, switch to demo mode automatically
-      if (this.rateLimitQueue.length > 3) {
-        console.log('Too many requests in queue, switching to demo mode');
-        this.setDemoMode(true);
-
-        // Show a toast notification about switching to demo mode
-        import('../utils').then(utils => {
-          utils.showToast(
-            'Too many requests queued. Switched to demo mode automatically to avoid delays.',
-            5000,
-            'warning'
-          );
-        });
-
-        // Process the queue in demo mode
-        this.processRateLimitQueue();
-        return;
-      }
 
       setTimeout(() => this.processRateLimitQueue(), waitTime);
     }
@@ -710,36 +597,6 @@ class OpenAIService {
     return this.rateLimitQueue.length;
   }
 
-  /**
-   * Set demo mode
-   * @param {boolean} enabled - Whether demo mode should be enabled
-   * @param {boolean} [log=true] - Whether to log the change to the console
-   */
-  setDemoMode(enabled, log = true) {
-    this.isDemoMode = enabled;
-    localStorage.setItem('openai_demo_mode', enabled.toString());
-    if (log) {
-      console.log('Demo mode set to:', enabled);
-    }
-  }
-
-  /**
-   * Check if demo mode is enabled
-   * @returns {boolean} Whether demo mode is enabled
-   */
-  isDemoModeEnabled() {
-    return this.isDemoMode;
-  }
-
-  /**
-   * Toggle demo mode
-   * @returns {boolean} The new demo mode state
-   */
-  toggleDemoMode() {
-    const newState = !this.isDemoMode;
-    this.setDemoMode(newState);
-    return newState;
-  }
 }
 
 // Create a singleton instance

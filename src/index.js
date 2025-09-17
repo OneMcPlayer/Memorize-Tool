@@ -17,7 +17,11 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     // Delay service worker registration until after the page has loaded
     setTimeout(() => {
-      navigator.serviceWorker.register('/service-worker.js')
+      const serviceWorkerUrl = process.env.NODE_ENV === 'development'
+        ? '/service-worker.js?dev-sw=true'
+        : '/service-worker.js';
+
+      navigator.serviceWorker.register(serviceWorkerUrl)
         .then(registration => {
           console.log('Service Worker registered with scope:', registration.scope);
 
