@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import openaiService from '../../services/openaiService';
 import ApiKeyInput from '../common/ApiKeyInput';
 import { showToast } from '../../utils';
+import useMicrophoneRecorder from '../../hooks/useMicrophoneRecorder';
 import './InteractiveMemorizationView.css';
 
 const buildSequence = (scriptLines, userCharacter) => {
@@ -74,6 +75,50 @@ const friendlyTtsError = (error) => {
   return message;
 };
 
+const friendlySttError = (error) => {
+  if (!error) {
+    return 'Could not transcribe your line. Please try again.';
+  }
+  const message = error.message || '';
+  if (message.includes('timed out')) return 'Transcription request timed out. Try speaking again.';
+  if (message.includes('Rate limit')) return 'OpenAI rate limit reached for speech recognition. Please wait before trying again.';
+  if (message.includes('API key')) return 'OpenAI API key error. Please verify your key.';
+  if (message.includes('Audio data is required')) return 'No audio captured. Make sure your microphone is enabled.';
+  return message || 'Could not transcribe your line. Please try again.';
+};
+
+const normalizeLine = (value = '') => (
+  value
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+);
+
+const calculateWordAccuracy = (expected, actual) => {
+  const expectedWords = normalizeLine(expected).split(' ').filter(Boolean);
+  const actualWords = normalizeLine(actual).split(' ').filter(Boolean);
+
+  if (!expectedWords.length || !actualWords.length) {
+    return 0;
+  }
+
+  const actualCounts = actualWords.reduce((acc, word) => {
+    acc[word] = (acc[word] || 0) + 1;
+    return acc;
+  }, {});
+
+  let matches = 0;
+  expectedWords.forEach(word => {
+    if (actualCounts[word]) {
+      matches += 1;
+      actualCounts[word] -= 1;
+    }
+  });
+
+  return matches / expectedWords.length;
+};
+
 const InteractiveMemorizationView = ({
   scriptLines,
   extractedLines,
@@ -107,6 +152,20 @@ const InteractiveMemorizationView = ({
   });
 
   const sequenceRef = useRef([]);
+
+  const {
+    isSupported: micSupported,
+    hasPermission: micPermission,
+    isRecording: micRecording,
+    error: micRecorderError,
+    requestPermission,
+    startRecording,
+    stopRecording,
+    cancelRecording
+  } = useMicrophoneRecorder();
+
+  const [isEvaluating, setIsEvaluating] = useState(false);
+  const [lastEvaluation, setLastEvaluation] = useState(null);
 
   const assignVoices = useCallback((sequence) => {
     const voices = openaiService.getVoices();
@@ -168,6 +227,7 @@ const InteractiveMemorizationView = ({
     setWaitingForUserLine(false);
     setShowUserLine(false);
     setError(null);
+    cancelRecording();
 
     try {
       for (let i = 0; i < lines.length; i += 1) {
@@ -197,7 +257,7 @@ const InteractiveMemorizationView = ({
       setError(friendly);
       showToast(friendly, 5000, 'error');
     }
-  }, [characterVoices, ttsModelKey, speed, volume]);
+  }, [characterVoices, ttsModelKey, speed, volume, cancelRecording]);
 
   useEffect(() => {
     setHasApiKey(openaiService.hasApiKey());
@@ -239,6 +299,45 @@ const InteractiveMemorizationView = ({
     initialise();
   }, [assignVoices, updateLineState, scriptLines, extractedLines, userCharacter]);
 
+  useEffect(() => {
+    let didCancel = false;
+
+    const autoRecord = async () => {
+      if (!waitingForUserLine || showUserLine || isEvaluating) {
+        cancelRecording();
+        return;
+      }
+
+      if (!micSupported || !hasApiKey) {
+        return;
+      }
+
+      try {
+        if (!micPermission) {
+          const granted = await requestPermission();
+          if (!granted || didCancel) {
+            return;
+          }
+        }
+
+        if (!micRecording) {
+          await startRecording();
+        }
+      } catch (err) {
+        if (!didCancel) {
+          console.error('Failed to start microphone recording:', err);
+          showToast('Unable to access the microphone. Check permissions and try again.', 5000, 'error');
+        }
+      }
+    };
+
+    autoRecord();
+
+    return () => {
+      didCancel = true;
+    };
+  }, [waitingForUserLine, showUserLine, isEvaluating, micSupported, micPermission, micRecording, hasApiKey, requestPermission, startRecording, cancelRecording]);
+
   const handleApiKeySet = (hasKey) => {
     setHasApiKey(hasKey);
     if (hasKey) {
@@ -257,6 +356,13 @@ const InteractiveMemorizationView = ({
       return;
     }
 
+    if (micSupported && !micPermission) {
+      const granted = await requestPermission();
+      if (!granted) {
+        showToast('Microphone access denied. Automatic evaluation will be unavailable.', 4000, 'warning');
+      }
+    }
+
     setSessionStarted(true);
     setTestComplete(false);
     setResults({ totalLines: 0, correctLines: 0, accuracy: 0 });
@@ -265,26 +371,84 @@ const InteractiveMemorizationView = ({
     await playLines(context);
   };
 
-  const handleSaidMyLine = () => {
-    if (!currentData.current) return;
+  const handleSaidMyLine = async () => {
+    if (!currentData.current || isEvaluating) return;
 
-    setShowUserLine(true);
-    setResults(prev => {
-      const total = prev.totalLines + 1;
-      const correct = prev.correctLines + 1;
-      return {
-        totalLines: total,
-        correctLines: correct,
-        accuracy: total > 0 ? (correct / total) * 100 : 0
+    setIsEvaluating(true);
+
+    let evaluation = {
+      status: 'no-input',
+      transcript: '',
+      accuracy: 0,
+      message: 'No audio detected. Line marked for review.'
+    };
+
+    try {
+      let transcript = '';
+
+      if (micSupported && (micPermission || micRecording)) {
+        const audioBlob = await stopRecording();
+        if (audioBlob && audioBlob.size > 0) {
+          transcript = await openaiService.speechToText(audioBlob);
+        }
+      }
+
+      if (transcript) {
+        const accuracy = calculateWordAccuracy(currentData.current.line, transcript);
+        const isCorrect = accuracy >= 0.8;
+
+        evaluation = {
+          status: isCorrect ? 'correct' : 'incorrect',
+          transcript,
+          accuracy,
+          message: isCorrect
+            ? 'Great job! Your line matches the script.'
+            : 'Your spoken line differs from the script. Review the transcript below.'
+        };
+      }
+    } catch (err) {
+      console.error('Error evaluating spoken line:', err);
+      const friendly = friendlySttError(err);
+      setError(friendly);
+      evaluation = {
+        status: 'error',
+        transcript: '',
+        accuracy: 0,
+        message: friendly
       };
-    });
+    } finally {
+      setIsEvaluating(false);
+      setShowUserLine(true);
+      setLastEvaluation(evaluation);
+      setResults(prev => {
+        const total = prev.totalLines + 1;
+        const correct = prev.correctLines + (evaluation.status === 'correct' ? 1 : 0);
+        return {
+          totalLines: total,
+          correctLines: correct,
+          accuracy: total > 0 ? (correct / total) * 100 : 0
+        };
+      });
 
-    showToast(t.practicePaused || 'Exercise paused. Review your line and continue when ready.', 3000, 'info');
+      if (evaluation.message) {
+        const tone = evaluation.status === 'correct' ? 'success' : evaluation.status === 'error' ? 'error' : 'warning';
+        showToast(evaluation.message, 4000, tone);
+      } else {
+        showToast(t.practicePaused || 'Exercise paused. Review your line and continue when ready.', 3000, 'info');
+      }
+    }
   };
 
   const handleNeedHelp = () => {
     if (!currentData.current) return;
+    cancelRecording();
     setShowUserLine(true);
+    setLastEvaluation({
+      status: 'revealed',
+      transcript: '',
+      accuracy: 0,
+      message: 'Line revealed for assistance.'
+    });
     showToast(t.needHelpToast || 'Here is your line. Take a look and continue when ready.', 3000, 'info');
   };
 
@@ -301,6 +465,7 @@ const InteractiveMemorizationView = ({
     setCurrentLineIndex(nextIndex);
     setShowUserLine(false);
     setWaitingForUserLine(false);
+    setLastEvaluation(null);
 
     const context = updateLineState(nextIndex);
     await playLines(context);
@@ -313,6 +478,7 @@ const InteractiveMemorizationView = ({
     setSessionStarted(true);
     setShowUserLine(false);
     setWaitingForUserLine(false);
+    setLastEvaluation(null);
 
     const context = updateLineState(0);
     await playLines(context);
@@ -364,6 +530,53 @@ const InteractiveMemorizationView = ({
     );
   };
 
+  const handleEnableMicrophone = async () => {
+    try {
+      const granted = await requestPermission();
+      if (granted) {
+        showToast('Microphone enabled. Speak your line when prompted.', 3000, 'success');
+      } else {
+        showToast('Microphone access denied. Automatic evaluation will be unavailable.', 4000, 'warning');
+      }
+    } catch (err) {
+      const friendly = friendlySttError(err);
+      setError(friendly);
+      showToast(friendly, 4000, 'error');
+    }
+  };
+
+  const renderMicrophoneStatus = () => {
+    if (!micSupported) {
+      return (
+        <p className="mic-status">Microphone not supported in this browser. Manual confirmation only.</p>
+      );
+    }
+
+    if (!hasApiKey) {
+      return null;
+    }
+
+    if (!micPermission) {
+      return (
+        <div className="recording-indicator">
+          <p>Microphone disabled. Enable it for automatic feedback.</p>
+          <button className="record-btn" onClick={handleEnableMicrophone}>
+            Enable Microphone
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <div className={`recording-indicator${micRecording ? ' active' : ''}`}>
+        <p>{micRecording ? 'Listening... speak your line now.' : 'Microphone ready.'}</p>
+        {micRecorderError && (
+          <p className="mic-error">{micRecorderError}</p>
+        )}
+      </div>
+    );
+  };
+
   const renderPlaybackState = () => {
     if (isPlaying) {
       const currentLine = otherCharacterLines[currentOtherLineIndex];
@@ -389,18 +602,49 @@ const InteractiveMemorizationView = ({
               <button className="hide-line-btn" onClick={handleContinue}>
                 {t.continueButton || 'Continue to Next Line'}
               </button>
+              {lastEvaluation && (
+                <div className={`evaluation-panel ${lastEvaluation.status}`}>
+                  {typeof lastEvaluation.accuracy === 'number' && lastEvaluation.accuracy > 0 && (
+                    <p>
+                      Accuracy: {(lastEvaluation.accuracy * 100).toFixed(0)}%
+                    </p>
+                  )}
+                  {lastEvaluation.transcript && (
+                    <p>
+                      <strong>Transcript:</strong> {lastEvaluation.transcript}
+                    </p>
+                  )}
+                  {lastEvaluation.message && (
+                    <p>{lastEvaluation.message}</p>
+                  )}
+                </div>
+              )}
             </div>
           ) : (
             <div className="user-prompt">
               <p>{(t.yourTurnPrompt && t.yourTurnPrompt.replace('{character}', userCharacter || 'You')) || `It's your turn, ${userCharacter || 'You'}!`}</p>
               <div className="user-actions">
-                <button className="said-line-btn" onClick={handleSaidMyLine}>
+                <button
+                  className="said-line-btn"
+                  onClick={handleSaidMyLine}
+                  disabled={isEvaluating}
+                >
                   {t.saidMyLineButton || 'I Said My Line'}
                 </button>
-                <button className="need-help-btn" onClick={handleNeedHelp}>
+                <button
+                  className="need-help-btn"
+                  onClick={handleNeedHelp}
+                  disabled={isEvaluating}
+                >
                   {t.needHelpButton || 'Need Help?'}
                 </button>
               </div>
+              <div className="mic-status-wrapper">
+                {renderMicrophoneStatus()}
+              </div>
+              {isEvaluating && (
+                <p className="evaluation-progress">Checking your line...</p>
+              )}
             </div>
           )}
         </div>

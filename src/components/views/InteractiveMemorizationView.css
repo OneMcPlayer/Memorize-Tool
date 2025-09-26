@@ -391,6 +391,27 @@
   margin-top: 1rem;
 }
 
+.recording-indicator.active p {
+  color: var(--success-color);
+}
+
+.mic-status-wrapper {
+  margin-top: 1rem;
+}
+
+.mic-status {
+  margin: 0.75rem 0 0;
+  text-align: center;
+  color: var(--warning-color);
+  font-size: 0.95rem;
+}
+
+.mic-error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--danger-color);
+}
+
 .recording-pulse {
   width: 12px;
   height: 12px;
@@ -403,6 +424,40 @@
   margin: 0;
   font-size: 0.9rem;
   color: var(--danger-color);
+}
+
+.evaluation-panel {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--secondary-color);
+  border-radius: 6px;
+  background-color: rgba(90, 103, 216, 0.08);
+  text-align: left;
+}
+
+.evaluation-panel.correct {
+  border-color: var(--success-color);
+  background-color: rgba(76, 175, 80, 0.12);
+}
+
+.evaluation-panel.incorrect {
+  border-color: var(--warning-color);
+  background-color: rgba(255, 152, 0, 0.12);
+}
+
+.evaluation-panel.error {
+  border-color: var(--danger-color);
+  background-color: rgba(244, 67, 54, 0.12);
+}
+
+.evaluation-panel p {
+  margin: 0.25rem 0;
+}
+
+.evaluation-progress {
+  margin-top: 0.75rem;
+  font-style: italic;
+  color: var(--secondary-color);
 }
 
 /* Comparison container */

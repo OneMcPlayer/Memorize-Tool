@@ -39,6 +39,7 @@ auth/db.sqlite3
 auth/users_database.yml
 auth/notification.txt
 auth/db/passkeys.db
+auth/db/*.db
 
 # Docker
 .docker/
