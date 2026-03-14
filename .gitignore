@@ -68,6 +68,9 @@ Thumbs.db
 tmp/
 temp/
 
+# Generated browser test artifacts
+artifacts/videos/
+
 # Server cache
 server/cache/
 server/cache/tts/
