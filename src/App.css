@@ -48,7 +48,7 @@ body {
   left: 20px;
   right: 20px;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   z-index: 999; /* Ensure it stays above other elements */
 }
@@ -58,16 +58,6 @@ body {
   align-items: center;
   gap: 5px;
   position: relative;
-}
-
-#languageSelect {
-  padding: 8px 12px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  background: #fff;
-  font-size: 14px;
-  cursor: pointer;
-  color: #2c3e50;
 }
 
 #themeToggle, #loginButton, #optionsToggle {
@@ -259,12 +249,6 @@ body.dark-mode #card.revealed {
   background: #2980b9;
 }
 
-body.dark-mode #languageSelect {
-  background: #2c3e50;
-  color: #fff;
-  border-color: #fff;
-}
-
 body.dark-mode #themeToggle, body.dark-mode #optionsToggle {
   color: #fff;
 }
@@ -293,18 +277,26 @@ body.dark-mode #loginButton:hover {
 
   .mobile-content {
     width: 100%;
-    padding: 15px;
-    margin: 60px auto 0;
+    padding: 12px 12px 92px;
+    margin: 56px auto 0;
     max-height: none;
     box-sizing: border-box;
     border-radius: 0;
     box-shadow: none;
+    background: transparent;
+    overflow-y: visible;
   }
 
   .header-controls {
     top: 10px;
     left: 10px;
     right: 10px;
+  }
+
+  .header-right button {
+    width: auto;
+    margin: 0;
+    min-height: auto;
   }
 
   h1 {
@@ -322,6 +314,10 @@ body.dark-mode #loginButton:hover {
   .center button {
     width: auto;
     min-width: 120px;
+  }
+
+  #loginButton {
+    display: none;
   }
 
   #card {
@@ -402,17 +398,13 @@ body.dark-mode #loginButton:hover {
     padding: 12px;
     margin: 50px auto 5px;
     border-radius: 10px;
+    background: transparent;
   }
 
   .header-controls {
     top: 5px;
     left: 5px;
     right: 5px;
-  }
-
-  #languageSelect {
-    padding: 6px 8px;
-    font-size: 12px;
   }
 
   #themeToggle, #optionsToggle {
@@ -502,6 +494,34 @@ body.dark-mode #loginButton:hover {
   background: #f5f5f5;
 }
 
+#optionsMenu li.option-control {
+  cursor: default;
+}
+
+#optionsMenu li.option-control:hover {
+  background: transparent;
+}
+
+.option-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #7f8c8d;
+}
+
+#optionsMenu select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #dcdfe6;
+  background: #fff;
+  color: #2c3e50;
+  font-size: 14px;
+}
+
 body.dark-mode #optionsMenu {
   background: #34495e;
   color: white;
@@ -509,4 +529,18 @@ body.dark-mode #optionsMenu {
 
 body.dark-mode #optionsMenu li:hover {
   background: #2c3e50;
+}
+
+body.dark-mode #optionsMenu li.option-control:hover {
+  background: transparent;
+}
+
+body.dark-mode .option-label {
+  color: #bdc3c7;
+}
+
+body.dark-mode #optionsMenu select {
+  background: #2c3e50;
+  color: #fff;
+  border-color: #4a6278;
 }

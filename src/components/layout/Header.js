@@ -14,11 +14,21 @@ const Header = ({ onOpenConverter, onOpenAbout, onOpenProfile }) => {
   // Handle language change
   const handleLanguageChange = (e) => {
     setLanguage(e.target.value);
+    setOptionsVisible(false);
   };
 
   // Handle theme toggle
   const handleThemeToggle = () => {
     toggleDarkMode();
+  };
+
+  const handleAuthAction = () => {
+    if (isAuthenticated) {
+      logout();
+    } else {
+      window.location.href = '/login.html';
+    }
+    setOptionsVisible(false);
   };
 
   // Handle options toggle
@@ -58,16 +68,6 @@ const Header = ({ onOpenConverter, onOpenAbout, onOpenProfile }) => {
   return (
     <header className="app-header">
       <div className="header-controls">
-        <select
-          id="languageSelect"
-          value={currentLang}
-          onChange={handleLanguageChange}
-          data-testid="languageSelect"
-        >
-          <option value="en">English</option>
-          <option value="it">Italiano</option>
-        </select>
-
         <div className="header-right">
           <ServerStatusBadge />
 
@@ -81,7 +81,7 @@ const Header = ({ onOpenConverter, onOpenAbout, onOpenProfile }) => {
 
           <button
             id="loginButton"
-            onClick={() => isAuthenticated ? logout() : window.location.href = '/login.html'}
+            onClick={handleAuthAction}
             aria-label={isAuthenticated ? 'Logout' : 'Login'}
             style={{ marginRight: '5px' }}
           >
@@ -100,6 +100,21 @@ const Header = ({ onOpenConverter, onOpenAbout, onOpenProfile }) => {
           {optionsVisible && (
             <div id="optionsMenu" ref={optionsMenuRef}>
               <ul>
+                <li id="optionLanguage" className="option-control">
+                  <label htmlFor="menuLanguageSelect" className="option-label">
+                    {currentLang === 'it' ? 'Lingua' : 'Language'}
+                  </label>
+                  <select
+                    id="menuLanguageSelect"
+                    value={currentLang}
+                    onChange={handleLanguageChange}
+                    data-testid="menuLanguageSelect"
+                  >
+                    <option value="en">English</option>
+                    <option value="it">Italiano</option>
+                  </select>
+                </li>
+
                 <li id="optionExperimental">
                   <label>
                     <input
@@ -126,6 +141,17 @@ const Header = ({ onOpenConverter, onOpenAbout, onOpenProfile }) => {
                     style={{ display: isMobileDevice() ? 'none' : 'list-item' }}
                   >
                     {translations[currentLang]?.converter?.title || 'Script Converter'}
+                  </li>
+                )}
+
+                {isMobileDevice() && (
+                  <li
+                    id="optionAccount"
+                    onClick={handleAuthAction}
+                  >
+                    {isAuthenticated
+                      ? (currentLang === 'it' ? 'Esci' : 'Logout')
+                      : (currentLang === 'it' ? 'Accedi' : 'Login')}
                   </li>
                 )}
 

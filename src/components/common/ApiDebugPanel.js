@@ -10,6 +10,7 @@ const ApiDebugPanel = () => {
   const [queueLength, setQueueLength] = useState(0);
   const [rpm, setRpm] = useState(openaiService.getRequestsPerMinute());
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth <= 768);
 
   // Update the API call count and queue length every second
   useEffect(() => {
@@ -22,14 +23,29 @@ const ApiDebugPanel = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Always show the panel, even when count is 0
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  if (isMobile && !isExpanded && apiCallCount === 0 && queueLength === 0 && !openaiService.isDebugMode()) {
+    return null;
+  }
+
+  const title = isMobile && !isExpanded
+    ? `API ${apiCallCount}`
+    : `OpenAI API Calls: ${apiCallCount}`;
 
   return (
     <div className={`api-debug-panel ${isExpanded ? 'expanded' : ''}`}>
       <div className="api-debug-header" onClick={() => setIsExpanded(!isExpanded)}>
         <span className="api-debug-icon">🔌</span>
         <span className="api-debug-title">
-          OpenAI API Calls: {apiCallCount}
+          {title}
           {queueLength > 0 && <span className="queue-badge">{queueLength}</span>}
         </span>
         <span className="api-debug-toggle">{isExpanded ? '▼' : '▲'}</span>
