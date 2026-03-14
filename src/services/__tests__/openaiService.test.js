@@ -25,6 +25,10 @@ Object.defineProperty(window, 'localStorage', {
 global.fetch = jest.fn(() =>
   Promise.resolve({
     ok: true,
+    headers: {
+      get: jest.fn(() => null)
+    },
+    text: () => Promise.resolve(''),
     blob: () => Promise.resolve(new Blob(['test audio data'], { type: 'audio/mpeg' })),
     json: () => Promise.resolve({})
   })
@@ -35,6 +39,24 @@ describe('OpenAI Service', () => {
     // Clear all mocks before each test
     jest.clearAllMocks();
     localStorageMock.clear();
+    openaiService.setApiKey('');
+    openaiService.audioCache.clear();
+    openaiService.requestTimestamps = [];
+    openaiService.rateLimitQueue = [];
+    openaiService.isProcessingQueue = false;
+    openaiService.setRequestsPerMinute(100);
+    openaiService.isTestMode = false;
+    global.fetch.mockImplementation(() =>
+      Promise.resolve({
+        ok: true,
+        headers: {
+          get: jest.fn(() => null)
+        },
+        text: () => Promise.resolve(''),
+        blob: () => Promise.resolve(new Blob(['test audio data'], { type: 'audio/mpeg' })),
+        json: () => Promise.resolve({})
+      })
+    );
   });
 
   describe('API Key Management', () => {
@@ -81,19 +103,7 @@ describe('OpenAI Service', () => {
 
   describe('Text-to-Speech', () => {
     it('should throw error if API key is not set', async () => {
-      // Clear the API key
-      openaiService.setApiKey('');
-
-      // Mock the implementation to throw the expected error
-      const originalTextToSpeech = openaiService.textToSpeech;
-      openaiService.textToSpeech = jest.fn().mockImplementation(() => {
-        throw new Error('OpenAI API key is not set');
-      });
-
       await expect(openaiService.textToSpeech('Hello')).rejects.toThrow('OpenAI API key is not set');
-
-      // Restore the original implementation
-      openaiService.textToSpeech = originalTextToSpeech;
     });
 
     it('should throw error if text is empty', async () => {
@@ -187,6 +197,10 @@ describe('OpenAI Service', () => {
       global.fetch.mockImplementationOnce(() =>
         Promise.resolve({
           ok: false,
+          headers: {
+            get: jest.fn(() => null)
+          },
+          text: () => Promise.resolve('Invalid API key'),
           json: () => Promise.resolve({ error: 'Invalid API key' }),
           statusText: 'Unauthorized'
         })
@@ -246,6 +260,69 @@ describe('OpenAI Service', () => {
       // Assertions
       expect(global.Audio).toHaveBeenCalledWith('blob:test-url');
       expect(mockAudio.play).toHaveBeenCalled();
+    });
+  });
+
+  describe('Speech-to-Text', () => {
+    it('calls the OpenAI transcription endpoint without forcing English', async () => {
+      openaiService.setApiKey('test-key');
+      global.fetch.mockClear();
+
+      global.fetch.mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: true,
+          headers: {
+            get: jest.fn(() => null)
+          },
+          json: () => Promise.resolve({ text: 'ciao mondo' })
+        })
+      );
+
+      const result = await openaiService.speechToText(
+        new Blob(['test audio data'], { type: 'audio/webm;codecs=opus' })
+      );
+
+      expect(result).toBe('ciao mondo');
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://api.openai.com/v1/audio/transcriptions',
+        expect.objectContaining({
+          method: 'POST',
+          headers: {
+            Authorization: 'Bearer test-key'
+          },
+          body: expect.any(FormData)
+        })
+      );
+
+      const formData = global.fetch.mock.calls[0][1].body;
+      expect(formData.get('model')).toBe(openaiService.sttModel);
+      expect(formData.get('language')).toBeNull();
+      expect(formData.get('file')).toBeInstanceOf(File);
+      expect(formData.get('file').name).toBe('recording.webm');
+    });
+
+    it('passes through an explicit language when provided', async () => {
+      openaiService.setApiKey('test-key');
+      global.fetch.mockClear();
+
+      global.fetch.mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: true,
+          headers: {
+            get: jest.fn(() => null)
+          },
+          json: () => Promise.resolve({ text: 'hello world' })
+        })
+      );
+
+      await openaiService.speechToText(
+        new Blob(['test audio data'], { type: 'audio/mp4' }),
+        { language: 'en' }
+      );
+
+      const formData = global.fetch.mock.calls[0][1].body;
+      expect(formData.get('language')).toBe('en');
+      expect(formData.get('file').name).toBe('recording.mp4');
     });
   });
 });

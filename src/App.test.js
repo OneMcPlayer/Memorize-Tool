@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import App from './App';
 
 test('renders the application title', () => {
@@ -7,9 +7,12 @@ test('renders the application title', () => {
   expect(titleElement).toBeInTheDocument();
 });
 
-test('renders language selector', () => {
+test('shows language selector inside the options menu', () => {
   render(<App />);
-  const languageSelector = screen.getByTestId('languageSelect');
+
+  fireEvent.click(screen.getByLabelText('Options menu'));
+
+  const languageSelector = screen.getByTestId('menuLanguageSelect');
   expect(languageSelector).toBeInTheDocument();
 });
 

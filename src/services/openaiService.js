@@ -10,7 +10,7 @@ class OpenAIService {
   constructor() {
     this.apiKey = localStorage.getItem('openai_api_key') || '';
     this.baseUrl = 'https://api.openai.com/v1';
-    this.serverBaseUrl = 'http://localhost:5000/api'; // Direct URL to server endpoints
+    this.serverBaseUrl = '/api'; // Use same-origin API routing for dev proxy and deployed environments
     this.serverTtsEndpoint = '/tts/speech'; // Server-side TTS endpoint with caching
     this.sttEndpoint = '/audio/transcriptions';
     this.ttsModels = {
@@ -298,7 +298,7 @@ class OpenAIService {
    * @param {Blob} audioBlob - The audio blob to convert to text
    * @returns {Promise<string>} A promise that resolves to the transcribed text
    */
-  async speechToText(audioBlob) {
+  async speechToText(audioBlob, options = {}) {
     if (!this.apiKey) {
       throw new Error('OpenAI API key is not set');
     }
@@ -327,7 +327,12 @@ class OpenAIService {
 
         formData.append('file', audioBlob, `recording.${fileExtension}`);
         formData.append('model', this.sttModel);
-        formData.append('language', 'en'); // Default to English, can be made configurable
+
+        // Let the transcription model auto-detect the spoken language unless the caller
+        // explicitly provides one. This keeps Italian and mixed-language scripts usable.
+        if (options.language) {
+          formData.append('language', options.language);
+        }
 
         // Log STT API call for debugging
         console.log('%c Making OpenAI Speech-to-Text API call...', 'background: #FF9800; color: white; padding: 2px 5px; border-radius: 3px;', {

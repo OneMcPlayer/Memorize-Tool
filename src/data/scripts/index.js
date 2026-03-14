@@ -12,6 +12,17 @@ import seGliUominiAvesseroLaCodaJson from './se-gli-uomini-avessero-la-coda.json
 import unaMoglieNervosaJson from './una-moglie-nervosa.json';
 import visitaCondoglianzeJson from './visita-condoglianze.json';
 import laGallinaCantaJson from './150-la-gallina-canta.json';
+import aPorteChiuseJson from './a-porte-chiuse.json';
+import aPorteChiuseTerzaScenaJson from './a-porte-chiuse-terza-scena.json';
+import finaleDiPartitaJson from './finale-di-partita.json';
+import ilCompleannoJson from './il-compleanno.json';
+import ilCalapranziJson from './il-calapranzi.json';
+import raccontoDInvernoJson from './racconto-dinverno.json';
+import misuraPerMisuraJson from './misura-per-misura.json';
+import laSignorinaJulieJson from './la-signorina-julie.json';
+import casaDiBambolaJson from './casa-di-bambola.json';
+import scenaFrateLorenzoJson from './scena-frate-lorenzo.json';
+import tartuffoJson from './tartuffo.json';
 
 // Script catalog
 export const scriptCatalog = [
@@ -69,6 +80,83 @@ export const scriptCatalog = [
     author: 'Achille Campanile',
     description: 'A comedy about a singing hen',
     language: 'it'
+  },
+  {
+    id: 'a-porte-chiuse',
+    title: 'A PORTE CHIUSE',
+    author: 'Jean-Paul Sartre',
+    description: 'Excerpt between Garcin and the waiter from No Exit',
+    language: 'it'
+  },
+  {
+    id: 'a-porte-chiuse-terza-scena',
+    title: 'A PORTE CHIUSE - TERZA SCENA',
+    author: 'Jean-Paul Sartre',
+    description: 'Third-scene excerpt featuring Garcin, Ines, and the waiter',
+    language: 'it'
+  },
+  {
+    id: 'finale-di-partita',
+    title: 'FINALE DI PARTITA',
+    author: 'Samuel Beckett',
+    description: 'Excerpt between Hamm and Clov from Endgame',
+    language: 'it'
+  },
+  {
+    id: 'il-compleanno',
+    title: 'IL COMPLEANNO',
+    author: 'Harold Pinter',
+    description: 'Excerpt between Goldberg and McCann from The Birthday Party',
+    language: 'it'
+  },
+  {
+    id: 'il-calapranzi',
+    title: 'IL CALAPRANZI',
+    author: 'Harold Pinter',
+    description: 'Excerpt between Ben and Gus from The Dumb Waiter',
+    language: 'it'
+  },
+  {
+    id: 'racconto-dinverno',
+    title: 'RACCONTO D\'INVERNO',
+    author: 'William Shakespeare',
+    description: 'Excerpt between Leonte and Camillo from The Winter\'s Tale',
+    language: 'it'
+  },
+  {
+    id: 'misura-per-misura',
+    title: 'MISURA PER MISURA',
+    author: 'William Shakespeare',
+    description: 'Excerpt between Angelo and Isabella from Measure for Measure',
+    language: 'it'
+  },
+  {
+    id: 'la-signorina-julie',
+    title: 'LA SIGNORINA JULIE',
+    author: 'August Strindberg',
+    description: 'Excerpt between Jean, Kristina, and Miss Julie',
+    language: 'it'
+  },
+  {
+    id: 'casa-di-bambola',
+    title: 'CASA DI BAMBOLA',
+    author: 'Henrik Ibsen',
+    description: 'Excerpt between Nora and Krogstad from A Doll\'s House',
+    language: 'it'
+  },
+  {
+    id: 'scena-frate-lorenzo',
+    title: 'SCENA FRATE LORENZO',
+    author: 'William Shakespeare',
+    description: 'Scene between Romeo and Friar Laurence from Romeo and Juliet',
+    language: 'it'
+  },
+  {
+    id: 'tartuffo',
+    title: 'TARTUFFO',
+    author: 'Moliere',
+    description: 'Excerpt between Orgone, Marianna, and Dorina',
+    language: 'it'
   }
 ];
 
@@ -95,6 +183,28 @@ export const getScriptContent = (scriptId) => {
       return visitaCondoglianzeJson;
     case '150-la-gallina-canta':
       return laGallinaCantaJson;
+    case 'a-porte-chiuse':
+      return aPorteChiuseJson;
+    case 'a-porte-chiuse-terza-scena':
+      return aPorteChiuseTerzaScenaJson;
+    case 'finale-di-partita':
+      return finaleDiPartitaJson;
+    case 'il-compleanno':
+      return ilCompleannoJson;
+    case 'il-calapranzi':
+      return ilCalapranziJson;
+    case 'racconto-dinverno':
+      return raccontoDInvernoJson;
+    case 'misura-per-misura':
+      return misuraPerMisuraJson;
+    case 'la-signorina-julie':
+      return laSignorinaJulieJson;
+    case 'casa-di-bambola':
+      return casaDiBambolaJson;
+    case 'scena-frate-lorenzo':
+      return scenaFrateLorenzoJson;
+    case 'tartuffo':
+      return tartuffoJson;
     default:
       // Script not found
       return '';

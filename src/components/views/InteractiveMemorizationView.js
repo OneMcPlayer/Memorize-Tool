@@ -374,6 +374,16 @@ const InteractiveMemorizationView = ({
   const handleSaidMyLine = async () => {
     if (!currentData.current || isEvaluating) return;
 
+    let recordedAudio = null;
+
+    if (micSupported && (micPermission || micRecording)) {
+      try {
+        recordedAudio = await stopRecording();
+      } catch (err) {
+        console.error('Error stopping microphone recording:', err);
+      }
+    }
+
     setIsEvaluating(true);
 
     let evaluation = {
@@ -386,11 +396,8 @@ const InteractiveMemorizationView = ({
     try {
       let transcript = '';
 
-      if (micSupported && (micPermission || micRecording)) {
-        const audioBlob = await stopRecording();
-        if (audioBlob && audioBlob.size > 0) {
-          transcript = await openaiService.speechToText(audioBlob);
-        }
+      if (recordedAudio && recordedAudio.size > 0) {
+        transcript = await openaiService.speechToText(recordedAudio);
       }
 
       if (transcript) {

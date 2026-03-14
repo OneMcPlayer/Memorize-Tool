@@ -1,7 +1,30 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 
-const isNavigatorAvailable = typeof navigator !== 'undefined' && !!navigator.mediaDevices;
-const isMediaRecorderAvailable = typeof window !== 'undefined' && typeof window.MediaRecorder !== 'undefined';
+const hasNavigatorMediaDevices = () => typeof navigator !== 'undefined' && !!navigator.mediaDevices;
+const hasMediaRecorder = () => typeof window !== 'undefined' && typeof window.MediaRecorder !== 'undefined';
+const preferredAudioConstraints = {
+  audio: {
+    echoCancellation: true,
+    noiseSuppression: true,
+    sampleRate: 44100
+  }
+};
+
+export const getPreferredAudioConstraints = () => preferredAudioConstraints;
+
+export const getPreferredMimeType = () => {
+  if (!hasMediaRecorder() || typeof window.MediaRecorder.isTypeSupported !== 'function') {
+    return '';
+  }
+
+  const preferredTypes = [
+    'audio/webm;codecs=opus',
+    'audio/webm',
+    'audio/mp4'
+  ];
+
+  return preferredTypes.find(type => window.MediaRecorder.isTypeSupported(type)) || '';
+};
 
 const useMicrophoneRecorder = () => {
   const [hasPermission, setHasPermission] = useState(false);
@@ -12,7 +35,7 @@ const useMicrophoneRecorder = () => {
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
 
-  const isSupported = isNavigatorAvailable && isMediaRecorderAvailable;
+  const isSupported = hasNavigatorMediaDevices() && hasMediaRecorder();
 
   const releaseStream = useCallback(() => {
     if (mediaStreamRef.current) {
@@ -33,7 +56,7 @@ const useMicrophoneRecorder = () => {
     }
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia(getPreferredAudioConstraints());
       mediaStreamRef.current = stream;
       setHasPermission(true);
       setError(null);
@@ -59,14 +82,16 @@ const useMicrophoneRecorder = () => {
     }
 
     if (!mediaStreamRef.current) {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia(getPreferredAudioConstraints());
       mediaStreamRef.current = stream;
     }
 
     try {
-      const recorder = new MediaRecorder(mediaStreamRef.current, {
-        mimeType: 'audio/webm'
-      });
+      const preferredMimeType = getPreferredMimeType();
+      const recorderOptions = preferredMimeType ? { mimeType: preferredMimeType } : undefined;
+      const recorder = recorderOptions
+        ? new MediaRecorder(mediaStreamRef.current, recorderOptions)
+        : new MediaRecorder(mediaStreamRef.current);
 
       chunksRef.current = [];
 
@@ -114,7 +139,9 @@ const useMicrophoneRecorder = () => {
 
       const finalize = () => {
         try {
-          const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+          const blob = new Blob(chunksRef.current, {
+            type: recorder.mimeType || getPreferredMimeType() || 'audio/webm'
+          });
           chunksRef.current = [];
           resolve(blob);
         } catch (err) {
