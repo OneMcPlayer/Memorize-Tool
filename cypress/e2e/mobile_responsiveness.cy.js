@@ -1,4 +1,7 @@
 describe('Mobile Responsiveness', () => {
+  const currentScriptId = 'il-calapranzi';
+  const practiceCharacter = 'BEN';
+
   beforeEach(() => {
     cy.visit('/');
   });
@@ -13,11 +16,11 @@ describe('Mobile Responsiveness', () => {
     // Verify header controls are visible and properly positioned
     cy.get('.header-controls').should('be.visible');
     
-    // Select the sample script
-    cy.get('#scriptLibrary').select('sample-script');
+    // Select a current-year script
+    cy.get('#scriptLibrary').select(currentScriptId);
     
     // Select a character
-    cy.get('#characterSelect').select('ALICE');
+    cy.get('#characterSelect').select(practiceCharacter);
     
     // Set context lines
     cy.get('#precedingCount').clear().type('1');
@@ -49,11 +52,11 @@ describe('Mobile Responsiveness', () => {
     // Check that the app content adjusts to landscape orientation
     cy.get('.app-content').should('be.visible');
     
-    // Select the sample script
-    cy.get('#scriptLibrary').select('sample-script');
+    // Select a current-year script
+    cy.get('#scriptLibrary').select(currentScriptId);
     
     // Select a character
-    cy.get('#characterSelect').select('ALICE');
+    cy.get('#characterSelect').select(practiceCharacter);
     
     // Set context lines
     cy.get('#precedingCount').clear().type('1');

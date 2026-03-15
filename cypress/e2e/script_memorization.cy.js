@@ -1,39 +1,43 @@
 describe('Script Memorization Feature', () => {
+  const currentScriptId = 'il-calapranzi';
+  const currentScriptTitle = 'IL CALAPRANZI';
+  const practiceCharacter = 'BEN';
+
   beforeEach(() => {
     // Visit the application before each test
     cy.visit('http://localhost:3000');
   });
 
-  it('should load the sample script and detect characters', () => {
-    // Select the sample script
-    cy.get('#scriptLibrary').select('sample-script');
+  it('should load the current-year script and detect characters', () => {
+    // Select a current-year script
+    cy.get('#scriptLibrary').select(currentScriptId);
 
     // Verify that the script is loaded
     cy.contains('View Full Script').should('be.visible').click();
 
     // Verify that the script modal shows the correct content
-    cy.contains('Sample Script').should('be.visible');
-    cy.contains('ALICE').should('be.visible');
-    cy.contains('BOB').should('be.visible');
-    cy.contains('NARRATOR').should('be.visible');
+    cy.contains(currentScriptTitle).should('be.visible');
+    cy.contains('BEN').should('be.visible');
+    cy.contains('GUS').should('be.visible');
+    cy.contains('DIDASCALIA').should('be.visible');
 
     // Close the modal
     cy.contains('Close').click();
 
     // Verify that characters are detected
     cy.get('#characterSelect').should('be.visible');
-    cy.get('#characterSelect option').should('have.length.at.least', 3); // At least ALICE, BOB, and NARRATOR
-    cy.get('#characterSelect option').should('contain', 'ALICE');
-    cy.get('#characterSelect option').should('contain', 'BOB');
-    cy.get('#characterSelect option').should('contain', 'NARRATOR');
+    cy.get('#characterSelect option').should('have.length.at.least', 3);
+    cy.get('#characterSelect option').should('contain', 'BEN');
+    cy.get('#characterSelect option').should('contain', 'GUS');
+    cy.get('#characterSelect option').should('contain', 'DIDASCALIA');
   });
 
-  it('should extract lines for ALICE character', () => {
-    // Select the sample script
-    cy.get('#scriptLibrary').select('sample-script');
+  it('should extract lines for the selected current-year character', () => {
+    // Select a current-year script
+    cy.get('#scriptLibrary').select(currentScriptId);
 
-    // Select ALICE character
-    cy.get('#characterSelect').select('ALICE');
+    // Select the practice character
+    cy.get('#characterSelect').select(practiceCharacter);
 
     // Set context lines to 1
     cy.get('#precedingCount').clear().type('1');
@@ -51,12 +55,12 @@ describe('Script Memorization Feature', () => {
     cy.contains('Verify My Line').should('be.visible');
   });
 
-  it('should correctly progress through ALICE lines', () => {
-    // Select the sample script
-    cy.get('#scriptLibrary').select('sample-script');
+  it('should correctly progress through current-year lines', () => {
+    // Select a current-year script
+    cy.get('#scriptLibrary').select(currentScriptId);
 
-    // Select ALICE character
-    cy.get('#characterSelect').select('ALICE');
+    // Select the practice character
+    cy.get('#characterSelect').select(practiceCharacter);
 
     // Set context lines to 1
     cy.get('#precedingCount').clear().type('1');
@@ -73,7 +77,7 @@ describe('Script Memorization Feature', () => {
 
     // Verify that the line is revealed
     cy.get('#card.revealed').should('exist');
-    cy.get('.card-content').should('contain', 'ALICE');
+    cy.get('.card-content').should('contain', practiceCharacter);
 
     // Wait for progress bar to update
     cy.wait(500);
@@ -101,11 +105,11 @@ describe('Script Memorization Feature', () => {
   });
 
   it('should allow skipping to next line', () => {
-    // Select the sample script
-    cy.get('#scriptLibrary').select('sample-script');
+    // Select a current-year script
+    cy.get('#scriptLibrary').select(currentScriptId);
 
-    // Select ALICE character
-    cy.get('#characterSelect').select('ALICE');
+    // Select the practice character
+    cy.get('#characterSelect').select(practiceCharacter);
 
     // Set context lines to 1
     cy.get('#precedingCount').clear().type('1');
