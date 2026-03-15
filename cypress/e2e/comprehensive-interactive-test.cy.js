@@ -9,13 +9,13 @@ describe('Comprehensive Interactive Mode Test', () => {
     cy.contains('Script Memorization', { timeout: 10000 }).should('be.visible');
     
     // Select the sample script
-    cy.get('#scriptLibrary').select('sample-script');
+    cy.get('#scriptLibrary').select('il-calapranzi');
     
     // Wait for character selection to appear
     cy.contains('Select Your Character').should('be.visible');
     
-    // Select the ALICE character
-    cy.get('select#characterSelect').select('ALICE');
+    // Select the BEN character
+    cy.get('select#characterSelect').select('BEN');
   });
 
   it('should navigate through the complete interactive mode flow', () => {
@@ -136,7 +136,7 @@ describe('Comprehensive Interactive Mode Test', () => {
         cy.wait(1000);
         
         // Verify that the user's line is shown
-        cy.contains('ALICE:', { timeout: 5000 }).should('be.visible');
+        cy.contains('BEN:', { timeout: 5000 }).should('be.visible');
         
         // Look for the "Continue to Next Line" button and click it
         cy.get('button').contains(/Continue|Next Line|Continue to Next Line/i, { timeout: 5000 })

@@ -11,16 +11,16 @@ describe('Step-by-Step Interactive Mode Test', () => {
     cy.log('Script Memorization title found');
     
     // Select the sample script
-    cy.get('#scriptLibrary').select('sample-script');
+    cy.get('#scriptLibrary').select('il-calapranzi');
     cy.log('Sample script selected');
     
     // Wait for character selection to appear
     cy.contains('Select Your Character').should('be.visible');
     cy.log('Character selection prompt found');
     
-    // Select the ALICE character
-    cy.get('select#characterSelect').select('ALICE');
-    cy.log('ALICE character selected');
+    // Select the BEN character
+    cy.get('select#characterSelect').select('BEN');
+    cy.log('BEN character selected');
   });
 
   it('Step 1: Should navigate to interactive mode', () => {
@@ -120,7 +120,7 @@ describe('Step-by-Step Interactive Mode Test', () => {
         
         // Check if the user's line is shown
         cy.get('body').then($body => {
-          const hasUserLine = $body.text().includes("ALICE:");
+          const hasUserLine = $body.text().includes("BEN:");
           
           if (hasUserLine) {
             cy.log('User line detected');
@@ -249,7 +249,7 @@ describe('Step-by-Step Interactive Mode Test', () => {
         
         // Check if the user's line is shown
         cy.get('body').then($body => {
-          const hasUserLine = $body.text().includes("ALICE:");
+          const hasUserLine = $body.text().includes("BEN:");
           
           if (hasUserLine) {
             cy.log('User line detected after clicking Need Help');

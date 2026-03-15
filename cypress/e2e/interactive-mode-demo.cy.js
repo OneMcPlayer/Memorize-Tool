@@ -9,13 +9,13 @@ describe('Interactive Mode Demo Test', () => {
     cy.contains('Script Memorization').should('be.visible');
 
     // Select the sample script
-    cy.get('#scriptLibrary').select('sample-script');
+    cy.get('#scriptLibrary').select('il-calapranzi');
 
     // Wait for character selection to appear
     cy.contains('Select Your Character').should('be.visible');
 
-    // Select the ALICE character
-    cy.get('select#characterSelect').select('ALICE');
+    // Select the BEN character
+    cy.get('select#characterSelect').select('BEN');
   });
 
   it('should navigate through the interactive mode with debug mode enabled', () => {
@@ -35,7 +35,7 @@ describe('Interactive Mode Demo Test', () => {
     cy.wait(3000);
 
     // Verify the user's turn prompt appears
-    cy.contains("It's your turn, ALICE!").should('be.visible');
+    cy.contains("It's your turn, BEN!").should('be.visible');
 
     // Verify the "I Said My Line" button appears
     cy.contains('button', 'I Said My Line').should('be.visible');
@@ -44,7 +44,7 @@ describe('Interactive Mode Demo Test', () => {
     cy.contains('button', 'I Said My Line').click();
 
     // Verify that the user's line is shown
-    cy.contains('ALICE:').should('be.visible');
+    cy.contains('BEN:').should('be.visible');
 
     // Verify the "Continue to Next Line" button appears
     cy.contains('button', 'Continue to Next Line').should('be.visible');
@@ -56,13 +56,13 @@ describe('Interactive Mode Demo Test', () => {
     cy.wait(3000);
 
     // Verify we're at the user's turn again
-    cy.contains("It's your turn, ALICE!").should('be.visible');
+    cy.contains("It's your turn, BEN!").should('be.visible');
 
     // Click the "Need Help?" button this time
     cy.contains('button', 'Need Help?').click();
 
     // Verify that the user's line is shown
-    cy.contains('ALICE:').should('be.visible');
+    cy.contains('BEN:').should('be.visible');
 
     // Click the "Continue to Next Line" button
     cy.contains('button', 'Continue to Next Line').click();
@@ -71,7 +71,7 @@ describe('Interactive Mode Demo Test', () => {
     cy.wait(3000);
 
     // Verify we're at the user's turn again
-    cy.contains("It's your turn, ALICE!").should('be.visible');
+    cy.contains("It's your turn, BEN!").should('be.visible');
 
     // Go back to the menu
     cy.contains('button', 'Back to Menu').click();

@@ -6,13 +6,13 @@ describe('Debug Interactive Mode Test', () => {
     cy.visit('/');
     
     // Select a sample script
-    cy.get('#scriptLibrary').select('sample-script');
+    cy.get('#scriptLibrary').select('il-calapranzi');
     
     // Wait for character selection to appear
     cy.contains('Select Your Character').should('be.visible');
     
     // Select a character
-    cy.get('select#characterSelect').select('ALICE');
+    cy.get('select#characterSelect').select('BEN');
     
     // Click the Interactive Practice button
     cy.contains('Interactive Practice').click();

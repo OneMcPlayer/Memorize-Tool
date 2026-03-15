@@ -13,13 +13,13 @@ describe('Verify Interactive Mode', () => {
     cy.get('#scriptLibrary').should('exist');
     
     // Select a sample script
-    cy.get('#scriptLibrary').select('sample-script');
+    cy.get('#scriptLibrary').select('il-calapranzi');
     
     // Wait for character selection to appear
     cy.contains('Select Your Character').should('be.visible');
     
     // Select a character
-    cy.get('select#characterSelect').select('ALICE');
+    cy.get('select#characterSelect').select('BEN');
     
     // Verify the Interactive Practice button exists
     cy.contains('Interactive Practice').should('exist');

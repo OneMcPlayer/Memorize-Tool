@@ -9,13 +9,13 @@ describe('Force Interactive Mode Test', () => {
     cy.contains('Script Memorization', { timeout: 10000 }).should('be.visible');
     
     // Select the sample script
-    cy.get('#scriptLibrary').select('sample-script');
+    cy.get('#scriptLibrary').select('il-calapranzi');
     
     // Wait for character selection to appear
     cy.contains('Select Your Character').should('be.visible');
     
-    // Select the ALICE character
-    cy.get('select#characterSelect').select('ALICE');
+    // Select the BEN character
+    cy.get('select#characterSelect').select('BEN');
     
     // Find the Interactive Practice button by ID and click it with force option
     cy.get('#memorizationPracticeButton').click({ force: true });

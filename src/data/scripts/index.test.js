@@ -1,6 +1,25 @@
 import { convertJsonScriptToText, getAvailableScripts, getScriptContent } from './index';
 
 describe('script library', () => {
+  it('does not include the retired 2025 scripts in the catalog', () => {
+    const scripts = getAvailableScripts();
+    const retiredIds = [
+      'sample-script',
+      'la-rivoluzione',
+      'inventore-cavallo',
+      'erano-un-po-nervosi',
+      'se-gli-uomini-avessero-la-coda',
+      'una-moglie-nervosa',
+      'visita-condoglianze',
+      '150-la-gallina-canta'
+    ];
+
+    retiredIds.forEach(scriptId => {
+      expect(scripts.some(script => script.id === scriptId)).toBe(false);
+      expect(getScriptContent(scriptId)).toBe('');
+    });
+  });
+
   it('includes Scena Frate Lorenzo in the catalog', () => {
     const scripts = getAvailableScripts();
 

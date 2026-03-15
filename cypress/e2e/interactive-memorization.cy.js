@@ -21,13 +21,13 @@ describe('Interactive Memorization Practice', () => {
     cy.visit('/');
 
     // Select a sample script from the dropdown instead of typing in a textarea
-    cy.get('#scriptLibrary').select('sample-script');
+    cy.get('#scriptLibrary').select('il-calapranzi');
 
     // Wait for character selection to appear
     cy.contains('Select Your Character').should('be.visible');
 
     // Select a character
-    cy.get('select#characterSelect').select('ALICE');
+    cy.get('select#characterSelect').select('BEN');
   });
 
   it('should navigate to the interactive memorization practice page', () => {

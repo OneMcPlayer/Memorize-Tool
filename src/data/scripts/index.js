@@ -4,14 +4,15 @@
  */
 
 // Import JSON script files
-import sampleScriptJson from './sample-script.json';
-import laRivoluzioneJson from './la-rivoluzione.json';
-import inventoreCavalloJson from './inventore-cavallo.json';
-import eranoUnPoNervosiJson from './erano-un-po-nervosi.json';
-import seGliUominiAvesseroLaCodaJson from './se-gli-uomini-avessero-la-coda.json';
-import unaMoglieNervosaJson from './una-moglie-nervosa.json';
-import visitaCondoglianzeJson from './visita-condoglianze.json';
-import laGallinaCantaJson from './150-la-gallina-canta.json';
+// Retired 2025 library entries kept here as a reference:
+// import sampleScriptJson from './sample-script.json';
+// import laRivoluzioneJson from './la-rivoluzione.json';
+// import inventoreCavalloJson from './inventore-cavallo.json';
+// import eranoUnPoNervosiJson from './erano-un-po-nervosi.json';
+// import seGliUominiAvesseroLaCodaJson from './se-gli-uomini-avessero-la-coda.json';
+// import unaMoglieNervosaJson from './una-moglie-nervosa.json';
+// import visitaCondoglianzeJson from './visita-condoglianze.json';
+// import laGallinaCantaJson from './150-la-gallina-canta.json';
 import aPorteChiuseJson from './a-porte-chiuse.json';
 import aPorteChiuseTerzaScenaJson from './a-porte-chiuse-terza-scena.json';
 import finaleDiPartitaJson from './finale-di-partita.json';
@@ -26,61 +27,62 @@ import tartuffoJson from './tartuffo.json';
 
 // Script catalog
 export const scriptCatalog = [
-  {
-    id: 'sample-script',
-    title: 'Sample Script',
-    description: 'A simple conversation between two friends about a school project',
-    language: 'en'
-  },
-  {
-    id: 'la-rivoluzione',
-    title: 'LA RIVOLUZIONE',
-    author: 'Achille Campanile',
-    description: 'A satirical play about a revolution and a prefect with a mechanical arm',
-    language: 'it'
-  },
-  {
-    id: 'inventore-cavallo',
-    title: 'L\'INVENTORE DEL CAVALLO',
-    author: 'Achille Campanile',
-    description: 'A humorous play about a man who claims to have invented the horse',
-    language: 'it'
-  },
-  {
-    id: 'erano-un-po-nervosi',
-    title: 'ERANO UN PO\' NERVOSI',
-    author: 'Achille Campanile',
-    description: 'A comedy about nervous characters',
-    language: 'it'
-  },
-  {
-    id: 'se-gli-uomini-avessero-la-coda',
-    title: 'SE GLI UOMINI AVESSERO LA CODA',
-    author: 'Achille Campanile',
-    description: 'A satirical play imagining if humans had tails',
-    language: 'it'
-  },
-  {
-    id: 'una-moglie-nervosa',
-    title: 'UNA MOGLIE NERVOSA',
-    author: 'Achille Campanile',
-    description: 'A comedy about a nervous wife',
-    language: 'it'
-  },
-  {
-    id: 'visita-condoglianze',
-    title: 'VISITA DI CONDOGLIANZE',
-    author: 'Achille Campanile',
-    description: 'A humorous play about a condolence visit',
-    language: 'it'
-  },
-  {
-    id: '150-la-gallina-canta',
-    title: '150 - LA GALLINA CANTA',
-    author: 'Achille Campanile',
-    description: 'A comedy about a singing hen',
-    language: 'it'
-  },
+  // Retired 2025 library entries:
+  // {
+  //   id: 'sample-script',
+  //   title: 'Sample Script',
+  //   description: 'A simple conversation between two friends about a school project',
+  //   language: 'en'
+  // },
+  // {
+  //   id: 'la-rivoluzione',
+  //   title: 'LA RIVOLUZIONE',
+  //   author: 'Achille Campanile',
+  //   description: 'A satirical play about a revolution and a prefect with a mechanical arm',
+  //   language: 'it'
+  // },
+  // {
+  //   id: 'inventore-cavallo',
+  //   title: 'L\'INVENTORE DEL CAVALLO',
+  //   author: 'Achille Campanile',
+  //   description: 'A humorous play about a man who claims to have invented the horse',
+  //   language: 'it'
+  // },
+  // {
+  //   id: 'erano-un-po-nervosi',
+  //   title: 'ERANO UN PO\' NERVOSI',
+  //   author: 'Achille Campanile',
+  //   description: 'A comedy about nervous characters',
+  //   language: 'it'
+  // },
+  // {
+  //   id: 'se-gli-uomini-avessero-la-coda',
+  //   title: 'SE GLI UOMINI AVESSERO LA CODA',
+  //   author: 'Achille Campanile',
+  //   description: 'A satirical play imagining if humans had tails',
+  //   language: 'it'
+  // },
+  // {
+  //   id: 'una-moglie-nervosa',
+  //   title: 'UNA MOGLIE NERVOSA',
+  //   author: 'Achille Campanile',
+  //   description: 'A comedy about a nervous wife',
+  //   language: 'it'
+  // },
+  // {
+  //   id: 'visita-condoglianze',
+  //   title: 'VISITA DI CONDOGLIANZE',
+  //   author: 'Achille Campanile',
+  //   description: 'A humorous play about a condolence visit',
+  //   language: 'it'
+  // },
+  // {
+  //   id: '150-la-gallina-canta',
+  //   title: '150 - LA GALLINA CANTA',
+  //   author: 'Achille Campanile',
+  //   description: 'A comedy about a singing hen',
+  //   language: 'it'
+  // },
   {
     id: 'a-porte-chiuse',
     title: 'A PORTE CHIUSE',
@@ -167,22 +169,23 @@ export const scriptCatalog = [
  */
 export const getScriptContent = (scriptId) => {
   switch (scriptId) {
-    case 'sample-script':
-      return sampleScriptJson;
-    case 'la-rivoluzione':
-      return laRivoluzioneJson;
-    case 'inventore-cavallo':
-      return inventoreCavalloJson;
-    case 'erano-un-po-nervosi':
-      return eranoUnPoNervosiJson;
-    case 'se-gli-uomini-avessero-la-coda':
-      return seGliUominiAvesseroLaCodaJson;
-    case 'una-moglie-nervosa':
-      return unaMoglieNervosaJson;
-    case 'visita-condoglianze':
-      return visitaCondoglianzeJson;
-    case '150-la-gallina-canta':
-      return laGallinaCantaJson;
+    // Retired 2025 library entries:
+    // case 'sample-script':
+    //   return sampleScriptJson;
+    // case 'la-rivoluzione':
+    //   return laRivoluzioneJson;
+    // case 'inventore-cavallo':
+    //   return inventoreCavalloJson;
+    // case 'erano-un-po-nervosi':
+    //   return eranoUnPoNervosiJson;
+    // case 'se-gli-uomini-avessero-la-coda':
+    //   return seGliUominiAvesseroLaCodaJson;
+    // case 'una-moglie-nervosa':
+    //   return unaMoglieNervosaJson;
+    // case 'visita-condoglianze':
+    //   return visitaCondoglianzeJson;
+    // case '150-la-gallina-canta':
+    //   return laGallinaCantaJson;
     case 'a-porte-chiuse':
       return aPorteChiuseJson;
     case 'a-porte-chiuse-terza-scena':
