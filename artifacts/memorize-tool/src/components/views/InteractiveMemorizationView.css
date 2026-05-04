@@ -1,0 +1,962 @@
+.interactive-memorization-view {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.interactive-memorization-view h1 {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.live-error {
+  background: rgba(244, 67, 54, 0.1);
+  color: #b71c1c;
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.live-stage {
+  background: var(--bg-secondary, #f5f5f5);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.other-lines-block h3,
+.user-line-block h3 {
+  margin: 0 0 10px 0;
+  font-size: 1rem;
+  color: var(--text-secondary, #666);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.other-lines-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.other-line {
+  background: rgba(74, 144, 226, 0.08);
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 1rem;
+  border-left: 3px solid transparent;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
+}
+
+.other-line.speaking {
+  background: rgba(74, 144, 226, 0.2);
+  border-left-color: var(--primary, #4a90e2);
+  font-weight: 500;
+}
+
+.user-line-block {
+  background: rgba(255, 167, 38, 0.08);
+  padding: 14px 16px;
+  border-radius: 8px;
+  border: 2px dashed transparent;
+}
+
+.user-line-block.active {
+  border-color: rgba(255, 167, 38, 0.5);
+  background: rgba(255, 167, 38, 0.14);
+}
+
+.user-line-text {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.user-line-hidden {
+  margin: 0;
+  color: var(--text-secondary, #666);
+  font-size: 0.95rem;
+}
+
+.evaluation-panel {
+  margin-top: 8px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.evaluation-panel p {
+  margin: 4px 0;
+}
+
+.evaluation-panel.correct {
+  background: rgba(76, 175, 80, 0.15);
+}
+.evaluation-panel.close {
+  background: rgba(255, 193, 7, 0.18);
+}
+.evaluation-panel.off {
+  background: rgba(244, 67, 54, 0.1);
+}
+.evaluation-panel.error {
+  background: rgba(244, 67, 54, 0.18);
+}
+.evaluation-panel.no-input {
+  background: rgba(255, 167, 38, 0.12);
+}
+
+.evaluation-message {
+  font-style: italic;
+}
+
+.live-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.live-controls button {
+  min-width: 140px;
+  padding: 12px 18px;
+  border-radius: 10px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    opacity 0.2s,
+    transform 0.05s;
+}
+
+.live-controls button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.play-next-btn {
+  background: var(--primary, #4a90e2);
+  color: #fff;
+}
+
+.record-btn {
+  background: #ef5350;
+  color: #fff;
+}
+
+.record-btn.recording {
+  background: #b71c1c;
+  animation: live-pulse 1.2s ease-in-out infinite;
+}
+
+.reveal-line-btn {
+  background: #ffa726;
+  color: #fff;
+}
+
+.next-line-btn {
+  background: #66bb6a;
+  color: #fff;
+}
+
+@keyframes live-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(244, 67, 54, 0);
+  }
+}
+
+.mic-status,
+.mic-error {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-secondary, #666);
+  margin: 6px 0;
+}
+
+.mic-error {
+  color: #d32f2f;
+}
+
+.test-complete {
+  text-align: center;
+  padding: 20px;
+}
+
+.results-summary {
+  background: var(--bg-secondary, #f5f5f5);
+  padding: 20px;
+  border-radius: 12px;
+  margin: 20px 0;
+}
+
+.results-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.result-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #666);
+}
+
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+.test-complete-actions,
+.navigation-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.test-complete-actions .restart-btn,
+.navigation-buttons .restart-btn {
+  background: var(--primary, #4a90e2);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.navigation-buttons .debug-report-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(74, 144, 226, 0.08);
+  color: var(--primary, #4a90e2);
+  border: 1px solid rgba(74, 144, 226, 0.35);
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.navigation-buttons .debug-report-btn:hover {
+  background: rgba(74, 144, 226, 0.14);
+}
+
+.interactive-memorization-view .back-btn {
+  background: transparent;
+  border: 1px solid var(--border-color, #ddd);
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+body.dark-mode .live-stage,
+body.dark-mode .results-summary {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .navigation-buttons .debug-report-btn {
+  background: rgba(74, 144, 226, 0.14);
+  color: #9fc8ff;
+  border-color: rgba(159, 200, 255, 0.35);
+}
+
+/* ============================================================
+   Zen Mode
+   ============================================================ */
+
+.zen-view {
+  position: relative;
+  max-width: 100%;
+  min-height: calc(100vh - 80px);
+  margin: 0 auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  background:
+    radial-gradient(
+      circle at 50% 35%,
+      rgba(74, 144, 226, 0.1),
+      transparent 60%
+    ),
+    var(--bg-primary, #fafafa);
+  overflow: hidden;
+}
+
+body.dark-mode .zen-view {
+  background:
+    radial-gradient(
+      circle at 50% 35%,
+      rgba(74, 144, 226, 0.18),
+      transparent 60%
+    ),
+    #0e1117;
+}
+
+.zen-icon-btn {
+  position: absolute;
+  top: 18px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color, rgba(0, 0, 0, 0.1));
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--text-primary, #333);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+  transition:
+    background 0.18s,
+    transform 0.05s;
+  z-index: 5;
+}
+.zen-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
+.zen-icon-btn:active {
+  transform: scale(0.96);
+}
+.zen-icon-btn--back {
+  left: 18px;
+}
+.zen-icon-btn--restart {
+  right: 18px;
+  font-size: 1.1rem;
+}
+.zen-icon-btn--exit-zen {
+  right: 66px;
+  font-size: 1rem;
+}
+
+body.dark-mode .zen-icon-btn {
+  background: rgba(255, 255, 255, 0.06);
+  color: #e8e8e8;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+body.dark-mode .zen-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.zen-stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  width: 100%;
+  padding: 40px 0;
+}
+
+.zen-sphere {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zen-sphere__core {
+  position: absolute;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 30%,
+    rgba(255, 255, 255, 0.85),
+    rgba(74, 144, 226, 0.85) 60%,
+    rgba(40, 90, 180, 0.95)
+  );
+  box-shadow:
+    0 0 60px rgba(74, 144, 226, 0.45),
+    inset 0 -10px 30px rgba(0, 0, 0, 0.18);
+  transition:
+    background 0.6s ease,
+    box-shadow 0.6s ease,
+    transform 0.6s ease;
+}
+
+.zen-sphere__ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid rgba(74, 144, 226, 0.35);
+  opacity: 0;
+}
+
+.zen-sphere__ring--1 {
+  width: 160px;
+  height: 160px;
+}
+.zen-sphere__ring--2 {
+  width: 190px;
+  height: 190px;
+}
+.zen-sphere__ring--3 {
+  width: 220px;
+  height: 220px;
+}
+
+/* Idle: gentle slow breathing */
+.zen-sphere--idle .zen-sphere__core {
+  animation: zen-breathe 5s ease-in-out infinite;
+}
+
+/* AI speaking: faster pulse + outward rings */
+.zen-sphere--speaking .zen-sphere__core {
+  animation: zen-breathe 1.6s ease-in-out infinite;
+  background: radial-gradient(
+    circle at 35% 30%,
+    rgba(255, 255, 255, 0.9),
+    rgba(99, 175, 255, 0.95) 60%,
+    rgba(40, 110, 200, 1)
+  );
+  box-shadow:
+    0 0 90px rgba(74, 144, 226, 0.65),
+    inset 0 -10px 30px rgba(0, 0, 0, 0.2);
+}
+.zen-sphere--speaking .zen-sphere__ring {
+  animation: zen-ripple 2.4s ease-out infinite;
+}
+.zen-sphere--speaking .zen-sphere__ring--2 {
+  animation-delay: 0.6s;
+}
+.zen-sphere--speaking .zen-sphere__ring--3 {
+  animation-delay: 1.2s;
+}
+
+/* Your turn: warm amber breathing invite */
+.zen-sphere--your-turn .zen-sphere__core {
+  animation: zen-breathe 2.6s ease-in-out infinite;
+  background: radial-gradient(
+    circle at 35% 30%,
+    rgba(255, 245, 220, 0.95),
+    rgba(255, 183, 77, 0.95) 60%,
+    rgba(220, 130, 30, 1)
+  );
+  box-shadow:
+    0 0 80px rgba(255, 167, 38, 0.55),
+    inset 0 -10px 30px rgba(0, 0, 0, 0.2);
+}
+.zen-sphere--your-turn .zen-sphere__ring {
+  border-color: rgba(255, 167, 38, 0.4);
+  animation: zen-ripple 3s ease-out infinite;
+}
+.zen-sphere--your-turn .zen-sphere__ring--2 {
+  animation-delay: 0.75s;
+}
+.zen-sphere--your-turn .zen-sphere__ring--3 {
+  animation-delay: 1.5s;
+}
+
+/* Recording: deep red glow */
+.zen-sphere--recording .zen-sphere__core {
+  animation: zen-pulse-strong 1s ease-in-out infinite;
+  background: radial-gradient(
+    circle at 35% 30%,
+    rgba(255, 220, 220, 0.9),
+    rgba(239, 83, 80, 0.95) 55%,
+    rgba(150, 30, 30, 1)
+  );
+  box-shadow:
+    0 0 100px rgba(244, 67, 54, 0.7),
+    inset 0 -10px 30px rgba(0, 0, 0, 0.25);
+}
+.zen-sphere--recording .zen-sphere__ring {
+  border-color: rgba(244, 67, 54, 0.5);
+  animation: zen-ripple 1.6s ease-out infinite;
+}
+.zen-sphere--recording .zen-sphere__ring--2 {
+  animation-delay: 0.4s;
+}
+.zen-sphere--recording .zen-sphere__ring--3 {
+  animation-delay: 0.8s;
+}
+
+/* Success: brief green flash with outward burst */
+.zen-sphere--success .zen-sphere__core {
+  background: radial-gradient(
+    circle at 35% 30%,
+    rgba(220, 255, 220, 0.95),
+    rgba(102, 187, 106, 0.95) 55%,
+    rgba(46, 125, 50, 1)
+  );
+  box-shadow:
+    0 0 110px rgba(102, 187, 106, 0.7),
+    inset 0 -10px 30px rgba(0, 0, 0, 0.18);
+  animation: zen-success-pop 1.3s ease-out;
+}
+.zen-sphere--success .zen-sphere__ring {
+  border-color: rgba(102, 187, 106, 0.55);
+  animation: zen-ripple 1.3s ease-out;
+}
+.zen-sphere--success .zen-sphere__ring--2 {
+  animation-delay: 0.2s;
+}
+.zen-sphere--success .zen-sphere__ring--3 {
+  animation-delay: 0.4s;
+}
+
+@keyframes zen-success-pop {
+  0% {
+    transform: scale(0.95);
+  }
+  35% {
+    transform: scale(1.18);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Checking: spinner ring */
+.zen-sphere--checking .zen-sphere__core {
+  background: radial-gradient(
+    circle at 35% 30%,
+    rgba(255, 255, 255, 0.85),
+    rgba(180, 180, 200, 0.9) 60%,
+    rgba(90, 90, 110, 0.95)
+  );
+  box-shadow:
+    0 0 50px rgba(150, 150, 170, 0.4),
+    inset 0 -10px 30px rgba(0, 0, 0, 0.2);
+  animation: zen-breathe 2s ease-in-out infinite;
+}
+.zen-sphere--checking .zen-sphere__ring--1 {
+  border-top-color: var(--primary, #4a90e2);
+  border-right-color: rgba(74, 144, 226, 0.1);
+  border-bottom-color: rgba(74, 144, 226, 0.1);
+  border-left-color: rgba(74, 144, 226, 0.1);
+  opacity: 1;
+  animation: zen-spin 1.2s linear infinite;
+}
+
+@keyframes zen-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.07);
+  }
+}
+
+@keyframes zen-pulse-strong {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+@keyframes zen-ripple {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.25);
+    opacity: 0;
+  }
+}
+
+@keyframes zen-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.zen-caption {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text-primary, #333);
+  text-align: center;
+  letter-spacing: 0.01em;
+  opacity: 0.85;
+  min-height: 1.5em;
+}
+
+body.dark-mode .zen-caption {
+  color: #e8e8e8;
+}
+
+.zen-action-bar {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding-bottom: 24px;
+}
+
+.zen-action-btn {
+  min-width: 220px;
+  padding: 16px 32px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  background: var(--primary, #4a90e2);
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(74, 144, 226, 0.35);
+  transition:
+    transform 0.05s ease,
+    box-shadow 0.2s ease,
+    background 0.25s ease;
+}
+
+.zen-action-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(74, 144, 226, 0.45);
+}
+.zen-action-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.zen-action-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.zen-action-btn--record {
+  background: #ef5350;
+  box-shadow: 0 6px 20px rgba(239, 83, 80, 0.4);
+}
+.zen-action-btn--record:hover:not(:disabled) {
+  box-shadow: 0 8px 24px rgba(239, 83, 80, 0.5);
+}
+
+.zen-action-btn--stop {
+  background: #b71c1c;
+  box-shadow: 0 6px 20px rgba(183, 28, 28, 0.5);
+  animation: live-pulse 1.4s ease-in-out infinite;
+}
+
+.zen-action-btn--play {
+  background: var(--primary, #4a90e2);
+}
+
+.zen-action-btn--checking,
+.zen-action-btn--speaking,
+.zen-action-btn--idle {
+  background: rgba(120, 120, 130, 0.6);
+  box-shadow: none;
+}
+
+.zen-correction-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 10;
+  animation: zen-overlay-fade 0.35s ease-out;
+}
+
+.zen-correction-overlay__inner {
+  position: relative;
+  max-width: 560px;
+  width: 100%;
+  background: var(--bg-primary, #fff);
+  border-radius: 16px;
+  padding: 18px 18px 18px 18px;
+  padding-top: 44px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+.zen-correction-overlay__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color, rgba(0, 0, 0, 0.1));
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--text-primary, #333);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.18s,
+    transform 0.05s;
+  padding: 0;
+  margin: 0;
+  z-index: 1;
+}
+.zen-correction-overlay__close:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+.zen-correction-overlay__close:active {
+  transform: scale(0.94);
+}
+body.dark-mode .zen-correction-overlay__close {
+  background: rgba(255, 255, 255, 0.08);
+  color: #e8e8e8;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+body.dark-mode .zen-correction-overlay__close:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+body.dark-mode .zen-correction-overlay__inner {
+  background: #1a1d24;
+}
+
+@keyframes zen-overlay-fade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.zen-mic-status {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-secondary, #666);
+  margin: 6px 0;
+}
+
+/* ============================================================
+   Mobile responsive overrides for the classic live view
+   ============================================================ */
+@media (max-width: 480px) {
+  .interactive-memorization-view {
+    padding: 12px;
+  }
+
+  .live-stage {
+    padding: 14px;
+    gap: 14px;
+  }
+
+  .live-controls {
+    gap: 8px;
+  }
+
+  .live-controls button {
+    flex: 1 1 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding: 12px 14px;
+    font-size: 0.95rem;
+  }
+
+  .results-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .stat-value {
+    font-size: 1.3rem;
+  }
+
+  .stat-label {
+    font-size: 0.82rem;
+  }
+
+  .test-complete-actions,
+  .navigation-buttons {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .test-complete-actions .restart-btn,
+  .navigation-buttons .restart-btn,
+  .navigation-buttons .debug-report-btn,
+  .interactive-memorization-view .back-btn {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
+/* In-screen Zen toggle on classic live header */
+.live-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.live-header h1 {
+  margin: 0;
+  text-align: left;
+}
+
+.zen-mode-inline-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--text-secondary, #555);
+  user-select: none;
+}
+
+.zen-mode-inline-toggle input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.zen-mode-inline-toggle__switch {
+  position: relative;
+  width: 38px;
+  height: 22px;
+  border-radius: 999px;
+  background: rgba(120, 120, 130, 0.35);
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+}
+
+.zen-mode-inline-toggle__switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease;
+}
+
+.zen-mode-inline-toggle input:checked + .zen-mode-inline-toggle__switch {
+  background: var(--primary, #4a90e2);
+}
+
+.zen-mode-inline-toggle input:checked + .zen-mode-inline-toggle__switch::after {
+  transform: translateX(16px);
+}
+
+.zen-mode-inline-toggle input:focus-visible + .zen-mode-inline-toggle__switch {
+  outline: 2px solid var(--primary, #4a90e2);
+  outline-offset: 2px;
+}
+
+body.dark-mode .zen-mode-inline-toggle {
+  color: #d8d8d8;
+}
+
+/* ============================================================
+   Mobile: make the live (zen) practice view a true fullscreen
+   experience by escaping the .app-content card padding/margins
+   and pinning to the viewport edges (with safe-area insets).
+   ============================================================ */
+@media (max-width: 768px) {
+  .app-content:has(.zen-view) {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    min-height: 100dvh !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .zen-view {
+    min-height: 100dvh;
+    width: 100vw;
+    padding: 16px;
+    padding-top: max(16px, env(safe-area-inset-top, 0px));
+    padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    box-sizing: border-box;
+    border-radius: 0;
+  }
+
+  .zen-icon-btn {
+    top: max(12px, env(safe-area-inset-top, 0px));
+  }
+  .zen-icon-btn--back {
+    left: max(12px, env(safe-area-inset-left, 0px));
+  }
+  .zen-icon-btn--restart {
+    right: max(12px, env(safe-area-inset-right, 0px));
+  }
+  .zen-icon-btn--exit-zen {
+    right: calc(max(12px, env(safe-area-inset-right, 0px)) + 48px);
+  }
+}
+
+@media (max-width: 480px) {
+  .zen-icon-btn--exit-zen {
+    right: calc(max(8px, env(safe-area-inset-right, 0px)) + 48px);
+  }
+
+  .zen-sphere {
+    width: 180px;
+    height: 180px;
+  }
+  .zen-sphere__core {
+    width: 100px;
+    height: 100px;
+  }
+  .zen-sphere__ring--1 {
+    width: 130px;
+    height: 130px;
+  }
+  .zen-sphere__ring--2 {
+    width: 160px;
+    height: 160px;
+  }
+  .zen-sphere__ring--3 {
+    width: 180px;
+    height: 180px;
+  }
+  .zen-action-btn {
+    min-width: 180px;
+    padding: 14px 24px;
+    font-size: 1rem;
+  }
+  .zen-caption {
+    font-size: 1rem;
+  }
+}

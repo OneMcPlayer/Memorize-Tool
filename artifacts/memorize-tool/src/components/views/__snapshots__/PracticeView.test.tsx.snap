@@ -1,0 +1,104 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`PracticeView > renders the practice heading, context and the verify/finish buttons 1`] = `
+<div
+  class="practice-view"
+>
+  <h1>
+    Practice Mode
+  </h1>
+  <div
+    class="progress-bar"
+  >
+    <div
+      class="progress-fill"
+    />
+  </div>
+  <div
+    class="context-section"
+  >
+    <h3>
+      Context:
+    </h3>
+    <div
+      class="context-line"
+    >
+      HORATIO: Hail to your lordship!
+    </div>
+  </div>
+  <div
+    class="center action-buttons"
+  >
+    <button
+      class="primary-btn"
+      id="verifyButton"
+    >
+      Verify My Line
+    </button>
+    <button
+      class="secondary-btn finish-btn"
+      id="skipButton"
+    >
+      Finish Practice
+      <span
+        class="checkmark"
+      >
+        ✓
+      </span>
+    </button>
+  </div>
+  <div
+    class="center"
+  >
+    <button
+      class="secondary-btn restart-btn"
+    >
+      Restart
+    </button>
+  </div>
+</div>
+`;
+
+exports[`PracticeView > shows the completion screen after finishing the last line 1`] = `
+<div
+  class="practice-view"
+>
+  <h1>
+    Practice Mode
+  </h1>
+  <div
+    class="progress-bar"
+  >
+    <div
+      class="progress-fill"
+      style="width: 100%;"
+    />
+  </div>
+  <div
+    class="complete-message"
+  >
+    <h2>
+      Practice complete! Well done! 🎭
+    </h2>
+    <p>
+      You have completed practicing all your lines!
+    </p>
+    <p
+      class="complete-stats"
+    >
+      Lines completed
+      : 
+      1
+    </p>
+  </div>
+  <div
+    class="center"
+  >
+    <button
+      class="secondary-btn"
+    >
+      Restart
+    </button>
+  </div>
+</div>
+`;

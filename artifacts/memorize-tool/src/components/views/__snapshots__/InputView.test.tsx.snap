@@ -1,0 +1,55 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`InputView (script picker) > renders the basic-mode script picker with the library dropdown 1`] = `
+<div
+  class="input-view"
+>
+  <h1>
+    🎭 Script Memorization
+  </h1>
+  <p>
+    Select a script from the library, enter your character's name,
+and choose the number of preceding lines to view for context.
+  </p>
+  <div
+    class="input-form basic-mode"
+  >
+    <div
+      class="step-container"
+    >
+      <div
+        class="step-header"
+      >
+        <span
+          class="step-number"
+        >
+          1
+        </span>
+        <h3>
+          Select a Script
+        </h3>
+      </div>
+      <select
+        class="active-step"
+        id="scriptLibrary"
+      >
+        <option
+          value=""
+        >
+          Select a script...
+        </option>
+        <option
+          value="hamlet"
+        >
+          Hamlet
+        </option>
+        <option
+          value="macbeth"
+        >
+          Macbeth
+        </option>
+      </select>
+    </div>
+  </div>
+</div>
+`;

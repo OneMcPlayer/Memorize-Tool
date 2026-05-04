@@ -1,0 +1,24 @@
+.server-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.server-status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.server-status-checking .server-status-indicator { background: #ffa726; }
+.server-status-online .server-status-indicator { background: #4caf50; }
+.server-status-offline .server-status-indicator { background: #f44336; }
+
+body.dark-mode .server-status-badge {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ddd;
+}

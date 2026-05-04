@@ -1,0 +1,179 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ScriptMemorizationPractice > renders the intro screen with the start and back buttons 1`] = `
+<div
+  class="script-memorization-practice intro"
+>
+  <h1>
+    Script Memorization Practice
+  </h1>
+  <div
+    class="intro-content"
+  >
+    <div
+      class="intro-header"
+    >
+      <div
+        class="intro-icon"
+      >
+        <span
+          aria-label="Microphone"
+          role="img"
+        >
+          🎭
+        </span>
+      </div>
+      <p
+        class="intro-description"
+      >
+        This feature helps you practice your lines by having the system play all other characters while you say your lines.
+      </p>
+    </div>
+    <div
+      class="feature-list"
+    >
+      <h2>
+        How It Works
+      </h2>
+      <ul>
+        <li
+          class="feature-item"
+        >
+          <span
+            class="feature-icon"
+          >
+            🔊
+          </span>
+          <span
+            class="feature-text"
+          >
+            The system will play the lines of all other characters using text-to-speech
+          </span>
+        </li>
+        <li
+          class="feature-item"
+        >
+          <span
+            class="feature-icon"
+          >
+            🎤
+          </span>
+          <span
+            class="feature-text"
+          >
+            When it's your turn, you'll need to say your line
+          </span>
+        </li>
+        <li
+          class="feature-item"
+        >
+          <span
+            class="feature-icon"
+          >
+            👂
+          </span>
+          <span
+            class="feature-text"
+          >
+            The system will listen and check if your line matches the script
+          </span>
+        </li>
+        <li
+          class="feature-item"
+        >
+          <span
+            class="feature-icon"
+          >
+            📊
+          </span>
+          <span
+            class="feature-text"
+          >
+            You'll get feedback on how well you remembered your lines
+          </span>
+        </li>
+      </ul>
+    </div>
+    <div
+      class="benefits-section"
+    >
+      <h2>
+        Benefits
+      </h2>
+      <div
+        class="benefits-grid"
+      >
+        <div
+          class="benefit-item"
+        >
+          <span
+            class="benefit-icon"
+          >
+            ⏱️
+          </span>
+          <h3>
+            Practice Efficiently
+          </h3>
+          <p>
+            No need for a scene partner - practice anytime, anywhere
+          </p>
+        </div>
+        <div
+          class="benefit-item"
+        >
+          <span
+            class="benefit-icon"
+          >
+            📈
+          </span>
+          <h3>
+            Track Progress
+          </h3>
+          <p>
+            Get instant feedback on your line accuracy
+          </p>
+        </div>
+        <div
+          class="benefit-item"
+        >
+          <span
+            class="benefit-icon"
+          >
+            🔄
+          </span>
+          <h3>
+            Repeat Difficult Scenes
+          </h3>
+          <p>
+            Focus on the parts you need to practice most
+          </p>
+        </div>
+      </div>
+    </div>
+    <div
+      class="start-actions"
+    >
+      <button
+        class="start-btn"
+      >
+        <span
+          class="btn-icon"
+        >
+          ▶️
+        </span>
+        Start Practice
+      </button>
+      <button
+        class="back-btn"
+      >
+        <span
+          class="btn-icon"
+        >
+          ←
+        </span>
+        Back
+      </button>
+    </div>
+  </div>
+</div>
+`;

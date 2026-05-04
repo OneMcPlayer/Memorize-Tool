@@ -1,0 +1,291 @@
+{
+  "title": "CASA DI BAMBOLA",
+  "author": "Henrik Ibsen",
+  "language": "it",
+  "lines": [
+    {
+      "speaker": "KROGSTAD",
+      "line": "Scusi, signora Helmer…"
+    },
+    {
+      "speaker": "NORA",
+      "line": "(si volta con un grido soffocato) Ah! Che cosa vuole?"
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "La porta d’ingresso era socchiusa, qualcuno deve essersi dimenticato di chiuderla."
+    },
+    {
+      "speaker": "NORA",
+      "line": "(si alza) Mio marito non è in casa, signor Krogstad."
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "Lo so."
+    },
+    {
+      "speaker": "NORA",
+      "line": "Allora cosa vuole?"
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "Parlare un po’ con lei."
+    },
+    {
+      "speaker": "NORA",
+      "line": "(inquieta) Vuol parlare con me?"
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "Sì."
+    },
+    {
+      "speaker": "NORA",
+      "line": "Oggi?… Ma non è ancora il primo del mese…"
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "È la vigilia di Natale. Dipenderà da lei passare un felice Natale o no."
+    },
+    {
+      "speaker": "NORA",
+      "line": "Che cosa vuole?"
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "Lei ha un momento di tempo, no?"
+    },
+    {
+      "speaker": "NORA",
+      "line": "Sì… certo."
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "Stavo seduto al caffè Olsen quando vidi passare suo marito… con una signora. Era la signora Linde, vero?"
+    },
+    {
+      "speaker": "NORA",
+      "line": "Sì."
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "Una sua amica?"
+    },
+    {
+      "speaker": "NORA",
+      "line": "Certo."
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "E avrà un posto alla Banca commerciale?"
+    },
+    {
+      "speaker": "NORA",
+      "line": "(senza esitazione) Sì. E sono stata io a parlare in suo favore."
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "Avevo dunque visto bene come si mettevano le cose."
+    },
+    {
+      "speaker": "NORA",
+      "line": "Un po’ di ascendente lo si ha sempre, credo. Quando ci si trova in una posizione subordinata bisognerebbe stare attenti a non irritare qualcuno che…"
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "Che ha dell’ascendente?"
+    },
+    {
+      "speaker": "NORA",
+      "line": "Appunto."
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "(cambiando tono) Allora usi questo ascendente in mio favore."
+    },
+    {
+      "speaker": "NORA",
+      "line": "Come?"
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "Si adoperi perché io mantenga il mio posto in banca."
+    },
+    {
+      "speaker": "NORA",
+      "line": "Chi pensa di toglierglielo?"
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "Capisco bene che non sia piacevole per la sua amica avere a che fare con me. Ora so anche a chi devo il mio licenziamento."
+    },
+    {
+      "speaker": "NORA",
+      "line": "Io non ho la minima influenza."
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "Davvero? Poco fa sembrava dire il contrario."
+    },
+    {
+      "speaker": "NORA",
+      "line": "Non in quel senso!"
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "Conosco suo marito. Non è più inespugnabile degli altri mariti."
+    },
+    {
+      "speaker": "NORA",
+      "line": "(secca) Se parla con disprezzo di mio marito la metto alla porta."
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "La signora è coraggiosa."
+    },
+    {
+      "speaker": "NORA",
+      "line": "Non ho più paura di lei."
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "(calmo) Se sarà necessario, lotterò per il mio piccolo posto con tutte le mie forze. Non per lo stipendio. Ma per i miei figli. Devo riconquistare la stima della società."
+    },
+    {
+      "speaker": "NORA",
+      "line": "Non è in mio potere aiutarla."
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "È perché non vuole. Ma io ho mezzi per costringerla."
+    },
+    {
+      "speaker": "NORA",
+      "line": "(terrorizzata) Non vorrà dire a mio marito che io le devo del denaro?"
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "E se lo dicessi?"
+    },
+    {
+      "speaker": "NORA",
+      "line": "Sarebbe una vergogna."
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "Solo seccature?"
+    },
+    {
+      "speaker": "NORA",
+      "line": "(con forza) Se mio marito lo sapesse pagherebbe subito. E non avremmo più nulla a che fare con lei."
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "(avvicinandosi) Signora Helmer, lei non capisce nulla di affari. Bisognerà che le spieghi meglio."
+    },
+    {
+      "speaker": "NORA",
+      "line": "Come?"
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "Durante la malattia di suo marito lei venne da me per farsi prestare del denaro."
+    },
+    {
+      "speaker": "NORA",
+      "line": "Non c’era altro da fare."
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "Le promisi la somma contro un’obbligazione. In fondo aggiunsi che suo padre si faceva garante."
+    },
+    {
+      "speaker": "NORA",
+      "line": "E firmò."
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "Avrebbe dovuto aggiungere la data. Lei mi riportò l’atto firmato pochi giorni dopo."
+    },
+    {
+      "speaker": "NORA",
+      "line": "Ho sempre pagato."
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "Sì. Ma suo padre morì poco dopo, vero?"
+    },
+    {
+      "speaker": "NORA",
+      "line": "Sì."
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "Ricorda la data?"
+    },
+    {
+      "speaker": "NORA",
+      "line": "Il 29 settembre."
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "Eppure qui c’è scritto: 2 ottobre."
+    },
+    {
+      "speaker": "NORA",
+      "line": "(tace)"
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "La firma è autentica?"
+    },
+    {
+      "speaker": "NORA",
+      "line": "(alzando il capo) No. Sono stata io a firmare il nome di mio padre."
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "Sa che è una confessione pericolosa?"
+    },
+    {
+      "speaker": "NORA",
+      "line": "Lei avrà i suoi soldi."
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "Perché non mandò l’atto a suo padre?"
+    },
+    {
+      "speaker": "NORA",
+      "line": "Era impossibile. Era morente. Non potevo dirgli che la vita di mio marito era in pericolo."
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "Allora avrebbe dovuto rinunciare al viaggio."
+    },
+    {
+      "speaker": "NORA",
+      "line": "Era impossibile. Quel viaggio doveva salvarlo."
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "La legge non domanda il perché degli atti."
+    },
+    {
+      "speaker": "NORA",
+      "line": "Allora la legge è fatta male."
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "Fatta male o no, se presento questa carta lei sarà giudicata."
+    },
+    {
+      "speaker": "NORA",
+      "line": "Una figlia non dovrebbe poter proteggere il padre? Una moglie salvare il marito?"
+    },
+    {
+      "speaker": "KROGSTAD",
+      "line": "Di affari come questi io me ne intendo. Faccia pure quello che vuole. Ma se sarò messo da parte dalla società per la seconda volta, lei mi farà compagnia. (Saluta ed esce)"
+    }
+  ]
+}

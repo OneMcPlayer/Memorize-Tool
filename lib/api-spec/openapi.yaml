@@ -1,0 +1,470 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: passkey
+    description: Passkey (WebAuthn) authentication ceremony
+  - name: user
+    description: Authenticated user profile and settings
+  - name: tts
+    description: OpenAI text-to-speech proxy with object-storage cache
+  - name: audio
+    description: OpenAI audio transcription proxy
+  - name: scripts
+    description: Built-in script catalog
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /passkey/supported:
+    get:
+      operationId: passkeySupported
+      tags: [passkey]
+      summary: Server-side passkey support flag
+      responses:
+        "200":
+          description: Supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PasskeySupported"
+
+  /passkey/register/options:
+    post:
+      operationId: passkeyRegisterOptions
+      tags: [passkey]
+      summary: Generate WebAuthn registration options
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasskeyRegisterOptionsBody"
+      responses:
+        "200":
+          description: Options
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PasskeyRegisterOptionsResponse"
+
+  /passkey/register/verify:
+    post:
+      operationId: passkeyRegisterVerify
+      tags: [passkey]
+      summary: Verify WebAuthn registration response
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasskeyRegisterVerifyBody"
+      responses:
+        "200":
+          description: Verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PasskeyRegisterVerifyResponse"
+
+  /passkey/authenticate/options:
+    post:
+      operationId: passkeyAuthenticateOptions
+      tags: [passkey]
+      summary: Generate WebAuthn authentication options
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasskeyAuthenticateOptionsBody"
+      responses:
+        "200":
+          description: Options
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PasskeyAuthenticateOptionsResponse"
+
+  /passkey/authenticate/verify:
+    post:
+      operationId: passkeyAuthenticateVerify
+      tags: [passkey]
+      summary: Verify WebAuthn authentication response
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasskeyAuthenticateVerifyBody"
+      responses:
+        "200":
+          description: Verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PasskeyAuthenticateVerifyResponse"
+
+  /passkey/refresh:
+    post:
+      operationId: passkeyRefresh
+      tags: [passkey]
+      summary: Refresh session token
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Refreshed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionTokenResponse"
+
+  /passkey/logout:
+    post:
+      operationId: passkeyLogout
+      tags: [passkey]
+      summary: Logout (revoke session token)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /user/logout:
+    post:
+      operationId: userLogout
+      tags: [user]
+      summary: Logout (revoke session token) — alias of /passkey/logout
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /user/me:
+    get:
+      operationId: getUserMe
+      tags: [user]
+      summary: Current authenticated user
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserMeResponse"
+
+  /tts/health:
+    get:
+      operationId: ttsHealth
+      tags: [tts]
+      summary: TTS proxy health
+      responses:
+        "200":
+          description: TTS health
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TtsHealthResponse"
+
+  /scripts:
+    get:
+      operationId: listScripts
+      tags: [scripts]
+      summary: List built-in scripts
+      responses:
+        "200":
+          description: Catalog
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScriptListResponse"
+
+  /scripts/{id}:
+    get:
+      operationId: getScript
+      tags: [scripts]
+      summary: Get a script by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Script
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScriptResponse"
+        "404":
+          description: Not found
+
+  /tts/speech:
+    post:
+      operationId: ttsSpeech
+      tags: [tts]
+      summary: OpenAI text-to-speech proxy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TtsSpeechBody"
+      responses:
+        "200":
+          description: Audio
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
+
+  /audio/transcriptions:
+    post:
+      operationId: audioTranscriptions
+      tags: [audio]
+      summary: OpenAI audio transcription proxy
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              description: multipart form-data with file, optional model and language
+              additionalProperties: true
+      responses:
+        "200":
+          description: Transcription
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AudioTranscriptionsResponse"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status: { type: string }
+      required: [status]
+
+    SuccessResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        message: { type: string }
+      required: [success]
+
+    PasskeySupported:
+      type: object
+      properties:
+        supported: { type: boolean }
+        message: { type: string }
+      required: [supported]
+
+    PasskeyRegisterOptionsBody:
+      type: object
+      properties:
+        username: { type: string, minLength: 1, maxLength: 200 }
+      required: [username]
+
+    PasskeyRegisterOptionsResponse:
+      type: object
+      additionalProperties: true
+      description: Options object returned by simplewebauthn for navigator.credentials.create
+
+    PasskeyRegisterVerifyBody:
+      type: object
+      properties:
+        username: { type: string, minLength: 1, maxLength: 200 }
+        response:
+          type: object
+          additionalProperties: true
+      required: [username, response]
+
+    PasskeyRegisterVerifyResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        message: { type: string }
+        userId: { type: string }
+        user:
+          $ref: "#/components/schemas/UserPublic"
+        token: { type: string }
+        expiresAt: { type: integer, format: int64 }
+      required: [success, userId, token, expiresAt, user]
+
+    PasskeyAuthenticateOptionsBody:
+      type: object
+      properties:
+        username: { type: string, minLength: 1, maxLength: 200 }
+
+    PasskeyAuthenticateOptionsResponse:
+      type: object
+      additionalProperties: true
+      description: Options object returned by simplewebauthn for navigator.credentials.get
+
+    PasskeyAuthenticateVerifyBody:
+      type: object
+      properties:
+        response:
+          type: object
+          additionalProperties: true
+      required: [response]
+
+    PasskeyAuthenticateVerifyResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        message: { type: string }
+        user:
+          $ref: "#/components/schemas/UserPublic"
+        token: { type: string }
+        expiresAt: { type: integer, format: int64 }
+      required: [success, user, token, expiresAt]
+
+    SessionTokenResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        message: { type: string }
+        token: { type: string }
+        expiresAt: { type: integer, format: int64 }
+      required: [success, token, expiresAt]
+
+    UserPublic:
+      type: object
+      properties:
+        id: { type: string }
+        username: { type: string }
+        email:
+          oneOf:
+            - { type: string }
+            - { type: "null" }
+      required: [id, username]
+
+    UserMeResponse:
+      type: object
+      properties:
+        id: { type: string }
+        username: { type: string }
+        displayName: { type: string }
+        email:
+          oneOf:
+            - { type: string }
+            - { type: "null" }
+        groups:
+          type: array
+          items: { type: string }
+        isAuthenticated: { type: boolean }
+      required: [username, displayName, isAuthenticated]
+
+    TtsSpeechBody:
+      type: object
+      properties:
+        text: { type: string, minLength: 1 }
+        voice: { type: string }
+        speed:
+          type: number
+          minimum: 0.25
+          maximum: 4
+        model:
+          type: string
+          enum: [tts-1, tts-1-hd, gpt-4o-mini-tts]
+      required: [text]
+
+    AudioTranscriptionsResponse:
+      type: object
+      properties:
+        text: { type: string }
+      required: [text]
+
+    TtsHealthResponse:
+      type: object
+      properties:
+        status: { type: string }
+        storage: { type: string }
+        fetchAvailable: { type: boolean }
+      required: [status]
+
+    ScriptMeta:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string }
+        author: { type: string }
+        description: { type: string }
+        language: { type: string }
+      required: [id, title, description, language]
+
+    ScriptListResponse:
+      type: object
+      properties:
+        scripts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ScriptMeta"
+      required: [scripts]
+
+    ScriptLine:
+      type: object
+      properties:
+        speaker: { type: string }
+        line: { type: string }
+      required: [speaker, line]
+
+    ScriptContent:
+      type: object
+      properties:
+        lines:
+          type: array
+          items:
+            $ref: "#/components/schemas/ScriptLine"
+      required: [lines]
+      additionalProperties: true
+
+    ScriptResponse:
+      type: object
+      properties:
+        meta:
+          $ref: "#/components/schemas/ScriptMeta"
+        content:
+          $ref: "#/components/schemas/ScriptContent"
+      required: [meta, content]

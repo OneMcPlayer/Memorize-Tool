@@ -1,0 +1,307 @@
+.line-tags-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  padding-top: max(1rem, env(safe-area-inset-top));
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+.line-tags-modal__panel {
+  background: #fff;
+  color: #1a1a1a;
+  width: 100%;
+  max-width: 720px;
+  max-height: 90vh;
+  border-radius: 12px;
+  box-shadow: 0 14px 48px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+body.dark-mode .line-tags-modal__panel {
+  background: #1d1d1f;
+  color: #ececec;
+}
+
+.line-tags-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+body.dark-mode .line-tags-modal__header {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.line-tags-modal__header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.line-tags-modal__close {
+  background: transparent;
+  border: none;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  color: inherit;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+}
+
+.line-tags-modal__close:hover { background: rgba(0, 0, 0, 0.06); }
+body.dark-mode .line-tags-modal__close:hover { background: rgba(255, 255, 255, 0.08); }
+
+.line-tags-modal__hint {
+  margin: 0;
+  padding: 0.75rem 1.1rem;
+  font-size: 0.875rem;
+  opacity: 0.8;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+body.dark-mode .line-tags-modal__hint {
+  border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.line-tags-modal__body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 0.5rem 1.1rem;
+}
+
+.line-tags-modal__empty {
+  margin: 1.5rem 0;
+  text-align: center;
+  opacity: 0.7;
+}
+
+.line-tags-modal__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.line-tags-modal__row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: stretch;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+body.dark-mode .line-tags-modal__row {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+.line-tags-modal__row:last-child { border-bottom: none; }
+
+.line-tags-modal__line {
+  font-size: 0.95rem;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.line-tags-modal__speaker {
+  font-weight: 600;
+  color: #2563eb;
+}
+body.dark-mode .line-tags-modal__speaker { color: #6ea8ff; }
+
+.line-tags-modal__field {
+  display: flex;
+  align-items: stretch;
+  gap: 0.4rem;
+}
+
+.line-tags-modal__original-label {
+  display: block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.6;
+  margin-bottom: 0.15rem;
+}
+
+.line-tags-modal__input {
+  flex: 1 1 auto;
+  font: inherit;
+  font-size: 16px; /* Prevent iOS auto-zoom on focus */
+  padding: 0.55rem 0.7rem;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  border-radius: 8px;
+  background: #fafafa;
+  color: inherit;
+  min-height: 44px;
+  resize: vertical;
+  line-height: 1.4;
+  font-family: inherit;
+}
+
+.line-tags-modal__row-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 0 0 auto;
+}
+
+.line-tags-modal__play,
+.line-tags-modal__reset {
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+body.dark-mode .line-tags-modal__play,
+body.dark-mode .line-tags-modal__reset {
+  border-color: rgba(255, 255, 255, 0.22);
+}
+.line-tags-modal__play:hover:not(:disabled),
+.line-tags-modal__reset:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.06);
+}
+body.dark-mode .line-tags-modal__play:hover:not(:disabled),
+body.dark-mode .line-tags-modal__reset:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+}
+.line-tags-modal__play:disabled,
+.line-tags-modal__reset:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.line-tags-modal__play.is-playing {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
+.line-tags-modal__spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  animation: lineTagsSpin 0.8s linear infinite;
+  display: inline-block;
+}
+@keyframes lineTagsSpin {
+  to { transform: rotate(360deg); }
+}
+
+body.dark-mode .line-tags-modal__input {
+  background: #2a2a2d;
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.line-tags-modal__input:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: 1px;
+}
+
+.line-tags-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  padding: 0.85rem 1.1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  background: #fafafa;
+}
+
+body.dark-mode .line-tags-modal__footer {
+  border-top-color: rgba(255, 255, 255, 0.08);
+  background: #181819;
+}
+
+.line-tags-modal__btn {
+  font: inherit;
+  font-size: 0.95rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  min-height: 44px;
+  min-width: 88px;
+}
+
+.line-tags-modal__btn--ghost {
+  background: transparent;
+  border-color: rgba(0, 0, 0, 0.18);
+  color: inherit;
+}
+body.dark-mode .line-tags-modal__btn--ghost {
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.line-tags-modal__btn--primary {
+  background: #2563eb;
+  color: #fff;
+}
+
+.line-tags-modal__btn--primary:hover:not(:disabled) {
+  background: #1d4fcc;
+}
+
+.line-tags-modal__btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Mobile: stack each row */
+@media (max-width: 640px) {
+  .line-tags-modal__panel {
+    max-height: 100vh;
+    border-radius: 0;
+    height: 100%;
+    max-width: 100%;
+  }
+  .line-tags-modal__row {
+    gap: 0.45rem;
+  }
+  .line-tags-modal__field {
+    flex-direction: column;
+  }
+  .line-tags-modal__row-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+  .line-tags-modal__footer {
+    padding-bottom: max(0.85rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* Add some breathing room above the line-tags edit button when it sits in the
+   live-header. The button itself is styled via .live-header__edit-tags-btn. */
+.live-header__edit-tags-btn {
+  font: inherit;
+  font-size: 0.9rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.live-header__edit-tags-btn:hover { background: rgba(0, 0, 0, 0.06); }
+body.dark-mode .live-header__edit-tags-btn { border-color: rgba(255, 255, 255, 0.22); }
+body.dark-mode .live-header__edit-tags-btn:hover { background: rgba(255, 255, 255, 0.08); }

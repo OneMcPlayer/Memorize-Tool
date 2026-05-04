@@ -1,0 +1,38 @@
+.swipedeck-container .hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.swipedeck-container .hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.swipedeck-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: #27272a;
+  border-radius: 2px;
+  outline: none;
+}
+
+.swipedeck-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  border: 4px solid #18181b;
+}
+
+.swipedeck-slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  border: 4px solid #18181b;
+}

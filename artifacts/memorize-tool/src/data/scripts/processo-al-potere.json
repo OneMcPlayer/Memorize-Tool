@@ -1,0 +1,634 @@
+{
+  "title": "PROCESSO AL POTERE",
+  "language": "it",
+  "lines": [
+    {
+      "speaker": "SEGRETARIO1",
+      "line": "[shouting, commanding] Silenzio in aula! [indignant, formal] Si dichiara aperta la seduta."
+    },
+    {
+      "speaker": "SEGRETARIO2",
+      "line": "[solemn, ceremonial] Che entri l'imparzialissimo giudice."
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[authoritative, slow and weighty] Questo non è un tribunale qualunque. Noi non giudichiamo un fatto, non giudichiamo una persona. [emphatic, after a pause] Oggi noi... mettiamo sotto processo il potere."
+    },
+    {
+      "speaker": "SEGRETARIO1",
+      "line": "[formal announcement] Si proceda con la lettura del capo d'accusa."
+    },
+    {
+      "speaker": "ACCUSA1",
+      "line": "[accusatory, building] Il potere è accusato di:"
+    },
+    {
+      "speaker": "CORO1",
+      "line": "[in unison, building intensity] aver schiacciato. aver manipolato. aver imposto silenzi. [sharp, climactic] aver trasformato la paura in obbedienza."
+    },
+    {
+      "speaker": "DIFESA1",
+      "line": "[calm, persuasive] Il potere è anche ciò che tiene insieme."
+    },
+    {
+      "speaker": "CORO2",
+      "line": "[in unison, reassuring] Ciò che organizza. Ciò che protegge."
+    },
+    {
+      "speaker": "DIFESA2",
+      "line": "[contemplative, trailing] Senza potere..."
+    },
+    {
+      "speaker": "CORO2",
+      "line": "[in unison, urgent questioning] chi decide? chi guida? chi si assume la responsabilità?"
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[measured] Le posizioni sono chiare. [thoughtful pause] Ma questo processo... non può esistere senza una giuria. [addressing the audience directly] Voi. Sì, voi. Siete qui non solo per guardare. [emphatic] Siete qui per giudicare, non le persone, ma le loro azioni."
+    },
+    {
+      "speaker": "SEGRETARIO2",
+      "line": "[formal] Data la natura del processo, fondamentali saranno le prove."
+    },
+    {
+      "speaker": "ACCUSA2",
+      "line": "[ominous, slow] Ogni parola... un indizio."
+    },
+    {
+      "speaker": "DIFESA1",
+      "line": "[quietly intense] Ogni silenzio... un dubbio."
+    },
+    {
+      "speaker": "CORO1",
+      "line": "[whispering, urgent] Guardate bene."
+    },
+    {
+      "speaker": "CORO2",
+      "line": "[whispering, urgent] Ascoltate bene."
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[calm, measured] Non affrettiamo il nostro giudizio."
+    },
+    {
+      "speaker": "CORO",
+      "line": "[in unison, mysterious, hushed] Perché il potere... non si mostra mai per quello che è."
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[firm, decisive] Cominciamo."
+    },
+    {
+      "speaker": "SEGRETARIO1",
+      "line": "[formal] Accusa, a voi la parola."
+    },
+    {
+      "speaker": "ACCUSA1",
+      "line": "[passionate, declamatory] Signor giudice. Signori e signore della giuria. La piramide del potere ha tanti strati, ma il primo è senz'altro il potere che ritroviamo nelle nostre stesse case. [emphatic, biting] Il patriarcato."
+    },
+    {
+      "speaker": "ACCUSA2",
+      "line": "[official, prosecutorial] L'accusa si rifà al caso Molière del 1664 e chiama a testimoniare Orgone con la figlia Marianna e la domestica Dorina."
+    },
+    {
+      "speaker": "DIFESA2",
+      "line": "[empathetic, pleading] Signori, era solo un padre di famiglia che voleva il meglio per la propria bambina. [interrupted, rising] Chi di voi non vorrebbe..."
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[firm] Lasciamo che a parlare siano i fatti."
+    },
+    {
+      "speaker": "SEGRETARIO2",
+      "line": "[formal] Prego, procedete con la prova."
+    },
+    {
+      "speaker": "ACCUSA1",
+      "line": "[indignant] Signori e signore, avete visto. Non ha voluto sentir ragioni."
+    },
+    {
+      "speaker": "CORO1",
+      "line": "[in unison, accusing] Impone e non ascolta."
+    },
+    {
+      "speaker": "SEGRETARIO1",
+      "line": "[formal, dismissive] Il vostro intervento è terminato."
+    },
+    {
+      "speaker": "DIFESA1",
+      "line": "[respectful, urgent] Signor giudice, posso rispondere?"
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[neutral, formal] Parola alla difesa."
+    },
+    {
+      "speaker": "CORO2",
+      "line": "[in unison, determined] Ora tocca a noi."
+    },
+    {
+      "speaker": "DIFESA2",
+      "line": "[calm, persuasive] Signori e signore della giuria, Messer Orgone ha agito per necessità."
+    },
+    {
+      "speaker": "ACCUSA2",
+      "line": "[outraged, interrupting] Non gliel'ha neanche chiesto!"
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[shouting, banging the gavel] Ordine! [stern] È il momento della difesa."
+    },
+    {
+      "speaker": "DIFESA1",
+      "line": "[grateful, then assertive] Grazie, signor giudice. Avete visto? [emphatic] Il potere è indispensabile per non permettere al caos di dilagare."
+    },
+    {
+      "speaker": "DIFESA2",
+      "line": "[official] Chiamiamo a testimoniare Ben e Gus dal caso Calapranzi."
+    },
+    {
+      "speaker": "CORO2",
+      "line": "[in unison, declarative] 1957."
+    },
+    {
+      "speaker": "ACCUSA1",
+      "line": "[outraged] Obiezione, signor giudice, sono degli assassini!"
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[firm, dismissive] Respinta. [measured] Ci interessano i fatti. Prima vediamo, poi giudichiamo."
+    },
+    {
+      "speaker": "SEGRETARIO2",
+      "line": "[formal announcement] Che inizi la prova Calapranzi."
+    },
+    {
+      "speaker": "ACCUSA2",
+      "line": "[deferential] Ho il permesso di parlare?"
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[curt] Concesso."
+    },
+    {
+      "speaker": "SEGRETARIO1",
+      "line": "[formal] La parola all'accusa."
+    },
+    {
+      "speaker": "ACCUSA1",
+      "line": "[informative, building] Il caso Calapranzi si porta dietro un'altra importante sentenza di quell'anno: [emphatic] la sentenza Pinter."
+    },
+    {
+      "speaker": "CORO1",
+      "line": "[in unison, hushed] Il Compleanno,"
+    },
+    {
+      "speaker": "ACCUSA2",
+      "line": "[matter-of-fact] appunto, 1957."
+    },
+    {
+      "speaker": "DIFESA2",
+      "line": "[frustrated, interrupted mid-sentence] Si era detto che quel caso..."
+    },
+    {
+      "speaker": "ACCUSA1",
+      "line": "[triumphant, accusatory] Ecco, vedete? Il potere si prende la libertà di sorvegliare, controllare, [ominous, slowing] e se decide che è il momento..."
+    },
+    {
+      "speaker": "CORO1",
+      "line": "[in unison, harsh] Invade senza chiedere il permesso."
+    },
+    {
+      "speaker": "CORO2",
+      "line": "[in unison, hesitant] Ma..."
+    },
+    {
+      "speaker": "DIFESA1",
+      "line": "[frustrated, interrupted mid-sentence] Si era detto che quella prova..."
+    },
+    {
+      "speaker": "SEGRETARIO2",
+      "line": "[formal, dismissive] Dopo farete valere le vostre ragioni."
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[firm] Andate avanti."
+    },
+    {
+      "speaker": "ACCUSA2",
+      "line": "[grateful, then official] Grazie. L'accusa chiama quindi a testimoniare Goldberg."
+    },
+    {
+      "speaker": "CORO1",
+      "line": "[in unison, ominous whisper] Mr Goldberg."
+    },
+    {
+      "speaker": "ACCUSA2",
+      "line": "[official] E MacCann."
+    },
+    {
+      "speaker": "CORO1",
+      "line": "[in unison, ominous whisper] Mr MacCann."
+    },
+    {
+      "speaker": "ACCUSA2",
+      "line": "[concluding] dal caso Il Compleanno."
+    },
+    {
+      "speaker": "SEGRETARIO1",
+      "line": "[formal] Procedete con la prova."
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[neutral] Bene, ora Difesa, potete parlare."
+    },
+    {
+      "speaker": "DIFESA2",
+      "line": "[clever, persuasive] Signor giudice, quello che volevo dire è che la prova che abbiamo appena visto è materiale anche della difesa."
+    },
+    {
+      "speaker": "ACCUSA1",
+      "line": "[incredulous] Come sarebbe a dire?"
+    },
+    {
+      "speaker": "CORO2",
+      "line": "[in unison, knowing] Che la scena si ripete."
+    },
+    {
+      "speaker": "DIFESA1",
+      "line": "[sly] Ma con un accorgimento."
+    },
+    {
+      "speaker": "CORO2",
+      "line": "[in unison, conspiratorial] Cambiamo gli interpreti."
+    },
+    {
+      "speaker": "DIFESA2",
+      "line": "[reassuring, confident] E vi dimostreremo che il potere, se ben esercitato, è rassicurante, protegge, non nuoce."
+    },
+    {
+      "speaker": "ACCUSA2",
+      "line": "[skeptical, trailing] Ma..."
+    },
+    {
+      "speaker": "CORO1",
+      "line": "[in unison, protesting] Non possono farlo."
+    },
+    {
+      "speaker": "CORO2",
+      "line": "[in unison, taunting] State a vedere."
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[deciding] Riguardiamo questa prova."
+    },
+    {
+      "speaker": "SEGRETARIO2",
+      "line": "[formal announcement] Che entrino Goldberg e MacCann."
+    },
+    {
+      "speaker": "CORO2",
+      "line": "[in unison, hushed] Mr Goldberg e Mr MacCann."
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[thoughtful] Ammetto che rivedere la scena è stato utile."
+    },
+    {
+      "speaker": "SEGRETARIO1",
+      "line": "[formal] Torna la parola all'accusa."
+    },
+    {
+      "speaker": "ACCUSA1",
+      "line": "[strategic, building] Dato l'ambiente in cui ci troviamo, ci sembra opportuno chiamare in causa la legge."
+    },
+    {
+      "speaker": "CORO1",
+      "line": "[in unison, formal] Il caso Angelo contro Isabella, 1603..."
+    },
+    {
+      "speaker": "ACCUSA1",
+      "line": "[trailing, sarcastic] ...presumibilmente."
+    },
+    {
+      "speaker": "SEGRETARIO2",
+      "line": "[surprised, formal] Intendete chiamare in causa un altro giudice?"
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[smugly amused] Lasciamoli fare, io sono l'imparzialissimo."
+    },
+    {
+      "speaker": "ACCUSA2",
+      "line": "[obsequious, slightly mocking] Grazie, signor giudice, siete davvero imparziale."
+    },
+    {
+      "speaker": "DIFESA1",
+      "line": "[obsequious] Il più imparziale."
+    },
+    {
+      "speaker": "CORI",
+      "line": "[in unison, sycophantic] L'imparzialissimo in persona."
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[mildly annoyed] Va bene, basta così, procediamo."
+    },
+    {
+      "speaker": "ACCUSA1",
+      "line": "[official, dramatic] Chiamiamo a testimoniare il giudice Angelo e suor Isabella, la prima delle nostre 'prove Shakespeare'."
+    },
+    {
+      "speaker": "CORO1",
+      "line": "[in unison, reverent whisper] Shakespeare."
+    },
+    {
+      "speaker": "ACCUSA2",
+      "line": "[passionate, indignant] Per dimostrare che il potere non si può salvare se arriva ad usare la legge per i suoi scopi e abusare del proprio ruolo."
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[curt] Procediamo."
+    },
+    {
+      "speaker": "SEGRETARIO1",
+      "line": "[formal announcement] Che entri la prova Shakespeare."
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[challenging] Cos'avete da dire voi della difesa?"
+    },
+    {
+      "speaker": "DIFESA2",
+      "line": "[philosophical, measured] Le regole sono deboli, vacillano, e il potere ne approfitta, ma se il sistema funziona..."
+    },
+    {
+      "speaker": "CORO2",
+      "line": "[in unison, declarative] L'ordine è inevitabile."
+    },
+    {
+      "speaker": "DIFESA1",
+      "line": "[didactic] Prendiamo ad esempio il caso \"A porte chiuse\"."
+    },
+    {
+      "speaker": "CORO2",
+      "line": "[in unison, factual] Francia, 1944."
+    },
+    {
+      "speaker": "DIFESA2",
+      "line": "[confirming] Precisamente. Garcin e Ines."
+    },
+    {
+      "speaker": "ACCUSA1",
+      "line": "[disgusted] Altri assassini."
+    },
+    {
+      "speaker": "DIFESA1",
+      "line": "[matter-of-fact] Infatti si trovano all'inferno."
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[skeptical] Non mi sembra una buona scelta."
+    },
+    {
+      "speaker": "DIFESA2",
+      "line": "[confident, persuasive] Signor giudice, vi dimostreremo che con il giusto ordine impartito dall'alto, anche il più temibile degli assassini cambia atteggiamento."
+    },
+    {
+      "speaker": "DIFESA1",
+      "line": "[assertive] Il vero potere non dubita delle sue stesse regole, nella prova rappresentate dal cameriere."
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[doubtful, drawn out] Sarà..."
+    },
+    {
+      "speaker": "SEGRETARIO2",
+      "line": "[formal] Procediamo con la prova 'A porte chiuse'."
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[muttering, intrigued] Diventa sempre più intricato."
+    },
+    {
+      "speaker": "SEGRETARIO1",
+      "line": "[formal] La parola all'accusa."
+    },
+    {
+      "speaker": "ACCUSA2",
+      "line": "[counter-arguing, sharp] La difesa parla di 'ordine impartito dall'alto', ma se nessuno è al di sopra di quel potere, basta nulla perché degeneri."
+    },
+    {
+      "speaker": "CORO1",
+      "line": "[in unison, biting] E la tirannia è servita."
+    },
+    {
+      "speaker": "DIFESA2",
+      "line": "[dismissive] Adesso non esageriamo."
+    },
+    {
+      "speaker": "ACCUSA1",
+      "line": "[grave, warning] Non c'è bisogno di esagerare. Basta poco perché quel potere vacilli e diventi follia."
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[demanding] Sì, ma le prove."
+    },
+    {
+      "speaker": "CORO1",
+      "line": "[in unison, pointed] Eccola qui la prova."
+    },
+    {
+      "speaker": "ACCUSA2",
+      "line": "[official] Seconda prova Shakespeare. Il re Leonte di Sicilia e il suo consigliere Camillo."
+    },
+    {
+      "speaker": "ACCUSA1",
+      "line": "[ominous, slow] Un piccolo pensiero può trasformare un uomo in un dittatore."
+    },
+    {
+      "speaker": "SEGRETARIO2",
+      "line": "[formal announcement] Che entrino i testimoni."
+    },
+    {
+      "speaker": "DIFESA1",
+      "line": "[earnest, heartfelt] Signor giudice, signori e signore della giuria, è chiaro che qui il problema è il troppo amore."
+    },
+    {
+      "speaker": "CORO1",
+      "line": "[in unison, incredulous] Eh?!"
+    },
+    {
+      "speaker": "DIFESA2",
+      "line": "[romantic, defending] Leonte era folle, sì, ma d'amore."
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[warning, stern] Attenzione alle parole che usate."
+    },
+    {
+      "speaker": "DIFESA1",
+      "line": "[explanatory] Voglio dire che il potere può essere in mano a due persone contemporaneamente."
+    },
+    {
+      "speaker": "ACCUSA2",
+      "line": "[challenging] Spiegati."
+    },
+    {
+      "speaker": "DIFESA2",
+      "line": "[explaining calmly] Quando due persone sono dipendenti l'una dall'altra, il potere è condiviso."
+    },
+    {
+      "speaker": "DIFESA1",
+      "line": "[official] Chiamo a testimoniare Hamm e Clov."
+    },
+    {
+      "speaker": "CORO2",
+      "line": "[in unison, factual] Caso 'Finale di partita', 1955."
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[clarifying, faintly amused] Il cieco paraplegico e il ragazzo con la gamba di legno, giusto?"
+    },
+    {
+      "speaker": "DIFESA2",
+      "line": "[confirming] Esatto."
+    },
+    {
+      "speaker": "SEGRETARIO1",
+      "line": "[formal] Procediamo con la visione della prova."
+    },
+    {
+      "speaker": "ACCUSA1",
+      "line": "[scornful, rhetorical] E questo sarebbe un potere condiviso?"
+    },
+    {
+      "speaker": "ACCUSA2",
+      "line": "[mocking, rhetorical] Un uomo che non può muoversi e uno che non riesce ad andarsene?"
+    },
+    {
+      "speaker": "CORO1",
+      "line": "[in unison, declarative] È dipendenza."
+    },
+    {
+      "speaker": "CORO2",
+      "line": "[in unison, declarative] È un legame."
+    },
+    {
+      "speaker": "ACCUSA1",
+      "line": "[grave, warning] Ed è proprio lì che il potere diventa pericoloso."
+    },
+    {
+      "speaker": "SEGRETARIO2",
+      "line": "[stern] Non alludete, parlate chiaramente."
+    },
+    {
+      "speaker": "ACCUSA2",
+      "line": "[building, suspenseful] Quando non si vede più..."
+    },
+    {
+      "speaker": "ACCUSA1",
+      "line": "[building, suspenseful] Quando si confonde con il bisogno..."
+    },
+    {
+      "speaker": "ACCUSA2",
+      "line": "[building, suspenseful] Quando si traveste da relazione..."
+    },
+    {
+      "speaker": "ACCUSA1",
+      "line": "[whispered, ominous] Quando non urla, ma..."
+    },
+    {
+      "speaker": "CORO1",
+      "line": "[in unison, whispered, hissing] Seduce."
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[demanding] Parlate chiaramente."
+    },
+    {
+      "speaker": "ACCUSA2",
+      "line": "[official] Caso Signorina Julie, 1888."
+    },
+    {
+      "speaker": "CORO1",
+      "line": "[in unison, formal] Sentenza Strindberg."
+    },
+    {
+      "speaker": "ACCUSA1",
+      "line": "[building, ominous] Il potere si insinua nei rapporti, inverte le gerarchie..."
+    },
+    {
+      "speaker": "ACCUSA2",
+      "line": "[trailing, somber] anche quando non possono cambiare..."
+    },
+    {
+      "speaker": "CORO1",
+      "line": "[in unison, harsh whisper] seduce e distrugge."
+    },
+    {
+      "speaker": "SEGRETARIO2",
+      "line": "[formal announcement] Mostrate la prova Strindberg."
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[contemplative] Reperto interessante. [turning, prompting] Difesa?"
+    },
+    {
+      "speaker": "DIFESA1",
+      "line": "[resigned] Non abbiamo altro da aggiungere."
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[prompting] Accusa?"
+    },
+    {
+      "speaker": "ACCUSA1",
+      "line": "[concluding, satisfied] Abbiamo finito le prove anche noi, signor giudice."
+    },
+    {
+      "speaker": "SEGRETARIO2",
+      "line": "[shouting, commanding] Silenzio in aula."
+    },
+    {
+      "speaker": "SEGRETARIO1",
+      "line": "[hushed, formal] Il giudice si prepara a deliberare."
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[reflective, weighty, addressing the audience] E così l'imputato di questo processo, il Potere, passa in mano mia. Spetta a me decidere. [thoughtful pause] Ma questo è un processo a teatro, e non avrete da me una sentenza chiara, [emphatic] ma forse è proprio questo il cuore di ciò che stiamo cercando."
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[reading aloud, dictionary tone] Treccani: il Potere è la facoltà di fare o non fare qualcosa, di agire in un determinato modo, di compiere o meno una data azione."
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[building emphasis] Il potere è quindi libertà di azione, di decisione, [emphatic, drawn out] di SCELTA."
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[conversational, light] Scelte grandi e scelte piccole. [playful] Quale cioccolatino scegliere? Pillola rossa o pillola blu? Lo mangio adesso, o aspetto di uscire? Lo tengo per me, o lo regalo? [thoughtful] Oppure scegliere di non prenderlo proprio, perché non mi va o non mi piace."
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[probing, challenging] Ma cosa succede quando sono gli altri a scegliere per te? [pointed] O quando si permette a qualcuno o qualcosa di scegliere al posto tuo?"
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[grave, slow] Ogni volta che non scegliamo, qualcun altro lo farà al posto nostro. [resolute] E già questa, in sé, è una sentenza."
+    },
+    {
+      "speaker": "GIUDICE",
+      "line": "[final, solemn] La corte non emette verdetto."
+    },
+    {
+      "speaker": "CORO1",
+      "line": "[in unison, addressing the audience] Cara giuria,"
+    },
+    {
+      "speaker": "CORO2",
+      "line": "[in unison, dismissing solemnly] potete ritirarvi per deliberare."
+    }
+  ]
+}

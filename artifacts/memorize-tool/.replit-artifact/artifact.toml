@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Memorize Tool"
+version = "1.0.0"
+id = "artifacts/memorize-tool"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25868
+
+[services.development]
+run = "pnpm --filter @workspace/memorize-tool run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/memorize-tool", "run", "build" ]
+publicDir = "artifacts/memorize-tool/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25868"
+BASE_PATH = "/"

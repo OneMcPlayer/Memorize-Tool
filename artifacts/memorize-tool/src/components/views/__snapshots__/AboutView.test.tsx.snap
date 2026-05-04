@@ -1,0 +1,63 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`AboutView > renders the English heading, features list and back button 1`] = `
+<div
+  class="about-view"
+>
+  <h1>
+    About
+  </h1>
+  <div
+    class="about-content"
+  >
+    <section
+      class="about-section"
+    >
+      <h2>
+        🎭 
+        Script Memorization Tool
+      </h2>
+      <p>
+        This tool is designed to help actors and theater students effectively memorize their lines by practicing them in context. It allows you to isolate your character's lines while maintaining the surrounding context, making it easier to learn your part within the flow of the script.
+      </p>
+    </section>
+    <section
+      class="about-section"
+    >
+      <h2>
+        ✨ 
+        Features
+      </h2>
+      <ul>
+        <li>
+          Load scripts from the built-in library or paste your own
+        </li>
+        <li>
+          Extract lines for a specific character
+        </li>
+        <li>
+          Practice with customizable context
+        </li>
+        <li>
+          Dark mode for comfortable reading
+        </li>
+        <li>
+          Multiple language support
+        </li>
+        <li>
+          Script converter (in experimental mode)
+        </li>
+      </ul>
+    </section>
+  </div>
+  <div
+    class="center"
+  >
+    <button
+      class="secondary-btn"
+    >
+      Back
+    </button>
+  </div>
+</div>
+`;

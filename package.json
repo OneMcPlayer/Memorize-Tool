@@ -1,62 +1,20 @@
 {
-  "name": "memorize-tool",
-  "version": "2.1.0-react-stable",
-  "private": true,
-  "homepage": ".",
-  "proxy": "http://localhost:5000",
-  "dependencies": {
-    "@testing-library/dom": "^10.4.0",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.3.0",
-    "@testing-library/user-event": "^13.5.0",
-    "body-parser": "^2.2.0",
-    "concurrently": "^9.1.2",
-    "cors": "^2.8.5",
-    "express": "^5.1.0",
-    "node-fetch": "^2.7.0",
-    "nodemon": "^3.1.10",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-scripts": "5.0.1",
-    "sqlite3": "^5.1.7",
-    "web-vitals": "^2.1.4"
-  },
+  "name": "workspace",
+  "version": "0.0.0",
+  "license": "MIT",
   "scripts": {
-    "start": "react-scripts start",
-    "server": "nodemon server/index.js",
-    "dev": "concurrently \"npm run server\" \"npm run start\"",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "test:audio": "node scripts/test-audio.js",
-    "test:audio:ci": "node scripts/run-audio-tests.js",
-    "cypress:open": "cypress open",
-    "cypress:run": "cypress run",
-    "prepare:test": "node scripts/download-test-audio.js",
-    "test:e2e": "npm run prepare:test && cypress run",
-    "test:interactive": "npm run prepare:test && cypress run --spec \"cypress/e2e/interactive-memorization.cy.js\""
+    "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
+    "build": "pnpm run typecheck && pnpm -r --if-present run build",
+    "typecheck:libs": "tsc --build",
+    "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck",
+    "test": "pnpm -r --if-present run test",
+    "test:coverage": "pnpm -r --if-present run test -- --coverage"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
+  "private": true,
   "devDependencies": {
-    "@simplewebauthn/browser": "^13.1.0",
-    "@simplewebauthn/server": "^13.1.1",
-    "cypress": "^14.3.2"
+    "typescript": "~5.9.2",
+    "prettier": "^3.8.1",
+    "vitest": "catalog:",
+    "@vitest/coverage-v8": "catalog:"
   }
 }

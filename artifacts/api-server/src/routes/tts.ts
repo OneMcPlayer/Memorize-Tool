@@ -1,0 +1,227 @@
+import { Router, type IRouter } from "express";
+import crypto from "node:crypto";
+import { z } from "zod/v4";
+import { readTtsCache, writeTtsCache } from "../lib/ttsStorage";
+import { requireAccessToken } from "../middleware/requireAccessToken";
+
+const router: IRouter = Router();
+router.use("/tts", requireAccessToken);
+
+const ALLOWED_MODELS = ["google/gemini-3.1-flash-tts-preview"] as const;
+const DEFAULT_MODEL = "google/gemini-3.1-flash-tts-preview";
+const DEFAULT_VOICE = "Zephyr";
+
+const PCM_DEFAULT_SAMPLE_RATE = 24_000;
+const PCM_DEFAULT_CHANNELS = 1;
+const PCM_DEFAULT_BITS_PER_SAMPLE = 16;
+
+const MAX_TTS_TEXT_LENGTH = 5_000;
+
+const speechBodySchema = z.object({
+  text: z.string().min(1, "Text is required").max(MAX_TTS_TEXT_LENGTH, `Text must be at most ${MAX_TTS_TEXT_LENGTH} characters`),
+  voice: z.string().optional(),
+  speed: z.number().min(0.25).max(4).optional(),
+  model: z.enum(ALLOWED_MODELS).optional(),
+});
+
+const inFlight = new Map<string, Promise<Buffer>>();
+
+function generateCacheKey(
+  text: string,
+  voice: string,
+  speed: number,
+  model: string,
+): string {
+  return crypto
+    .createHash("sha256")
+    .update(`${model}\u0001${voice}\u0001${speed}\u0001${text}`)
+    .digest("hex");
+}
+
+function parsePositiveInt(value: string | undefined): number | null {
+  if (!value) return null;
+  const n = Number.parseInt(value, 10);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
+interface PcmFormat {
+  sampleRate: number;
+  channelCount: number;
+  bitsPerSample: number;
+}
+
+function parsePcmFormat(contentType: string | null): PcmFormat {
+  const fmt: PcmFormat = {
+    sampleRate: PCM_DEFAULT_SAMPLE_RATE,
+    channelCount: PCM_DEFAULT_CHANNELS,
+    bitsPerSample: PCM_DEFAULT_BITS_PER_SAMPLE,
+  };
+  if (!contentType) return fmt;
+  const params = new Map<string, string>();
+  for (const part of contentType.split(";").slice(1)) {
+    const [k, v] = part.split("=");
+    if (k && v) params.set(k.trim().toLowerCase(), v.trim());
+  }
+  return {
+    sampleRate:
+      parsePositiveInt(params.get("rate")) ??
+      parsePositiveInt(params.get("sample-rate")) ??
+      parsePositiveInt(params.get("samplerate")) ??
+      fmt.sampleRate,
+    channelCount:
+      parsePositiveInt(params.get("channels")) ??
+      parsePositiveInt(params.get("channel-count")) ??
+      fmt.channelCount,
+    bitsPerSample:
+      parsePositiveInt(params.get("bits")) ??
+      parsePositiveInt(params.get("bit-depth")) ??
+      fmt.bitsPerSample,
+  };
+}
+
+function isPcmContentType(contentType: string | null): boolean {
+  if (!contentType) return false;
+  const mime = contentType.split(";", 1)[0]?.trim().toLowerCase();
+  return mime === "audio/pcm" || mime === "audio/l16";
+}
+
+function buildWavFromPcm(pcm: Buffer, format: PcmFormat): Buffer {
+  const bytesPerSample = format.bitsPerSample / 8;
+  const blockAlign = format.channelCount * bytesPerSample;
+  const byteRate = format.sampleRate * blockAlign;
+  const header = Buffer.alloc(44);
+  header.write("RIFF", 0);
+  header.writeUInt32LE(36 + pcm.length, 4);
+  header.write("WAVE", 8);
+  header.write("fmt ", 12);
+  header.writeUInt32LE(16, 16);
+  header.writeUInt16LE(1, 20); // PCM
+  header.writeUInt16LE(format.channelCount, 22);
+  header.writeUInt32LE(format.sampleRate, 24);
+  header.writeUInt32LE(byteRate, 28);
+  header.writeUInt16LE(blockAlign, 32);
+  header.writeUInt16LE(format.bitsPerSample, 34);
+  header.write("data", 36);
+  header.writeUInt32LE(pcm.length, 40);
+  return Buffer.concat([header, pcm]);
+}
+
+router.get("/tts/health", (_req, res): void => {
+  res.json({
+    status: "TTS service is running",
+    storage: "object-storage",
+    fetchAvailable: typeof fetch === "function",
+    provider: "openrouter",
+    model: DEFAULT_MODEL,
+    voice: DEFAULT_VOICE,
+    configured: Boolean(process.env.OPENROUTER_API_KEY),
+  });
+});
+
+router.post("/tts/speech", async (req, res): Promise<void> => {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    req.log.error("OPENROUTER_API_KEY is not configured");
+    res.status(503).json({ error: "Live mode is not configured. OPENROUTER_API_KEY is missing on the server." });
+    return;
+  }
+
+  const parsed = speechBodySchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues });
+    return;
+  }
+  const { text } = parsed.data;
+  const voice = parsed.data.voice ?? DEFAULT_VOICE;
+  const speed = parsed.data.speed ?? 1.0;
+  const model = parsed.data.model ?? DEFAULT_MODEL;
+
+  const cacheKey = generateCacheKey(text, voice, speed, model);
+
+  // Try cache first (cached payload is already a finished WAV file)
+  const cached = await readTtsCache(cacheKey).catch(() => null);
+  if (cached) {
+    req.log.info({ model, voice, key: cacheKey }, "TTS cache hit");
+    res.setHeader("Content-Type", "audio/wav");
+    res.setHeader("Cache-Control", "public, max-age=86400");
+    res.setHeader("X-TTS-Cache-Status", "HIT");
+    res.setHeader("X-TTS-Cache-Source", "OBJECT_STORAGE");
+    res.setHeader("X-TTS-Cache-Key", cacheKey);
+    res.send(cached);
+    return;
+  }
+
+  req.log.info({ model, voice, length: text.length }, "TTS cache miss");
+
+  // In-flight dedupe so simultaneous identical requests share one upstream call
+  let promise = inFlight.get(cacheKey);
+  if (!promise) {
+    promise = (async () => {
+      const response = await fetch("https://openrouter.ai/api/v1/audio/speech", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model,
+          input: text,
+          voice,
+          speed,
+          response_format: "pcm",
+        }),
+        signal: AbortSignal.timeout(30_000),
+      });
+      if (!response.ok) {
+        let errorMessage = response.statusText;
+        try {
+          const errBody = (await response.json()) as { error?: { message?: string } | string };
+          if (typeof errBody.error === "string") {
+            errorMessage = errBody.error;
+          } else {
+            errorMessage = errBody.error?.message ?? errorMessage;
+          }
+        } catch {
+          // ignore
+        }
+        const err = new Error(errorMessage) as Error & { status?: number };
+        err.status = response.status;
+        throw err;
+      }
+      const upstreamContentType = response.headers.get("Content-Type");
+      const arrayBuf = await response.arrayBuffer();
+      const raw = Buffer.from(arrayBuf);
+      // Wrap raw PCM into a WAV file so the browser can play it via <audio>.
+      const wav = isPcmContentType(upstreamContentType)
+        ? buildWavFromPcm(raw, parsePcmFormat(upstreamContentType))
+        : raw;
+      await writeTtsCache(cacheKey, wav).catch((cacheErr) => {
+        req.log.warn(
+          { err: cacheErr, key: cacheKey, model, voice },
+          "TTS cache write failed; returning fresh audio anyway",
+        );
+      });
+      return wav;
+    })();
+    inFlight.set(cacheKey, promise);
+  }
+
+  try {
+    const buf = await promise;
+    res.setHeader("Content-Type", "audio/wav");
+    res.setHeader("Cache-Control", "public, max-age=86400");
+    res.setHeader("X-TTS-Cache-Status", "MISS");
+    res.setHeader("X-TTS-Cache-Source", "OPENROUTER");
+    res.setHeader("X-TTS-Cache-Key", cacheKey);
+    res.send(buf);
+  } catch (err) {
+    const status = (err as { status?: number }).status ?? 502;
+    const message = err instanceof Error ? err.message : String(err);
+    req.log.error({ err }, "TTS proxy fetch failed");
+    res.status(status).json({ error: message });
+  } finally {
+    inFlight.delete(cacheKey);
+  }
+});
+
+export default router;

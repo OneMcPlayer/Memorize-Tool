@@ -1,0 +1,266 @@
+.converter-view {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.converter-view h1 {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.converter-view > p {
+  text-align: center;
+  margin: 0 0 24px;
+  color: var(--text-secondary, #666);
+}
+
+.converter-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.converter-view .input-section,
+.converter-view .output-section {
+  background: var(--bg-secondary, #f5f5f5);
+  padding: 20px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.converter-view h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.converter-view h3 {
+  margin: 0 0 10px 0;
+  font-size: 1rem;
+  color: var(--text-secondary, #666);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.converter-view .script-editor,
+.converter-view .structured-output textarea,
+.converter-view .metadata-field input,
+.converter-view .metadata-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #ddd);
+  background: var(--bg-primary, #fff);
+  color: var(--text-primary, #2c3e50);
+  font-family: inherit;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.converter-view .script-editor,
+.converter-view .structured-output textarea {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.9rem;
+  min-height: 220px;
+  resize: vertical;
+}
+
+.converter-view .structured-output textarea {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.converter-view .script-editor:focus,
+.converter-view .structured-output textarea:focus,
+.converter-view .metadata-field input:focus,
+.converter-view .metadata-field textarea:focus {
+  outline: none;
+  border-color: var(--primary, #4a90e2);
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.18);
+}
+
+.converter-view .script-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.converter-view .script-stats span {
+  background: rgba(74, 144, 226, 0.12);
+  color: var(--primary, #4a90e2);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.converter-view .detected-characters .character-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.converter-view .character-item {
+  background: rgba(102, 187, 106, 0.15);
+  color: #2e7d32;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.converter-view .detected-characters p {
+  margin: 0;
+  text-align: left;
+  color: var(--text-secondary, #666);
+  font-size: 0.9rem;
+}
+
+.converter-view .metadata-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.converter-view .metadata-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.converter-view .metadata-field label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary, #666);
+}
+
+.converter-view .metadata-field textarea {
+  font-family: inherit;
+  resize: vertical;
+  min-height: 70px;
+}
+
+.converter-view .export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.converter-view .export-actions button {
+  min-height: 44px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  background: var(--primary, #4a90e2);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin: 0;
+}
+
+.converter-view .center {
+  margin-top: 8px;
+}
+
+.converter-view .secondary-btn {
+  background: transparent;
+  color: var(--text-primary, #2c3e50);
+  border: 1px solid var(--border-color, #ddd);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+body.dark-mode .converter-view > p,
+body.dark-mode .converter-view h3,
+body.dark-mode .converter-view .metadata-field label,
+body.dark-mode .converter-view .detected-characters p {
+  color: #cfd8dc;
+}
+
+body.dark-mode .converter-view .input-section,
+body.dark-mode .converter-view .output-section {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .converter-view .script-editor,
+body.dark-mode .converter-view .metadata-field input,
+body.dark-mode .converter-view .metadata-field textarea {
+  background: rgba(255, 255, 255, 0.06);
+  color: #f1f5f9;
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+body.dark-mode .converter-view .structured-output textarea {
+  background: rgba(0, 0, 0, 0.25);
+  color: #f1f5f9;
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+body.dark-mode .converter-view .script-stats span {
+  background: rgba(74, 144, 226, 0.22);
+  color: #b3d4fc;
+}
+
+body.dark-mode .converter-view .character-item {
+  background: rgba(102, 187, 106, 0.22);
+  color: #c8e6c9;
+}
+
+body.dark-mode .converter-view .secondary-btn {
+  color: #f1f5f9;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+@media (max-width: 768px) {
+  .converter-view {
+    padding: 12px;
+  }
+
+  .converter-view .input-section,
+  .converter-view .output-section {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .converter-view .script-editor,
+  .converter-view .structured-output textarea {
+    min-height: 180px;
+  }
+
+  .converter-view .export-actions {
+    justify-content: stretch;
+  }
+
+  .converter-view .export-actions button {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .converter-view .secondary-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .converter-view {
+    padding: 8px;
+  }
+
+  .converter-view h2 {
+    font-size: 1.05rem;
+  }
+
+  .converter-view .script-editor,
+  .converter-view .structured-output textarea {
+    font-size: 0.85rem;
+    min-height: 160px;
+  }
+}

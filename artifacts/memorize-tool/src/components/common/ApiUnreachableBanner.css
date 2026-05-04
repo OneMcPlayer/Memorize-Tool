@@ -1,0 +1,132 @@
+.api-unreachable-banner {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  max-width: min(640px, calc(100vw - 24px));
+  width: max-content;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #fff8e1;
+  color: #5d4037;
+  border: 1px solid #ffb300;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  z-index: 1100;
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.api-unreachable-banner__icon {
+  font-size: 1.25rem;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.api-unreachable-banner__content {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.api-unreachable-banner__title {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.api-unreachable-banner__message {
+  font-weight: 400;
+}
+
+.api-unreachable-banner__detail {
+  margin-top: 4px;
+  font-size: 0.75rem;
+  opacity: 0.75;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.api-unreachable-banner__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.api-unreachable-banner__retry {
+  background: #ffb300;
+  color: #3e2723;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.api-unreachable-banner__retry:hover {
+  background: #ffa000;
+}
+
+.api-unreachable-banner__dismiss {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.api-unreachable-banner__dismiss:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+body.dark-mode .api-unreachable-banner {
+  background: #3e2723;
+  color: #ffe0b2;
+  border-color: #ffb300;
+}
+
+body.dark-mode .api-unreachable-banner__dismiss:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 768px) {
+  .api-unreachable-banner__retry,
+  .api-unreachable-banner__dismiss {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .api-unreachable-banner {
+    flex-wrap: wrap;
+    width: calc(100vw - 24px);
+    padding: 10px 12px;
+    gap: 8px;
+    font-size: 0.85rem;
+  }
+  .api-unreachable-banner__content {
+    flex: 1 1 100%;
+    order: 1;
+  }
+  .api-unreachable-banner__icon {
+    order: 0;
+  }
+  .api-unreachable-banner__actions {
+    order: 2;
+    margin-left: auto;
+    width: 100%;
+    justify-content: flex-end;
+  }
+  .api-unreachable-banner__retry {
+    flex: 1 1 auto;
+    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+}
