@@ -6,7 +6,9 @@ import React, {
   useMemo,
 } from "react";
 import { ClipboardList } from "lucide-react";
-import openaiService from "../../services/openaiService";
+import openaiService, {
+  type AudioPlaybackDiagnostics,
+} from "../../services/openaiService";
 import { useAppContext } from "../../context/AppContext";
 import { useAuth } from "../../context/AuthContext";
 import {
@@ -32,9 +34,15 @@ import LineTagsModal from "../common/LineTagsModal";
 import VoiceAssignmentModal from "../common/VoiceAssignmentModal";
 
 const SUCCESS_FLASH_MS = 1300;
+const MIN_STT_CAPTURE_BYTES = 1024;
+const MIN_STT_CAPTURE_DURATION_MS = 250;
+const LIVE_STT_LANGUAGE = "it";
 
 import { showToast } from "../../utils";
-import useMicrophoneRecorder from "../../hooks/useMicrophoneRecorder";
+import useMicrophoneRecorder, {
+  type RecordingMetadata,
+  type RecordingResult,
+} from "../../hooks/useMicrophoneRecorder";
 import "./InteractiveMemorizationView.css";
 
 interface ScriptEntry {
@@ -111,6 +119,12 @@ const friendlyTtsError = (
   return message;
 };
 
+const isExpectedTtsCancellation = (error: unknown): boolean =>
+  error instanceof Error &&
+  (error.name === "AbortError" ||
+    error.message.toLowerCase().includes("cancel") ||
+    error.message.toLowerCase().includes("stopped"));
+
 const friendlySttError = (
   error: unknown,
   t: Record<string, string>,
@@ -129,7 +143,12 @@ const friendlySttError = (
     return t.errorSttTimeout ?? "Transcription request timed out.";
   if (message.includes("Rate limit") || message.includes("rate"))
     return t.errorSttRateLimit ?? "Rate limit reached.";
-  if (message.includes("Audio data is required"))
+  if (
+    message.includes("Audio data is required") ||
+    message.includes("Audio data is too short") ||
+    message.includes("Audio file is too short") ||
+    message.includes("No audio")
+  )
     return t.errorSttNoAudio ?? "No audio captured.";
   return message;
 };
@@ -180,6 +199,29 @@ const diagnosticNow = (): number =>
 
 const diagnosticElapsed = (startedAt: number): number =>
   Math.max(0, Math.round(diagnosticNow() - startedAt));
+
+const recorderDiagnostics = (metadata: RecordingMetadata | null) => ({
+  capturedBytes: metadata?.bytes ?? 0,
+  captureDurationMs: metadata?.durationMs ?? 0,
+  chunkCount: metadata?.chunkCount ?? 0,
+  mimeType: metadata?.mimeType ?? "none",
+  recorderState: metadata?.recorderState ?? "missing",
+  streamActive: metadata?.streamActive ?? false,
+  trackCount: metadata?.trackCount ?? 0,
+  trackStates: metadata?.trackStates ?? [],
+});
+
+const unusableCaptureReason = (
+  result: RecordingResult | null,
+): string | null => {
+  if (!result) return "missing-blob";
+  if (result.blob.size === 0) return "empty-blob";
+  if (result.blob.size < MIN_STT_CAPTURE_BYTES) return "too-small";
+  if (result.metadata.durationMs < MIN_STT_CAPTURE_DURATION_MS) {
+    return "too-short";
+  }
+  return null;
+};
 
 const InteractiveMemorizationView = ({
   scriptLines,
@@ -302,8 +344,16 @@ const InteractiveMemorizationView = ({
 
   const cursorRef = useRef(0);
   const cancelRef = useRef(false);
+  const isMountedRef = useRef(true);
   const zenFadeTimerRef = useRef<number | null>(null);
   const successFlashTimerRef = useRef<number | null>(null);
+
+  useEffect(
+    () => () => {
+      isMountedRef.current = false;
+    },
+    [],
+  );
 
   useEffect(() => {
     cursorRef.current = cursor;
@@ -331,6 +381,8 @@ const InteractiveMemorizationView = ({
     });
 
     return () => {
+      cancelRef.current = true;
+      openaiService.stopAudio("Live view unmounted");
       recordDiagnosticBreadcrumb("live-view-unmounted", {
         cursor: cursorRef.current,
         scriptKey,
@@ -356,6 +408,8 @@ const InteractiveMemorizationView = ({
     startRecording,
     stopRecording,
     cancelRecording,
+    releaseStream,
+    getRecorderSnapshot,
   } = useMicrophoneRecorder();
 
   const upcomingNonUserLines = useMemo(() => {
@@ -440,6 +494,35 @@ const InteractiveMemorizationView = ({
     hideZenOverlay();
     setIsPlaying(true);
     cancelRef.current = false;
+    let playedCount = 0;
+    const primeStartedAt = diagnosticNow();
+    try {
+      const primed = await openaiService.primeAudioPlayback();
+      recordDiagnosticBreadcrumb(
+        "tts-playback-primed",
+        {
+          elapsedMs: diagnosticElapsed(primeStartedAt),
+          primed,
+        },
+        primed ? "info" : "warn",
+      );
+    } catch (err) {
+      recordDiagnosticBreadcrumb(
+        "tts-playback-prime-failed",
+        {
+          elapsedMs: diagnosticElapsed(primeStartedAt),
+          message: err instanceof Error ? err.message : String(err),
+        },
+        "warn",
+      );
+    }
+    if (cancelRef.current) {
+      if (isMountedRef.current) {
+        setIsPlaying(false);
+        setNowSpeakingIndex(null);
+      }
+      return;
+    }
     recordDiagnosticBreadcrumb("tts-sequence-started", {
       cursor,
       lineCount: upcomingNonUserLines.length,
@@ -467,27 +550,63 @@ const InteractiveMemorizationView = ({
         });
         const audioBlob = await openaiService.textToSpeech(ttsText, ttsOpts);
         recordDiagnosticBreadcrumb("tts-line-ready", {
-          audioSize: audioBlob.size,
-          audioType: audioBlob.type || "unknown",
+          generatedBytes: audioBlob.size,
+          mimeType: audioBlob.type || "unknown",
           elapsedMs: diagnosticElapsed(lineStartedAt),
           originalIndex: item.originalIndex,
           sequenceOffset: i,
         });
         if (cancelRef.current) break;
-        await openaiService.playAudio(audioBlob, { volume: 1 });
+        let playbackDiagnostics: AudioPlaybackDiagnostics | null = null;
+        await openaiService.playAudio(audioBlob, {
+          onEnded: (diagnostics) => {
+            playbackDiagnostics = diagnostics;
+            recordDiagnosticBreadcrumb("tts-audio-ended", {
+              audio: diagnostics,
+              originalIndex: item.originalIndex,
+              sequenceOffset: i,
+            });
+          },
+          onError: (diagnostics) => {
+            recordDiagnosticBreadcrumb(
+              "tts-audio-error",
+              {
+                audio: diagnostics,
+                originalIndex: item.originalIndex,
+                sequenceOffset: i,
+              },
+              "warn",
+            );
+          },
+          volume: 1,
+        });
+        playedCount += 1;
         recordDiagnosticBreadcrumb("tts-line-played", {
+          audio: playbackDiagnostics,
           elapsedMs: diagnosticElapsed(lineStartedAt),
           originalIndex: item.originalIndex,
           sequenceOffset: i,
         });
       }
-      setCursor((prev) => prev + upcomingNonUserLines.length);
+      if (playedCount > 0 && isMountedRef.current) {
+        setCursor((prev) => prev + playedCount);
+      }
       recordDiagnosticBreadcrumb("tts-sequence-completed", {
-        advancedBy: upcomingNonUserLines.length,
+        advancedBy: playedCount,
         cancelled: cancelRef.current,
         cursor,
+        requestedLineCount: upcomingNonUserLines.length,
       });
     } catch (err) {
+      if (cancelRef.current && isExpectedTtsCancellation(err)) {
+        recordDiagnosticBreadcrumb("tts-sequence-cancelled", {
+          advancedBy: playedCount,
+          cursor,
+          lineCount: upcomingNonUserLines.length,
+          message: err instanceof Error ? err.message : String(err),
+        });
+        return;
+      }
       const friendly = friendlyTtsError(err, t);
       recordDiagnosticBreadcrumb(
         "tts-sequence-failed",
@@ -508,11 +627,15 @@ const InteractiveMemorizationView = ({
         severity: "error",
         type: "tts-playback-error",
       });
-      setError(friendly);
-      showToast(friendly, 5000, "error");
+      if (isMountedRef.current) {
+        setError(friendly);
+        showToast(friendly, 5000, "error");
+      }
     } finally {
-      setIsPlaying(false);
-      setNowSpeakingIndex(null);
+      if (isMountedRef.current) {
+        setIsPlaying(false);
+        setNowSpeakingIndex(null);
+      }
     }
   }, [
     cursor,
@@ -577,6 +700,7 @@ const InteractiveMemorizationView = ({
       await startRecording();
       recordDiagnosticBreadcrumb("recording-started", {
         cursor,
+        ...recorderDiagnostics(getRecorderSnapshot()),
         userTurn,
       });
     } catch (err) {
@@ -615,6 +739,7 @@ const InteractiveMemorizationView = ({
     startRecording,
     t,
     userTurn,
+    getRecorderSnapshot,
   ]);
 
   const handleStopRecording = useCallback(async () => {
@@ -622,16 +747,15 @@ const InteractiveMemorizationView = ({
     const stopStartedAt = diagnosticNow();
     recordDiagnosticBreadcrumb("recording-stop-requested", {
       cursor,
-      expectedLength: nextUserLine.line.length,
+      lineChars: nextUserLine.line.length,
       originalIndex: nextUserLine.originalIndex,
     });
-    let audio: Blob | null = null;
+    let result: RecordingResult | null = null;
     try {
-      audio = await stopRecording();
+      result = await stopRecording();
       recordDiagnosticBreadcrumb("recording-stopped", {
-        audioSize: audio?.size ?? 0,
-        audioType: audio?.type || "none",
-        elapsedMs: diagnosticElapsed(stopStartedAt),
+        ...recorderDiagnostics(result?.metadata ?? null),
+        stopElapsedMs: diagnosticElapsed(stopStartedAt),
         originalIndex: nextUserLine.originalIndex,
       });
     } catch (err) {
@@ -654,22 +778,44 @@ const InteractiveMemorizationView = ({
         type: "recording-stop-error",
       });
       // ignore — handled below by no-input case
+    } finally {
+      releaseStream();
+      recordDiagnosticBreadcrumb("microphone-stream-released", {
+        cursor,
+        originalIndex: nextUserLine.originalIndex,
+        reason: "recording-stopped",
+      });
     }
     const expected = nextUserLine.line;
-    if (!audio || audio.size === 0) {
+    const unusableReason = unusableCaptureReason(result);
+    if (unusableReason) {
       recordDiagnosticBreadcrumb(
-        "recording-empty",
+        "recording-unusable",
         {
           cursor,
+          ...recorderDiagnostics(result?.metadata ?? null),
           originalIndex: nextUserLine.originalIndex,
+          reason: unusableReason,
         },
         "warn",
       );
+      captureDiagnostic({
+        extras: {
+          cursor,
+          ...recorderDiagnostics(result?.metadata ?? null),
+          originalIndex: nextUserLine.originalIndex,
+          reason: unusableReason,
+        },
+        severity: "warning",
+        type: "recording-unusable",
+      });
       const evalResult: Evaluation = {
         status: "no-input",
         transcript: "",
         message:
-          t.correctionNoInput ?? "No audio captured. Try recording again.",
+          t.correctionNoUsableInput ??
+          t.correctionNoInput ??
+          "Recording did not start correctly. Tap Record and try again.",
         expected,
       };
       setLastEvaluation(evalResult);
@@ -677,23 +823,27 @@ const InteractiveMemorizationView = ({
       showToast(evalResult.message, 4000, "warning");
       return;
     }
+    if (!result) return;
+    const audio = result.blob;
     setIsTranscribing(true);
     try {
       const sttStartedAt = diagnosticNow();
       recordDiagnosticBreadcrumb("stt-request-started", {
-        audioSize: audio.size,
-        audioType: audio.type || "unknown",
-        expectedLength: expected.length,
-        language: currentLang || "auto",
+        capturedBytes: result.metadata.bytes,
+        captureDurationMs: result.metadata.durationMs,
+        chunkCount: result.metadata.chunkCount,
+        lineChars: expected.length,
+        mimeType: audio.type || "unknown",
+        language: LIVE_STT_LANGUAGE,
         originalIndex: nextUserLine.originalIndex,
       });
       const transcript = await openaiService.speechToText(audio, {
-        language: currentLang || undefined,
+        language: LIVE_STT_LANGUAGE,
       });
       const status = evaluateMatch(expected, transcript);
       recordDiagnosticBreadcrumb("stt-result", {
         elapsedMs: diagnosticElapsed(sttStartedAt),
-        expectedLength: expected.length,
+        lineChars: expected.length,
         originalIndex: nextUserLine.originalIndex,
         status,
         transcriptLength: transcript.length,
@@ -734,6 +884,7 @@ const InteractiveMemorizationView = ({
         {
           cursor,
           message: friendly,
+          ...recorderDiagnostics(result.metadata),
           originalIndex: nextUserLine.originalIndex,
         },
         "error",
@@ -741,11 +892,10 @@ const InteractiveMemorizationView = ({
       captureDiagnostic({
         error: err,
         extras: {
-          audioSize: audio.size,
-          audioType: audio.type || "unknown",
           cursor,
-          expectedLength: expected.length,
-          language: currentLang || "auto",
+          ...recorderDiagnostics(result.metadata),
+          lineChars: expected.length,
+          language: LIVE_STT_LANGUAGE,
           originalIndex: nextUserLine.originalIndex,
         },
         severity: "error",
@@ -771,6 +921,7 @@ const InteractiveMemorizationView = ({
     nextUserLine,
     showZenOverlay,
     stopRecording,
+    releaseStream,
     t,
     triggerSuccessFlash,
   ]);
@@ -845,6 +996,7 @@ const InteractiveMemorizationView = ({
     });
     cancelRecording();
     cancelRef.current = true;
+    openaiService.stopAudio("Live playback restarted");
     hideZenOverlay();
     clearSuccessFlashTimer();
     setSphereSuccessFlash(false);
@@ -872,6 +1024,7 @@ const InteractiveMemorizationView = ({
     });
     cancelRecording();
     cancelRef.current = true;
+    openaiService.stopAudio("Live view left");
     hideZenOverlay();
     onBack();
   }, [

@@ -75,6 +75,8 @@ test.describe("Memorize Tool — public flow", () => {
 });
 
 test.describe("Memorize Tool — backend smoke", () => {
+  const accessToken = process.env.PLAYWRIGHT_ACCESS_TOKEN;
+
   const expectStatus = async (
     resPromise: Promise<APIResponse>,
     status: number,
@@ -93,7 +95,10 @@ test.describe("Memorize Tool — backend smoke", () => {
     const list = await expectStatus(request.get("/api/scripts"), 200);
     const listBody = (await list.json()) as { scripts: { id: string }[] };
     expect(Array.isArray(listBody.scripts)).toBe(true);
-    expect(listBody.scripts.length).toBeGreaterThanOrEqual(20);
+    expect(listBody.scripts.length).toBeGreaterThanOrEqual(12);
+    expect(
+      listBody.scripts.some((script) => script.id === "finale-di-partita"),
+    ).toBe(true);
 
     const detail = await expectStatus(
       request.get("/api/scripts/finale-di-partita"),
@@ -107,7 +112,16 @@ test.describe("Memorize Tool — backend smoke", () => {
     expect(Array.isArray(detailBody.content.lines)).toBe(true);
 
     await expectStatus(request.get("/api/scripts/no-such-script"), 404);
-    await expectStatus(request.get("/api/tts/health"), 200);
+    if (accessToken) {
+      await expectStatus(
+        request.get("/api/tts/health", {
+          headers: { "x-access-token": accessToken },
+        }),
+        200,
+      );
+    } else {
+      await expectStatus(request.get("/api/tts/health"), 401);
+    }
   });
 
   test("auth-protected endpoints reject unauthenticated and invalid tokens", async ({

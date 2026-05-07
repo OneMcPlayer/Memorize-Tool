@@ -1,8 +1,7 @@
-import { defineConfig } from "vite";
+import { defineConfig, type PluginOption } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
-import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 import { VitePWA } from "vite-plugin-pwa";
 
 // PORT and BASE_PATH are required at runtime (`vite dev` / `vite preview`) and
@@ -33,12 +32,43 @@ if (!process.env.BASE_PATH && !isBuildCommand) {
   );
 }
 
+const apiProxyTarget = process.env.API_PROXY_TARGET;
+const enableReplitVitePlugins =
+  process.env.ENABLE_REPLIT_VITE_PLUGINS === "true";
+
+async function loadReplitVitePlugins(): Promise<PluginOption[]> {
+  if (!enableReplitVitePlugins) return [];
+
+  const runtimeErrorOverlayPackage = "@replit/vite-plugin-runtime-error-modal";
+  const cartographerPackage = "@replit/vite-plugin-cartographer";
+  const devBannerPackage = "@replit/vite-plugin-dev-banner";
+
+  const runtimeErrorOverlay = await import(runtimeErrorOverlayPackage).then(
+    (m) => (m as { default: () => PluginOption }).default,
+  );
+  const cartographer = await import(cartographerPackage).then(
+    (m) =>
+      (m as { cartographer: (options: { root: string }) => PluginOption })
+        .cartographer,
+  );
+  const devBanner = await import(devBannerPackage).then(
+    (m) => (m as { devBanner: () => PluginOption }).devBanner,
+  );
+
+  return [
+    runtimeErrorOverlay(),
+    cartographer({
+      root: path.resolve(import.meta.dirname, ".."),
+    }),
+    devBanner(),
+  ];
+}
+
 export default defineConfig({
   base: basePath,
   plugins: [
     react(),
     tailwindcss(),
-    runtimeErrorOverlay(),
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: "auto",
@@ -120,24 +150,17 @@ export default defineConfig({
         ],
       },
     }),
-    ...(process.env.NODE_ENV !== "production" &&
-    process.env.REPL_ID !== undefined
-      ? [
-          await import("@replit/vite-plugin-cartographer").then((m) =>
-            m.cartographer({
-              root: path.resolve(import.meta.dirname, ".."),
-            }),
-          ),
-          await import("@replit/vite-plugin-dev-banner").then((m) =>
-            m.devBanner(),
-          ),
-        ]
-      : []),
+    ...(await loadReplitVitePlugins()),
   ],
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "src"),
-      "@assets": path.resolve(import.meta.dirname, "..", "..", "attached_assets"),
+      "@assets": path.resolve(
+        import.meta.dirname,
+        "..",
+        "..",
+        "attached_assets",
+      ),
     },
     dedupe: ["react", "react-dom"],
   },
@@ -151,6 +174,15 @@ export default defineConfig({
     strictPort: true,
     host: "0.0.0.0",
     allowedHosts: true,
+    proxy: apiProxyTarget
+      ? {
+          "/api": {
+            target: apiProxyTarget,
+            changeOrigin: true,
+            secure: false,
+          },
+        }
+      : undefined,
     fs: {
       strict: true,
     },

@@ -1,19 +1,25 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useAppContext } from '../../context/AppContext';
-import { useAuth } from '../../context/AuthContext';
-import { translations } from '../../data/translations';
+import React, { useState, useEffect, useRef } from "react";
+import { useAppContext } from "../../context/AppContext";
+import { useAuth } from "../../context/AuthContext";
+import { translations } from "../../data/translations";
 
 interface HeaderProps {
   onOpenConverter: () => void;
   onOpenAbout: () => void;
   onOpenProfile: () => void;
   onOpenAudioTest: () => void;
-  onOpenTtsTest: () => void;
+  onOpenSttPerformanceTest: () => void;
 }
 
-type OptionsView = 'main' | 'experimental';
+type OptionsView = "main" | "experimental";
 
-const Header = ({ onOpenConverter, onOpenAbout, onOpenProfile, onOpenAudioTest, onOpenTtsTest }: HeaderProps) => {
+const Header = ({
+  onOpenConverter,
+  onOpenAbout,
+  onOpenProfile,
+  onOpenAudioTest,
+  onOpenSttPerformanceTest,
+}: HeaderProps) => {
   const {
     currentLang,
     setLanguage,
@@ -29,7 +35,7 @@ const Header = ({ onOpenConverter, onOpenAbout, onOpenProfile, onOpenAudioTest, 
   } = useAppContext();
   const { isAuthenticated } = useAuth();
   const [optionsVisible, setOptionsVisible] = useState(false);
-  const [optionsView, setOptionsView] = useState<OptionsView>('main');
+  const [optionsView, setOptionsView] = useState<OptionsView>("main");
   const experimentalEntryRef = useRef<HTMLButtonElement | null>(null);
   const shouldReturnFocusRef = useRef(false);
 
@@ -43,7 +49,7 @@ const Header = ({ onOpenConverter, onOpenAbout, onOpenProfile, onOpenAudioTest, 
 
   const handleOptionsToggle = () => {
     if (!optionsVisible) {
-      setOptionsView('main');
+      setOptionsView("main");
     }
     setOptionsVisible(!optionsVisible);
   };
@@ -53,27 +59,27 @@ const Header = ({ onOpenConverter, onOpenAbout, onOpenProfile, onOpenAudioTest, 
   };
 
   useEffect(() => {
-    if (!isAdvancedMode && optionsView === 'experimental') {
-      setOptionsView('main');
+    if (!isAdvancedMode && optionsView === "experimental") {
+      setOptionsView("main");
     }
   }, [isAdvancedMode, optionsView]);
 
   useEffect(() => {
     if (!optionsVisible) return;
     const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = "hidden";
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOptionsVisible(false);
+      if (e.key === "Escape") setOptionsVisible(false);
     };
-    document.addEventListener('keydown', handleEsc);
+    document.addEventListener("keydown", handleEsc);
     return () => {
       document.body.style.overflow = previousOverflow;
-      document.removeEventListener('keydown', handleEsc);
+      document.removeEventListener("keydown", handleEsc);
     };
   }, [optionsVisible]);
 
   useEffect(() => {
-    if (optionsView === 'main' && shouldReturnFocusRef.current) {
+    if (optionsView === "main" && shouldReturnFocusRef.current) {
       shouldReturnFocusRef.current = false;
       experimentalEntryRef.current?.focus();
     }
@@ -85,7 +91,10 @@ const Header = ({ onOpenConverter, onOpenAbout, onOpenProfile, onOpenAudioTest, 
 
   const t = translations[currentLang] as Record<string, unknown>;
 
-  const titleId = optionsView === 'experimental' ? 'experimentalOptionsTitle' : 'optionsModalTitle';
+  const titleId =
+    optionsView === "experimental"
+      ? "experimentalOptionsTitle"
+      : "optionsModalTitle";
 
   return (
     <header className="app-header">
@@ -113,10 +122,10 @@ const Header = ({ onOpenConverter, onOpenAbout, onOpenProfile, onOpenAudioTest, 
             <button
               id="profileToggle"
               onClick={onOpenProfile}
-              aria-label={isAuthenticated ? 'Profile' : 'Login'}
-              title={isAuthenticated ? 'Profile' : 'Login'}
+              aria-label={isAuthenticated ? "Profile" : "Login"}
+              title={isAuthenticated ? "Profile" : "Login"}
             >
-              {isAuthenticated ? '👤' : '🔑'}
+              {isAuthenticated ? "👤" : "🔑"}
             </button>
           )}
 
@@ -140,18 +149,23 @@ const Header = ({ onOpenConverter, onOpenAbout, onOpenProfile, onOpenAudioTest, 
           aria-labelledby={titleId}
           onClick={() => setOptionsVisible(false)}
         >
-          <div className="options-modal__panel" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="options-modal__panel"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="options-modal__handle" aria-hidden="true" />
 
-            {optionsView === 'main' && (
+            {optionsView === "main" && (
               <>
                 <div className="options-modal__header">
-                  <h2 id="optionsModalTitle">{(t.optionsTitle as string) || 'Options'}</h2>
+                  <h2 id="optionsModalTitle">
+                    {(t.optionsTitle as string) || "Options"}
+                  </h2>
                   <button
                     type="button"
                     className="options-modal__close modal-close-icon"
                     onClick={() => setOptionsVisible(false)}
-                    aria-label={(t.closeButton as string) || 'Close'}
+                    aria-label={(t.closeButton as string) || "Close"}
                   >
                     ✕
                   </button>
@@ -160,7 +174,7 @@ const Header = ({ onOpenConverter, onOpenAbout, onOpenProfile, onOpenAudioTest, 
                 <div className="options-modal__body">
                   <label className="options-modal__row" id="optionExperimental">
                     <span className="options-modal__row-label">
-                      {(t.advancedMode as string) || 'Experimental Mode'}
+                      {(t.advancedMode as string) || "Experimental Mode"}
                     </span>
                     <input
                       type="checkbox"
@@ -181,7 +195,8 @@ const Header = ({ onOpenConverter, onOpenAbout, onOpenProfile, onOpenAudioTest, 
                         setOptionsVisible(false);
                       }}
                     >
-                      {((t.converter as Record<string, string>)?.title) || 'Script Converter'}
+                      {(t.converter as Record<string, string>)?.title ||
+                        "Script Converter"}
                     </button>
                   )}
 
@@ -194,7 +209,7 @@ const Header = ({ onOpenConverter, onOpenAbout, onOpenProfile, onOpenAudioTest, 
                       setOptionsVisible(false);
                     }}
                   >
-                    {(t.about as string) || 'About'}
+                    {(t.about as string) || "About"}
                   </button>
 
                   {isAdvancedMode && (
@@ -203,17 +218,18 @@ const Header = ({ onOpenConverter, onOpenAbout, onOpenProfile, onOpenAudioTest, 
                       className="options-modal__item"
                       id="optionExperimentalOptions"
                       ref={experimentalEntryRef}
-                      onClick={() => setOptionsView('experimental')}
+                      onClick={() => setOptionsView("experimental")}
                       aria-haspopup="true"
                     >
-                      {(t.experimentalOptions as string) || 'Experimental options'}
+                      {(t.experimentalOptions as string) ||
+                        "Experimental options"}
                     </button>
                   )}
                 </div>
               </>
             )}
 
-            {optionsView === 'experimental' && (
+            {optionsView === "experimental" && (
               <>
                 <div className="options-modal__header">
                   <button
@@ -221,20 +237,23 @@ const Header = ({ onOpenConverter, onOpenAbout, onOpenProfile, onOpenAudioTest, 
                     className="options-modal__close"
                     onClick={() => {
                       shouldReturnFocusRef.current = true;
-                      setOptionsView('main');
+                      setOptionsView("main");
                     }}
-                    aria-label={(t.experimentalOptionsBack as string) || 'Back to options'}
+                    aria-label={
+                      (t.experimentalOptionsBack as string) || "Back to options"
+                    }
                   >
                     ‹
                   </button>
                   <h2 id="experimentalOptionsTitle">
-                    {(t.experimentalOptionsTitle as string) || 'Experimental options'}
+                    {(t.experimentalOptionsTitle as string) ||
+                      "Experimental options"}
                   </h2>
                   <button
                     type="button"
                     className="options-modal__close modal-close-icon"
                     onClick={() => setOptionsVisible(false)}
-                    aria-label={(t.closeButton as string) || 'Close'}
+                    aria-label={(t.closeButton as string) || "Close"}
                   >
                     ✕
                   </button>
@@ -243,7 +262,7 @@ const Header = ({ onOpenConverter, onOpenAbout, onOpenProfile, onOpenAudioTest, 
                 <div className="options-modal__body">
                   <label className="options-modal__row" id="optionLoginEnabled">
                     <span className="options-modal__row-label">
-                      {(t.loginEnabled as string) || 'Login / Profile'}
+                      {(t.loginEnabled as string) || "Login / Profile"}
                     </span>
                     <input
                       type="checkbox"
@@ -254,22 +273,29 @@ const Header = ({ onOpenConverter, onOpenAbout, onOpenProfile, onOpenAudioTest, 
                     />
                   </label>
 
-                  <label className="options-modal__row" id="optionCustomScriptInput">
+                  <label
+                    className="options-modal__row"
+                    id="optionCustomScriptInput"
+                  >
                     <span className="options-modal__row-label">
-                      {(t.customScriptInput as string) || 'Custom script input (paste / file)'}
+                      {(t.customScriptInput as string) ||
+                        "Custom script input (paste / file)"}
                     </span>
                     <input
                       type="checkbox"
                       id="customScriptInputToggle"
                       className="options-modal__switch"
                       checked={isCustomScriptInputEnabled}
-                      onChange={(e) => setCustomScriptInputEnabled(e.target.checked)}
+                      onChange={(e) =>
+                        setCustomScriptInputEnabled(e.target.checked)
+                      }
                     />
                   </label>
 
                   <label className="options-modal__row" id="optionCopyButton">
                     <span className="options-modal__row-label">
-                      {(t.copyButtonEnabled as string) || 'Copy line button (in Practice Mode)'}
+                      {(t.copyButtonEnabled as string) ||
+                        "Copy line button (in Practice Mode)"}
                     </span>
                     <input
                       type="checkbox"
@@ -295,13 +321,13 @@ const Header = ({ onOpenConverter, onOpenAbout, onOpenProfile, onOpenAudioTest, 
                   <button
                     type="button"
                     className="options-modal__item"
-                    id="optionTtsTest"
+                    id="optionSttPerformanceTest"
                     onClick={() => {
-                      onOpenTtsTest();
+                      onOpenSttPerformanceTest();
                       setOptionsVisible(false);
                     }}
                   >
-                    TTS Test
+                    STT Performance Test
                   </button>
                 </div>
               </>

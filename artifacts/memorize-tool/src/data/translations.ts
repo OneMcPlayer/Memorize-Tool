@@ -62,11 +62,14 @@ export const translations: Record<string, Record<string, unknown>> = {
     memorizationPractice: "Live Practice",
     interactiveMemorizationTitle: "Interactive Memorization Practice",
     scriptMemorizationPractice: "Script Memorization Practice",
-    practiceDescription: "This feature helps you practice your lines by having the system play all other characters while you say your lines.",
+    practiceDescription:
+      "This feature helps you practice your lines by having the system play all other characters while you say your lines.",
     howItWorks: "How It Works",
-    featureItem1: "The system will play the lines of all other characters using text-to-speech",
+    featureItem1:
+      "The system will play the lines of all other characters using text-to-speech",
     featureItem2: "When it's your turn, you'll need to say your line",
-    featureItem3: "The system will listen and check if your line matches the script",
+    featureItem3:
+      "The system will listen and check if your line matches the script",
     featureItem4: "You'll get feedback on how well you remembered your lines",
     benefits: "Benefits",
     benefitTitle1: "Practice Efficiently",
@@ -95,14 +98,15 @@ export const translations: Record<string, Record<string, unknown>> = {
     accuracy: "Accuracy",
     loading: "Loading...",
     error: "Error",
-    practiceInstructions: "Use \"Play next\" to hear the other characters' lines, then \"Record\" to speak your line and check it against the script.",
+    practiceInstructions:
+      'Use "Play next" to hear the other characters\' lines, then "Record" to speak your line and check it against the script.',
     startTestPrompt: "Ready to start the practice?",
     zenModeToggle: "Zen Mode",
     lineTags: {
       openButton: "Edit cue tags",
       openTitle: "Add inline performance tags to cue lines (e.g. [whisper])",
       title: "Edit cue tags",
-      hint: "Edit each cue line and place bracketed tags anywhere inside it (e.g. \"Hello [angry] world, [whisper] goodbye\"). The whole marked-up line is sent to the voice.",
+      hint: 'Edit each cue line and place bracketed tags anywhere inside it (e.g. "Hello [angry] world, [whisper] goodbye"). The whole marked-up line is sent to the voice.',
       placeholder: "Hello [angry] world",
       empty: "No cue lines from other characters in this script.",
       save: "Save",
@@ -138,6 +142,8 @@ export const translations: Record<string, Record<string, unknown>> = {
     correctionTranscribed: "What you said",
     correctionComparison: "Compared to the script",
     correctionNoInput: "No audio captured. Try recording again.",
+    correctionNoUsableInput:
+      "Recording did not start correctly. Tap Record and try again.",
     correctionError: "Transcription error",
     correctionPerfect: "Perfect — exact match!",
     feedbackCorrect: "Great — that matches the script.",
@@ -145,22 +151,27 @@ export const translations: Record<string, Record<string, unknown>> = {
     feedbackOff: "That doesn't match the script. Moving on.",
     voiceAssignButton: "Assign voices",
     voiceAssignTitle: "Assign voices to characters",
-    voiceAssignHelp: "Experimental — pick a Gemini voice for each character and preview a sample line. Selections are saved on this device, and each (line + voice) is cached on the server so the same preview never re-generates.",
+    voiceAssignHelp:
+      "Experimental — pick a Gemini voice for each character and preview a sample line. Selections are saved on this device, and each (line + voice) is cached on the server so the same preview never re-generates.",
     voiceDefaultOption: "Default (Zephyr)",
     voiceSampleButton: "Sample",
     voiceShuffleTitle: "Try another line",
     voiceNoSample: "No sample available for this character.",
-    voiceNoCharacters: "No characters detected yet. Paste or load a script first.",
+    voiceNoCharacters:
+      "No characters detected yet. Paste or load a script first.",
     voiceClearAll: "Reset all",
     voiceDone: "Done",
     voiceYouBadge: "you",
     voiceRandomToggle: "Experimental: random line",
-    voiceRandomToggleHint: "Pick a random line for each character instead of the curated sample.",
+    voiceRandomToggleHint:
+      "Pick a random line for each character instead of the curated sample.",
     voiceRandomRegenerate: "Pick another random line",
     voiceRandomNoLines: "No spoken lines for this character.",
-    errorTtsNotConfigured: "Live mode isn't configured on the server. Ask the administrator to set OPENROUTER_API_KEY.",
+    errorTtsNotConfigured:
+      "Live mode isn't configured on the server. Ask the administrator to set OPENROUTER_API_KEY.",
     errorTtsGeneric: "Error playing audio. Please try again.",
-    errorTtsRateLimit: "Rate limit reached. Please wait a moment and try again.",
+    errorTtsRateLimit:
+      "Rate limit reached. Please wait a moment and try again.",
     errorTtsNetwork: "Network error. Please check your connection.",
     errorSttGeneric: "Could not transcribe your line. Please try again.",
     errorSttTimeout: "Transcription request timed out. Try again.",
@@ -185,20 +196,22 @@ export const translations: Record<string, Record<string, unknown>> = {
       title: "Install App",
       message: "Install this app on your device for a better experience.",
       install: "Install",
-      dismiss: "Not now"
+      dismiss: "Not now",
     },
     offlineIndicator: {
-      message: "You are offline. Some features may be limited."
+      message: "You are offline. Some features may be limited.",
     },
     apiUnreachable: {
       title: "API server unreachable",
-      message: "We can't reach the API server. Try restarting the workflows from the Replit panel.",
+      message:
+        "We can't reach the API server. Check that the backend is running and reachable.",
       retry: "Retry",
-      dismiss: "Dismiss"
+      dismiss: "Dismiss",
     },
     converter: {
       title: "Script Converter",
-      description: "Convert plain text scripts to structured format for improved parsing and memorization.",
+      description:
+        "Convert plain text scripts to structured format for improved parsing and memorization.",
       inputLabel: "Input Plain Text Script",
       inputPlaceholder: "Paste your plain text script here...",
       parseButton: "Parse Script",
@@ -222,7 +235,8 @@ export const translations: Record<string, Record<string, unknown>> = {
       toolUppercase: "UPPERCASE",
       toolAddCharacter: "Add Character Name",
       editorPlaceholder: "Enter your script here...",
-      editorHint: "Tip: Character names should be followed by a colon (e.g., HAMLET: To be or not to be)",
+      editorHint:
+        "Tip: Character names should be followed by a colon (e.g., HAMLET: To be or not to be)",
       previewStatus: "Preview updates as you type",
       characterSingular: "Character",
       characterPlural: "Characters",
@@ -236,22 +250,25 @@ export const translations: Record<string, Record<string, unknown>> = {
       editCharacter: "Edit character",
       editCharacterPrompt: "Edit character name:",
       characterRenamed: "Character name successfully changed",
-      noCharactersDetected: "No characters detected. Try adding character names followed by a colon.",
+      noCharactersDetected:
+        "No characters detected. Try adding character names followed by a colon.",
       editingTips: "Editing Tips",
-      tipCharacterFormat: "Format lines as \"CHARACTER: Dialogue text\"",
-      tipStageDirections: "Stage directions can be enclosed in parentheses (like this)",
+      tipCharacterFormat: 'Format lines as "CHARACTER: Dialogue text"',
+      tipStageDirections:
+        "Stage directions can be enclosed in parentheses (like this)",
       tipSelection: "Click on a line in the preview to find it in the editor",
-      tipCtrlClick: "Use Ctrl+Click to select multiple lines to merge"
+      tipCtrlClick: "Use Ctrl+Click to select multiple lines to merge",
     },
     accessGate: {
       title: "Enter access code to use this app",
-      description: "This app is invite-only. Enter the access code shared with you to continue.",
+      description:
+        "This app is invite-only. Enter the access code shared with you to continue.",
       placeholder: "Access code",
       submit: "Unlock",
       wrong: "Wrong access code",
       expired: "Access code is no longer valid, please enter it again",
-      networkError: "Could not reach the server. Please try again."
-    }
+      networkError: "Could not reach the server. Please try again.",
+    },
   },
   it: {
     title: "🎭 Memorizzazione Copione",
@@ -316,17 +333,22 @@ export const translations: Record<string, Record<string, unknown>> = {
     memorizationPractice: "Esercitazione Live",
     interactiveMemorizationTitle: "Esercitazione Memorizzazione Interattiva",
     scriptMemorizationPractice: "Esercitazione Memorizzazione Copione",
-    practiceDescription: "Questa funzione ti aiuta a esercitarti con le tue battute facendo recitare al sistema le battute degli altri personaggi mentre tu reciti le tue.",
+    practiceDescription:
+      "Questa funzione ti aiuta a esercitarti con le tue battute facendo recitare al sistema le battute degli altri personaggi mentre tu reciti le tue.",
     howItWorks: "Come Funziona",
-    featureItem1: "Il sistema reciterà le battute degli altri personaggi usando la sintesi vocale",
+    featureItem1:
+      "Il sistema reciterà le battute degli altri personaggi usando la sintesi vocale",
     featureItem2: "Quando è il tuo turno, dovrai pronunciare la tua battuta",
-    featureItem3: "Il sistema ascolterà e verificherà se la tua battuta corrisponde al copione",
+    featureItem3:
+      "Il sistema ascolterà e verificherà se la tua battuta corrisponde al copione",
     featureItem4: "Riceverai un riscontro sulla precisione delle tue battute",
     benefits: "Vantaggi",
     benefitTitle1: "Esercitati Efficacemente",
-    benefitDesc1: "Nessun partner di scena necessario - esercitati dove e quando vuoi",
+    benefitDesc1:
+      "Nessun partner di scena necessario - esercitati dove e quando vuoi",
     benefitTitle2: "Monitora i Progressi",
-    benefitDesc2: "Ricevi un riscontro immediato sulla precisione delle tue battute",
+    benefitDesc2:
+      "Ricevi un riscontro immediato sulla precisione delle tue battute",
     benefitTitle3: "Ripeti le Scene Difficili",
     benefitDesc3: "Concentrati sulle parti che devi esercitare di più",
     startButton: "Inizia Esercitazione",
@@ -336,7 +358,8 @@ export const translations: Record<string, Record<string, unknown>> = {
     playingLabel: "Riproduzione...",
     checkingLabel: "Controllo...",
     upcomingLines: "Prossime battute",
-    userLineHidden: "Recita la tua battuta, poi ferma la registrazione per controllarla.",
+    userLineHidden:
+      "Recita la tua battuta, poi ferma la registrazione per controllarla.",
     transcriptLabel: "Trascrizione:",
     expectedLabel: "Atteso:",
     micUnsupported: "Microfono non supportato in questo browser.",
@@ -349,14 +372,16 @@ export const translations: Record<string, Record<string, unknown>> = {
     accuracy: "Precisione",
     loading: "Caricamento...",
     error: "Errore",
-    practiceInstructions: "Usa \"Riproduci\" per ascoltare le battute degli altri personaggi, poi \"Registra\" per recitare la tua battuta e confrontarla con il copione.",
+    practiceInstructions:
+      'Usa "Riproduci" per ascoltare le battute degli altri personaggi, poi "Registra" per recitare la tua battuta e confrontarla con il copione.',
     startTestPrompt: "Pronto a iniziare l'esercitazione?",
     zenModeToggle: "Modalità Zen",
     lineTags: {
       openButton: "Modifica tag battute",
-      openTitle: "Aggiungi tag interpretativi all'interno delle battute (es. [whisper])",
+      openTitle:
+        "Aggiungi tag interpretativi all'interno delle battute (es. [whisper])",
       title: "Modifica tag battute",
-      hint: "Modifica ogni battuta inserendo tag tra parentesi quadre dove vuoi (es. \"Ciao [angry] mondo, [whisper] addio\"). L'intera battuta marcata viene inviata alla voce.",
+      hint: 'Modifica ogni battuta inserendo tag tra parentesi quadre dove vuoi (es. "Ciao [angry] mondo, [whisper] addio"). L\'intera battuta marcata viene inviata alla voce.',
       placeholder: "Ciao [angry] mondo",
       empty: "Nessuna battuta degli altri personaggi in questo copione.",
       save: "Salva",
@@ -392,6 +417,8 @@ export const translations: Record<string, Record<string, unknown>> = {
     correctionTranscribed: "Hai detto",
     correctionComparison: "Confronto con il copione",
     correctionNoInput: "Nessun audio acquisito. Prova a registrare di nuovo.",
+    correctionNoUsableInput:
+      "La registrazione non è partita correttamente. Tocca Registra e riprova.",
     correctionError: "Errore di trascrizione",
     correctionPerfect: "Perfetto — corrispondenza esatta!",
     feedbackCorrect: "Ottimo — corrisponde al copione.",
@@ -399,27 +426,34 @@ export const translations: Record<string, Record<string, unknown>> = {
     feedbackOff: "Non corrisponde al copione. Si va avanti.",
     voiceAssignButton: "Assegna voci",
     voiceAssignTitle: "Assegna le voci ai personaggi",
-    voiceAssignHelp: "Sperimentale — scegli una voce Gemini per ogni personaggio e ascolta una battuta di esempio. Le scelte vengono salvate su questo dispositivo e ogni combinazione (battuta + voce) è memorizzata sul server, così la stessa anteprima non viene mai rigenerata.",
+    voiceAssignHelp:
+      "Sperimentale — scegli una voce Gemini per ogni personaggio e ascolta una battuta di esempio. Le scelte vengono salvate su questo dispositivo e ogni combinazione (battuta + voce) è memorizzata sul server, così la stessa anteprima non viene mai rigenerata.",
     voiceDefaultOption: "Predefinita (Zephyr)",
     voiceSampleButton: "Ascolta",
     voiceShuffleTitle: "Prova un'altra battuta",
     voiceNoSample: "Nessuna battuta disponibile per questo personaggio.",
-    voiceNoCharacters: "Nessun personaggio rilevato. Incolla o carica prima un copione.",
+    voiceNoCharacters:
+      "Nessun personaggio rilevato. Incolla o carica prima un copione.",
     voiceClearAll: "Reimposta tutto",
     voiceDone: "Fatto",
     voiceYouBadge: "tu",
     voiceRandomToggle: "Sperimentale: linea casuale",
-    voiceRandomToggleHint: "Scegli una battuta casuale per ogni personaggio al posto del campione predefinito.",
+    voiceRandomToggleHint:
+      "Scegli una battuta casuale per ogni personaggio al posto del campione predefinito.",
     voiceRandomRegenerate: "Scegli un'altra battuta casuale",
     voiceRandomNoLines: "Questo personaggio non ha battute.",
-    errorTtsNotConfigured: "La modalità live non è configurata sul server. Chiedi all'amministratore di impostare OPENROUTER_API_KEY.",
+    errorTtsNotConfigured:
+      "La modalità live non è configurata sul server. Chiedi all'amministratore di impostare OPENROUTER_API_KEY.",
     errorTtsGeneric: "Errore nella riproduzione dell'audio. Riprova.",
-    errorTtsRateLimit: "Limite di richieste raggiunto. Attendi qualche istante e riprova.",
+    errorTtsRateLimit:
+      "Limite di richieste raggiunto. Attendi qualche istante e riprova.",
     errorTtsNetwork: "Errore di rete. Controlla la connessione.",
     errorSttGeneric: "Impossibile trascrivere la tua battuta. Riprova.",
     errorSttTimeout: "Richiesta di trascrizione scaduta. Riprova.",
-    errorSttRateLimit: "Limite di richieste raggiunto per il riconoscimento vocale.",
-    errorSttNoAudio: "Nessun audio acquisito. Assicurati che il microfono sia attivo.",
+    errorSttRateLimit:
+      "Limite di richieste raggiunto per il riconoscimento vocale.",
+    errorSttNoAudio:
+      "Nessun audio acquisito. Assicurati che il microfono sia attivo.",
     errorMicNotSupported: "Microfono non supportato in questo browser.",
     errorMicDenied: "Permesso microfono negato.",
     errorMicStart: "Impossibile avviare la registrazione.",
@@ -437,22 +471,25 @@ export const translations: Record<string, Record<string, unknown>> = {
     passkeyNotSupported: "Le Passkey non sono supportate da questo browser.",
     installPrompt: {
       title: "Installa App",
-      message: "Installa questa app sul tuo dispositivo per una migliore esperienza.",
+      message:
+        "Installa questa app sul tuo dispositivo per una migliore esperienza.",
       install: "Installa",
-      dismiss: "Non ora"
+      dismiss: "Non ora",
     },
     offlineIndicator: {
-      message: "Sei offline. Alcune funzionalità potrebbero essere limitate."
+      message: "Sei offline. Alcune funzionalità potrebbero essere limitate.",
     },
     apiUnreachable: {
       title: "Server API non raggiungibile",
-      message: "Non riusciamo a contattare il server API. Prova a riavviare i workflow dal pannello di Replit.",
+      message:
+        "Non riusciamo a contattare il server API. Controlla che il backend sia avviato e raggiungibile.",
       retry: "Riprova",
-      dismiss: "Chiudi"
+      dismiss: "Chiudi",
     },
     converter: {
       title: "Convertitore Copioni",
-      description: "Converti copioni in formato testuale in formato strutturato per una migliore analisi e memorizzazione.",
+      description:
+        "Converti copioni in formato testuale in formato strutturato per una migliore analisi e memorizzazione.",
       inputLabel: "Copione in Formato Testuale",
       inputPlaceholder: "Incolla il tuo copione qui...",
       parseButton: "Analizza Copione",
@@ -470,13 +507,15 @@ export const translations: Record<string, Record<string, unknown>> = {
       exportButton: "Esporta Copione Strutturato",
       copyButton: "Copia negli Appunti",
       downloadButton: "Scarica come File",
-      mobileNotSupported: "Il convertitore è disponibile solo su dispositivi desktop",
+      mobileNotSupported:
+        "Il convertitore è disponibile solo su dispositivi desktop",
       toolBold: "Grassetto",
       toolItalic: "Corsivo",
       toolUppercase: "MAIUSCOLO",
       toolAddCharacter: "Aggiungi Nome Personaggio",
       editorPlaceholder: "Inserisci il tuo copione qui...",
-      editorHint: "Suggerimento: I nomi dei personaggi devono essere seguiti da due punti (es. AMLETO: Essere o non essere)",
+      editorHint:
+        "Suggerimento: I nomi dei personaggi devono essere seguiti da due punti (es. AMLETO: Essere o non essere)",
       previewStatus: "L'anteprima si aggiorna mentre scrivi",
       characterSingular: "Personaggio",
       characterPlural: "Personaggi",
@@ -490,21 +529,26 @@ export const translations: Record<string, Record<string, unknown>> = {
       editCharacter: "Modifica personaggio",
       editCharacterPrompt: "Modifica nome personaggio:",
       characterRenamed: "Nome personaggio modificato con successo",
-      noCharactersDetected: "Nessun personaggio rilevato. Prova ad aggiungere nomi di personaggi seguiti da due punti.",
+      noCharactersDetected:
+        "Nessun personaggio rilevato. Prova ad aggiungere nomi di personaggi seguiti da due punti.",
       editingTips: "Suggerimenti per la Modifica",
-      tipCharacterFormat: "Formatta le battute come \"PERSONAGGIO: Testo dialogo\"",
-      tipStageDirections: "Le indicazioni sceniche possono essere racchiuse tra parentesi (come questa)",
-      tipSelection: "Clicca su una riga nell'anteprima per trovarla nell'editor",
-      tipCtrlClick: "Usa Ctrl+Click per selezionare più righe da unire"
+      tipCharacterFormat:
+        'Formatta le battute come "PERSONAGGIO: Testo dialogo"',
+      tipStageDirections:
+        "Le indicazioni sceniche possono essere racchiuse tra parentesi (come questa)",
+      tipSelection:
+        "Clicca su una riga nell'anteprima per trovarla nell'editor",
+      tipCtrlClick: "Usa Ctrl+Click per selezionare più righe da unire",
     },
     accessGate: {
       title: "Inserisci il codice d'accesso per usare l'app",
-      description: "L'app è ad accesso riservato. Inserisci il codice che ti è stato condiviso per continuare.",
+      description:
+        "L'app è ad accesso riservato. Inserisci il codice che ti è stato condiviso per continuare.",
       placeholder: "Codice d'accesso",
       submit: "Sblocca",
       wrong: "Codice d'accesso errato",
       expired: "Il codice d'accesso non è più valido, inseriscilo di nuovo",
-      networkError: "Impossibile contattare il server. Riprova."
-    }
-  }
+      networkError: "Impossibile contattare il server. Riprova.",
+    },
+  },
 };

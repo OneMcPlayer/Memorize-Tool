@@ -15,7 +15,7 @@ tags:
   - name: user
     description: Authenticated user profile and settings
   - name: tts
-    description: OpenAI text-to-speech proxy with object-storage cache
+    description: OpenAI text-to-speech proxy with configurable backend cache
   - name: audio
     description: OpenAI audio transcription proxy
   - name: scripts
@@ -271,6 +271,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/AudioTranscriptionsResponse"
+        "400":
+          description: Invalid request body, missing file, or unusable tiny audio upload
 
 components:
   securitySchemes:

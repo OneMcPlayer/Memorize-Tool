@@ -199,9 +199,6 @@ importers:
       '@google-cloud/storage':
         specifier: ^7.19.0
         version: 7.19.0
-      '@replit/object-storage':
-        specifier: ^1.0.0
-        version: 1.0.0
       '@simplewebauthn/server':
         specifier: ^13.3.0
         version: 13.3.0
@@ -284,6 +281,10 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 3.2.4(@types/node@25.3.5)(jiti@2.6.1)(jsdom@25.0.1)(lightningcss@1.31.1)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)
+    optionalDependencies:
+      '@replit/object-storage':
+        specifier: ^1.0.0
+        version: 1.0.0
 
   artifacts/memorize-tool:
     devDependencies:
@@ -374,15 +375,6 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: ^1.2.0
         version: 1.2.8(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      '@replit/vite-plugin-cartographer':
-        specifier: 'catalog:'
-        version: 0.5.1
-      '@replit/vite-plugin-dev-banner':
-        specifier: 'catalog:'
-        version: 0.1.2
-      '@replit/vite-plugin-runtime-error-modal':
-        specifier: 'catalog:'
-        version: 0.0.6
       '@simplewebauthn/browser':
         specifier: ^13.3.0
         version: 13.3.0
@@ -506,6 +498,16 @@ importers:
       zod:
         specifier: 'catalog:'
         version: 3.25.76
+    optionalDependencies:
+      '@replit/vite-plugin-cartographer':
+        specifier: 'catalog:'
+        version: 0.5.1
+      '@replit/vite-plugin-dev-banner':
+        specifier: 'catalog:'
+        version: 0.1.2
+      '@replit/vite-plugin-runtime-error-modal':
+        specifier: 'catalog:'
+        version: 0.0.6
 
   artifacts/mockup-sandbox:
     devDependencies:
@@ -593,12 +595,6 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: ^1.2.8
         version: 1.2.8(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      '@replit/vite-plugin-cartographer':
-        specifier: 'catalog:'
-        version: 0.5.1
-      '@replit/vite-plugin-runtime-error-modal':
-        specifier: 'catalog:'
-        version: 0.0.6
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.2.1(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3))
@@ -689,6 +685,13 @@ importers:
       zod:
         specifier: 'catalog:'
         version: 3.25.76
+    optionalDependencies:
+      '@replit/vite-plugin-cartographer':
+        specifier: 'catalog:'
+        version: 0.5.1
+      '@replit/vite-plugin-runtime-error-modal':
+        specifier: 'catalog:'
+        version: 0.0.6
 
   lib/api-client-react:
     dependencies:
@@ -7350,6 +7353,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
       - supports-color
+    optional: true
 
   '@replit/vite-plugin-cartographer@0.5.1':
     dependencies:
@@ -7360,12 +7364,15 @@ snapshots:
       modern-screenshot: 4.6.8
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
-  '@replit/vite-plugin-dev-banner@0.1.2': {}
+  '@replit/vite-plugin-dev-banner@0.1.2':
+    optional: true
 
   '@replit/vite-plugin-runtime-error-modal@0.0.6':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
+    optional: true
 
   '@rolldown/pluginutils@1.0.0-rc.3': {}
 
@@ -9255,7 +9262,8 @@ snapshots:
 
   mitt@3.0.1: {}
 
-  modern-screenshot@4.6.8: {}
+  modern-screenshot@4.6.8:
+    optional: true
 
   motion-dom@12.35.1:
     dependencies:

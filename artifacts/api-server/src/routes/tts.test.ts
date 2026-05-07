@@ -4,6 +4,7 @@ const readTtsCache = vi.fn();
 const writeTtsCache = vi.fn();
 
 vi.mock("../lib/ttsStorage", () => ({
+  getTtsCacheProvider: () => "filesystem",
   readTtsCache: (...args: unknown[]) => readTtsCache(...args),
   writeTtsCache: (...args: unknown[]) => writeTtsCache(...args),
 }));
@@ -16,7 +17,11 @@ function makeApp() {
   const app = express();
   app.use(express.json());
   app.use((req, _res, next) => {
-    (req as unknown as { log: { info: () => void; warn: () => void; error: () => void } }).log = {
+    (
+      req as unknown as {
+        log: { info: () => void; warn: () => void; error: () => void };
+      }
+    ).log = {
       info: () => {},
       warn: () => {},
       error: () => {},
@@ -56,7 +61,7 @@ describe("/tts routes", () => {
     expect(res.body).toMatchObject({
       provider: "openrouter",
       configured: true,
-      storage: "object-storage",
+      storage: "filesystem",
     });
   });
 
@@ -106,7 +111,9 @@ describe("/tts routes", () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(pcm, {
         status: 200,
-        headers: { "Content-Type": "audio/pcm; rate=24000; channels=1; bits=16" },
+        headers: {
+          "Content-Type": "audio/pcm; rate=24000; channels=1; bits=16",
+        },
       }),
     );
 
@@ -120,6 +127,30 @@ describe("/tts routes", () => {
     // Body should start with the WAV "RIFF" header.
     expect(res.body.subarray(0, 4).toString()).toBe("RIFF");
     expect(writeTtsCache).toHaveBeenCalledTimes(1);
+  });
+
+  it("POST /tts/speech wraps unspecified binary PCM as playable WAV", async () => {
+    readTtsCache.mockResolvedValueOnce(null);
+    writeTtsCache.mockResolvedValueOnce(undefined);
+    const pcm = Buffer.from([1, 2, 3, 4]);
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(pcm, {
+        status: 200,
+        headers: { "Content-Type": "application/octet-stream" },
+      }),
+    );
+
+    const res = await request(makeApp())
+      .post("/tts/speech")
+      .set("x-access-token", ACCESS)
+      .send({ text: "hello" });
+    expect(res.status).toBe(200);
+    expect(res.headers["content-type"]).toBe("audio/wav");
+    expect(res.body.subarray(0, 4).toString()).toBe("RIFF");
+    expect(res.body.subarray(8, 12).toString()).toBe("WAVE");
+    expect(writeTtsCache.mock.calls[0]?.[1].subarray(0, 4).toString()).toBe(
+      "RIFF",
+    );
   });
 
   it("POST /tts/speech surfaces upstream errors", async () => {

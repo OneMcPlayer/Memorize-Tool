@@ -9,7 +9,8 @@ interface FakeRecorder {
   onstop: (() => void) | null;
   onerror: ((e: Event & { error?: Error }) => void) | null;
   onstart: (() => void) | null;
-  start: () => void;
+  requestData: () => void;
+  start: (timeslice?: number) => void;
   stop: () => void;
 }
 
@@ -28,10 +29,13 @@ function installFakeMediaRecorder(): {
     constructor() {
       ref.recorder = this;
     }
+    requestData() {
+      this.ondataavailable?.({ data: new Blob(["chunk"], { type: this.mimeType }) });
+    }
     start() {
       this.state = "recording";
       this.onstart?.();
-      this.ondataavailable?.({ data: new Blob(["chunk"], { type: this.mimeType }) });
+      this.requestData();
     }
     stop() {
       this.state = "inactive";
@@ -46,8 +50,15 @@ function installFakeMediaRecorder(): {
 }
 
 function installGetUserMedia(impl: () => Promise<MediaStream>) {
-  const fakeTrack = { stop: vi.fn() };
+  const fakeTrack = {
+    enabled: true,
+    kind: "audio",
+    muted: false,
+    readyState: "live",
+    stop: vi.fn(),
+  };
   const fakeStream = {
+    getAudioTracks: () => [fakeTrack],
     getTracks: () => [fakeTrack],
   } as unknown as MediaStream;
   Object.defineProperty(navigator, "mediaDevices", {
@@ -76,7 +87,29 @@ describe("useMicrophoneRecorder", () => {
   });
 
   it("requestPermission flips hasPermission on success", async () => {
-    installGetUserMedia(async () => ({ getTracks: () => [{ stop: vi.fn() }] }) as unknown as MediaStream);
+    installGetUserMedia(
+      async () =>
+        ({
+          getAudioTracks: () => [
+            {
+              enabled: true,
+              kind: "audio",
+              muted: false,
+              readyState: "live",
+              stop: vi.fn(),
+            },
+          ],
+          getTracks: () => [
+            {
+              enabled: true,
+              kind: "audio",
+              muted: false,
+              readyState: "live",
+              stop: vi.fn(),
+            },
+          ],
+        }) as unknown as MediaStream,
+    );
     const { result } = renderHook(() => useMicrophoneRecorder());
     await act(async () => {
       const ok = await result.current.requestPermission();
@@ -100,7 +133,29 @@ describe("useMicrophoneRecorder", () => {
   });
 
   it("startRecording then stopRecording yields a Blob from collected chunks", async () => {
-    installGetUserMedia(async () => ({ getTracks: () => [{ stop: vi.fn() }] }) as unknown as MediaStream);
+    installGetUserMedia(
+      async () =>
+        ({
+          getAudioTracks: () => [
+            {
+              enabled: true,
+              kind: "audio",
+              muted: false,
+              readyState: "live",
+              stop: vi.fn(),
+            },
+          ],
+          getTracks: () => [
+            {
+              enabled: true,
+              kind: "audio",
+              muted: false,
+              readyState: "live",
+              stop: vi.fn(),
+            },
+          ],
+        }) as unknown as MediaStream,
+    );
     const { result } = renderHook(() => useMicrophoneRecorder());
 
     await act(async () => {
@@ -111,13 +166,62 @@ describe("useMicrophoneRecorder", () => {
     });
     expect(result.current.isRecording).toBe(true);
 
-    let blob: Blob | null = null;
+    let resultValue: Awaited<ReturnType<typeof result.current.stopRecording>> = null;
     await act(async () => {
-      blob = await result.current.stopRecording();
+      resultValue = await result.current.stopRecording();
     });
-    expect(blob).toBeInstanceOf(Blob);
-    expect(blob!.size).toBeGreaterThan(0);
+    expect(resultValue?.blob).toBeInstanceOf(Blob);
+    expect(resultValue?.blob.size).toBeGreaterThan(0);
+    expect(resultValue?.metadata.bytes).toBeGreaterThan(0);
+    expect(resultValue?.metadata.chunkCount).toBeGreaterThan(0);
     expect(result.current.isRecording).toBe(false);
+  });
+
+  it("refreshes a stale microphone stream before starting", async () => {
+    let firstReadyState: "live" | "ended" = "live";
+    const firstTrack = {
+      enabled: true,
+      kind: "audio",
+      muted: false,
+      get readyState() {
+        return firstReadyState;
+      },
+      stop: vi.fn(),
+    };
+    const secondTrack = {
+      enabled: true,
+      kind: "audio",
+      muted: false,
+      readyState: "live",
+      stop: vi.fn(),
+    };
+    const getUserMedia = vi
+      .fn()
+      .mockResolvedValueOnce({
+        getAudioTracks: () => [firstTrack],
+        getTracks: () => [firstTrack],
+      } as unknown as MediaStream)
+      .mockResolvedValueOnce({
+        getAudioTracks: () => [secondTrack],
+        getTracks: () => [secondTrack],
+      } as unknown as MediaStream);
+    Object.defineProperty(navigator, "mediaDevices", {
+      configurable: true,
+      value: { getUserMedia },
+    });
+
+    const { result } = renderHook(() => useMicrophoneRecorder());
+    await act(async () => {
+      await result.current.requestPermission();
+    });
+    firstReadyState = "ended";
+    await act(async () => {
+      await result.current.startRecording();
+    });
+
+    expect(getUserMedia).toHaveBeenCalledTimes(2);
+    expect(firstTrack.stop).toHaveBeenCalled();
+    expect(result.current.isRecording).toBe(true);
   });
 
   it("cleans up the media stream on unmount", async () => {

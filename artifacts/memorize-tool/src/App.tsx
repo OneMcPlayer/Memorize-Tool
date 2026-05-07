@@ -10,12 +10,13 @@ import ConverterView from "./components/views/ConverterView";
 import AboutView from "./components/views/AboutView";
 import ScriptMemorizationPractice from "./components/views/ScriptMemorizationPractice";
 import UserProfile from "./components/UserProfile";
+import AccessGate from "./components/AccessGate";
 import OfflineIndicator from "./components/common/OfflineIndicator";
 import InstallPrompt from "./components/common/InstallPrompt";
 import ServerStatusBadge from "./components/common/ServerStatusBadge";
 import ApiUnreachableBanner from "./components/common/ApiUnreachableBanner";
 import AudioTestComponent from "./components/test/AudioTestComponent";
-import TtsTestPage from "./components/test/TtsTestPage";
+import SttPerformanceTestPage from "./components/test/SttPerformanceTestPage";
 import { ApiHealthProvider, useApiHealthState } from "./hooks/useApiHealth";
 import {
   captureDiagnostic,
@@ -31,11 +32,17 @@ const VIEWS = {
   ABOUT: "about",
   PROFILE: "profile",
   AUDIO_TEST: "audio_test",
-  TTS_TEST: "tts_test",
+  STT_PERFORMANCE_TEST: "stt_performance_test",
+};
+
+const getInitialView = () => {
+  if (typeof window === "undefined") return VIEWS.INPUT;
+  const view = new URLSearchParams(window.location.search).get("view");
+  return view === "stt-performance" ? VIEWS.STT_PERFORMANCE_TEST : VIEWS.INPUT;
 };
 
 function App() {
-  const [currentView, setCurrentView] = useState(VIEWS.INPUT);
+  const [currentView, setCurrentView] = useState(getInitialView);
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
@@ -86,8 +93,12 @@ function App() {
         return <UserProfile onBack={() => setCurrentView(VIEWS.INPUT)} />;
       case VIEWS.AUDIO_TEST:
         return <AudioTestComponent />;
-      case VIEWS.TTS_TEST:
-        return <TtsTestPage />;
+      case VIEWS.STT_PERFORMANCE_TEST:
+        return (
+          <AccessGate>
+            <SttPerformanceTestPage />
+          </AccessGate>
+        );
       case VIEWS.INPUT:
       default:
         return (
@@ -114,7 +125,9 @@ function App() {
               onOpenAbout={() => setCurrentView(VIEWS.ABOUT)}
               onOpenProfile={() => setCurrentView(VIEWS.PROFILE)}
               onOpenAudioTest={() => setCurrentView(VIEWS.AUDIO_TEST)}
-              onOpenTtsTest={() => setCurrentView(VIEWS.TTS_TEST)}
+              onOpenSttPerformanceTest={() =>
+                setCurrentView(VIEWS.STT_PERFORMANCE_TEST)
+              }
             />
             <main className="app-content">{renderView()}</main>
             <ApiUnreachableBanner />

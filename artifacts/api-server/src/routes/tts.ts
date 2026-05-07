@@ -1,7 +1,11 @@
 import { Router, type IRouter } from "express";
 import crypto from "node:crypto";
 import { z } from "zod/v4";
-import { readTtsCache, writeTtsCache } from "../lib/ttsStorage";
+import {
+  getTtsCacheProvider,
+  readTtsCache,
+  writeTtsCache,
+} from "../lib/ttsStorage";
 import { requireAccessToken } from "../middleware/requireAccessToken";
 
 const router: IRouter = Router();
@@ -18,7 +22,13 @@ const PCM_DEFAULT_BITS_PER_SAMPLE = 16;
 const MAX_TTS_TEXT_LENGTH = 5_000;
 
 const speechBodySchema = z.object({
-  text: z.string().min(1, "Text is required").max(MAX_TTS_TEXT_LENGTH, `Text must be at most ${MAX_TTS_TEXT_LENGTH} characters`),
+  text: z
+    .string()
+    .min(1, "Text is required")
+    .max(
+      MAX_TTS_TEXT_LENGTH,
+      `Text must be at most ${MAX_TTS_TEXT_LENGTH} characters`,
+    ),
   voice: z.string().optional(),
   speed: z.number().min(0.25).max(4).optional(),
   model: z.enum(ALLOWED_MODELS).optional(),
@@ -82,7 +92,11 @@ function parsePcmFormat(contentType: string | null): PcmFormat {
 function isPcmContentType(contentType: string | null): boolean {
   if (!contentType) return false;
   const mime = contentType.split(";", 1)[0]?.trim().toLowerCase();
-  return mime === "audio/pcm" || mime === "audio/l16";
+  return (
+    mime === "audio/pcm" ||
+    mime === "audio/l16" ||
+    mime === "application/octet-stream"
+  );
 }
 
 function buildWavFromPcm(pcm: Buffer, format: PcmFormat): Buffer {
@@ -106,10 +120,29 @@ function buildWavFromPcm(pcm: Buffer, format: PcmFormat): Buffer {
   return Buffer.concat([header, pcm]);
 }
 
+function hasWavHeader(buffer: Buffer): boolean {
+  return (
+    buffer.length >= 12 &&
+    buffer.subarray(0, 4).toString("ascii") === "RIFF" &&
+    buffer.subarray(8, 12).toString("ascii") === "WAVE"
+  );
+}
+
+function finishTtsAudio(raw: Buffer, contentType: string | null): Buffer {
+  if (hasWavHeader(raw)) return raw;
+  if (isPcmContentType(contentType)) {
+    return buildWavFromPcm(raw, parsePcmFormat(contentType));
+  }
+  // We request PCM from OpenRouter, but some gateways return it as an
+  // unspecified binary stream. Serving those bytes as audio/wav without a WAV
+  // header makes browser playback fail, so default to wrapping the response.
+  return buildWavFromPcm(raw, parsePcmFormat(contentType));
+}
+
 router.get("/tts/health", (_req, res): void => {
   res.json({
     status: "TTS service is running",
-    storage: "object-storage",
+    storage: getTtsCacheProvider(),
     fetchAvailable: typeof fetch === "function",
     provider: "openrouter",
     model: DEFAULT_MODEL,
@@ -122,13 +155,18 @@ router.post("/tts/speech", async (req, res): Promise<void> => {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
     req.log.error("OPENROUTER_API_KEY is not configured");
-    res.status(503).json({ error: "Live mode is not configured. OPENROUTER_API_KEY is missing on the server." });
+    res.status(503).json({
+      error:
+        "Live mode is not configured. OPENROUTER_API_KEY is missing on the server.",
+    });
     return;
   }
 
   const parsed = speechBodySchema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues });
+    res
+      .status(400)
+      .json({ error: "Invalid request body", issues: parsed.error.issues });
     return;
   }
   const { text } = parsed.data;
@@ -145,7 +183,7 @@ router.post("/tts/speech", async (req, res): Promise<void> => {
     res.setHeader("Content-Type", "audio/wav");
     res.setHeader("Cache-Control", "public, max-age=86400");
     res.setHeader("X-TTS-Cache-Status", "HIT");
-    res.setHeader("X-TTS-Cache-Source", "OBJECT_STORAGE");
+    res.setHeader("X-TTS-Cache-Source", getTtsCacheProvider().toUpperCase());
     res.setHeader("X-TTS-Cache-Key", cacheKey);
     res.send(cached);
     return;
@@ -157,25 +195,30 @@ router.post("/tts/speech", async (req, res): Promise<void> => {
   let promise = inFlight.get(cacheKey);
   if (!promise) {
     promise = (async () => {
-      const response = await fetch("https://openrouter.ai/api/v1/audio/speech", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
+      const response = await fetch(
+        "https://openrouter.ai/api/v1/audio/speech",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model,
+            input: text,
+            voice,
+            speed,
+            response_format: "pcm",
+          }),
+          signal: AbortSignal.timeout(30_000),
         },
-        body: JSON.stringify({
-          model,
-          input: text,
-          voice,
-          speed,
-          response_format: "pcm",
-        }),
-        signal: AbortSignal.timeout(30_000),
-      });
+      );
       if (!response.ok) {
         let errorMessage = response.statusText;
         try {
-          const errBody = (await response.json()) as { error?: { message?: string } | string };
+          const errBody = (await response.json()) as {
+            error?: { message?: string } | string;
+          };
           if (typeof errBody.error === "string") {
             errorMessage = errBody.error;
           } else {
@@ -191,10 +234,7 @@ router.post("/tts/speech", async (req, res): Promise<void> => {
       const upstreamContentType = response.headers.get("Content-Type");
       const arrayBuf = await response.arrayBuffer();
       const raw = Buffer.from(arrayBuf);
-      // Wrap raw PCM into a WAV file so the browser can play it via <audio>.
-      const wav = isPcmContentType(upstreamContentType)
-        ? buildWavFromPcm(raw, parsePcmFormat(upstreamContentType))
-        : raw;
+      const wav = finishTtsAudio(raw, upstreamContentType);
       await writeTtsCache(cacheKey, wav).catch((cacheErr) => {
         req.log.warn(
           { err: cacheErr, key: cacheKey, model, voice },

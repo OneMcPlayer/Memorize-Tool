@@ -1,8 +1,7 @@
-import { defineConfig } from "vite";
+import { defineConfig, type PluginOption } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
-import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 import { mockupPreviewPlugin } from "./mockupPreviewPlugin";
 
 const rawPort = process.env.PORT;
@@ -28,23 +27,39 @@ if (!process.env.BASE_PATH && !isBuildCommand) {
   );
 }
 
+const enableReplitVitePlugins =
+  process.env.ENABLE_REPLIT_VITE_PLUGINS === "true";
+
+async function loadReplitVitePlugins(): Promise<PluginOption[]> {
+  if (!enableReplitVitePlugins) return [];
+
+  const runtimeErrorOverlayPackage = "@replit/vite-plugin-runtime-error-modal";
+  const cartographerPackage = "@replit/vite-plugin-cartographer";
+
+  const runtimeErrorOverlay = await import(runtimeErrorOverlayPackage).then(
+    (m) => (m as { default: () => PluginOption }).default,
+  );
+  const cartographer = await import(cartographerPackage).then(
+    (m) =>
+      (m as { cartographer: (options: { root: string }) => PluginOption })
+        .cartographer,
+  );
+
+  return [
+    runtimeErrorOverlay(),
+    cartographer({
+      root: path.resolve(import.meta.dirname, ".."),
+    }),
+  ];
+}
+
 export default defineConfig({
   base: basePath,
   plugins: [
     mockupPreviewPlugin(),
     react(),
     tailwindcss(),
-    runtimeErrorOverlay(),
-    ...(process.env.NODE_ENV !== "production" &&
-    process.env.REPL_ID !== undefined
-      ? [
-          await import("@replit/vite-plugin-cartographer").then((m) =>
-            m.cartographer({
-              root: path.resolve(import.meta.dirname, ".."),
-            }),
-          ),
-        ]
-      : []),
+    ...(await loadReplitVitePlugins()),
   ],
   resolve: {
     alias: {

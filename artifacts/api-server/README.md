@@ -25,6 +25,24 @@ into the access-code prompt on first load; the token is then stored in their
 browser's `localStorage` and attached to every subsequent request
 automatically.
 
-To revoke access for everyone, change `MAIN_ACCESS_TOKEN` in the Replit
-secrets panel and restart the API workflow. All existing browsers will be
-prompted to enter the new code on their next request.
+To revoke access for everyone, change `MAIN_ACCESS_TOKEN` in `.env.local`, your
+deployment secret store, or the Replit secrets panel, then restart the API. All
+existing browsers will be prompted to enter the new code on their next request.
+
+## Optional portable cache settings
+
+- `TTS_CACHE_PROVIDER=filesystem` — default outside Replit; stores generated
+  TTS audio on disk.
+- `TTS_CACHE_PROVIDER=none` — disables backend TTS caching.
+- `TTS_CACHE_PROVIDER=replit-object-storage` — uses Replit Object Storage.
+- `TTS_CACHE_DIR` — filesystem cache directory when using the filesystem
+  provider.
+
+See `../../docs/development.md` for local and Codespaces setup.
+
+## Audio transcription guardrails
+
+`POST /audio/transcriptions` rejects tiny uploaded files before forwarding to
+OpenRouter. This catches failed mobile recordings, such as 5-byte MediaRecorder
+containers from Safari, and returns a clear 400 response instead of an opaque
+provider error.

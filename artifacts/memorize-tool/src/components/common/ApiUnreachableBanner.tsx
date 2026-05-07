@@ -17,14 +17,14 @@ const FALLBACK_STRINGS: Record<string, BannerStrings> = {
   en: {
     title: "API server unreachable",
     message:
-      "We can't reach the API server. Try restarting the workflows from the Replit panel.",
+      "We can't reach the API server. Check that the backend is running and reachable.",
     retry: "Retry",
     dismiss: "Dismiss",
   },
   it: {
     title: "Server API non raggiungibile",
     message:
-      "Non riusciamo a contattare il server API. Prova a riavviare i workflow dal pannello di Replit.",
+      "Non riusciamo a contattare il server API. Controlla che il backend sia avviato e raggiungibile.",
     retry: "Riprova",
     dismiss: "Chiudi",
   },
@@ -35,8 +35,11 @@ const ApiUnreachableBanner: React.FC = () => {
   const { currentLang } = useAppContext();
   const [dismissed, setDismissed] = useState(false);
 
-  const langTranslations = (translations as Record<string, Record<string, unknown>>)[currentLang] ?? {};
-  const apiUnreachable = (langTranslations.apiUnreachable ?? {}) as Partial<BannerStrings>;
+  const langTranslations =
+    (translations as Record<string, Record<string, unknown>>)[currentLang] ??
+    {};
+  const apiUnreachable = (langTranslations.apiUnreachable ??
+    {}) as Partial<BannerStrings>;
   const fallback = FALLBACK_STRINGS[currentLang] ?? FALLBACK_STRINGS.en;
   const t: BannerStrings = {
     title: apiUnreachable.title ?? fallback.title,
@@ -53,7 +56,9 @@ const ApiUnreachableBanner: React.FC = () => {
   }, [status, dismissed]);
 
   const shouldShow =
-    !dismissed && status === "offline" && consecutiveFailures >= FAILURE_THRESHOLD;
+    !dismissed &&
+    status === "offline" &&
+    consecutiveFailures >= FAILURE_THRESHOLD;
 
   if (!shouldShow) return null;
 
@@ -64,7 +69,9 @@ const ApiUnreachableBanner: React.FC = () => {
       aria-live="assertive"
       data-testid="api-unreachable-banner"
     >
-      <div className="api-unreachable-banner__icon" aria-hidden="true">⚠️</div>
+      <div className="api-unreachable-banner__icon" aria-hidden="true">
+        ⚠️
+      </div>
       <div className="api-unreachable-banner__content">
         <div className="api-unreachable-banner__title">{t.title}</div>
         <div className="api-unreachable-banner__message">{t.message}</div>

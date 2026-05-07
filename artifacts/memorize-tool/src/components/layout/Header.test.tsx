@@ -45,7 +45,7 @@ describe("Header", () => {
         onOpenAbout={() => {}}
         onOpenProfile={() => {}}
         onOpenAudioTest={() => {}}
-        onOpenTtsTest={() => {}}
+        onOpenSttPerformanceTest={() => {}}
       />,
     );
 
@@ -66,7 +66,7 @@ describe("Header", () => {
         onOpenAbout={onOpenAbout}
         onOpenProfile={() => {}}
         onOpenAudioTest={() => {}}
-        onOpenTtsTest={() => {}}
+        onOpenSttPerformanceTest={() => {}}
       />,
     );
 
@@ -91,7 +91,7 @@ describe("Header", () => {
         onOpenAbout={() => {}}
         onOpenProfile={() => {}}
         onOpenAudioTest={() => {}}
-        onOpenTtsTest={() => {}}
+        onOpenSttPerformanceTest={() => {}}
       />,
     );
 
@@ -109,7 +109,7 @@ describe("Header", () => {
         onOpenAbout={() => {}}
         onOpenProfile={() => {}}
         onOpenAudioTest={() => {}}
-        onOpenTtsTest={() => {}}
+        onOpenSttPerformanceTest={() => {}}
       />,
     );
 
