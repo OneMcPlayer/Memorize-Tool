@@ -35,6 +35,28 @@ function makeApp() {
 const ACCESS = process.env.MAIN_ACCESS_TOKEN!;
 const ORIGINAL_KEY = process.env.OPENROUTER_API_KEY;
 
+function makePcm(size = 4096): Buffer {
+  return Buffer.alloc(size, 1);
+}
+
+function makeWav(pcm = makePcm()): Buffer {
+  const header = Buffer.alloc(44);
+  header.write("RIFF", 0);
+  header.writeUInt32LE(36 + pcm.length, 4);
+  header.write("WAVE", 8);
+  header.write("fmt ", 12);
+  header.writeUInt32LE(16, 16);
+  header.writeUInt16LE(1, 20);
+  header.writeUInt16LE(1, 22);
+  header.writeUInt32LE(24_000, 24);
+  header.writeUInt32LE(48_000, 28);
+  header.writeUInt16LE(2, 32);
+  header.writeUInt16LE(16, 34);
+  header.write("data", 36);
+  header.writeUInt32LE(pcm.length, 40);
+  return Buffer.concat([header, pcm]);
+}
+
 describe("/tts routes", () => {
   beforeEach(() => {
     process.env.OPENROUTER_API_KEY = "test-key";
@@ -91,7 +113,7 @@ describe("/tts routes", () => {
   });
 
   it("POST /tts/speech serves cached audio without calling fetch", async () => {
-    readTtsCache.mockResolvedValueOnce(Buffer.from("cached-wav"));
+    readTtsCache.mockResolvedValueOnce(makeWav());
     const fetchMock = vi.spyOn(globalThis, "fetch");
 
     const res = await request(makeApp())
@@ -104,10 +126,31 @@ describe("/tts routes", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it("POST /tts/speech ignores invalid cached audio and refetches", async () => {
+    readTtsCache.mockResolvedValueOnce(Buffer.alloc(44));
+    writeTtsCache.mockResolvedValueOnce(undefined);
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(makePcm(), {
+        status: 200,
+        headers: {
+          "Content-Type": "audio/pcm; rate=24000; channels=1; bits=16",
+        },
+      }),
+    );
+
+    const res = await request(makeApp())
+      .post("/tts/speech")
+      .set("x-access-token", ACCESS)
+      .send({ text: "hello" });
+    expect(res.status).toBe(200);
+    expect(res.headers["x-tts-cache-status"]).toBe("MISS");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it("POST /tts/speech calls upstream on cache miss and writes the cache", async () => {
     readTtsCache.mockResolvedValueOnce(null);
     writeTtsCache.mockResolvedValueOnce(undefined);
-    const pcm = Buffer.from([1, 2, 3, 4]);
+    const pcm = makePcm();
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(pcm, {
         status: 200,
@@ -132,7 +175,7 @@ describe("/tts routes", () => {
   it("POST /tts/speech wraps unspecified binary PCM as playable WAV", async () => {
     readTtsCache.mockResolvedValueOnce(null);
     writeTtsCache.mockResolvedValueOnce(undefined);
-    const pcm = Buffer.from([1, 2, 3, 4]);
+    const pcm = makePcm();
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(pcm, {
         status: 200,
@@ -151,6 +194,98 @@ describe("/tts routes", () => {
     expect(writeTtsCache.mock.calls[0]?.[1].subarray(0, 4).toString()).toBe(
       "RIFF",
     );
+  });
+
+  it("POST /tts/speech retries once after invalid successful upstream audio", async () => {
+    readTtsCache.mockResolvedValueOnce(null);
+    writeTtsCache.mockResolvedValueOnce(undefined);
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(
+        new Response(new Uint8Array(), {
+          status: 200,
+          headers: { "Content-Type": "audio/pcm" },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(makePcm(), {
+          status: 200,
+          headers: {
+            "Content-Type": "audio/pcm; rate=24000; channels=1; bits=16",
+          },
+        }),
+      );
+
+    const res = await request(makeApp())
+      .post("/tts/speech")
+      .set("x-access-token", ACCESS)
+      .send({ text: "hello" });
+    expect(res.status).toBe(200);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(writeTtsCache).toHaveBeenCalledTimes(1);
+  });
+
+  it("POST /tts/speech rejects empty successful upstream audio", async () => {
+    readTtsCache.mockResolvedValueOnce(null);
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(
+      () =>
+        Promise.resolve(
+          new Response(new Uint8Array(), {
+            status: 200,
+            headers: { "Content-Type": "audio/pcm" },
+          }),
+        ),
+    );
+
+    const res = await request(makeApp())
+      .post("/tts/speech")
+      .set("x-access-token", ACCESS)
+      .send({ text: "hello" });
+    expect(res.status).toBe(502);
+    expect(res.body.error).toMatch(/empty or invalid audio/);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(writeTtsCache).not.toHaveBeenCalled();
+  });
+
+  it("POST /tts/speech rejects an empty WAV response", async () => {
+    readTtsCache.mockResolvedValueOnce(null);
+    const emptyWav = makeWav(Buffer.alloc(0));
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(
+      () =>
+        Promise.resolve(
+          new Response(emptyWav, {
+            status: 200,
+            headers: { "Content-Type": "audio/wav" },
+          }),
+        ),
+    );
+
+    const res = await request(makeApp())
+      .post("/tts/speech")
+      .set("x-access-token", ACCESS)
+      .send({ text: "hello" });
+    expect(res.status).toBe(502);
+    expect(res.body.error).toMatch(/empty or invalid audio/);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(writeTtsCache).not.toHaveBeenCalled();
+  });
+
+  it("POST /tts/speech does not retry explicit upstream errors", async () => {
+    readTtsCache.mockResolvedValueOnce(null);
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ error: { message: "rate limited" } }), {
+        status: 429,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    const res = await request(makeApp())
+      .post("/tts/speech")
+      .set("x-access-token", ACCESS)
+      .send({ text: "hi" });
+    expect(res.status).toBe(429);
+    expect(res.body.error).toBe("rate limited");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it("POST /tts/speech surfaces upstream errors", async () => {

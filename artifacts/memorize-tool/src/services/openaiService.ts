@@ -42,6 +42,7 @@ export interface PlayAudioOptions {
 }
 
 export const MIN_STT_UPLOAD_BYTES = 1024;
+export const MIN_TTS_AUDIO_BYTES = 1024;
 const AUDIO_PRIME_TIMEOUT_MS = 900;
 const AUDIO_PLAY_START_TIMEOUT_MS = 5000;
 const STT_REQUEST_TIMEOUT_MS = 65_000;
@@ -205,6 +206,9 @@ class OpenAIService {
     }
 
     const audioBlob = await response.blob();
+    if (audioBlob.size < MIN_TTS_AUDIO_BYTES) {
+      throw new Error("TTS provider returned empty or invalid audio.");
+    }
     this.audioCache.set(cacheKey, audioBlob);
     return audioBlob;
   }

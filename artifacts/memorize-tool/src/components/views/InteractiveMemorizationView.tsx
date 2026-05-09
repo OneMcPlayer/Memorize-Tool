@@ -32,6 +32,7 @@ import LineCorrectionDiff, {
 } from "../common/LineCorrectionDiff";
 import LineTagsModal from "../common/LineTagsModal";
 import VoiceAssignmentModal from "../common/VoiceAssignmentModal";
+import { evaluateComparableTextMatch } from "../../utils/wordDiff";
 
 const SUCCESS_FLASH_MS = 1300;
 const MIN_STT_CAPTURE_BYTES = 1024;
@@ -153,45 +154,11 @@ const friendlySttError = (
   return message;
 };
 
-const normalizeLine = (value = ""): string =>
-  value
-    .toLowerCase()
-    .replace(/[^a-z0-9\sÀ-ÿ]/gi, "")
-    .replace(/\s+/g, " ")
-    .trim();
-
-const levenshtein = (a: string, b: string): number => {
-  if (a === b) return 0;
-  if (!a.length) return b.length;
-  if (!b.length) return a.length;
-  const dp: number[] = Array.from({ length: b.length + 1 }, (_, i) => i);
-  for (let i = 1; i <= a.length; i += 1) {
-    let prev = dp[0];
-    dp[0] = i;
-    for (let j = 1; j <= b.length; j += 1) {
-      const tmp = dp[j];
-      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-      dp[j] = Math.min(dp[j] + 1, dp[j - 1] + 1, prev + cost);
-      prev = tmp;
-    }
-  }
-  return dp[b.length];
-};
-
 const evaluateMatch = (
   expected: string,
   actual: string,
 ): "correct" | "close" | "off" => {
-  const e = normalizeLine(expected);
-  const a = normalizeLine(actual);
-  if (!e || !a) return "off";
-  if (e === a) return "correct";
-  const longer = Math.max(e.length, a.length);
-  const distance = levenshtein(e, a);
-  const ratio = 1 - distance / longer;
-  if (ratio >= 0.85) return "correct";
-  if (ratio >= 0.6) return "close";
-  return "off";
+  return evaluateComparableTextMatch(expected, actual);
 };
 
 const diagnosticNow = (): number =>

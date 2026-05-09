@@ -1,4 +1,5 @@
 export type WordDiffStatus = "correct" | "missing" | "extra";
+export type ComparableMatchStatus = "correct" | "close" | "off";
 
 export interface WordDiff {
   word: string;
@@ -43,6 +44,54 @@ function levenshteinDistance(a: string[], b: string[]): number[][] {
     }
   }
   return dp;
+}
+
+function levenshteinText(a: string, b: string): number {
+  if (a === b) return 0;
+  if (!a.length) return b.length;
+  if (!b.length) return a.length;
+  const dp: number[] = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i += 1) {
+    let prev = dp[0];
+    dp[0] = i;
+    for (let j = 1; j <= b.length; j += 1) {
+      const tmp = dp[j];
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      dp[j] = Math.min(dp[j] + 1, dp[j - 1] + 1, prev + cost);
+      prev = tmp;
+    }
+  }
+  return dp[b.length];
+}
+
+export function evaluateComparableTextMatch(
+  expected: string,
+  spoken: string,
+): ComparableMatchStatus {
+  const expectedWords = tokenizeComparableText(expected);
+  const spokenWords = tokenizeComparableText(spoken);
+  if (expectedWords.length === 0 || spokenWords.length === 0) return "off";
+
+  const expectedComparable = expectedWords.join(" ");
+  const spokenComparable = spokenWords.join(" ");
+  if (expectedComparable === spokenComparable) return "correct";
+
+  const wordDistance =
+    levenshteinDistance(expectedWords, spokenWords)[expectedWords.length][
+      spokenWords.length
+    ];
+  const wordRatio =
+    1 - wordDistance / Math.max(expectedWords.length, spokenWords.length);
+
+  const charDistance = levenshteinText(expectedComparable, spokenComparable);
+  const charRatio =
+    1 -
+    charDistance /
+      Math.max(expectedComparable.length, spokenComparable.length);
+
+  if (wordRatio >= 0.9 || charRatio >= 0.9) return "correct";
+  if (wordRatio >= 0.6 || charRatio >= 0.6) return "close";
+  return "off";
 }
 
 export function computeWordDiff(expected: string, spoken: string): WordDiff[] {

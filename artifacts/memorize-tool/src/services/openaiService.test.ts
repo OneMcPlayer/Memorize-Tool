@@ -1,5 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import openaiService, { MIN_STT_UPLOAD_BYTES } from "./openaiService";
+import openaiService, {
+  MIN_STT_UPLOAD_BYTES,
+  MIN_TTS_AUDIO_BYTES,
+} from "./openaiService";
 
 function resetPlaybackAudio(): void {
   openaiService.stopAudio();
@@ -36,6 +39,20 @@ describe("openaiService speechToText", () => {
       /Audio data is too short/,
     );
     expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("rejects tiny TTS responses before playback can try to decode them", async () => {
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(new Uint8Array(MIN_TTS_AUDIO_BYTES - 1), {
+        status: 200,
+        headers: { "Content-Type": "audio/wav" },
+      }),
+    );
+
+    await expect(openaiService.textToSpeech("hello")).rejects.toThrow(
+      /empty or invalid audio/,
+    );
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 
   it("reuses one audio element for primed sequential TTS playback", async () => {

@@ -35,6 +35,12 @@ important decision or result to `HISTORY.md`.
     ended/error element timing, and only advances by played lines.
   - Goal: confirm whether this removes later-sequence `NotAllowedError`
     playback failures and the observed half-line/reload symptom.
+- [ ] Re-test the `PROCESSO AL POTERE` `seduce.` cue on iPhone Safari.
+  - Current mitigation: the bundled line was disambiguated as lowercase
+    `seduce.`, invalid 44-byte TTS responses are ignored/retried by the API,
+    and the frontend refuses tiny TTS blobs before playback.
+  - Goal: confirm the cue is spoken as the Italian line and no longer causes a
+    media decode error or navigation reset.
 
 ## Short Term
 
@@ -63,6 +69,9 @@ important decision or result to `HISTORY.md`.
   - Current Live mode sends Italian (`it`) to STT because the course scripts are
     Italian. A future setting should let imported/custom scripts choose a
     different spoken language without tying it to the UI language.
+- [ ] Add an option to retry wrong spoken lines.
+  - Goal: after an `off` or `close` result, let the user re-record the same
+    line before advancing.
 - [x] Switch Live mode STT default to Chirp 3.
   - Result: backend `/audio/transcriptions` now defaults to `google/chirp-3`;
     the STT performance page compares Whisper large-v3 with Chirp 3.
@@ -81,6 +90,9 @@ important decision or result to `HISTORY.md`.
 
 - [ ] Complete feature audit against the old `main`, `dev`, TMP, and
       Code-Memorize target versions.
+- [ ] Explore a fast reveal-only practice mode.
+  - Intended behavior: outside Zen mode, play partner TTS faster, skip user
+    recording, and show a button to reveal the correct user line.
 - [ ] Decide the production deployment shape.
   - Replit artifacts currently model frontend and API separately.
   - Codespaces currently uses Vite proxy for development only.

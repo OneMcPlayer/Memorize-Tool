@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   computeWordDiff,
+  evaluateComparableTextMatch,
   hasErrors,
   stripStageDirections,
   tokenizeComparableText,
@@ -100,6 +101,26 @@ describe("wordDiff", () => {
         { word: "bar", status: "extra" },
         { word: "three", status: "correct" },
       ]);
+    });
+  });
+
+  describe("evaluateComparableTextMatch", () => {
+    it("ignores stage directions when scoring the spoken line", () => {
+      expect(
+        evaluateComparableTextMatch(
+          "(in piedi, formale) Silenzio in aula. Si dichiara aperta la seduta.",
+          "Silenzio in aula, si dichiara aperta la seduta.",
+        ),
+      ).toBe("correct");
+    });
+
+    it("treats one extra word in a short line as close instead of off", () => {
+      expect(
+        evaluateComparableTextMatch(
+          "Ma da sempre tu no?",
+          "Ma certo, da sempre, tu no?",
+        ),
+      ).toBe("close");
     });
   });
 });

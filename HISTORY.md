@@ -27,6 +27,18 @@ Changes and decisions:
     DB migrations, and restarts services.
   - The updater is timer-based so it works without opening a webhook receiver
     or requiring root.
+- Hardened the 2026-05-09 Live mode bug reports from iPhone Safari.
+  - Matching now scores spoken lines with the same stage-direction-aware,
+    punctuation-insensitive tokenization used by the correction diff. This
+    fixes cases where a displayed all-green diff could still be marked only
+    close because the hidden stage direction text was included in scoring.
+  - TTS proxy responses are now validated before caching/serving. Invalid
+    cached WAVs are ignored, empty provider responses are retried once, and
+    persistent invalid audio returns a controlled backend error instead of a
+    44-byte WAV that Safari cannot decode.
+  - The frontend now rejects tiny TTS blobs before calling the media decoder.
+  - The bundled `PROCESSO AL POTERE` cue `Seduce` was changed to `seduce.` to
+    disambiguate the Italian word from an English imperative for TTS.
 - Added root `TODO.md` and `HISTORY.md` so open work and project decisions are
   tracked in the repository instead of only in chat.
 - Added a Vite development proxy controlled by `API_PROXY_TARGET`.

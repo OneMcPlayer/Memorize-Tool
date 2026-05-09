@@ -18,8 +18,12 @@ const DEFAULT_VOICE = "Zephyr";
 const PCM_DEFAULT_SAMPLE_RATE = 24_000;
 const PCM_DEFAULT_CHANNELS = 1;
 const PCM_DEFAULT_BITS_PER_SAMPLE = 16;
+const MIN_TTS_AUDIO_BYTES = 1024;
+const MAX_TTS_AUDIO_ATTEMPTS = 2;
 
 const MAX_TTS_TEXT_LENGTH = 5_000;
+const INVALID_TTS_AUDIO_MESSAGE =
+  "TTS provider returned empty or invalid audio.";
 
 const speechBodySchema = z.object({
   text: z
@@ -128,6 +132,33 @@ function hasWavHeader(buffer: Buffer): boolean {
   );
 }
 
+function wavDataBytes(buffer: Buffer): number | null {
+  if (!hasWavHeader(buffer)) return null;
+  let offset = 12;
+  while (offset + 8 <= buffer.length) {
+    const chunkId = buffer.subarray(offset, offset + 4).toString("ascii");
+    const chunkSize = buffer.readUInt32LE(offset + 4);
+    if (chunkId === "data") return chunkSize;
+    offset += 8 + chunkSize + (chunkSize % 2);
+  }
+  return null;
+}
+
+function isUsableTtsAudio(buffer: Buffer): boolean {
+  if (buffer.length < MIN_TTS_AUDIO_BYTES) return false;
+  const dataBytes = wavDataBytes(buffer);
+  return dataBytes === null || dataBytes >= MIN_TTS_AUDIO_BYTES;
+}
+
+function assertUsableTtsAudio(buffer: Buffer): void {
+  if (isUsableTtsAudio(buffer)) return;
+  throw new Error(INVALID_TTS_AUDIO_MESSAGE);
+}
+
+function isInvalidTtsAudioError(err: unknown): boolean {
+  return err instanceof Error && err.message === INVALID_TTS_AUDIO_MESSAGE;
+}
+
 function finishTtsAudio(raw: Buffer, contentType: string | null): Buffer {
   if (hasWavHeader(raw)) return raw;
   if (isPcmContentType(contentType)) {
@@ -178,7 +209,7 @@ router.post("/tts/speech", async (req, res): Promise<void> => {
 
   // Try cache first (cached payload is already a finished WAV file)
   const cached = await readTtsCache(cacheKey).catch(() => null);
-  if (cached) {
+  if (cached && isUsableTtsAudio(cached)) {
     req.log.info({ model, voice, key: cacheKey }, "TTS cache hit");
     res.setHeader("Content-Type", "audio/wav");
     res.setHeader("Cache-Control", "public, max-age=86400");
@@ -187,6 +218,11 @@ router.post("/tts/speech", async (req, res): Promise<void> => {
     res.setHeader("X-TTS-Cache-Key", cacheKey);
     res.send(cached);
     return;
+  } else if (cached) {
+    req.log.warn(
+      { model, voice, key: cacheKey, bytes: cached.length },
+      "Ignoring invalid TTS cache entry",
+    );
   }
 
   req.log.info({ model, voice, length: text.length }, "TTS cache miss");
@@ -195,53 +231,75 @@ router.post("/tts/speech", async (req, res): Promise<void> => {
   let promise = inFlight.get(cacheKey);
   if (!promise) {
     promise = (async () => {
-      const response = await fetch(
-        "https://openrouter.ai/api/v1/audio/speech",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model,
-            input: text,
-            voice,
-            speed,
-            response_format: "pcm",
-          }),
-          signal: AbortSignal.timeout(30_000),
-        },
-      );
-      if (!response.ok) {
-        let errorMessage = response.statusText;
+      let lastErr: unknown = null;
+      for (let attempt = 1; attempt <= MAX_TTS_AUDIO_ATTEMPTS; attempt += 1) {
         try {
-          const errBody = (await response.json()) as {
-            error?: { message?: string } | string;
-          };
-          if (typeof errBody.error === "string") {
-            errorMessage = errBody.error;
-          } else {
-            errorMessage = errBody.error?.message ?? errorMessage;
+          const response = await fetch(
+            "https://openrouter.ai/api/v1/audio/speech",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${apiKey}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                model,
+                input: text,
+                voice,
+                speed,
+                response_format: "pcm",
+              }),
+              signal: AbortSignal.timeout(30_000),
+            },
+          );
+          if (!response.ok) {
+            let errorMessage = response.statusText;
+            try {
+              const errBody = (await response.json()) as {
+                error?: { message?: string } | string;
+              };
+              if (typeof errBody.error === "string") {
+                errorMessage = errBody.error;
+              } else {
+                errorMessage = errBody.error?.message ?? errorMessage;
+              }
+            } catch {
+              // ignore
+            }
+            const err = new Error(errorMessage) as Error & { status?: number };
+            err.status = response.status;
+            throw err;
           }
-        } catch {
-          // ignore
+          const upstreamContentType = response.headers.get("Content-Type");
+          const arrayBuf = await response.arrayBuffer();
+          const raw = Buffer.from(arrayBuf);
+          if (raw.length < MIN_TTS_AUDIO_BYTES) {
+            throw new Error(INVALID_TTS_AUDIO_MESSAGE);
+          }
+          const wav = finishTtsAudio(raw, upstreamContentType);
+          assertUsableTtsAudio(wav);
+          await writeTtsCache(cacheKey, wav).catch((cacheErr) => {
+            req.log.warn(
+              { err: cacheErr, key: cacheKey, model, voice },
+              "TTS cache write failed; returning fresh audio anyway",
+            );
+          });
+          return wav;
+        } catch (err) {
+          lastErr = err;
+          if (
+            attempt >= MAX_TTS_AUDIO_ATTEMPTS ||
+            !isInvalidTtsAudioError(err)
+          ) {
+            throw err;
+          }
+          req.log.warn(
+            { err, attempt, model, voice, length: text.length },
+            "Retrying TTS provider after invalid audio response",
+          );
         }
-        const err = new Error(errorMessage) as Error & { status?: number };
-        err.status = response.status;
-        throw err;
       }
-      const upstreamContentType = response.headers.get("Content-Type");
-      const arrayBuf = await response.arrayBuffer();
-      const raw = Buffer.from(arrayBuf);
-      const wav = finishTtsAudio(raw, upstreamContentType);
-      await writeTtsCache(cacheKey, wav).catch((cacheErr) => {
-        req.log.warn(
-          { err: cacheErr, key: cacheKey, model, voice },
-          "TTS cache write failed; returning fresh audio anyway",
-        );
-      });
-      return wav;
+      throw lastErr instanceof Error ? lastErr : new Error(String(lastErr));
     })();
     inFlight.set(cacheKey, promise);
   }
