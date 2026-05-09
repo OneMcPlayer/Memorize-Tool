@@ -148,7 +148,12 @@ export const translations: Record<string, Record<string, unknown>> = {
     correctionPerfect: "Perfect — exact match!",
     feedbackCorrect: "Great — that matches the script.",
     feedbackClose: "Close — most of the line is there.",
+    feedbackCloseRetry:
+      "Close — most of the line is there. Try again or continue.",
     feedbackOff: "That doesn't match the script. Moving on.",
+    feedbackOffRetry: "That doesn't match the script. Try again or continue.",
+    retryLineButton: "Try again",
+    continueLineButton: "Continue",
     voiceAssignButton: "Assign voices",
     voiceAssignTitle: "Assign voices to characters",
     voiceAssignHelp:
@@ -423,7 +428,12 @@ export const translations: Record<string, Record<string, unknown>> = {
     correctionPerfect: "Perfetto — corrispondenza esatta!",
     feedbackCorrect: "Ottimo — corrisponde al copione.",
     feedbackClose: "Quasi — la battuta c'è quasi tutta.",
+    feedbackCloseRetry:
+      "Quasi — la battuta c'è quasi tutta. Riprova o continua.",
     feedbackOff: "Non corrisponde al copione. Si va avanti.",
+    feedbackOffRetry: "Non corrisponde al copione. Riprova o continua.",
+    retryLineButton: "Riprova",
+    continueLineButton: "Continua",
     voiceAssignButton: "Assegna voci",
     voiceAssignTitle: "Assegna le voci ai personaggi",
     voiceAssignHelp:

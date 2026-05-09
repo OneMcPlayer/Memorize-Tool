@@ -66,6 +66,7 @@ interface Evaluation {
   transcript: string;
   message: string;
   expected: string;
+  originalIndex: number;
 }
 
 interface InteractiveMemorizationViewProps {
@@ -397,6 +398,11 @@ const InteractiveMemorizationView = ({
 
   const userTurn = upcomingNonUserLines.length === 0 && nextUserLine !== null;
   const finished = nextUserLine === null && upcomingNonUserLines.length === 0;
+  const retryableEvaluation =
+    lastEvaluation !== null &&
+    nextUserLine !== null &&
+    lastEvaluation.originalIndex === nextUserLine.originalIndex &&
+    (lastEvaluation.status === "close" || lastEvaluation.status === "off");
 
   useEffect(() => {
     if (finished && sequence.length > 0 && !testComplete) {
@@ -453,6 +459,17 @@ const InteractiveMemorizationView = ({
     clearZenFadeTimer();
     setZenOverlayVisible(false);
   }, [clearZenFadeTimer]);
+
+  const addLineResult = useCallback((status: MatchStatus) => {
+    if (status !== "correct" && status !== "close" && status !== "off") {
+      return;
+    }
+    setResults((prev) => ({
+      totalLines: prev.totalLines + 1,
+      correctLines: prev.correctLines + (status === "correct" ? 1 : 0),
+      closeLines: prev.closeLines + (status === "close" ? 1 : 0),
+    }));
+  }, []);
 
   const handlePlayNext = useCallback(async () => {
     if (isPlaying || isTranscribing) return;
@@ -784,6 +801,7 @@ const InteractiveMemorizationView = ({
           t.correctionNoInput ??
           "Recording did not start correctly. Tap Record and try again.",
         expected,
+        originalIndex: nextUserLine.originalIndex,
       };
       setLastEvaluation(evalResult);
       showZenOverlay();
@@ -819,15 +837,20 @@ const InteractiveMemorizationView = ({
         status === "correct"
           ? (t.feedbackCorrect ?? "Great — that matches the script.")
           : status === "close"
-            ? (t.feedbackClose ?? "Close — most of the line is there.")
-            : (t.feedbackOff ?? "That doesn't match the script. Moving on.");
-      const evalResult: Evaluation = { status, transcript, message, expected };
+            ? (t.feedbackCloseRetry ??
+              t.feedbackClose ??
+              "Close — most of the line is there. Try again or continue.")
+            : (t.feedbackOffRetry ??
+              t.feedbackOff ??
+              "That doesn't match the script. Try again or continue.");
+      const evalResult: Evaluation = {
+        status,
+        transcript,
+        message,
+        expected,
+        originalIndex: nextUserLine.originalIndex,
+      };
       setLastEvaluation(evalResult);
-      setResults((prev) => ({
-        totalLines: prev.totalLines + 1,
-        correctLines: prev.correctLines + (status === "correct" ? 1 : 0),
-        closeLines: prev.closeLines + (status === "close" ? 1 : 0),
-      }));
       const tone =
         status === "correct"
           ? "success"
@@ -840,10 +863,11 @@ const InteractiveMemorizationView = ({
       if (status !== "correct") {
         showZenOverlay();
       } else {
+        addLineResult(status);
         hideZenOverlay();
         triggerSuccessFlash();
+        setCursor((prev) => prev + 1);
       }
-      setCursor((prev) => prev + 1);
     } catch (err) {
       const friendly = friendlySttError(err, t);
       recordDiagnosticBreadcrumb(
@@ -873,6 +897,7 @@ const InteractiveMemorizationView = ({
         transcript: "",
         message: friendly,
         expected,
+        originalIndex: nextUserLine.originalIndex,
       };
       setLastEvaluation(evalResult);
       setError(friendly);
@@ -883,6 +908,7 @@ const InteractiveMemorizationView = ({
     }
   }, [
     currentLang,
+    addLineResult,
     cursor,
     hideZenOverlay,
     nextUserLine,
@@ -892,6 +918,36 @@ const InteractiveMemorizationView = ({
     t,
     triggerSuccessFlash,
   ]);
+
+  const handleContinueAfterEvaluation = useCallback(() => {
+    if (!retryableEvaluation || !lastEvaluation) return;
+    recordDiagnosticBreadcrumb("line-evaluation-continued", {
+      cursor,
+      originalIndex: lastEvaluation.originalIndex,
+      status: lastEvaluation.status,
+      transcriptLength: lastEvaluation.transcript.length,
+    });
+    addLineResult(lastEvaluation.status);
+    hideZenOverlay();
+    setCursor((prev) => prev + 1);
+  }, [
+    addLineResult,
+    cursor,
+    hideZenOverlay,
+    lastEvaluation,
+    retryableEvaluation,
+  ]);
+
+  const handleRetryLine = useCallback(async () => {
+    if (!retryableEvaluation || !lastEvaluation) return;
+    recordDiagnosticBreadcrumb("line-evaluation-retry-requested", {
+      cursor,
+      originalIndex: lastEvaluation.originalIndex,
+      status: lastEvaluation.status,
+      transcriptLength: lastEvaluation.transcript.length,
+    });
+    await handleStartRecording();
+  }, [cursor, handleStartRecording, lastEvaluation, retryableEvaluation]);
 
   const handleRecordToggle = useCallback(async () => {
     if (isPlaying || isTranscribing) return;
@@ -1068,6 +1124,31 @@ const InteractiveMemorizationView = ({
   const playLabel = t.playNextButton ?? "▶️ Play next";
   const recordStartLabel = t.recordStartButton ?? "🎤 Record";
   const recordStopLabel = t.recordStopButton ?? "⏹ Stop & check";
+  const retryLineLabel = t.retryLineButton ?? "Try again";
+  const continueLineLabel = t.continueLineButton ?? "Continue";
+  const retryActionDisabled = isPlaying || isTranscribing || micRecording;
+  const retryActions = retryableEvaluation ? (
+    <div className="line-retry-actions" data-testid="line-retry-actions">
+      <button
+        type="button"
+        className="line-retry-btn"
+        onClick={handleRetryLine}
+        disabled={retryActionDisabled}
+        data-testid="line-retry-btn"
+      >
+        {retryLineLabel}
+      </button>
+      <button
+        type="button"
+        className="line-continue-btn"
+        onClick={handleContinueAfterEvaluation}
+        disabled={retryActionDisabled}
+        data-testid="line-continue-btn"
+      >
+        {continueLineLabel}
+      </button>
+    </div>
+  ) : null;
 
   // Determine sphere visual state for zen mode
   let sphereState:
@@ -1117,6 +1198,13 @@ const InteractiveMemorizationView = ({
         onClick: handleRecordToggle,
         disabled: false,
         kind: "stop" as const,
+      };
+    if (retryableEvaluation)
+      return {
+        label: retryLineLabel,
+        onClick: handleRetryLine,
+        disabled: false,
+        kind: "record" as const,
       };
     if (userTurn)
       return {
@@ -1234,6 +1322,7 @@ const InteractiveMemorizationView = ({
                   perfect: t.zenPerfect ?? "Perfect.",
                 }}
               />
+              {retryActions}
             </div>
           </div>
         )}
@@ -1362,19 +1451,22 @@ const InteractiveMemorizationView = ({
         ) : null}
 
         {lastEvaluation && evaluationStatus && (
-          <LineCorrectionDiff
-            transcript={lastEvaluation.transcript}
-            expected={lastEvaluation.expected}
-            status={evaluationStatus}
-            message={lastEvaluation.message}
-            labels={{
-              transcribed: t.correctionTranscribed ?? "What you said",
-              comparison: t.correctionComparison ?? "Compared to the script",
-              noInput: t.correctionNoInput ?? "No audio captured.",
-              errorTitle: t.correctionError ?? "Transcription error",
-              perfect: t.correctionPerfect ?? "Perfect — exact match!",
-            }}
-          />
+          <>
+            <LineCorrectionDiff
+              transcript={lastEvaluation.transcript}
+              expected={lastEvaluation.expected}
+              status={evaluationStatus}
+              message={lastEvaluation.message}
+              labels={{
+                transcribed: t.correctionTranscribed ?? "What you said",
+                comparison: t.correctionComparison ?? "Compared to the script",
+                noInput: t.correctionNoInput ?? "No audio captured.",
+                errorTitle: t.correctionError ?? "Transcription error",
+                perfect: t.correctionPerfect ?? "Perfect — exact match!",
+              }}
+            />
+            {retryActions}
+          </>
         )}
       </div>
 
@@ -1399,7 +1491,9 @@ const InteractiveMemorizationView = ({
             ? (t.checkingLabel ?? "Checking...")
             : micRecording
               ? recordStopLabel
-              : recordStartLabel}
+              : retryableEvaluation
+                ? retryLineLabel
+                : recordStartLabel}
         </button>
       </div>
 

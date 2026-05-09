@@ -39,6 +39,12 @@ Changes and decisions:
   - The frontend now rejects tiny TTS blobs before calling the media decoder.
   - The bundled `PROCESSO AL POTERE` cue `Seduce` was changed to `seduce.` to
     disambiguate the Italian word from an English imperative for TTS.
+- Added retry controls for wrong spoken Live mode lines.
+  - After a `close` or `off` result, Live mode keeps the same user line active
+    and offers retry/continue actions instead of advancing immediately.
+  - Correct retries replace the failed attempt in the practice flow; continuing
+    records the close/off result and advances.
+  - E2E video artifact: `artifacts/videos/live-retry-wrong-line-e2e.webm`.
 - Added root `TODO.md` and `HISTORY.md` so open work and project decisions are
   tracked in the repository instead of only in chat.
 - Added a Vite development proxy controlled by `API_PROXY_TARGET`.

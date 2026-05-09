@@ -69,9 +69,12 @@ important decision or result to `HISTORY.md`.
   - Current Live mode sends Italian (`it`) to STT because the course scripts are
     Italian. A future setting should let imported/custom scripts choose a
     different spoken language without tying it to the UI language.
-- [ ] Add an option to retry wrong spoken lines.
+- [x] Add an option to retry wrong spoken lines.
   - Goal: after an `off` or `close` result, let the user re-record the same
     line before advancing.
+  - Result: Live mode now keeps the current user line active after a close/off
+    match, offers retry/continue actions, and only advances when the user
+    continues or records a correct line.
 - [x] Switch Live mode STT default to Chirp 3.
   - Result: backend `/audio/transcriptions` now defaults to `google/chirp-3`;
     the STT performance page compares Whisper large-v3 with Chirp 3.

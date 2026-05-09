@@ -159,6 +159,38 @@
   animation: live-pulse 1.2s ease-in-out infinite;
 }
 
+.line-retry-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-top: -6px;
+}
+
+.line-retry-actions button {
+  min-width: 118px;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.line-retry-actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.line-retry-btn {
+  background: #ef5350;
+}
+
+.line-continue-btn {
+  background: #43a047;
+}
+
 .reveal-line-btn {
   background: #ffa726;
   color: #fff;
