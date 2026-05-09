@@ -79,17 +79,12 @@ describe("POST /audio/transcriptions", () => {
     expect(res.body.error).toMatch(/Invalid request body/);
   });
 
-  it("uses Gemini 3.1 Pro for live transcription by default", async () => {
+  it("uses Chirp 3 for live transcription by default", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(
-        JSON.stringify({
-          choices: [{ message: { content: "hello from gemini pro" } }],
-        }),
-        {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        },
-      ),
+      new Response(JSON.stringify({ text: "hello from chirp" }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
     );
     const res = await request(makeApp())
       .post("/audio/transcriptions")
@@ -100,20 +95,17 @@ describe("POST /audio/transcriptions", () => {
         contentType: "audio/wav",
       });
     expect(res.status).toBe(200);
-    expect(res.body).toEqual({ text: "hello from gemini pro" });
+    expect(res.body).toEqual({ text: "hello from chirp" });
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://openrouter.ai/api/v1/chat/completions",
+      "https://openrouter.ai/api/v1/audio/transcriptions",
       expect.objectContaining({ method: "POST" }),
     );
     const body = JSON.parse(
       (fetchMock.mock.calls[0]![1] as RequestInit).body as string,
     );
-    expect(body.model).toBe("google/gemini-3.1-pro-preview");
-    expect(body.messages[0].content[0].text).toContain(
-      "The expected language is en.",
-    );
-    expect(body.messages[0].content[1]).toMatchObject({
-      type: "input_audio",
+    expect(body).toMatchObject({
+      model: "google/chirp-3",
+      language: "en",
       input_audio: { format: "wav" },
     });
   });
@@ -224,8 +216,8 @@ describe("POST /audio/stt-performance", () => {
           defaultModel: "openai/whisper-large-v3",
         }),
         expect.objectContaining({
-          id: "gemini-3.1-flash",
-          defaultModel: "google/gemini-3.1-flash-lite-preview",
+          id: "chirp-3",
+          defaultModel: "google/chirp-3",
         }),
       ]),
     );
@@ -283,18 +275,18 @@ describe("POST /audio/stt-performance", () => {
     });
   });
 
-  it("runs Gemini through OpenRouter's audio-input chat endpoint", async () => {
+  it("runs Chirp through OpenRouter's STT endpoint", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(
         JSON.stringify({
-          choices: [{ message: { content: "gemini transcript" } }],
-          usage: { prompt_tokens: 12, completion_tokens: 3, total_tokens: 15 },
+          text: "chirp transcript",
+          usage: { seconds: 0.8, cost: 0.001 },
         }),
         {
           status: 200,
           headers: {
             "Content-Type": "application/json",
-            "X-Generation-Id": "gen-gemini",
+            "X-Generation-Id": "gen-chirp",
           },
         },
       ),
@@ -303,9 +295,8 @@ describe("POST /audio/stt-performance", () => {
     const res = await request(makeApp())
       .post("/audio/stt-performance")
       .set("x-access-token", ACCESS)
-      .field("target", "gemini-3.1-flash")
-      .field("model", "google/gemini-3.1-flash-preview")
-      .field("prompt", "Transcribe only.")
+      .field("target", "chirp-3")
+      .field("model", "google/chirp-3")
       .attach("file", VALID_AUDIO, {
         filename: "sample.webm",
         contentType: "audio/webm",
@@ -313,37 +304,32 @@ describe("POST /audio/stt-performance", () => {
 
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
-      target: "gemini-3.1-flash",
-      model: "google/gemini-3.1-flash-preview",
-      endpoint: "openrouter-chat-audio-input",
-      text: "gemini transcript",
-      generationId: "gen-gemini",
+      target: "chirp-3",
+      model: "google/chirp-3",
+      endpoint: "openrouter-audio-transcriptions",
+      text: "chirp transcript",
+      generationId: "gen-chirp",
       input: { format: "webm", sizeBytes: VALID_AUDIO.length },
     });
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://openrouter.ai/api/v1/chat/completions",
+      "https://openrouter.ai/api/v1/audio/transcriptions",
       expect.objectContaining({ method: "POST" }),
     );
     const body = JSON.parse(
       (fetchMock.mock.calls[0]![1] as RequestInit).body as string,
     );
-    expect(body.model).toBe("google/gemini-3.1-flash-preview");
-    expect(body.messages[0].content[0]).toEqual({
-      type: "text",
-      text: "Transcribe only.",
-    });
-    expect(body.messages[0].content[1]).toMatchObject({
-      type: "input_audio",
+    expect(body).toMatchObject({
+      model: "google/chirp-3",
       input_audio: { format: "webm" },
     });
   });
 
-  it("rejects a Gemini model id for the Whisper target", async () => {
+  it("rejects a Chirp model id for the Whisper target", async () => {
     const res = await request(makeApp())
       .post("/audio/stt-performance")
       .set("x-access-token", ACCESS)
       .field("target", "whisper-large-v3")
-      .field("model", "google/gemini-3.1-flash-lite-preview")
+      .field("model", "google/chirp-3")
       .attach("file", VALID_AUDIO, {
         filename: "sample.wav",
         contentType: "audio/wav",
@@ -364,7 +350,7 @@ describe("POST /audio/stt-performance", () => {
     const res = await request(makeApp())
       .post("/audio/stt-performance")
       .set("x-access-token", ACCESS)
-      .field("target", "gemini-3.1-flash")
+      .field("target", "chirp-3")
       .attach("file", Buffer.from("tiny"), {
         filename: "sample.wav",
         contentType: "audio/wav",

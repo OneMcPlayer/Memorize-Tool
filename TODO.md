@@ -63,6 +63,9 @@ important decision or result to `HISTORY.md`.
   - Current Live mode sends Italian (`it`) to STT because the course scripts are
     Italian. A future setting should let imported/custom scripts choose a
     different spoken language without tying it to the UI language.
+- [x] Switch Live mode STT default to Chirp 3.
+  - Result: backend `/audio/transcriptions` now defaults to `google/chirp-3`;
+    the STT performance page compares Whisper large-v3 with Chirp 3.
 - [x] Add focused tests for empty audio handling.
   - Backend: reject tiny/empty audio with a clear error before provider call.
   - Frontend: do not call STT if the recorded blob is too small.

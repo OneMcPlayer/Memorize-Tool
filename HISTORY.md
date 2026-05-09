@@ -57,6 +57,13 @@ Changes and decisions:
   - Reason: the rehearsal scripts are Italian even when the app UI is set to
     English, and the previous `currentLang` behavior sent `en` in the iPhone
     test.
+- Changed the default Live mode STT model from Gemini audio input to
+  `google/chirp-3`.
+  - Reason: manual testing showed Chirp 3 was much faster for the current voice
+    rehearsal flow.
+  - The Gemini TTS model remains unchanged; this only affects speech-to-text.
+  - The internal STT performance page now compares Whisper large-v3 with
+    Chirp 3 instead of Gemini.
 - Release the microphone stream after each recording stop in Live mode.
   - Reason: iPhone Safari can keep the audio route in a microphone/capture mode
     after recording, which can make later TTS playback sound noticeably dimmed

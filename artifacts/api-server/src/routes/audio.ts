@@ -10,9 +10,9 @@ const upload = multer({
   limits: { fileSize: 25 * 1024 * 1024 },
 });
 
-const DEFAULT_LIVE_STT_MODEL = "google/gemini-3.1-pro-preview";
+const DEFAULT_LIVE_STT_MODEL = "google/chirp-3";
 const DEFAULT_WHISPER_STT_MODEL = "openai/whisper-large-v3";
-const DEFAULT_GEMINI_STT_MODEL = "google/gemini-3.1-flash-lite-preview";
+const DEFAULT_CHIRP_STT_MODEL = "google/chirp-3";
 const OPENROUTER_STT_URL = "https://openrouter.ai/api/v1/audio/transcriptions";
 const OPENROUTER_CHAT_URL = "https://openrouter.ai/api/v1/chat/completions";
 export const MIN_TRANSCRIPTION_AUDIO_BYTES = 1024;
@@ -22,6 +22,7 @@ const ALLOWED_MODELS = new Set([
   "openai/whisper-large-v3",
   "openai/gpt-4o-transcribe",
   "openai/gpt-4o-mini-transcribe",
+  "google/chirp-3",
   "google/gemini-3.1-pro-preview",
 ]);
 
@@ -41,7 +42,7 @@ const TranscriptionBodySchema = z.object({
 
 const PerformanceTargetSchema = z.enum([
   "whisper-large-v3",
-  "gemini-3.1-flash",
+  "chirp-3",
 ]);
 
 const SttPerformanceBodySchema = z.object({
@@ -57,7 +58,6 @@ const SttPerformanceBodySchema = z.object({
     .string()
     .regex(/^[a-zA-Z-]{2,8}$/, "language must be a BCP-47 / ISO-639 code")
     .optional(),
-  prompt: z.string().trim().max(1500).optional(),
 });
 
 type SttPerformanceTarget = z.infer<typeof PerformanceTargetSchema>;
@@ -106,7 +106,7 @@ function audioFormatFromMime(
 function defaultModelForTarget(target: SttPerformanceTarget): string {
   return target === "whisper-large-v3"
     ? DEFAULT_WHISPER_STT_MODEL
-    : DEFAULT_GEMINI_STT_MODEL;
+    : DEFAULT_CHIRP_STT_MODEL;
 }
 
 function isModelAllowedForTarget(
@@ -116,7 +116,7 @@ function isModelAllowedForTarget(
   if (target === "whisper-large-v3") {
     return model === DEFAULT_WHISPER_STT_MODEL;
   }
-  return /^google\/gemini-[a-z0-9.-]+$/i.test(model);
+  return /^google\/chirp-[a-z0-9.-]+$/i.test(model);
 }
 
 async function parseOpenRouterError(response: Response): Promise<string> {
@@ -370,10 +370,10 @@ router.get(
           endpoint: "OpenRouter STT",
         },
         {
-          id: "gemini-3.1-flash",
-          label: "Gemini 3.1 Flash",
-          defaultModel: DEFAULT_GEMINI_STT_MODEL,
-          endpoint: "OpenRouter audio input",
+          id: "chirp-3",
+          label: "Chirp 3",
+          defaultModel: DEFAULT_CHIRP_STT_MODEL,
+          endpoint: "OpenRouter STT",
         },
       ],
     });
@@ -431,7 +431,7 @@ router.post(
         error:
           target === "whisper-large-v3"
             ? "Whisper target only supports openai/whisper-large-v3."
-            : "Gemini target only supports google/gemini-* model ids.",
+            : "Chirp target only supports google/chirp-* model ids.",
       });
       return;
     }
@@ -453,30 +453,26 @@ router.post(
 
     try {
       const result =
-        target === "whisper-large-v3"
+        target === "whisper-large-v3" || target === "chirp-3"
           ? await callOpenRouterStt({
               apiKey,
               base64,
               format,
               language: parsed.data.language,
-              model,
-            })
+            model,
+          })
           : await callOpenRouterGeminiAudioChat({
               apiKey,
               base64,
               format,
               language: parsed.data.language,
               model,
-              prompt: parsed.data.prompt,
             });
 
       res.json({
         target,
         model,
-        endpoint:
-          target === "whisper-large-v3"
-            ? "openrouter-audio-transcriptions"
-            : "openrouter-chat-audio-input",
+        endpoint: "openrouter-audio-transcriptions",
         text: result.text,
         usage: result.usage,
         generationId: result.generationId,

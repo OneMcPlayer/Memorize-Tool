@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("STT performance test page", () => {
-  test("uploads one sample and renders mocked Whisper/Gemini timings", async ({
+  test("uploads one sample and renders mocked Whisper/Chirp timings", async ({
     page,
   }) => {
     await page.addInitScript(() => {
@@ -18,20 +18,18 @@ test.describe("STT performance test page", () => {
       await route.fulfill({
         contentType: "application/json",
         body: JSON.stringify({
-          target: isWhisper ? "whisper-large-v3" : "gemini-3.1-flash",
+          target: isWhisper ? "whisper-large-v3" : "chirp-3",
           model: isWhisper
             ? "openai/whisper-large-v3"
-            : "google/gemini-3.1-flash-lite-preview",
-          endpoint: isWhisper
-            ? "openrouter-audio-transcriptions"
-            : "openrouter-chat-audio-input",
+            : "google/chirp-3",
+          endpoint: "openrouter-audio-transcriptions",
           text: isWhisper
             ? "Whisper heard the sample line clearly."
-            : "Gemini heard the sample line clearly.",
+            : "Chirp heard the sample line clearly.",
           usage: isWhisper
             ? { seconds: 1.2, cost: 0.001 }
-            : { total_tokens: 86 },
-          generationId: isWhisper ? "gen-whisper-e2e" : "gen-gemini-e2e",
+            : { seconds: 0.7, cost: 0.001 },
+          generationId: isWhisper ? "gen-whisper-e2e" : "gen-chirp-e2e",
           durationMs: isWhisper ? 940 : 620,
           input: {
             format: "wav",
@@ -63,7 +61,7 @@ test.describe("STT performance test page", () => {
     await page.getByRole("button", { name: /Run comparison/ }).click();
 
     await expect(page.getByText("Whisper heard the sample line")).toBeVisible();
-    await expect(page.getByText("Gemini heard the sample line")).toBeVisible();
-    await expect(page.getByText(/Gemini 3\.1 Flash was faster/)).toBeVisible();
+    await expect(page.getByText("Chirp heard the sample line")).toBeVisible();
+    await expect(page.getByText(/Chirp 3 was faster/)).toBeVisible();
   });
 });

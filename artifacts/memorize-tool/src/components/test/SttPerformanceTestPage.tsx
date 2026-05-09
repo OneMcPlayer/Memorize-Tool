@@ -6,7 +6,7 @@ import useMicrophoneRecorder, {
 import { clearAccessToken, withAccessTokenHeader } from "../../lib/accessToken";
 import "./SttPerformanceTestPage.css";
 
-type SttTargetId = "whisper-large-v3" | "gemini-3.1-flash";
+type SttTargetId = "whisper-large-v3" | "chirp-3";
 type RunStatus = "idle" | "running" | "success" | "error";
 
 interface TargetConfig {
@@ -46,19 +46,16 @@ const TARGETS: TargetConfig[] = [
     endpointLabel: "STT endpoint",
   },
   {
-    id: "gemini-3.1-flash",
-    label: "Gemini 3.1 Flash",
-    defaultModel: "google/gemini-3.1-flash-lite-preview",
-    endpointLabel: "Audio-input chat",
+    id: "chirp-3",
+    label: "Chirp 3",
+    defaultModel: "google/chirp-3",
+    endpointLabel: "STT endpoint",
   },
 ];
 
-const DEFAULT_PROMPT =
-  "Transcribe the spoken words exactly. Return only the transcript text.";
-
 const emptyRunState = (): Record<SttTargetId, RunState> => ({
   "whisper-large-v3": { status: "idle" },
-  "gemini-3.1-flash": { status: "idle" },
+  "chirp-3": { status: "idle" },
 });
 
 const formatBytes = (bytes: number): string => {
@@ -114,9 +111,8 @@ const SttPerformanceTestPage = () => {
   const [language, setLanguage] = useState("en");
   const [models, setModels] = useState<Record<SttTargetId, string>>({
     "whisper-large-v3": TARGETS[0].defaultModel,
-    "gemini-3.1-flash": TARGETS[1].defaultModel,
+    "chirp-3": TARGETS[1].defaultModel,
   });
-  const [prompt, setPrompt] = useState(DEFAULT_PROMPT);
   const [runs, setRuns] =
     useState<Record<SttTargetId, RunState>>(emptyRunState);
   const [isRunning, setIsRunning] = useState(false);
@@ -142,14 +138,14 @@ const SttPerformanceTestPage = () => {
 
   const comparisonDelta = useMemo(() => {
     const whisper = runs["whisper-large-v3"].result;
-    const gemini = runs["gemini-3.1-flash"].result;
-    if (!whisper || !gemini) return null;
-    const diff = Math.abs(whisper.durationMs - gemini.durationMs);
+    const chirp = runs["chirp-3"].result;
+    if (!whisper || !chirp) return null;
+    const diff = Math.abs(whisper.durationMs - chirp.durationMs);
     if (diff < 25) return "Server timings are effectively tied.";
     const faster =
-      whisper.durationMs < gemini.durationMs
+      whisper.durationMs < chirp.durationMs
         ? "Whisper large-v3"
-        : "Gemini 3.1 Flash";
+        : "Chirp 3";
     return `${faster} was faster by ${formatMs(diff)} server-side.`;
   }, [runs]);
 
@@ -216,9 +212,6 @@ const SttPerformanceTestPage = () => {
     formData.append("target", target.id);
     formData.append("model", models[target.id].trim());
     if (language.trim()) formData.append("language", language.trim());
-    if (target.id === "gemini-3.1-flash" && prompt.trim()) {
-      formData.append("prompt", prompt.trim());
-    }
     formData.append("file", audioBlob, audioName || "sample.webm");
 
     const startedAt = performance.now();
@@ -255,7 +248,7 @@ const SttPerformanceTestPage = () => {
     setPageError(null);
     setRuns({
       "whisper-large-v3": { status: "running" },
-      "gemini-3.1-flash": { status: "running" },
+      "chirp-3": { status: "running" },
     });
 
     await Promise.all(
@@ -288,7 +281,7 @@ const SttPerformanceTestPage = () => {
     <div className="stt-performance-page">
       <h1>Speech-to-Text Performance</h1>
       <p className="stt-performance-summary">
-        Compare one audio sample against Whisper large-v3 and Gemini 3.1 Flash
+        Compare one audio sample against Whisper large-v3 and Chirp 3
         with server timing, browser round trip, provider usage, and transcripts.
       </p>
 
@@ -382,15 +375,6 @@ const SttPerformanceTestPage = () => {
               />
             </div>
           ))}
-        </div>
-        <div className="stt-performance-field">
-          <label htmlFor="gemini-stt-prompt">Gemini prompt</label>
-          <textarea
-            id="gemini-stt-prompt"
-            value={prompt}
-            onChange={(event) => setPrompt(event.target.value)}
-            disabled={isRunning}
-          />
         </div>
       </section>
 
