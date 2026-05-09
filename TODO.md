@@ -66,6 +66,11 @@ important decision or result to `HISTORY.md`.
 - [x] Switch Live mode STT default to Chirp 3.
   - Result: backend `/audio/transcriptions` now defaults to `google/chirp-3`;
     the STT performance page compares Whisper large-v3 with Chirp 3.
+- [ ] Validate the non-root VPS deployment flow on a real server.
+  - Current scaffolding: `docs/vps-hermes-prompt.md` and `deploy/vps/`.
+  - Goal: confirm HTTPS reverse proxy, passkeys, diagnostics persistence,
+    filesystem TTS cache, database migrations, service restart, and the
+    `dev` branch auto-update timer.
 - [x] Add focused tests for empty audio handling.
   - Backend: reject tiny/empty audio with a clear error before provider call.
   - Frontend: do not call STT if the recorded blob is too small.

@@ -19,6 +19,14 @@ Date: 2026-05-04
 
 Changes and decisions:
 
+- Added an initial VPS deployment handoff for a non-root Hermes agent.
+  - `docs/vps-hermes-prompt.md` contains the copy/paste prompt and operational
+    steps for deploying the `dev` branch.
+  - `deploy/vps/` contains user-systemd service installers, API/web run
+    scripts, and a polling updater that pulls `origin/dev`, rebuilds, applies
+    DB migrations, and restarts services.
+  - The updater is timer-based so it works without opening a webhook receiver
+    or requiring root.
 - Added root `TODO.md` and `HISTORY.md` so open work and project decisions are
   tracked in the repository instead of only in chat.
 - Added a Vite development proxy controlled by `API_PROXY_TARGET`.
