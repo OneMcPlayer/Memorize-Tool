@@ -8,10 +8,12 @@ import {
   sanitizeDiagnosticValue,
   startDiagnosticSession,
 } from "./diagnosticsService";
+import { clearAccessToken, setAccessToken } from "../lib/accessToken";
 
 describe("diagnosticsService", () => {
   beforeEach(() => {
     resetDiagnosticsForTests();
+    clearAccessToken();
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
     vi.stubGlobal(
@@ -80,6 +82,31 @@ describe("diagnosticsService", () => {
         String(call[0]).includes("/client-logs"),
       ),
     ).toBe(true);
+  });
+
+  it("sends the access token with backend diagnostic uploads", async () => {
+    setAccessToken("diag-access");
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        json: async () => ({ sessionId: "session-1" }),
+        ok: true,
+        status: 201,
+      })
+      .mockResolvedValue({
+        json: async () => ({ accepted: 1 }),
+        ok: true,
+        status: 200,
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await startDiagnosticSession({
+      mode: "live-memorization",
+    });
+
+    expect(fetchMock.mock.calls[0]?.[1]?.headers).toMatchObject({
+      "X-Access-Token": "diag-access",
+    });
   });
 
   it("captures diagnostics without throwing when upload fails", () => {

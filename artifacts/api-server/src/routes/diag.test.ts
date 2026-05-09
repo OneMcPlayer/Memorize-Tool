@@ -4,6 +4,8 @@ import request from "supertest";
 import diagRouter from "./diag";
 import { resetDiagnosticSessionsForTests } from "../lib/diagnosticSessions";
 
+const ORIGINAL_ENV = { ...process.env };
+
 function makeApp() {
   const app = express();
   app.use(express.json());
@@ -33,9 +35,79 @@ describe("/diag routes", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     resetDiagnosticSessionsForTests();
+    for (const key of Object.keys(process.env)) {
+      if (!(key in ORIGINAL_ENV)) delete process.env[key];
+    }
+    Object.assign(process.env, ORIGINAL_ENV);
+    process.env.NODE_ENV = "test";
   });
   afterEach(() => {
     vi.restoreAllMocks();
+    for (const key of Object.keys(process.env)) {
+      if (!(key in ORIGINAL_ENV)) delete process.env[key];
+    }
+    Object.assign(process.env, ORIGINAL_ENV);
+  });
+
+  it("404s diagnostic routes by default in production", async () => {
+    process.env.NODE_ENV = "production";
+    delete process.env.ENABLE_DIAG_ROUTES;
+
+    const res = await request(makeApp())
+      .post("/diag/sessions")
+      .send({ source: "test" });
+
+    expect(res.status).toBe(404);
+    expect(res.body).toEqual({ error: "not_found" });
+  });
+
+  it("requires the normal access token for production diagnostic writes", async () => {
+    process.env.NODE_ENV = "production";
+    process.env.ENABLE_DIAG_ROUTES = "true";
+    process.env.MAIN_ACCESS_TOKEN = "diag-access";
+
+    const blocked = await request(makeApp())
+      .post("/diag/sessions")
+      .send({ source: "test" });
+
+    expect(blocked.status).toBe(401);
+    expect(blocked.body).toEqual({ error: "invalid_access_token" });
+
+    const accepted = await request(makeApp())
+      .post("/diag/sessions")
+      .set("x-access-token", "diag-access")
+      .send({ source: "test" });
+
+    expect(accepted.status).toBe(201);
+    expect(accepted.body.sessionId).toEqual(expect.any(String));
+  });
+
+  it("requires the diagnostics admin token for production log reads", async () => {
+    process.env.NODE_ENV = "production";
+    process.env.ENABLE_DIAG_ROUTES = "true";
+    process.env.MAIN_ACCESS_TOKEN = "diag-access";
+    process.env.DIAG_ADMIN_TOKEN = "diag-admin";
+
+    const app = makeApp();
+    const created = await request(app)
+      .post("/diag/sessions")
+      .set("x-access-token", "diag-access")
+      .send({ source: "test" });
+    const sessionId = created.body.sessionId as string;
+
+    const blocked = await request(app)
+      .get(`/diag/sessions/${sessionId}/logs`)
+      .set("x-access-token", "diag-access");
+
+    expect(blocked.status).toBe(401);
+    expect(blocked.body).toEqual({ error: "invalid_diag_admin_token" });
+
+    const accepted = await request(app)
+      .get(`/diag/sessions/${sessionId}/logs`)
+      .set("x-diag-admin-token", "diag-admin");
+
+    expect(accepted.status).toBe(200);
+    expect(accepted.body.sessionId).toBe(sessionId);
   });
 
   it("POST /diag/boot-failure accepts a valid payload", async () => {

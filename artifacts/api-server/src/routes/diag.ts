@@ -1,4 +1,11 @@
-import { Router, type IRouter } from "express";
+import crypto from "node:crypto";
+import {
+  Router,
+  type IRouter,
+  type NextFunction,
+  type Request,
+  type Response,
+} from "express";
 import { z } from "zod/v4";
 import {
   appendDiagnosticLog,
@@ -7,8 +14,99 @@ import {
   type DiagnosticLogEntry,
   getDiagnosticSession,
 } from "../lib/diagnosticSessions";
+import { requireAccessToken } from "../middleware/requireAccessToken";
 
 const router: IRouter = Router();
+const TRUE_ENV_VALUES = new Set(["1", "true", "yes", "on"]);
+const FALSE_ENV_VALUES = new Set(["0", "false", "no", "off"]);
+
+function readBooleanEnv(name: string): boolean | null {
+  const value = process.env[name]?.trim().toLowerCase();
+  if (!value || value === "auto") return null;
+  if (TRUE_ENV_VALUES.has(value)) return true;
+  if (FALSE_ENV_VALUES.has(value)) return false;
+  return null;
+}
+
+function isProduction(): boolean {
+  return process.env.NODE_ENV === "production";
+}
+
+function areDiagnosticRoutesEnabled(): boolean {
+  const configured = readBooleanEnv("ENABLE_DIAG_ROUTES");
+  if (configured !== null) return configured;
+  return !isProduction();
+}
+
+function shouldRequireDiagnosticAuth(): boolean {
+  const configured = readBooleanEnv("DIAG_REQUIRE_AUTH");
+  if (configured !== null) return configured;
+  return isProduction();
+}
+
+function shouldRequireDiagnosticAdmin(): boolean {
+  const configured = readBooleanEnv("DIAG_REQUIRE_ADMIN");
+  if (configured !== null) return configured;
+  return isProduction();
+}
+
+function constantTimeEqual(a: Buffer, b: Buffer): boolean {
+  if (a.length !== b.length) {
+    crypto.timingSafeEqual(a, a);
+    return false;
+  }
+  return crypto.timingSafeEqual(a, b);
+}
+
+function isAdminReadRequest(req: Request): boolean {
+  return (
+    req.method === "GET" &&
+    (req.path === "/diag/web-health" ||
+      /^\/diag\/sessions\/[^/]+\/logs$/.test(req.path))
+  );
+}
+
+function requireDiagnosticAdminToken(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void {
+  const expected = process.env.DIAG_ADMIN_TOKEN;
+  if (!expected) {
+    res.status(403).json({ error: "diag_admin_token_not_configured" });
+    return;
+  }
+
+  const provided = req.get("x-diag-admin-token");
+  if (
+    !provided ||
+    !constantTimeEqual(Buffer.from(provided), Buffer.from(expected))
+  ) {
+    res.status(401).json({ error: "invalid_diag_admin_token" });
+    return;
+  }
+
+  next();
+}
+
+router.use((req, res, next): void => {
+  if (!areDiagnosticRoutesEnabled()) {
+    res.status(404).json({ error: "not_found" });
+    return;
+  }
+
+  if (isAdminReadRequest(req) && shouldRequireDiagnosticAdmin()) {
+    requireDiagnosticAdminToken(req, res, next);
+    return;
+  }
+
+  if (shouldRequireDiagnosticAuth()) {
+    requireAccessToken(req, res, next);
+    return;
+  }
+
+  next();
+});
 
 const bootFailureSchema = z.object({
   reason: z.string().max(500).optional(),

@@ -1,3 +1,5 @@
+import { withAccessTokenHeader } from "../lib/accessToken";
+
 export type DiagnosticLevel = "debug" | "info" | "warn" | "error";
 
 export interface DiagnosticBreadcrumb {
@@ -145,7 +147,7 @@ export async function startDiagnosticSession(
   try {
     const res = await fetch(apiPath("/diag/sessions"), {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: withAccessTokenHeader({ "Content-Type": "application/json" }),
       body: JSON.stringify(payload),
     });
     if (!res.ok)
@@ -203,7 +205,9 @@ export async function flushDiagnosticLogs(): Promise<void> {
       try {
         const res = await fetch(url, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: withAccessTokenHeader({
+            "Content-Type": "application/json",
+          }),
           body: JSON.stringify({ entries: batch, source: "memorize-tool" }),
         });
         if (!res.ok)
@@ -250,7 +254,7 @@ export function captureDiagnostic(options: {
     : apiPath("/diag/diagnostics");
   void fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: withAccessTokenHeader({ "Content-Type": "application/json" }),
     body: JSON.stringify(payload),
   }).catch(() => {
     // Diagnostics should never affect rehearsal flow.

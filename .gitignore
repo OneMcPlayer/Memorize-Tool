@@ -54,6 +54,7 @@ Thumbs.db
 # Local agent/session files
 .codex
 Code-Memorize.zip
+.env.production
 
 # Generated verification and backup artifacts
 artifacts/videos/

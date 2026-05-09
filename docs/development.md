@@ -88,7 +88,17 @@ http://localhost:25868/
 
 In Codespaces, make port `25868` public and use the generated
 `*.app.github.dev` URL. The frontend proxies `/api` to the private API port via
-`API_PROXY_TARGET`.
+`API_PROXY_TARGET`. If the Vite server needs to be reachable from outside the
+container, set `HOST=0.0.0.0` for the frontend command:
+
+```bash
+set -a; source .env.local; set +a
+HOST=0.0.0.0 PORT=25868 BASE_PATH=/ API_PROXY_TARGET=http://127.0.0.1:8080 pnpm run dev:web
+```
+
+Diagnostics are open by default outside production. In production they are
+disabled unless `ENABLE_DIAG_ROUTES=true`; when enabled, uploads require the
+normal `MAIN_ACCESS_TOKEN` and log reads require `DIAG_ADMIN_TOKEN` by default.
 
 ## Replit Compatibility
 

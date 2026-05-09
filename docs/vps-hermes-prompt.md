@@ -85,17 +85,30 @@ Deployment steps:
      OPENROUTER_API_KEY=<openrouter-key>
      DATABASE_URL=<postgresql-url>
 
+     HOST=127.0.0.1
      API_PORT=8080
      WEB_PORT=25868
      BASE_PATH=/
+     API_PROXY_TARGET=http://127.0.0.1:8080
 
      TTS_CACHE_PROVIDER=filesystem
      TTS_CACHE_DIR=$HOME/apps/memorize-tool/artifacts/api-server/output/tts-cache
+
+     ENABLE_DIAG_ROUTES=false
+     DIAG_REQUIRE_AUTH=true
+     DIAG_REQUIRE_ADMIN=true
+     DIAG_ADMIN_TOKEN=<long-random-admin-diagnostics-token>
      DIAG_LOG_PATH=$HOME/apps/memorize-tool/artifacts/api-server/output/diag-session-logs.jsonl
 
      WEBAUTHN_RP_ID=<public-domain-without-https>
      WEBAUTHN_ORIGIN=https://<public-domain>
      WEB_HEALTH_URL=https://<public-domain>/
+
+   Keep `ENABLE_DIAG_ROUTES=false` for normal production use. If diagnostics
+   are needed during a real-user bug test, set it to `true`, restart the API,
+   collect the logs, then disable it again. With the settings above,
+   diagnostic uploads still require the normal app access token and diagnostic
+   log reads require `DIAG_ADMIN_TOKEN`.
 
    This file is sourced by bash. Wrap any value that contains shell-sensitive
    characters like `&`, `#`, spaces, or parentheses in single quotes.

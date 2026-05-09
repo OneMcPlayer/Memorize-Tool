@@ -45,6 +45,17 @@ Changes and decisions:
   - Correct retries replace the failed attempt in the practice flow; continuing
     records the close/off result and advances.
   - E2E video artifact: `artifacts/videos/live-retry-wrong-line-e2e.webm`.
+- Prepared safer VPS production defaults for the Caddy deployment shape.
+  - API and Vite dev/preview servers now honor `HOST`; VPS run scripts default
+    both services to `127.0.0.1` unless explicitly overridden.
+  - `.env.production` is ignored, and `.env.production.template` documents
+    localhost binding, WebAuthn origin values for `epicserver.vpsgh.it`, and
+    required secret placeholders.
+  - Production diagnostics are disabled by default. When enabled, diagnostic
+    uploads require the normal app access token and diagnostic log reads require
+    `DIAG_ADMIN_TOKEN` by default.
+  - Frontend diagnostic uploads include the stored access token so trusted
+    users can still submit bug reports when production diagnostics are enabled.
 - Added root `TODO.md` and `HISTORY.md` so open work and project decisions are
   tracked in the repository instead of only in chat.
 - Added a Vite development proxy controlled by `API_PROXY_TARGET`.

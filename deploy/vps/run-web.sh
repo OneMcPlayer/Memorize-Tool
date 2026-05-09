@@ -12,6 +12,7 @@ cd_app
 
 export NODE_ENV="${NODE_ENV:-production}"
 export PORT="${WEB_PORT:-25868}"
+export HOST="${WEB_HOST:-${HOST:-127.0.0.1}}"
 export BASE_PATH="${BASE_PATH:-/}"
 
 exec pnpm --filter @workspace/memorize-tool run serve

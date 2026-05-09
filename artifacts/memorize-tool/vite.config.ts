@@ -33,6 +33,7 @@ if (!process.env.BASE_PATH && !isBuildCommand) {
 }
 
 const apiProxyTarget = process.env.API_PROXY_TARGET;
+const host = process.env.HOST?.trim() || "127.0.0.1";
 const enableReplitVitePlugins =
   process.env.ENABLE_REPLIT_VITE_PLUGINS === "true";
 
@@ -172,7 +173,7 @@ export default defineConfig({
   server: {
     port,
     strictPort: true,
-    host: "0.0.0.0",
+    host,
     allowedHosts: true,
     proxy: apiProxyTarget
       ? {
@@ -189,7 +190,7 @@ export default defineConfig({
   },
   preview: {
     port,
-    host: "0.0.0.0",
+    host,
     allowedHosts: true,
   },
 });

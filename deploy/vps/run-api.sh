@@ -12,5 +12,6 @@ cd_app
 
 export NODE_ENV="${NODE_ENV:-production}"
 export PORT="${API_PORT:-8080}"
+export HOST="${API_HOST:-${HOST:-127.0.0.1}}"
 
 exec pnpm --filter @workspace/api-server run start

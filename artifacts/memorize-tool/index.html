@@ -195,6 +195,15 @@
         function setStatus(text) {
           if (statusEl) statusEl.textContent = text;
         }
+        function getStoredAccessToken() {
+          try {
+            return window.localStorage
+              ? window.localStorage.getItem("mainAccessToken")
+              : null;
+          } catch (e) {
+            return null;
+          }
+        }
         function reportFailure(reason) {
           try {
             var body = JSON.stringify({
@@ -203,7 +212,18 @@
               url: window.location.href,
               timestamp: Date.now(),
             });
-            if (navigator.sendBeacon) {
+            var token = getStoredAccessToken();
+            if (token) {
+              fetch("/api/diag/boot-failure", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "X-Access-Token": token,
+                },
+                body: body,
+                keepalive: true,
+              }).catch(function () {});
+            } else if (navigator.sendBeacon) {
               navigator.sendBeacon(
                 "/api/diag/boot-failure",
                 new Blob([body], { type: "application/json" }),
