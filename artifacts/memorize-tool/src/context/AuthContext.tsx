@@ -1,6 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import { withAccessTokenHeader, clearAccessToken } from "../lib/accessToken";
 import { apiPath } from "../lib/apiPath";
+import {
+  getScopedStorageItem,
+  removeScopedStorageItem,
+  setScopedStorageItem,
+} from "../lib/scopedLocalStorage";
 
 // Returns true when the 401 came from the access-token gate (not from the
 // passkey session). Callers should skip clearing the user's session in that
@@ -51,7 +56,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const refreshTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const isTokenExpired = useCallback((): boolean => {
-    const expiresAt = localStorage.getItem("authTokenExpires");
+    const expiresAt = getScopedStorageItem("authTokenExpires");
     if (!expiresAt) return true;
     const expiryTime = parseInt(expiresAt, 10);
     if (Number.isNaN(expiryTime)) return true;
@@ -60,7 +65,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const refreshToken = useCallback(async (): Promise<boolean> => {
     try {
-      const authToken = localStorage.getItem("authToken");
+      const authToken = getScopedStorageItem("authToken");
       if (!authToken) return false;
       const response = await fetch(apiPath("/passkey/refresh"), {
         method: "POST",
@@ -76,8 +81,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (response.ok) {
         const data = (await response.json()) as { success: boolean; token: string; expiresAt: number };
         if (data.success && data.token) {
-          localStorage.setItem("authToken", data.token);
-          localStorage.setItem("authTokenExpires", String(data.expiresAt));
+          setScopedStorageItem("authToken", data.token);
+          setScopedStorageItem("authTokenExpires", String(data.expiresAt));
           return true;
         }
       }
@@ -91,7 +96,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const authToken = localStorage.getItem("authToken");
+        const authToken = getScopedStorageItem("authToken");
         if (!authToken) {
           setUser(null);
           setLoading(false);
@@ -100,15 +105,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (isTokenExpired()) {
           const refreshed = await refreshToken();
           if (!refreshed) {
-            localStorage.removeItem("authToken");
-            localStorage.removeItem("authTokenExpires");
-            localStorage.removeItem("authUser");
+            removeScopedStorageItem("authToken");
+            removeScopedStorageItem("authTokenExpires");
+            removeScopedStorageItem("authUser");
             setUser(null);
             setLoading(false);
             return;
           }
         }
-        const storedUser = localStorage.getItem("authUser");
+        const storedUser = getScopedStorageItem("authUser");
         if (storedUser) {
           try {
             setUser(JSON.parse(storedUser) as AuthUser);
@@ -116,7 +121,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             console.error("Error parsing stored user:", e);
           }
         }
-        const tokenForRequest = localStorage.getItem("authToken");
+        const tokenForRequest = getScopedStorageItem("authToken");
         const response = await fetch(apiPath("/user/me"), {
           headers: withAccessTokenHeader({ Authorization: `Bearer ${tokenForRequest}` }),
         });
@@ -125,11 +130,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         } else if (response.ok) {
           const userData = (await response.json()) as AuthUser;
           setUser(userData);
-          localStorage.setItem("authUser", JSON.stringify(userData));
+          setScopedStorageItem("authUser", JSON.stringify(userData));
         } else if (response.status === 401) {
-          localStorage.removeItem("authToken");
-          localStorage.removeItem("authTokenExpires");
-          localStorage.removeItem("authUser");
+          removeScopedStorageItem("authToken");
+          removeScopedStorageItem("authTokenExpires");
+          removeScopedStorageItem("authUser");
           setUser(null);
         }
       } catch (err) {
@@ -155,7 +160,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = useCallback(async (): Promise<void> => {
     try {
-      const authToken = localStorage.getItem("authToken");
+      const authToken = getScopedStorageItem("authToken");
       if (authToken) {
         await fetch(apiPath("/passkey/logout"), {
           method: "POST",
@@ -165,9 +170,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }),
         }).catch((err) => console.error("Logout API call failed:", err));
       }
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("authTokenExpires");
-      localStorage.removeItem("authUser");
+      removeScopedStorageItem("authToken");
+      removeScopedStorageItem("authTokenExpires");
+      removeScopedStorageItem("authUser");
       setUser(null);
     } catch (err) {
       console.error("Logout failed:", err);

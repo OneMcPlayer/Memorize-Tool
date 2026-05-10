@@ -1,5 +1,6 @@
 import { withAccessTokenHeader, clearAccessToken } from "../lib/accessToken";
 import { apiPath } from "../lib/apiPath";
+import { getScopedStorageItem } from "../lib/scopedLocalStorage";
 
 async function handleInvalidAccessTokenResponse(
   response: Response,
@@ -173,7 +174,7 @@ class OpenAIService {
     if (typeof speed === "number") body.speed = speed;
     if (model) body.model = model;
 
-    const authToken = localStorage.getItem("authToken");
+    const authToken = getScopedStorageItem("authToken");
     const response = await fetch(
       apiPath(this.serverTtsEndpoint),
       {
@@ -236,7 +237,7 @@ class OpenAIService {
       STT_REQUEST_TIMEOUT_MS,
     );
 
-    const authToken = localStorage.getItem("authToken");
+    const authToken = getScopedStorageItem("authToken");
     try {
       const response = await fetch(
         apiPath(this.serverSttEndpoint),

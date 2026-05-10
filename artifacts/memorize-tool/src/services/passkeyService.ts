@@ -7,6 +7,7 @@ import {
 } from "@simplewebauthn/browser";
 import { withAccessTokenHeader, clearAccessToken } from "../lib/accessToken";
 import { apiPath } from "../lib/apiPath";
+import { setScopedStorageItem } from "../lib/scopedLocalStorage";
 
 async function handleInvalidAccessToken(response: Response): Promise<void> {
   if (response.status !== 401) return;
@@ -45,9 +46,9 @@ interface LoginResult {
 
 function persistSession(data: { token?: string; expiresAt?: number; user?: ApiUser }) {
   if (data.token && data.expiresAt && data.user) {
-    localStorage.setItem("authToken", data.token);
-    localStorage.setItem("authTokenExpires", String(data.expiresAt));
-    localStorage.setItem(
+    setScopedStorageItem("authToken", data.token);
+    setScopedStorageItem("authTokenExpires", String(data.expiresAt));
+    setScopedStorageItem(
       "authUser",
       JSON.stringify({
         username: data.user.username,

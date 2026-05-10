@@ -1,10 +1,11 @@
 import { withAccessTokenHeader } from "../lib/accessToken";
 import { apiPath } from "../lib/apiPath";
+import { getScopedStorageItem } from "../lib/scopedLocalStorage";
 
 const BASE = apiPath("/user/line-tags");
 
 function authHeaders(): Record<string, string> {
-  const authToken = localStorage.getItem("authToken");
+  const authToken = getScopedStorageItem("authToken");
   return withAccessTokenHeader(
     authToken ? { Authorization: `Bearer ${authToken}` } : {},
   );

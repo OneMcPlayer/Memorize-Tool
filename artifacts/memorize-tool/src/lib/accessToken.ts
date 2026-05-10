@@ -1,4 +1,9 @@
 import { apiPath } from "./apiPath";
+import {
+  getScopedStorageItem,
+  removeScopedStorageItem,
+  setScopedStorageItem,
+} from "./scopedLocalStorage";
 
 const STORAGE_KEY = "mainAccessToken";
 
@@ -6,28 +11,16 @@ type Listener = (token: string | null) => void;
 const listeners = new Set<Listener>();
 
 export function getAccessToken(): string | null {
-  try {
-    return localStorage.getItem(STORAGE_KEY);
-  } catch {
-    return null;
-  }
+  return getScopedStorageItem(STORAGE_KEY);
 }
 
 export function setAccessToken(token: string): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, token);
-  } catch {
-    /* ignore */
-  }
+  setScopedStorageItem(STORAGE_KEY, token);
   emit(token);
 }
 
 export function clearAccessToken(): void {
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    /* ignore */
-  }
+  removeScopedStorageItem(STORAGE_KEY);
   emit(null);
 }
 

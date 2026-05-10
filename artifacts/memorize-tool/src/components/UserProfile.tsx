@@ -6,6 +6,7 @@ import { isPasskeySupported, registerPasskey, loginWithPasskey } from "../servic
 import { showToast } from "../utils";
 import { withAccessTokenHeader, clearAccessToken } from "../lib/accessToken";
 import { apiPath } from "../lib/apiPath";
+import { getScopedStorageItem } from "../lib/scopedLocalStorage";
 import "./UserProfile.css";
 
 interface UserProfileProps {
@@ -26,7 +27,7 @@ const UserProfile = ({ onBack }: UserProfileProps) => {
       setPasskeyCount(null);
       return;
     }
-    const token = localStorage.getItem("authToken");
+    const token = getScopedStorageItem("authToken");
     if (!token) return;
     let cancelled = false;
     void (async () => {

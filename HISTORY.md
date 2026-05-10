@@ -68,6 +68,8 @@ Changes and decisions:
     `BASE_PATH`, so a `/dev/` build calls `/dev/api/...` instead of production
     `/api/...`.
   - The Vite PWA and dev proxy also use the configured base path.
+  - Frontend access and passkey session storage is scoped by base path to avoid
+    `/dev/` clearing the production session on the shared origin.
   - VPS systemd installer/update scripts now support a configurable
     `SERVICE_PREFIX`, allowing independent prod and staging services.
 - Added a Vite development proxy controlled by `API_PROXY_TARGET`.
