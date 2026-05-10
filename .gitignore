@@ -55,6 +55,7 @@ Thumbs.db
 .codex
 Code-Memorize.zip
 .env.production
+.env.staging
 
 # Generated verification and backup artifacts
 artifacts/videos/
