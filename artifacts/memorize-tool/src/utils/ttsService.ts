@@ -1,3 +1,5 @@
+import { apiPath } from "../lib/apiPath";
+
 interface TTSOptions {
   voice?: SpeechSynthesisVoice | { lang: string; name: string } | null;
   volume?: number;
@@ -51,7 +53,7 @@ class TTSService {
       useWebSpeech: true,
       useGoogleTTS: true,
       useProxy: false,
-      proxyUrl: '/api/tts-proxy',
+      proxyUrl: apiPath('/tts-proxy'),
       defaultVolume: 1.0,
       defaultRate: 1.0,
       defaultPitch: 1.0,

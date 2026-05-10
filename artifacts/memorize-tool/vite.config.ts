@@ -23,7 +23,19 @@ if (rawPort) {
   );
 }
 
-const basePath = process.env.BASE_PATH ?? "/";
+function normalizeBasePath(value: string): string {
+  const trimmed = value.trim() || "/";
+  const withLeadingSlash = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+  return withLeadingSlash.endsWith("/")
+    ? withLeadingSlash
+    : `${withLeadingSlash}/`;
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+const basePath = normalizeBasePath(process.env.BASE_PATH ?? "/");
 if (!process.env.BASE_PATH && !isBuildCommand) {
   // Dev/preview must be reachable at the artifact's prefix, so require an
   // explicit value rather than silently serving from "/".
@@ -36,6 +48,9 @@ const apiProxyTarget = process.env.API_PROXY_TARGET;
 const host = process.env.HOST?.trim() || "127.0.0.1";
 const enableReplitVitePlugins =
   process.env.ENABLE_REPLIT_VITE_PLUGINS === "true";
+const basePathWithoutTrailingSlash =
+  basePath === "/" ? "" : basePath.replace(/\/+$/, "");
+const apiPathPrefix = `${basePathWithoutTrailingSlash}/api`;
 
 async function loadReplitVitePlugins(): Promise<PluginOption[]> {
   if (!enableReplitVitePlugins) return [];
@@ -124,11 +139,13 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,svg,ico,woff2}"],
-        navigateFallbackDenylist: [/^\/api\//],
+        navigateFallbackDenylist: [
+          new RegExp(`^${escapeRegExp(apiPathPrefix)}(?:/|$)`),
+        ],
         runtimeCaching: [
           {
             urlPattern: ({ url }) =>
-              url.pathname.startsWith("/api/tts/") &&
+              url.pathname.startsWith(`${apiPathPrefix}/tts/`) &&
               !url.pathname.includes("/health"),
             handler: "CacheFirst",
             options: {
@@ -139,8 +156,8 @@ export default defineConfig({
           },
           {
             urlPattern: ({ url }) =>
-              url.pathname === "/api/healthz" ||
-              url.pathname === "/api/passkey/supported",
+              url.pathname === `${apiPathPrefix}/healthz` ||
+              url.pathname === `${apiPathPrefix}/passkey/supported`,
             handler: "NetworkFirst",
             options: {
               cacheName: "api-public-cache",
@@ -177,10 +194,17 @@ export default defineConfig({
     allowedHosts: true,
     proxy: apiProxyTarget
       ? {
-          "/api": {
+          [apiPathPrefix]: {
             target: apiProxyTarget,
             changeOrigin: true,
             secure: false,
+            rewrite: (proxyPath) =>
+              apiPathPrefix === "/api"
+                ? proxyPath
+                : proxyPath.replace(
+                    new RegExp(`^${escapeRegExp(apiPathPrefix)}(?=/|$)`),
+                    "/api",
+                  ),
           },
         }
       : undefined,

@@ -4,6 +4,7 @@ import useMicrophoneRecorder, {
   type RecordingMetadata,
 } from "../../hooks/useMicrophoneRecorder";
 import { clearAccessToken, withAccessTokenHeader } from "../../lib/accessToken";
+import { apiPath } from "../../lib/apiPath";
 import "./SttPerformanceTestPage.css";
 
 type SttTargetId = "whisper-large-v3" | "chirp-3";
@@ -215,7 +216,7 @@ const SttPerformanceTestPage = () => {
     formData.append("file", audioBlob, audioName || "sample.webm");
 
     const startedAt = performance.now();
-    const response = await fetch("/api/audio/stt-performance", {
+    const response = await fetch(apiPath("/audio/stt-performance"), {
       method: "POST",
       headers: withAccessTokenHeader(),
       body: formData,

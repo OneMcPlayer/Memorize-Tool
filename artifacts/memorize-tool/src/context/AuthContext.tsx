@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import { withAccessTokenHeader, clearAccessToken } from "../lib/accessToken";
+import { apiPath } from "../lib/apiPath";
 
 // Returns true when the 401 came from the access-token gate (not from the
 // passkey session). Callers should skip clearing the user's session in that
@@ -61,7 +62,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const authToken = localStorage.getItem("authToken");
       if (!authToken) return false;
-      const response = await fetch("/api/passkey/refresh", {
+      const response = await fetch(apiPath("/passkey/refresh"), {
         method: "POST",
         headers: withAccessTokenHeader({
           "Content-Type": "application/json",
@@ -116,7 +117,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         }
         const tokenForRequest = localStorage.getItem("authToken");
-        const response = await fetch("/api/user/me", {
+        const response = await fetch(apiPath("/user/me"), {
           headers: withAccessTokenHeader({ Authorization: `Bearer ${tokenForRequest}` }),
         });
         if (await isAccessTokenRejection(response)) {
@@ -156,7 +157,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const authToken = localStorage.getItem("authToken");
       if (authToken) {
-        await fetch("/api/passkey/logout", {
+        await fetch(apiPath("/passkey/logout"), {
           method: "POST",
           headers: withAccessTokenHeader({
             "Content-Type": "application/json",

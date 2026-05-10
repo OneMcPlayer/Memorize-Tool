@@ -58,6 +58,18 @@ Changes and decisions:
     users can still submit bug reports when production diagnostics are enabled.
 - Added root `TODO.md` and `HISTORY.md` so open work and project decisions are
   tracked in the repository instead of only in chat.
+- Added single-host production/staging deployment support for the VPS.
+  - Reason: DNS control only allows `epicserver.vpsgh.it`, not extra
+    subdomains.
+  - Production remains at `/`; staging can run under `/dev/` on the same
+    domain with separate internal API/web ports, database, cache, logs, and
+    access tokens.
+  - Frontend raw API calls and the generated API client now honor Vite
+    `BASE_PATH`, so a `/dev/` build calls `/dev/api/...` instead of production
+    `/api/...`.
+  - The Vite PWA and dev proxy also use the configured base path.
+  - VPS systemd installer/update scripts now support a configurable
+    `SERVICE_PREFIX`, allowing independent prod and staging services.
 - Added a Vite development proxy controlled by `API_PROXY_TARGET`.
   - Reason: Codespaces exposes a public frontend port, but the API can stay on a
     private local port. The frontend can proxy `/api` to the local API during

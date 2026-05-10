@@ -83,6 +83,8 @@ important decision or result to `HISTORY.md`.
   - Goal: confirm HTTPS reverse proxy, passkeys, diagnostics persistence,
     filesystem TTS cache, database migrations, service restart, and the
     `dev` branch auto-update timer.
+  - 2026-05-10 decision: because only `epicserver.vpsgh.it` DNS is available,
+    use `/` for production and `/dev/` for staging instead of subdomains.
 - [x] Add focused tests for empty audio handling.
   - Backend: reject tiny/empty audio with a clear error before provider call.
   - Frontend: do not call STT if the recorded blob is too small.
@@ -96,9 +98,9 @@ important decision or result to `HISTORY.md`.
 - [ ] Explore a fast reveal-only practice mode.
   - Intended behavior: outside Zen mode, play partner TTS faster, skip user
     recording, and show a button to reveal the correct user line.
-- [ ] Decide the production deployment shape.
-  - Replit artifacts currently model frontend and API separately.
-  - Codespaces currently uses Vite proxy for development only.
+- [x] Decide the production deployment shape.
+  - Result: use Caddy on `epicserver.vpsgh.it`, route production at `/`, and
+    route staging at `/dev/` with separate localhost ports and data stores.
 - [ ] Review generated `dist/` artifacts and ignore policy.
 - [ ] Confirm whether diagnostics should be memory-only, file-backed, or
       database-backed in production.

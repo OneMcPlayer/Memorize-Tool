@@ -1,4 +1,5 @@
 import { withAccessTokenHeader } from "../lib/accessToken";
+import { apiPath } from "../lib/apiPath";
 
 export type DiagnosticLevel = "debug" | "info" | "warn" | "error";
 
@@ -29,11 +30,6 @@ let uploadInFlight = false;
 let initialized = false;
 const breadcrumbs: DiagnosticBreadcrumb[] = [];
 const pendingUploads: DiagnosticBreadcrumb[] = [];
-
-const apiPath = (path: string): string => {
-  const base = (import.meta.env.BASE_URL ?? "/").replace(/\/+$/, "");
-  return `${base}/api${path}`;
-};
 
 export function redactDiagnosticText(value: string): string {
   return value

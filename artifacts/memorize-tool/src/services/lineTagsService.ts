@@ -1,6 +1,7 @@
 import { withAccessTokenHeader } from "../lib/accessToken";
+import { apiPath } from "../lib/apiPath";
 
-const BASE = "/api/user/line-tags";
+const BASE = apiPath("/user/line-tags");
 
 function authHeaders(): Record<string, string> {
   const authToken = localStorage.getItem("authToken");

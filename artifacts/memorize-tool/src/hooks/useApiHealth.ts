@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
+import { apiPath } from "../lib/apiPath";
 
 export type ApiHealthStatus = "checking" | "online" | "offline";
 
@@ -15,8 +16,7 @@ const POLL_INTERVAL_FAILING_MS = 5_000;
 const REQUEST_TIMEOUT_MS = 5_000;
 
 const buildHealthUrl = (): string => {
-  const base = (import.meta.env.BASE_URL ?? "/").replace(/\/+$/, "");
-  return `${base}/api/healthz`;
+  return apiPath("/healthz");
 };
 
 export function useApiHealthState(): ApiHealthState {

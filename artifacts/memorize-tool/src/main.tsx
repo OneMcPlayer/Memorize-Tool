@@ -1,11 +1,13 @@
 import { createRoot } from "react-dom/client";
 import {
+  setBaseUrl,
   setAccessTokenGetter,
   setInvalidAccessTokenHandler,
 } from "@workspace/api-client-react";
 import App from "./App";
 import "./index.css";
 import { clearAccessToken, getAccessToken } from "./lib/accessToken";
+import { appBasePath } from "./lib/apiPath";
 
 declare global {
   interface Window {
@@ -16,6 +18,7 @@ declare global {
 // Wire the shared invite-code access token into every request the generated
 // API client makes. Raw `fetch` callers add the header themselves via
 // `withAccessTokenHeader()`.
+setBaseUrl(appBasePath() || null);
 setAccessTokenGetter(() => getAccessToken());
 setInvalidAccessTokenHandler(() => {
   clearAccessToken();

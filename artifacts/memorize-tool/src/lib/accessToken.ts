@@ -1,3 +1,5 @@
+import { apiPath } from "./apiPath";
+
 const STORAGE_KEY = "mainAccessToken";
 
 type Listener = (token: string | null) => void;
@@ -65,8 +67,7 @@ export function withAccessTokenHeader(
  * 401, and throws for any other failure (network, 5xx).
  */
 export async function verifyAccessToken(token: string): Promise<boolean> {
-  const base = (import.meta.env.BASE_URL ?? "/").replace(/\/+$/, "");
-  const res = await fetch(`${base}/api/access/verify`, {
+  const res = await fetch(apiPath("/access/verify"), {
     headers: { "X-Access-Token": token },
     cache: "no-store",
   });

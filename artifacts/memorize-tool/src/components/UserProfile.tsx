@@ -5,6 +5,7 @@ import { translations } from "../data/translations";
 import { isPasskeySupported, registerPasskey, loginWithPasskey } from "../services/passkeyService";
 import { showToast } from "../utils";
 import { withAccessTokenHeader, clearAccessToken } from "../lib/accessToken";
+import { apiPath } from "../lib/apiPath";
 import "./UserProfile.css";
 
 interface UserProfileProps {
@@ -30,7 +31,7 @@ const UserProfile = ({ onBack }: UserProfileProps) => {
     let cancelled = false;
     void (async () => {
       try {
-        const res = await fetch("/api/passkey/count", {
+        const res = await fetch(apiPath("/passkey/count"), {
           headers: withAccessTokenHeader({ Authorization: `Bearer ${token}` }),
         });
         if (res.status === 401) {

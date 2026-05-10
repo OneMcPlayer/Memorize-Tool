@@ -1,4 +1,5 @@
 import { withAccessTokenHeader, clearAccessToken } from "../lib/accessToken";
+import { apiPath } from "../lib/apiPath";
 
 async function handleInvalidAccessTokenResponse(
   response: Response,
@@ -87,7 +88,6 @@ function buildSilentWavDataUrl(durationMs = 250, sampleRate = 8000): string {
 const SILENT_WAV_DATA_URL = buildSilentWavDataUrl();
 
 class OpenAIService {
-  private readonly serverBaseUrl = "/api";
   private readonly serverTtsEndpoint = "/tts/speech";
   private readonly serverSttEndpoint = "/audio/transcriptions";
   private readonly audioCache = new Map<string, Blob>();
@@ -175,7 +175,7 @@ class OpenAIService {
 
     const authToken = localStorage.getItem("authToken");
     const response = await fetch(
-      `${this.serverBaseUrl}${this.serverTtsEndpoint}`,
+      apiPath(this.serverTtsEndpoint),
       {
         method: "POST",
         headers: withAccessTokenHeader({
@@ -239,7 +239,7 @@ class OpenAIService {
     const authToken = localStorage.getItem("authToken");
     try {
       const response = await fetch(
-        `${this.serverBaseUrl}${this.serverSttEndpoint}`,
+        apiPath(this.serverSttEndpoint),
         {
           method: "POST",
           headers: withAccessTokenHeader(

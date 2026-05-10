@@ -6,6 +6,7 @@ import {
   type PublicKeyCredentialRequestOptionsJSON,
 } from "@simplewebauthn/browser";
 import { withAccessTokenHeader, clearAccessToken } from "../lib/accessToken";
+import { apiPath } from "../lib/apiPath";
 
 async function handleInvalidAccessToken(response: Response): Promise<void> {
   if (response.status !== 401) return;
@@ -63,7 +64,7 @@ export async function registerPasskey(username: string): Promise<RegisterResult>
   const trimmedUsername = username.trim();
 
   // Step 1: ask the server for registration options (challenge)
-  const optsRes = await fetch("/api/passkey/register/options", {
+  const optsRes = await fetch(apiPath("/passkey/register/options"), {
     method: "POST",
     headers: withAccessTokenHeader({ "Content-Type": "application/json" }),
     body: JSON.stringify({ username: trimmedUsername }),
@@ -82,7 +83,7 @@ export async function registerPasskey(username: string): Promise<RegisterResult>
   });
 
   // Step 3: send the response back for cryptographic verification
-  const verifyRes = await fetch("/api/passkey/register/verify", {
+  const verifyRes = await fetch(apiPath("/passkey/register/verify"), {
     method: "POST",
     headers: withAccessTokenHeader({ "Content-Type": "application/json" }),
     body: JSON.stringify({ username: trimmedUsername, response: credential }),
@@ -103,7 +104,7 @@ export async function registerPasskey(username: string): Promise<RegisterResult>
 
 export async function loginWithPasskey(): Promise<LoginResult> {
   // Step 1: ask the server for authentication options (challenge)
-  const optsRes = await fetch("/api/passkey/authenticate/options", {
+  const optsRes = await fetch(apiPath("/passkey/authenticate/options"), {
     method: "POST",
     headers: withAccessTokenHeader({ "Content-Type": "application/json" }),
     body: JSON.stringify({}),
@@ -122,7 +123,7 @@ export async function loginWithPasskey(): Promise<LoginResult> {
   });
 
   // Step 3: send the assertion back for cryptographic verification
-  const verifyRes = await fetch("/api/passkey/authenticate/verify", {
+  const verifyRes = await fetch(apiPath("/passkey/authenticate/verify"), {
     method: "POST",
     headers: withAccessTokenHeader({ "Content-Type": "application/json" }),
     body: JSON.stringify({ response: credential }),

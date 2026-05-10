@@ -12,6 +12,9 @@ FORCE="${FORCE:-0}"
 STATE_DIR="${STATE_DIR:-$APP_DIR/.deploy}"
 LAST_SUCCESS_FILE="$STATE_DIR/last-success-$BRANCH"
 LOCK_FILE="$STATE_DIR/update-$BRANCH.lock"
+SERVICE_PREFIX="${SERVICE_PREFIX:-memorize}"
+API_SERVICE_NAME="${API_SERVICE_NAME:-${SERVICE_PREFIX}-api.service}"
+WEB_SERVICE_NAME="${WEB_SERVICE_NAME:-${SERVICE_PREFIX}-web.service}"
 
 mkdir -p "$STATE_DIR"
 
@@ -87,15 +90,24 @@ pnpm run db:push
 
 if command -v systemctl >/dev/null 2>&1; then
   systemctl --user daemon-reload || true
-  systemctl --user restart memorize-api.service
-  systemctl --user restart memorize-web.service
+  systemctl --user restart "$API_SERVICE_NAME"
+  systemctl --user restart "$WEB_SERVICE_NAME"
 fi
 
 api_port="${API_PORT:-8080}"
 web_port="${WEB_PORT:-25868}"
+base_path="${BASE_PATH:-/}"
+case "$base_path" in
+  /*) ;;
+  *) base_path="/$base_path" ;;
+esac
+case "$base_path" in
+  */) ;;
+  *) base_path="$base_path/" ;;
+esac
 if command -v curl >/dev/null 2>&1; then
   wait_for_url "API" "http://127.0.0.1:${api_port}/api/healthz"
-  wait_for_url "web" "http://127.0.0.1:${web_port}/"
+  wait_for_url "web" "http://127.0.0.1:${web_port}${base_path}"
 fi
 
 printf "%s" "$current_sha" > "$LAST_SUCCESS_FILE"
