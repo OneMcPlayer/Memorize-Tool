@@ -6,6 +6,7 @@ import openaiService, {
 
 function resetPlaybackAudio(): void {
   openaiService.stopAudio();
+  openaiService.clearCache();
   const service = openaiService as unknown as {
     currentAudio: HTMLAudioElement | null;
     currentAudioUrl: string | null;
@@ -53,6 +54,62 @@ describe("openaiService speechToText", () => {
       /empty or invalid audio/,
     );
     expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("preloads cache-only TTS hits into the client cache", async () => {
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(new Uint8Array(MIN_TTS_AUDIO_BYTES), {
+        status: 200,
+        headers: {
+          "Content-Type": "audio/wav",
+          "X-TTS-Cache-Status": "HIT",
+        },
+      }),
+    );
+
+    await expect(
+      openaiService.preloadCachedTextToSpeech("hello"),
+    ).resolves.toMatchObject({ status: "cached", bytes: MIN_TTS_AUDIO_BYTES });
+
+    const firstCall = vi.mocked(fetch).mock.calls[0];
+    expect(JSON.parse(String(firstCall?.[1]?.body))).toMatchObject({
+      cacheOnly: true,
+      text: "hello",
+    });
+
+    await expect(openaiService.textToSpeech("hello")).resolves.toHaveProperty(
+      "size",
+      MIN_TTS_AUDIO_BYTES,
+    );
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("reports cache-only TTS misses without storing audio", async () => {
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(
+        new Response(null, {
+          status: 204,
+          headers: { "X-TTS-Cache-Status": "MISS" },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(new Uint8Array(MIN_TTS_AUDIO_BYTES), {
+          status: 200,
+          headers: {
+            "Content-Type": "audio/wav",
+            "X-TTS-Cache-Status": "MISS",
+          },
+        }),
+      );
+
+    await expect(
+      openaiService.preloadCachedTextToSpeech("hello"),
+    ).resolves.toMatchObject({ status: "miss" });
+    await expect(openaiService.textToSpeech("hello")).resolves.toHaveProperty(
+      "size",
+      MIN_TTS_AUDIO_BYTES,
+    );
+    expect(fetch).toHaveBeenCalledTimes(2);
   });
 
   it("reuses one audio element for primed sequential TTS playback", async () => {

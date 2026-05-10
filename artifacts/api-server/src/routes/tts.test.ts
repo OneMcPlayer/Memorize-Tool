@@ -96,6 +96,7 @@ describe("/tts routes", () => {
 
   it("POST /tts/speech returns 503 if OPENROUTER_API_KEY is missing", async () => {
     delete process.env.OPENROUTER_API_KEY;
+    readTtsCache.mockResolvedValueOnce(null);
     const res = await request(makeApp())
       .post("/tts/speech")
       .set("x-access-token", ACCESS)
@@ -124,6 +125,34 @@ describe("/tts routes", () => {
     expect(res.headers["x-tts-cache-status"]).toBe("HIT");
     expect(res.headers["content-type"]).toBe("audio/wav");
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("POST /tts/speech serves cache-only hits without calling fetch", async () => {
+    readTtsCache.mockResolvedValueOnce(makeWav());
+    const fetchMock = vi.spyOn(globalThis, "fetch");
+
+    const res = await request(makeApp())
+      .post("/tts/speech")
+      .set("x-access-token", ACCESS)
+      .send({ text: "hello", cacheOnly: true });
+    expect(res.status).toBe(200);
+    expect(res.headers["x-tts-cache-status"]).toBe("HIT");
+    expect(res.headers["content-type"]).toBe("audio/wav");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("POST /tts/speech returns 204 for cache-only misses without calling fetch", async () => {
+    readTtsCache.mockResolvedValueOnce(null);
+    const fetchMock = vi.spyOn(globalThis, "fetch");
+
+    const res = await request(makeApp())
+      .post("/tts/speech")
+      .set("x-access-token", ACCESS)
+      .send({ text: "hello", cacheOnly: true });
+    expect(res.status).toBe(204);
+    expect(res.headers["x-tts-cache-status"]).toBe("MISS");
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(writeTtsCache).not.toHaveBeenCalled();
   });
 
   it("POST /tts/speech ignores invalid cached audio and refetches", async () => {

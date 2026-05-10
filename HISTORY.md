@@ -72,6 +72,14 @@ Changes and decisions:
     `/dev/` clearing the production session on the shared origin.
   - VPS systemd installer/update scripts now support a configurable
     `SERVICE_PREFIX`, allowing independent prod and staging services.
+- Added cache-only Live mode TTS lookahead preloading.
+  - Reason: server-side TTS cache hits were fast, but the browser still had to
+    wait for the first download before playing a line.
+  - The API now accepts `cacheOnly` for `/api/tts/speech`, returning cached WAVs
+    or `204` without calling the TTS provider on a miss.
+  - Live mode preloads up to five upcoming partner lines into the client cache,
+    including lines after the user's next turn, without speculative provider
+    generation.
 - Added a Vite development proxy controlled by `API_PROXY_TARGET`.
   - Reason: Codespaces exposes a public frontend port, but the API can stay on a
     private local port. The frontend can proxy `/api` to the local API during

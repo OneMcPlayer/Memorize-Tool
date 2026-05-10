@@ -20,6 +20,12 @@ export interface TtsOptions {
   model?: string;
 }
 
+export interface TtsPreloadResult {
+  bytes?: number;
+  message?: string;
+  status: "cached" | "already-cached" | "miss" | "error";
+}
+
 export interface SttOptions {
   language?: string;
 }
@@ -92,6 +98,7 @@ class OpenAIService {
   private readonly serverTtsEndpoint = "/tts/speech";
   private readonly serverSttEndpoint = "/audio/transcriptions";
   private readonly audioCache = new Map<string, Blob>();
+  private readonly ttsInFlight = new Map<string, Promise<Blob>>();
   private apiCallCount = 0;
   // Keep one reusable <audio> element for TTS playback. iOS Safari is much
   // less tolerant of repeated new Audio().play() calls during a long async
@@ -109,6 +116,73 @@ class OpenAIService {
       this.currentAudio = audio;
     }
     return this.currentAudio;
+  }
+
+  private ttsCacheKey(text: string, options: TtsOptions = {}): string {
+    return `${text}_${options.voice ?? "default"}_${options.speed ?? "default"}_${options.model ?? "default"}`;
+  }
+
+  private ttsRequestBody(
+    text: string,
+    options: TtsOptions = {},
+    cacheOnly = false,
+  ): Record<string, unknown> {
+    const body: Record<string, unknown> = { text };
+    if (options.voice) body.voice = options.voice;
+    if (typeof options.speed === "number") body.speed = options.speed;
+    if (options.model) body.model = options.model;
+    if (cacheOnly) body.cacheOnly = true;
+    return body;
+  }
+
+  private async fetchTtsBlob(
+    text: string,
+    options: TtsOptions = {},
+    cacheOnly = false,
+  ): Promise<{ blob: Blob; cacheStatus: string | null }> {
+    const authToken = getScopedStorageItem("authToken");
+    const response = await fetch(apiPath(this.serverTtsEndpoint), {
+      method: "POST",
+      headers: withAccessTokenHeader({
+        "Content-Type": "application/json",
+        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+      }),
+      body: JSON.stringify(this.ttsRequestBody(text, options, cacheOnly)),
+    });
+    await handleInvalidAccessTokenResponse(response);
+
+    if (cacheOnly && response.status === 204) {
+      const err = new Error("TTS audio is not cached.") as Error & {
+        cacheMiss?: boolean;
+        status?: number;
+      };
+      err.cacheMiss = true;
+      err.status = response.status;
+      throw err;
+    }
+
+    if (!response.ok) {
+      let errorMessage = response.statusText;
+      try {
+        const errorData = (await response.json()) as { error?: string };
+        errorMessage = errorData.error ?? errorMessage;
+      } catch {
+        // ignore
+      }
+      const err = new Error(errorMessage) as Error & { status?: number };
+      err.status = response.status;
+      throw err;
+    }
+
+    const audioBlob = await response.blob();
+    if (audioBlob.size < MIN_TTS_AUDIO_BYTES) {
+      throw new Error("TTS provider returned empty or invalid audio.");
+    }
+
+    return {
+      blob: audioBlob,
+      cacheStatus: response.headers.get("X-TTS-Cache-Status"),
+    };
   }
 
   private audioDiagnostics(
@@ -161,57 +235,71 @@ class OpenAIService {
   async textToSpeech(text: string, options: TtsOptions = {}): Promise<Blob> {
     if (!text || text.trim() === "") throw new Error("Text is required");
 
-    const voice = options.voice;
-    const speed = options.speed;
-    const model = options.model;
-
-    const cacheKey = `${text}_${voice ?? "default"}_${speed ?? "default"}_${model ?? "default"}`;
+    const cacheKey = this.ttsCacheKey(text, options);
     const cached = this.audioCache.get(cacheKey);
     if (cached) return cached;
 
-    const body: Record<string, unknown> = { text };
-    if (voice) body.voice = voice;
-    if (typeof speed === "number") body.speed = speed;
-    if (model) body.model = model;
+    const inFlight = this.ttsInFlight.get(cacheKey);
+    if (inFlight) return inFlight;
 
-    const authToken = getScopedStorageItem("authToken");
-    const response = await fetch(
-      apiPath(this.serverTtsEndpoint),
-      {
-        method: "POST",
-        headers: withAccessTokenHeader({
-          "Content-Type": "application/json",
-          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-        }),
-        body: JSON.stringify(body),
+    const request = this.fetchTtsBlob(text, options).then(
+      ({ blob, cacheStatus }) => {
+        if (cacheStatus === "MISS") {
+          this.apiCallCount += 1;
+        }
+        this.audioCache.set(cacheKey, blob);
+        return blob;
       },
     );
-    await handleInvalidAccessTokenResponse(response);
+    this.ttsInFlight.set(cacheKey, request);
 
-    if (!response.ok) {
-      let errorMessage = response.statusText;
+    try {
+      return await request;
+    } finally {
+      this.ttsInFlight.delete(cacheKey);
+    }
+  }
+
+  async preloadCachedTextToSpeech(
+    text: string,
+    options: TtsOptions = {},
+  ): Promise<TtsPreloadResult> {
+    if (!text || text.trim() === "") {
+      return { status: "error", message: "Text is required" };
+    }
+
+    const cacheKey = this.ttsCacheKey(text, options);
+    const cached = this.audioCache.get(cacheKey);
+    if (cached) {
+      return { status: "already-cached", bytes: cached.size };
+    }
+
+    const inFlight = this.ttsInFlight.get(cacheKey);
+    if (inFlight) {
       try {
-        const errorData = (await response.json()) as { error?: string };
-        errorMessage = errorData.error ?? errorMessage;
-      } catch {
-        // ignore
+        const blob = await inFlight;
+        return { status: "cached", bytes: blob.size };
+      } catch (err) {
+        return {
+          status: "error",
+          message: err instanceof Error ? err.message : String(err),
+        };
       }
-      const err = new Error(errorMessage) as Error & { status?: number };
-      err.status = response.status;
-      throw err;
     }
 
-    const cacheStatus = response.headers.get("X-TTS-Cache-Status");
-    if (cacheStatus === "MISS") {
-      this.apiCallCount += 1;
+    try {
+      const { blob } = await this.fetchTtsBlob(text, options, true);
+      this.audioCache.set(cacheKey, blob);
+      return { status: "cached", bytes: blob.size };
+    } catch (err) {
+      if ((err as { cacheMiss?: boolean } | null)?.cacheMiss) {
+        return { status: "miss" };
+      }
+      return {
+        status: "error",
+        message: err instanceof Error ? err.message : String(err),
+      };
     }
-
-    const audioBlob = await response.blob();
-    if (audioBlob.size < MIN_TTS_AUDIO_BYTES) {
-      throw new Error("TTS provider returned empty or invalid audio.");
-    }
-    this.audioCache.set(cacheKey, audioBlob);
-    return audioBlob;
   }
 
   async speechToText(
@@ -463,6 +551,7 @@ class OpenAIService {
 
   clearCache(): void {
     this.audioCache.clear();
+    this.ttsInFlight.clear();
   }
 
   getApiCallCount(): number {

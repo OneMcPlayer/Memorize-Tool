@@ -36,6 +36,7 @@ const speechBodySchema = z.object({
   voice: z.string().optional(),
   speed: z.number().min(0.25).max(4).optional(),
   model: z.enum(ALLOWED_MODELS).optional(),
+  cacheOnly: z.boolean().optional(),
 });
 
 const inFlight = new Map<string, Promise<Buffer>>();
@@ -183,16 +184,6 @@ router.get("/tts/health", (_req, res): void => {
 });
 
 router.post("/tts/speech", async (req, res): Promise<void> => {
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) {
-    req.log.error("OPENROUTER_API_KEY is not configured");
-    res.status(503).json({
-      error:
-        "Live mode is not configured. OPENROUTER_API_KEY is missing on the server.",
-    });
-    return;
-  }
-
   const parsed = speechBodySchema.safeParse(req.body);
   if (!parsed.success) {
     res
@@ -200,10 +191,12 @@ router.post("/tts/speech", async (req, res): Promise<void> => {
       .json({ error: "Invalid request body", issues: parsed.error.issues });
     return;
   }
+  const apiKey = process.env.OPENROUTER_API_KEY;
   const { text } = parsed.data;
   const voice = parsed.data.voice ?? DEFAULT_VOICE;
   const speed = parsed.data.speed ?? 1.0;
   const model = parsed.data.model ?? DEFAULT_MODEL;
+  const cacheOnly = parsed.data.cacheOnly === true;
 
   const cacheKey = generateCacheKey(text, voice, speed, model);
 
@@ -223,6 +216,25 @@ router.post("/tts/speech", async (req, res): Promise<void> => {
       { model, voice, key: cacheKey, bytes: cached.length },
       "Ignoring invalid TTS cache entry",
     );
+  }
+
+  if (cacheOnly) {
+    req.log.info({ model, voice, key: cacheKey }, "TTS cache-only miss");
+    res.setHeader("Cache-Control", "no-store");
+    res.setHeader("X-TTS-Cache-Status", "MISS");
+    res.setHeader("X-TTS-Cache-Source", getTtsCacheProvider().toUpperCase());
+    res.setHeader("X-TTS-Cache-Key", cacheKey);
+    res.status(204).send();
+    return;
+  }
+
+  if (!apiKey) {
+    req.log.error("OPENROUTER_API_KEY is not configured");
+    res.status(503).json({
+      error:
+        "Live mode is not configured. OPENROUTER_API_KEY is missing on the server.",
+    });
+    return;
   }
 
   req.log.info({ model, voice, length: text.length }, "TTS cache miss");

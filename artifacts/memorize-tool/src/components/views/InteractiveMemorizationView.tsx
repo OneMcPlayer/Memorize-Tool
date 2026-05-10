@@ -38,6 +38,7 @@ const SUCCESS_FLASH_MS = 1300;
 const MIN_STT_CAPTURE_BYTES = 1024;
 const MIN_STT_CAPTURE_DURATION_MS = 250;
 const LIVE_STT_LANGUAGE = "it";
+const TTS_PRELOAD_LOOKAHEAD = 5;
 
 import { showToast } from "../../utils";
 import useMicrophoneRecorder, {
@@ -315,6 +316,7 @@ const InteractiveMemorizationView = ({
   const isMountedRef = useRef(true);
   const zenFadeTimerRef = useRef<number | null>(null);
   const successFlashTimerRef = useRef<number | null>(null);
+  const ttsPreloadAttemptedRef = useRef<Set<string>>(new Set());
 
   useEffect(
     () => () => {
@@ -388,6 +390,93 @@ const InteractiveMemorizationView = ({
     }
     return items;
   }, [sequence, cursor]);
+
+  const ttsPreloadCandidates = useMemo(() => {
+    const items: SequenceItem[] = [];
+    for (
+      let i = cursor;
+      i < sequence.length && items.length < TTS_PRELOAD_LOOKAHEAD;
+      i += 1
+    ) {
+      if (!sequence[i].isUserLine) {
+        items.push(sequence[i]);
+      }
+    }
+    return items;
+  }, [sequence, cursor]);
+
+  const buildTtsRequest = useCallback(
+    (item: SequenceItem): { options: { voice?: string }; text: string } => {
+      const assignedVoice = voiceAssignments[item.speaker];
+      const options: { voice?: string } = {};
+      if (assignedVoice) options.voice = assignedVoice;
+      return {
+        options,
+        text: resolveMarkedUpLine(lineTags[String(item.originalIndex)], item.line),
+      };
+    },
+    [lineTags, voiceAssignments],
+  );
+
+  useEffect(() => {
+    ttsPreloadAttemptedRef.current.clear();
+  }, [scriptKey]);
+
+  useEffect(() => {
+    if (ttsPreloadCandidates.length === 0) return;
+    let cancelled = false;
+
+    const candidates = ttsPreloadCandidates
+      .map((item, sequenceOffset) => {
+        const { options, text } = buildTtsRequest(item);
+        const key = [
+          item.originalIndex,
+          options.voice ?? "default",
+          text,
+        ].join("\u0001");
+        return { item, key, options, sequenceOffset, text };
+      })
+      .filter(({ key }) => {
+        if (ttsPreloadAttemptedRef.current.has(key)) return false;
+        ttsPreloadAttemptedRef.current.add(key);
+        return true;
+      });
+
+    if (candidates.length === 0) return;
+
+    recordDiagnosticBreadcrumb("tts-preload-started", {
+      cursor,
+      requested: candidates.length,
+      window: TTS_PRELOAD_LOOKAHEAD,
+    });
+
+    void Promise.all(
+      candidates.map(async ({ item, options, sequenceOffset, text }) => {
+        const startedAt = diagnosticNow();
+        const result = await openaiService.preloadCachedTextToSpeech(
+          text,
+          options,
+        );
+        if (cancelled) return;
+        recordDiagnosticBreadcrumb(
+          "tts-preload-finished",
+          {
+            bytes: result.bytes ?? null,
+            elapsedMs: diagnosticElapsed(startedAt),
+            message: result.message ?? null,
+            originalIndex: item.originalIndex,
+            result: result.status,
+            sequenceOffset,
+          },
+          result.status === "error" ? "warn" : "debug",
+        );
+      }),
+    );
+
+    return () => {
+      cancelled = true;
+    };
+  }, [buildTtsRequest, cursor, ttsPreloadCandidates]);
 
   const nextUserLine = useMemo(() => {
     for (let i = cursor; i < sequence.length; i += 1) {
@@ -518,19 +607,13 @@ const InteractiveMemorizationView = ({
         const item = upcomingNonUserLines[i];
         const lineStartedAt = diagnosticNow();
         setNowSpeakingIndex(i);
-        const assignedVoice = voiceAssignments[item.speaker];
-        const ttsOpts: { voice?: string } = {};
-        if (assignedVoice) ttsOpts.voice = assignedVoice;
-        const ttsText = resolveMarkedUpLine(
-          lineTags[String(item.originalIndex)],
-          item.line,
-        );
+        const { options: ttsOpts, text: ttsText } = buildTtsRequest(item);
         recordDiagnosticBreadcrumb("tts-line-requested", {
-          hasAssignedVoice: Boolean(assignedVoice),
+          hasAssignedVoice: Boolean(ttsOpts.voice),
           lineLength: item.line.length,
           originalIndex: item.originalIndex,
           sequenceOffset: i,
-          voice: assignedVoice ?? null,
+          voice: ttsOpts.voice ?? null,
         });
         const audioBlob = await openaiService.textToSpeech(ttsText, ttsOpts);
         recordDiagnosticBreadcrumb("tts-line-ready", {
@@ -623,14 +706,13 @@ const InteractiveMemorizationView = ({
     }
   }, [
     cursor,
+    buildTtsRequest,
     hideZenOverlay,
     isPlaying,
     isTranscribing,
-    lineTags,
     scriptKey,
     t,
     upcomingNonUserLines,
-    voiceAssignments,
   ]);
 
   const handleStartRecording = useCallback(async () => {
