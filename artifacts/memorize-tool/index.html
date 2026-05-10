@@ -183,6 +183,8 @@
         var pollTimer = null;
         var reloading = false;
         var extensionsUsed = 0;
+        var basePath = "%BASE_URL%";
+        var basePathNoSlash = basePath.replace(/\/+$/, "");
         // Track whether we have observed an unhealthy probe at any point. We
         // only auto-reload after seeing unhealthy -> healthy, so a slow boot
         // is never restarted into another slow boot loop.
@@ -195,11 +197,19 @@
         function setStatus(text) {
           if (statusEl) statusEl.textContent = text;
         }
+        function apiUrl(path) {
+          return basePathNoSlash + "/api" + path;
+        }
         function getStoredAccessToken() {
           try {
-            return window.localStorage
-              ? window.localStorage.getItem("mainAccessToken")
-              : null;
+            if (!window.localStorage) return null;
+            var scopedKey = "mainAccessToken:" + (basePathNoSlash || "/");
+            return (
+              window.localStorage.getItem(scopedKey) ||
+              (basePathNoSlash
+                ? null
+                : window.localStorage.getItem("mainAccessToken"))
+            );
           } catch (e) {
             return null;
           }
@@ -214,7 +224,7 @@
             });
             var token = getStoredAccessToken();
             if (token) {
-              fetch("/api/diag/boot-failure", {
+              fetch(apiUrl("/diag/boot-failure"), {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
@@ -225,11 +235,11 @@
               }).catch(function () {});
             } else if (navigator.sendBeacon) {
               navigator.sendBeacon(
-                "/api/diag/boot-failure",
+                apiUrl("/diag/boot-failure"),
                 new Blob([body], { type: "application/json" }),
               );
             } else {
-              fetch("/api/diag/boot-failure", {
+              fetch(apiUrl("/diag/boot-failure"), {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: body,
@@ -247,7 +257,7 @@
         }
         function pollHealth() {
           if (reloading || booted) return;
-          fetch("/api/diag/web-health", { cache: "no-store" })
+          fetch(apiUrl("/diag/web-health"), { cache: "no-store" })
             .then(function (r) {
               return r.ok ? r.json() : null;
             })
@@ -284,7 +294,7 @@
         // healthy, grant extensions instead of showing the scary screen.
         function maybeShowFallback() {
           if (booted) return;
-          fetch("/api/diag/web-health", { cache: "no-store" })
+          fetch(apiUrl("/diag/web-health"), { cache: "no-store" })
             .then(function (r) {
               return r.ok ? r.json() : { healthy: false };
             })
