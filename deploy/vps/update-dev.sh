@@ -12,9 +12,6 @@ FORCE="${FORCE:-0}"
 STATE_DIR="${STATE_DIR:-$APP_DIR/.deploy}"
 LAST_SUCCESS_FILE="$STATE_DIR/last-success-$BRANCH"
 LOCK_FILE="$STATE_DIR/update-$BRANCH.lock"
-SERVICE_PREFIX="${SERVICE_PREFIX:-memorize}"
-API_SERVICE_NAME="${API_SERVICE_NAME:-${SERVICE_PREFIX}-api.service}"
-WEB_SERVICE_NAME="${WEB_SERVICE_NAME:-${SERVICE_PREFIX}-web.service}"
 
 mkdir -p "$STATE_DIR"
 
@@ -28,6 +25,9 @@ load_node_path
 require_command git
 require_command pnpm
 load_env_file
+SERVICE_PREFIX="${SERVICE_PREFIX:-memorize}"
+API_SERVICE_NAME="${API_SERVICE_NAME:-${SERVICE_PREFIX}-api.service}"
+WEB_SERVICE_NAME="${WEB_SERVICE_NAME:-${SERVICE_PREFIX}-web.service}"
 cd_app
 
 wait_for_url() {

@@ -62,6 +62,9 @@ Type=oneshot
 WorkingDirectory=$APP_DIR
 Environment=APP_DIR=$APP_DIR
 Environment=ENV_FILE=$ENV_FILE
+Environment=SERVICE_PREFIX=$SERVICE_PREFIX
+Environment=API_SERVICE_NAME=$API_SERVICE_NAME
+Environment=WEB_SERVICE_NAME=$WEB_SERVICE_NAME
 ExecStart=$APP_DIR/deploy/vps/update-dev.sh
 UNIT
 
