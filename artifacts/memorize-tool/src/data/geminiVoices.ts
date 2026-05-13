@@ -1,42 +1,46 @@
 export interface GeminiVoice {
+  gender: "female" | "male";
   id: string;
   hint: string;
 }
 
 export const GEMINI_VOICES: GeminiVoice[] = [
-  { id: "Zephyr", hint: "bright" },
-  { id: "Puck", hint: "upbeat" },
-  { id: "Charon", hint: "informative" },
-  { id: "Kore", hint: "firm" },
-  { id: "Fenrir", hint: "excitable" },
-  { id: "Leda", hint: "youthful" },
-  { id: "Orus", hint: "firm" },
-  { id: "Aoede", hint: "breezy" },
-  { id: "Callirrhoe", hint: "easy-going" },
-  { id: "Autonoe", hint: "bright" },
-  { id: "Enceladus", hint: "breathy" },
-  { id: "Iapetus", hint: "clear" },
-  { id: "Umbriel", hint: "easy-going" },
-  { id: "Algieba", hint: "smooth" },
-  { id: "Despina", hint: "smooth" },
-  { id: "Erinome", hint: "clear" },
-  { id: "Algenib", hint: "gravelly" },
-  { id: "Rasalgethi", hint: "informative" },
-  { id: "Laomedeia", hint: "upbeat" },
-  { id: "Achernar", hint: "soft" },
-  { id: "Alnilam", hint: "firm" },
-  { id: "Schedar", hint: "even" },
-  { id: "Gacrux", hint: "mature" },
-  { id: "Pulcherrima", hint: "forward" },
-  { id: "Achird", hint: "friendly" },
-  { id: "Zubenelgenubi", hint: "casual" },
-  { id: "Vindemiatrix", hint: "gentle" },
-  { id: "Sadachbia", hint: "lively" },
-  { id: "Sadaltager", hint: "knowledgeable" },
-  { id: "Sulafat", hint: "warm" },
+  { id: "Zephyr", gender: "female", hint: "bright" },
+  { id: "Puck", gender: "male", hint: "upbeat" },
+  { id: "Charon", gender: "male", hint: "informative" },
+  { id: "Kore", gender: "female", hint: "firm" },
+  { id: "Fenrir", gender: "male", hint: "excitable" },
+  { id: "Leda", gender: "female", hint: "youthful" },
+  { id: "Orus", gender: "male", hint: "firm" },
+  { id: "Aoede", gender: "female", hint: "breezy" },
+  { id: "Callirrhoe", gender: "female", hint: "easy-going" },
+  { id: "Autonoe", gender: "female", hint: "bright" },
+  { id: "Enceladus", gender: "male", hint: "breathy" },
+  { id: "Iapetus", gender: "male", hint: "clear" },
+  { id: "Umbriel", gender: "male", hint: "easy-going" },
+  { id: "Algieba", gender: "male", hint: "smooth" },
+  { id: "Despina", gender: "female", hint: "smooth" },
+  { id: "Erinome", gender: "female", hint: "clear" },
+  { id: "Algenib", gender: "male", hint: "gravelly" },
+  { id: "Rasalgethi", gender: "male", hint: "informative" },
+  { id: "Laomedeia", gender: "female", hint: "upbeat" },
+  { id: "Achernar", gender: "female", hint: "soft" },
+  { id: "Alnilam", gender: "male", hint: "firm" },
+  { id: "Schedar", gender: "male", hint: "even" },
+  { id: "Gacrux", gender: "female", hint: "mature" },
+  { id: "Pulcherrima", gender: "female", hint: "forward" },
+  { id: "Achird", gender: "male", hint: "friendly" },
+  { id: "Zubenelgenubi", gender: "male", hint: "casual" },
+  { id: "Vindemiatrix", gender: "female", hint: "gentle" },
+  { id: "Sadachbia", gender: "male", hint: "lively" },
+  { id: "Sadaltager", gender: "male", hint: "knowledgeable" },
+  { id: "Sulafat", gender: "female", hint: "warm" },
 ];
 
 export const DEFAULT_VOICE_ID = "Zephyr";
+export const DEFAULT_GEMINI_VOICE = GEMINI_VOICES.find(
+  (voice) => voice.id === DEFAULT_VOICE_ID,
+) ?? GEMINI_VOICES[0];
 
 const MIN_SAMPLE_LEN = 25;
 const IDEAL_MIN = 60;

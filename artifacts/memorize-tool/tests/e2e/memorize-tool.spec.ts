@@ -9,13 +9,14 @@
  * must be running before invoking the tests; the suite hits the shared proxy at port 80.
  */
 import { test, expect, type APIResponse } from "@playwright/test";
+import { seedAppStorage } from "./helpers/storage";
 
 test.describe("Memorize Tool — public flow", () => {
   test("loads the app shell with header, options, script picker and online status", async ({
     page,
   }) => {
-    await page.addInitScript(() => localStorage.clear());
-    await page.goto("/");
+    await seedAppStorage(page);
+    await page.goto("./");
     await expect(page.locator("#root")).not.toBeEmpty({ timeout: 15_000 });
     await expect(page.locator("#optionsToggle")).toBeVisible();
     await expect(page.locator("select").first()).toBeVisible();
@@ -27,12 +28,11 @@ test.describe("Memorize Tool — public flow", () => {
   test("opens and closes the profile/login panel when enabled", async ({
     page,
   }) => {
-    await page.addInitScript(() => {
-      localStorage.clear();
-      localStorage.setItem("advancedMode", "true");
-      localStorage.setItem("loginEnabled", "true");
+    await seedAppStorage(page, {
+      advancedMode: "true",
+      loginEnabled: "true",
     });
-    await page.goto("/");
+    await page.goto("./");
     await expect(page.locator("#profileToggle")).toBeVisible();
     await page.locator("#profileToggle").click();
     await expect(
@@ -43,12 +43,8 @@ test.describe("Memorize Tool — public flow", () => {
   });
 
   test("Live mode no longer asks for an OpenAI API key", async ({ page }) => {
-    await page.addInitScript(() => {
-      localStorage.clear();
-      localStorage.setItem("advancedMode", "true");
-      localStorage.setItem("mainAccessToken", "e2e-token");
-    });
-    await page.goto("/");
+    await seedAppStorage(page, { advancedMode: "true" });
+    await page.goto("./");
     // Even if a stale key was set, it must not gate the Live mode UI anymore.
     await page.evaluate(() =>
       localStorage.setItem("openai_api_key", "sk-stale"),

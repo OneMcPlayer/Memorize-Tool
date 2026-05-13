@@ -1,14 +1,11 @@
 import { expect, test } from "@playwright/test";
+import { seedAppStorage } from "./helpers/storage";
 
 test.describe("STT performance test page", () => {
   test("uploads one sample and renders mocked Whisper/Chirp timings", async ({
     page,
   }) => {
-    await page.addInitScript(() => {
-      localStorage.clear();
-      localStorage.setItem("advancedMode", "true");
-      localStorage.setItem("mainAccessToken", "e2e-token");
-    });
+    await seedAppStorage(page, { advancedMode: "true" });
 
     await page.route("**/api/audio/stt-performance", async (route) => {
       const body = (route.request().postDataBuffer() ?? Buffer.alloc(0)).toString(
@@ -40,7 +37,7 @@ test.describe("STT performance test page", () => {
       });
     });
 
-    await page.goto("/");
+    await page.goto("./");
     await page.locator("#optionsToggle").click();
     await page.getByRole("button", { name: "Experimental options" }).click();
     await page

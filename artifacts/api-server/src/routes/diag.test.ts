@@ -82,6 +82,34 @@ describe("/diag routes", () => {
     expect(accepted.body.sessionId).toEqual(expect.any(String));
   });
 
+  it("allows boot fallback probes without an access token when diagnostics are enabled", async () => {
+    process.env.NODE_ENV = "production";
+    process.env.ENABLE_DIAG_ROUTES = "true";
+    process.env.DIAG_REQUIRE_AUTH = "true";
+    process.env.DIAG_REQUIRE_ADMIN = "true";
+    process.env.MAIN_ACCESS_TOKEN = "diag-access";
+    process.env.DIAG_ADMIN_TOKEN = "diag-admin";
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("", { status: 200 }),
+    );
+
+    const health = await request(makeApp()).get("/diag/web-health");
+    expect(health.status).toBe(200);
+    expect(health.body).toEqual({ healthy: true, status: 200 });
+
+    const bootFailure = await request(makeApp())
+      .post("/diag/boot-failure")
+      .send({ reason: "timeout", url: "https://x.example/dev/" });
+    expect(bootFailure.status).toBe(200);
+    expect(bootFailure.body).toEqual({ received: true });
+
+    const richWrite = await request(makeApp())
+      .post("/diag/sessions")
+      .send({ source: "test" });
+    expect(richWrite.status).toBe(401);
+    expect(richWrite.body).toEqual({ error: "invalid_access_token" });
+  });
+
   it("requires the diagnostics admin token for production log reads", async () => {
     process.env.NODE_ENV = "production";
     process.env.ENABLE_DIAG_ROUTES = "true";

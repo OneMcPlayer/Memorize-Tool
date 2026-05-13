@@ -70,6 +70,12 @@ interface Evaluation {
   originalIndex: number;
 }
 
+interface RevealedLine {
+  expected: string;
+  originalIndex: number;
+  speaker: string;
+}
+
 interface InteractiveMemorizationViewProps {
   scriptLines: string[];
   extractedLines: ScriptEntry[];
@@ -301,6 +307,8 @@ const InteractiveMemorizationView = ({
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastEvaluation, setLastEvaluation] = useState<Evaluation | null>(null);
+  const [revealModeEnabled, setRevealModeEnabled] = useState(false);
+  const [revealedLine, setRevealedLine] = useState<RevealedLine | null>(null);
   const [results, setResults] = useState({
     totalLines: 0,
     correctLines: 0,
@@ -492,6 +500,10 @@ const InteractiveMemorizationView = ({
     nextUserLine !== null &&
     lastEvaluation.originalIndex === nextUserLine.originalIndex &&
     (lastEvaluation.status === "close" || lastEvaluation.status === "off");
+  const revealedLineActive =
+    revealedLine !== null &&
+    nextUserLine !== null &&
+    revealedLine.originalIndex === nextUserLine.originalIndex;
 
   useEffect(() => {
     if (finished && sequence.length > 0 && !testComplete) {
@@ -500,8 +512,19 @@ const InteractiveMemorizationView = ({
   }, [finished, sequence.length, testComplete]);
 
   useEffect(() => {
+    setRevealedLine(null);
+  }, [cursor]);
+
+  useEffect(() => {
+    if (!isZenModeEnabled || !revealModeEnabled) return;
+    setRevealModeEnabled(false);
+    setRevealedLine(null);
+  }, [isZenModeEnabled, revealModeEnabled]);
+
+  useEffect(() => {
     setCursor(0);
     setLastEvaluation(null);
+    setRevealedLine(null);
     setResults({ totalLines: 0, correctLines: 0, closeLines: 0 });
     setTestComplete(false);
     setError(null);
@@ -564,6 +587,7 @@ const InteractiveMemorizationView = ({
     if (isPlaying || isTranscribing) return;
     if (upcomingNonUserLines.length === 0) return;
     setError(null);
+    setRevealedLine(null);
     hideZenOverlay();
     setIsPlaying(true);
     cancelRef.current = false;
@@ -739,6 +763,7 @@ const InteractiveMemorizationView = ({
     }
     setError(null);
     setLastEvaluation(null);
+    setRevealedLine(null);
     hideZenOverlay();
     try {
       if (!micPermission) {
@@ -1011,6 +1036,7 @@ const InteractiveMemorizationView = ({
     });
     addLineResult(lastEvaluation.status);
     hideZenOverlay();
+    setRevealedLine(null);
     setCursor((prev) => prev + 1);
   }, [
     addLineResult,
@@ -1019,6 +1045,78 @@ const InteractiveMemorizationView = ({
     lastEvaluation,
     retryableEvaluation,
   ]);
+
+  const handleRevealModeChange = useCallback(
+    (enabled: boolean) => {
+      if (isPlaying || isTranscribing || micRecording) return;
+      recordDiagnosticBreadcrumb("live-reveal-mode-changed", {
+        cursor,
+        enabled,
+        scriptKey,
+      });
+      setRevealModeEnabled(enabled);
+      setLastEvaluation(null);
+      setRevealedLine(null);
+      setError(null);
+      hideZenOverlay();
+    },
+    [
+      cursor,
+      hideZenOverlay,
+      isPlaying,
+      isTranscribing,
+      micRecording,
+      scriptKey,
+    ],
+  );
+
+  const handleRevealLine = useCallback(() => {
+    if (
+      !revealModeEnabled ||
+      !userTurn ||
+      !nextUserLine ||
+      isPlaying ||
+      isTranscribing
+    ) {
+      return;
+    }
+    const reveal: RevealedLine = {
+      expected: nextUserLine.line,
+      originalIndex: nextUserLine.originalIndex,
+      speaker: nextUserLine.speaker,
+    };
+    recordDiagnosticBreadcrumb("live-line-revealed", {
+      cursor,
+      lineChars: nextUserLine.line.length,
+      originalIndex: nextUserLine.originalIndex,
+      scriptKey,
+    });
+    setError(null);
+    setLastEvaluation(null);
+    setRevealedLine(reveal);
+    hideZenOverlay();
+  }, [
+    cursor,
+    hideZenOverlay,
+    isPlaying,
+    isTranscribing,
+    nextUserLine,
+    revealModeEnabled,
+    scriptKey,
+    userTurn,
+  ]);
+
+  const handleContinueAfterReveal = useCallback(() => {
+    if (!revealedLineActive || !revealedLine) return;
+    recordDiagnosticBreadcrumb("live-revealed-line-continued", {
+      cursor,
+      originalIndex: revealedLine.originalIndex,
+      scriptKey,
+    });
+    setRevealedLine(null);
+    hideZenOverlay();
+    setCursor((prev) => prev + 1);
+  }, [cursor, hideZenOverlay, revealedLine, revealedLineActive, scriptKey]);
 
   const handleRetryLine = useCallback(async () => {
     if (!retryableEvaluation || !lastEvaluation) return;
@@ -1033,6 +1131,7 @@ const InteractiveMemorizationView = ({
 
   const handleRecordToggle = useCallback(async () => {
     if (isPlaying || isTranscribing) return;
+    if (revealModeEnabled) return;
     if (!userTurn) return;
     if (micRecording) {
       await handleStopRecording();
@@ -1044,6 +1143,7 @@ const InteractiveMemorizationView = ({
     isTranscribing,
     userTurn,
     micRecording,
+    revealModeEnabled,
     handleStartRecording,
     handleStopRecording,
   ]);
@@ -1107,6 +1207,7 @@ const InteractiveMemorizationView = ({
     setSphereSuccessFlash(false);
     setCursor(0);
     setLastEvaluation(null);
+    setRevealedLine(null);
     setResults({ totalLines: 0, correctLines: 0, closeLines: 0 });
     setTestComplete(false);
     setError(null);
@@ -1208,6 +1309,9 @@ const InteractiveMemorizationView = ({
   const recordStopLabel = t.recordStopButton ?? "⏹ Stop & check";
   const retryLineLabel = t.retryLineButton ?? "Try again";
   const continueLineLabel = t.continueLineButton ?? "Continue";
+  const revealLineLabel = t.revealLineButton ?? "Reveal line";
+  const revealModeUnavailable =
+    isPlaying || isTranscribing || micRecording || isZenModeEnabled;
   const retryActionDisabled = isPlaying || isTranscribing || micRecording;
   const retryActions = retryableEvaluation ? (
     <div className="line-retry-actions" data-testid="line-retry-actions">
@@ -1472,6 +1576,29 @@ const InteractiveMemorizationView = ({
           </button>
         )}
         <label
+          className="zen-mode-inline-toggle reveal-mode-inline-toggle"
+          data-testid="reveal-mode-toggle"
+          title={
+            t.revealModeHint ??
+            "Skip recording and reveal your line when it is your turn."
+          }
+        >
+          <span className="zen-mode-inline-toggle__label">
+            {t.revealModeToggle ?? "Reveal Mode"}
+          </span>
+          <input
+            type="checkbox"
+            checked={revealModeEnabled}
+            onChange={(e) => handleRevealModeChange(e.target.checked)}
+            disabled={revealModeUnavailable}
+            data-testid="reveal-mode-toggle-input"
+          />
+          <span
+            className="zen-mode-inline-toggle__switch"
+            aria-hidden="true"
+          />
+        </label>
+        <label
           className="zen-mode-inline-toggle"
           data-testid="zen-mode-inline-toggle"
         >
@@ -1525,10 +1652,27 @@ const InteractiveMemorizationView = ({
             </h3>
             <p className="user-line-hidden">
               <em>
-                {t.userLineHidden ??
-                  "Speak your line, then stop the recording to check it."}
+                {revealModeEnabled
+                  ? (t.userLineHiddenReveal ??
+                    "Press Reveal line to show the correct line.")
+                  : (t.userLineHidden ??
+                    "Speak your line, then stop the recording to check it.")}
               </em>
             </p>
+            {revealedLineActive && revealedLine && (
+              <div
+                className="revealed-user-line"
+                data-testid="revealed-user-line"
+              >
+                <span className="revealed-user-line__label">
+                  {t.revealedLineLabel ?? "Correct line"}
+                </span>
+                <p>
+                  <strong>{revealedLine.speaker}:</strong>{" "}
+                  {revealedLine.expected}
+                </p>
+              </div>
+            )}
           </div>
         ) : null}
 
@@ -1563,28 +1707,45 @@ const InteractiveMemorizationView = ({
         >
           {isPlaying ? (t.playingLabel ?? "Playing...") : playLabel}
         </button>
-        <button
-          className={`record-btn${micRecording ? " recording" : ""}`}
-          onClick={handleRecordToggle}
-          disabled={!userTurn || isPlaying || isTranscribing}
-          data-testid="record-btn"
-        >
-          {isTranscribing
-            ? (t.checkingLabel ?? "Checking...")
-            : micRecording
-              ? recordStopLabel
-              : retryableEvaluation
-                ? retryLineLabel
-                : recordStartLabel}
-        </button>
+        {revealModeEnabled ? (
+          <button
+            className={revealedLineActive ? "next-line-btn" : "reveal-line-btn"}
+            onClick={
+              revealedLineActive ? handleContinueAfterReveal : handleRevealLine
+            }
+            disabled={!userTurn || isPlaying || isTranscribing}
+            data-testid={
+              revealedLineActive ? "reveal-continue-btn" : "reveal-line-btn"
+            }
+          >
+            {revealedLineActive ? continueLineLabel : revealLineLabel}
+          </button>
+        ) : (
+          <button
+            className={`record-btn${micRecording ? " recording" : ""}`}
+            onClick={handleRecordToggle}
+            disabled={!userTurn || isPlaying || isTranscribing}
+            data-testid="record-btn"
+          >
+            {isTranscribing
+              ? (t.checkingLabel ?? "Checking...")
+              : micRecording
+                ? recordStopLabel
+                : retryableEvaluation
+                  ? retryLineLabel
+                  : recordStartLabel}
+          </button>
+        )}
       </div>
 
-      {!micSupported && (
+      {!revealModeEnabled && !micSupported && (
         <p className="mic-status">
           {t.micUnsupported ?? "Microphone not supported in this browser."}
         </p>
       )}
-      {micRecorderError && <p className="mic-error">{micRecorderError}</p>}
+      {!revealModeEnabled && micRecorderError && (
+        <p className="mic-error">{micRecorderError}</p>
+      )}
 
       <div className="navigation-buttons">
         <button onClick={handleRestart} className="restart-btn">

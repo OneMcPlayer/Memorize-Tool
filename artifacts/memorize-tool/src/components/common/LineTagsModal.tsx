@@ -219,10 +219,6 @@ const LineTagsModal: React.FC<LineTagsModalProps> = ({
     }
   };
 
-  const handleBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) onClose();
-  };
-
   const handleClose = () => {
     stopPreview();
     onClose();
@@ -234,7 +230,6 @@ const LineTagsModal: React.FC<LineTagsModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="lineTagsTitle"
-      onClick={handleBackdrop}
       data-testid="line-tags-modal"
     >
       <div className="line-tags-modal__panel">

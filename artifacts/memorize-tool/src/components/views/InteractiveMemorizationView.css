@@ -87,6 +87,29 @@
   font-size: 0.95rem;
 }
 
+.revealed-user-line {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: rgba(67, 160, 71, 0.14);
+  border-left: 3px solid #43a047;
+}
+
+.revealed-user-line__label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text-secondary, #555);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.revealed-user-line p {
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.5;
+}
+
 .evaluation-panel {
   margin-top: 8px;
   padding: 12px 14px;
@@ -908,6 +931,11 @@ body.dark-mode .zen-correction-overlay__inner {
 .zen-mode-inline-toggle input:focus-visible + .zen-mode-inline-toggle__switch {
   outline: 2px solid var(--primary, #4a90e2);
   outline-offset: 2px;
+}
+
+.zen-mode-inline-toggle:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 body.dark-mode .zen-mode-inline-toggle {

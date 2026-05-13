@@ -86,6 +86,12 @@ export const translations: Record<string, Record<string, unknown>> = {
     checkingLabel: "Checking...",
     upcomingLines: "Upcoming lines",
     userLineHidden: "Speak your line, then stop the recording to check it.",
+    revealModeToggle: "Reveal Mode",
+    revealModeHint:
+      "Skip recording and reveal your line when it is your turn.",
+    userLineHiddenReveal: "Press Reveal line to show the correct line.",
+    revealLineButton: "Reveal line",
+    revealedLineLabel: "Correct line",
     transcriptLabel: "Transcript:",
     expectedLabel: "Expected:",
     micUnsupported: "Microphone not supported in this browser.",
@@ -159,6 +165,8 @@ export const translations: Record<string, Record<string, unknown>> = {
     voiceAssignHelp:
       "Experimental — pick a Gemini voice for each character and preview a sample line. Selections are saved on this device, and each (line + voice) is cached on the server so the same preview never re-generates.",
     voiceDefaultOption: "Default (Zephyr)",
+    voiceGenderFemale: "female",
+    voiceGenderMale: "male",
     voiceSampleButton: "Sample",
     voiceShuffleTitle: "Try another line",
     voiceNoSample: "No sample available for this character.",
@@ -365,6 +373,12 @@ export const translations: Record<string, Record<string, unknown>> = {
     upcomingLines: "Prossime battute",
     userLineHidden:
       "Recita la tua battuta, poi ferma la registrazione per controllarla.",
+    revealModeToggle: "Modalità rivela",
+    revealModeHint:
+      "Salta la registrazione e mostra la tua battuta quando tocca a te.",
+    userLineHiddenReveal: "Premi Mostra battuta per vedere la battuta corretta.",
+    revealLineButton: "Mostra battuta",
+    revealedLineLabel: "Battuta corretta",
     transcriptLabel: "Trascrizione:",
     expectedLabel: "Atteso:",
     micUnsupported: "Microfono non supportato in questo browser.",
@@ -439,6 +453,8 @@ export const translations: Record<string, Record<string, unknown>> = {
     voiceAssignHelp:
       "Sperimentale — scegli una voce Gemini per ogni personaggio e ascolta una battuta di esempio. Le scelte vengono salvate su questo dispositivo e ogni combinazione (battuta + voce) è memorizzata sul server, così la stessa anteprima non viene mai rigenerata.",
     voiceDefaultOption: "Predefinita (Zephyr)",
+    voiceGenderFemale: "femminile",
+    voiceGenderMale: "maschile",
     voiceSampleButton: "Ascolta",
     voiceShuffleTitle: "Prova un'altra battuta",
     voiceNoSample: "Nessuna battuta disponibile per questo personaggio.",

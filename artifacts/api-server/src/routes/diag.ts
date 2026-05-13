@@ -61,8 +61,14 @@ function constantTimeEqual(a: Buffer, b: Buffer): boolean {
 function isAdminReadRequest(req: Request): boolean {
   return (
     req.method === "GET" &&
-    (req.path === "/diag/web-health" ||
-      /^\/diag\/sessions\/[^/]+\/logs$/.test(req.path))
+    /^\/diag\/sessions\/[^/]+\/logs$/.test(req.path)
+  );
+}
+
+function isBootFallbackRequest(req: Request): boolean {
+  return (
+    (req.method === "GET" && req.path === "/diag/web-health") ||
+    (req.method === "POST" && req.path === "/diag/boot-failure")
   );
 }
 
@@ -92,6 +98,15 @@ function requireDiagnosticAdminToken(
 router.use((req, res, next): void => {
   if (!areDiagnosticRoutesEnabled()) {
     res.status(404).json({ error: "not_found" });
+    return;
+  }
+
+  // The static HTML boot fallback runs before the React app and before any
+  // access token flow. Keep this minimal probe/report path public so failed
+  // boots can recover and leave useful diagnostics, while richer logs stay
+  // behind the normal access/admin gates below.
+  if (isBootFallbackRequest(req)) {
+    next();
     return;
   }
 

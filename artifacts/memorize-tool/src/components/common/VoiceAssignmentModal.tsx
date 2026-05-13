@@ -3,6 +3,7 @@ import { useAppContext } from "../../context/AppContext";
 import { translations } from "../../data/translations";
 import {
   GEMINI_VOICES,
+  DEFAULT_GEMINI_VOICE,
   DEFAULT_VOICE_ID,
   pickSampleLinesForCharacter,
   getAllLinesForCharacter,
@@ -216,8 +217,26 @@ const VoiceAssignmentModal: React.FC<VoiceAssignmentModalProps> = ({
     setVoiceAssignment(character, value === "" ? null : value);
   };
 
+  const genderLabel = (gender: "female" | "male"): string =>
+    gender === "female"
+      ? (t.voiceGenderFemale ?? "female")
+      : (t.voiceGenderMale ?? "male");
+
+  const formatVoiceLabel = (voice: (typeof GEMINI_VOICES)[number]): string =>
+    `${voice.id} [${genderLabel(voice.gender)}] — ${voice.hint}`;
+
+  const defaultVoiceLabel = `${
+    t.voiceDefaultOption ?? `Default (${DEFAULT_VOICE_ID})`
+  } [${genderLabel(DEFAULT_GEMINI_VOICE.gender)}]`;
+
   return (
-    <div className="voice-modal-overlay" role="dialog" aria-modal="true" onClick={onClose}>
+    <div
+      className="voice-modal-overlay"
+      role="dialog"
+      aria-modal="true"
+      onClick={onClose}
+      data-testid="voice-assignment-modal"
+    >
       <div className="voice-modal" onClick={(e) => e.stopPropagation()}>
         <div className="voice-modal-header">
           <h2>
@@ -274,13 +293,14 @@ const VoiceAssignmentModal: React.FC<VoiceAssignmentModalProps> = ({
                         value={assigned}
                         onChange={(e) => handleVoiceChange(character, e.target.value)}
                         aria-label={`Voice for ${character}`}
+                        data-testid={`voice-select-${character}`}
                       >
                         <option value="">
-                          {t.voiceDefaultOption ?? `Default (${DEFAULT_VOICE_ID})`}
+                          {defaultVoiceLabel}
                         </option>
                         {GEMINI_VOICES.map((v) => (
                           <option key={v.id} value={v.id}>
-                            {v.id} — {v.hint}
+                            {formatVoiceLabel(v)}
                           </option>
                         ))}
                       </select>

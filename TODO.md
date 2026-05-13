@@ -35,10 +35,10 @@ important decision or result to `HISTORY.md`.
     ended/error element timing, and only advances by played lines.
   - Goal: confirm whether this removes later-sequence `NotAllowedError`
     playback failures and the observed half-line/reload symptom.
-- [ ] Re-test the `PROCESSO AL POTERE` `seduce.` cue on iPhone Safari.
-  - Current mitigation: the bundled line was disambiguated as lowercase
-    `seduce.`, invalid 44-byte TTS responses are ignored/retried by the API,
-    and the frontend refuses tiny TTS blobs before playback.
+- [ ] Re-test the `PROCESSO AL POTERE` `[letteralmente] seduce` cue on iPhone Safari.
+  - Current mitigation: the bundled line was disambiguated with
+    `[letteralmente] seduce`, invalid 44-byte TTS responses are ignored/retried
+    by the API, and the frontend refuses tiny TTS blobs before playback.
   - Goal: confirm the cue is spoken as the Italian line and no longer causes a
     media decode error or navigation reset.
 
@@ -95,9 +95,10 @@ important decision or result to `HISTORY.md`.
 
 - [ ] Complete feature audit against the old `main`, `dev`, TMP, and
       Code-Memorize target versions.
-- [ ] Explore a fast reveal-only practice mode.
-  - Intended behavior: outside Zen mode, play partner TTS faster, skip user
-    recording, and show a button to reveal the correct user line.
+- [x] Add a reveal-only Live mode.
+  - Result: outside Zen mode, classic Live mode can skip user recording/STT and
+    reveal the correct user line from a button before continuing.
+- [ ] Decide whether reveal-only Live mode also needs faster partner TTS.
 - [x] Decide the production deployment shape.
   - Result: use Caddy on `epicserver.vpsgh.it`, route production at `/`, and
     route staging at `/dev/` with separate localhost ports and data stores.

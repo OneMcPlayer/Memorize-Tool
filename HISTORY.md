@@ -37,14 +37,36 @@ Changes and decisions:
     persistent invalid audio returns a controlled backend error instead of a
     44-byte WAV that Safari cannot decode.
   - The frontend now rejects tiny TTS blobs before calling the media decoder.
-  - The bundled `PROCESSO AL POTERE` cue `Seduce` was changed to `seduce.` to
-    disambiguate the Italian word from an English imperative for TTS.
+  - The bundled `PROCESSO AL POTERE` cue `Seduce` was changed to
+    `[letteralmente] seduce` to disambiguate the Italian word from an English
+    imperative for TTS.
 - Added retry controls for wrong spoken Live mode lines.
   - After a `close` or `off` result, Live mode keeps the same user line active
     and offers retry/continue actions instead of advancing immediately.
   - Correct retries replace the failed attempt in the practice flow; continuing
     records the close/off result and advances.
   - E2E video artifact: `artifacts/videos/live-retry-wrong-line-e2e.webm`.
+- Added reveal-only classic Live mode.
+  - Reason: a faster rehearsal pass can be useful when the user wants to hear
+    the scene partners, reveal their own line, and continue without spending
+    time on microphone capture or STT matching.
+  - Behavior: outside Zen mode, a `Reveal Mode` toggle replaces the record
+    action with reveal/continue buttons. Partner TTS speed is unchanged for now.
+  - E2E coverage verifies that revealing a line does not call the STT endpoint.
+- Kept boot fallback diagnostics available before login.
+  - Evidence: a PC test reached the static boot fallback and repeatedly hit
+    `/dev/api/diag/web-health`, but the API returned `401`, so no boot-failure
+    report was stored.
+  - Behavior: when diagnostic routes are enabled, `/diag/web-health` and
+    `/diag/boot-failure` no longer require the normal access token. Rich
+    diagnostic sessions, uploads, and log reads remain gated.
+- Added gender labels to Gemini voice assignment options.
+  - Reason: choosing scene-partner voices is faster when each Gemini voice
+    option shows whether Google classifies it as male or female.
+  - Behavior: the saved voice IDs are unchanged; only the picker labels now
+    include `[male]` or `[female]` in the current UI language.
+  - E2E coverage verifies the picker against the VPS `/dev/` base path, with
+    scoped access/passkey storage seeded the same way the app reads it.
 - Prepared safer VPS production defaults for the Caddy deployment shape.
   - API and Vite dev/preview servers now honor `HOST`; VPS run scripts default
     both services to `127.0.0.1` unless explicitly overridden.
