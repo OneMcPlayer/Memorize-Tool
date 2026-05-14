@@ -98,6 +98,10 @@ important decision or result to `HISTORY.md`.
 - [x] Add a reveal-only Live mode.
   - Result: outside Zen mode, classic Live mode can skip user recording/STT and
     reveal the correct user line from a button before continuing.
+- [ ] Test hands-free car mode on iPhone Safari.
+  - Current implementation: experimental option plus Reveal Mode waits based on
+    user-line length, plays the correct line with cached TTS, beeps, advances,
+    and continues without STT.
 - [ ] Decide whether reveal-only Live mode also needs faster partner TTS.
 - [x] Decide the production deployment shape.
   - Result: use Caddy on `epicserver.vpsgh.it`, route production at `/`, and

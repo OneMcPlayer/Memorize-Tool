@@ -39,6 +39,11 @@ const MIN_STT_CAPTURE_BYTES = 1024;
 const MIN_STT_CAPTURE_DURATION_MS = 250;
 const LIVE_STT_LANGUAGE = "it";
 const TTS_PRELOAD_LOOKAHEAD = 5;
+const CAR_MODE_MIN_WAIT_MS = 2500;
+const CAR_MODE_MAX_WAIT_MS = 12000;
+const CAR_MODE_WORD_WAIT_MS = 650;
+const CAR_MODE_CHAR_WAIT_MS = 28;
+const CAR_MODE_BEEP_DURATION_MS = 180;
 
 import { showToast } from "../../utils";
 import useMicrophoneRecorder, {
@@ -169,6 +174,66 @@ const evaluateMatch = (
   return evaluateComparableTextMatch(expected, actual);
 };
 
+const estimateCarModeWaitMs = (line: string): number => {
+  const clean = line
+    .replace(/\[[^\]]*]/g, " ")
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  const words = clean ? clean.split(/\s+/).length : 0;
+  const chars = clean.length;
+  const estimated = Math.max(
+    words * CAR_MODE_WORD_WAIT_MS,
+    chars * CAR_MODE_CHAR_WAIT_MS,
+  );
+  return Math.round(
+    Math.min(
+      CAR_MODE_MAX_WAIT_MS,
+      Math.max(CAR_MODE_MIN_WAIT_MS, estimated),
+    ),
+  );
+};
+
+const buildCarModeBeepBlob = (): Blob => {
+  const sampleRate = 16000;
+  const samples = Math.max(
+    1,
+    Math.round((CAR_MODE_BEEP_DURATION_MS / 1000) * sampleRate),
+  );
+  const dataBytes = samples * 2;
+  const bytes = new Uint8Array(44 + dataBytes);
+  const view = new DataView(bytes.buffer);
+  const writeAscii = (offset: number, value: string) => {
+    for (let i = 0; i < value.length; i += 1) {
+      bytes[offset + i] = value.charCodeAt(i);
+    }
+  };
+
+  writeAscii(0, "RIFF");
+  view.setUint32(4, 36 + dataBytes, true);
+  writeAscii(8, "WAVE");
+  writeAscii(12, "fmt ");
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true);
+  view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true);
+  writeAscii(36, "data");
+  view.setUint32(40, dataBytes, true);
+
+  const frequency = 880;
+  for (let i = 0; i < samples; i += 1) {
+    const t = i / sampleRate;
+    const fade = Math.min(i / 160, (samples - i) / 160, 1);
+    const sample = Math.sin(2 * Math.PI * frequency * t) * 0.38 * fade;
+    view.setInt16(44 + i * 2, Math.round(sample * 32767), true);
+  }
+
+  return new Blob([bytes], { type: "audio/wav" });
+};
+
 const diagnosticNow = (): number =>
   typeof performance !== "undefined" ? performance.now() : Date.now();
 
@@ -208,8 +273,12 @@ const InteractiveMemorizationView = ({
   scriptId,
 }: InteractiveMemorizationViewProps) => {
   const t = (translations[currentLang] ?? {}) as Record<string, string>;
-  const { isZenModeEnabled, setZenModeEnabled, voiceAssignments } =
-    useAppContext();
+  const {
+    isCarModeEnabled,
+    isZenModeEnabled,
+    setZenModeEnabled,
+    voiceAssignments,
+  } = useAppContext();
   const { isAuthenticated } = useAuth();
   const [lineTags, setLineTags] = useState<LineTagsMap>({});
   const [lineTagsMaxLength, setLineTagsMaxLength] = useState<number>(2000);
@@ -309,6 +378,8 @@ const InteractiveMemorizationView = ({
   const [lastEvaluation, setLastEvaluation] = useState<Evaluation | null>(null);
   const [revealModeEnabled, setRevealModeEnabled] = useState(false);
   const [revealedLine, setRevealedLine] = useState<RevealedLine | null>(null);
+  const [carModeActive, setCarModeActive] = useState(false);
+  const [carModeWaiting, setCarModeWaiting] = useState(false);
   const [results, setResults] = useState({
     totalLines: 0,
     correctLines: 0,
@@ -324,6 +395,7 @@ const InteractiveMemorizationView = ({
   const isMountedRef = useRef(true);
   const zenFadeTimerRef = useRef<number | null>(null);
   const successFlashTimerRef = useRef<number | null>(null);
+  const carModeTimerRef = useRef<number | null>(null);
   const ttsPreloadAttemptedRef = useRef<Set<string>>(new Set());
 
   useEffect(
@@ -399,6 +471,9 @@ const InteractiveMemorizationView = ({
     return items;
   }, [sequence, cursor]);
 
+  const carModeRevealEnabled =
+    revealModeEnabled && isCarModeEnabled && !isZenModeEnabled;
+
   const ttsPreloadCandidates = useMemo(() => {
     const items: SequenceItem[] = [];
     for (
@@ -406,12 +481,12 @@ const InteractiveMemorizationView = ({
       i < sequence.length && items.length < TTS_PRELOAD_LOOKAHEAD;
       i += 1
     ) {
-      if (!sequence[i].isUserLine) {
+      if (!sequence[i].isUserLine || carModeRevealEnabled) {
         items.push(sequence[i]);
       }
     }
     return items;
-  }, [sequence, cursor]);
+  }, [carModeRevealEnabled, sequence, cursor]);
 
   const buildTtsRequest = useCallback(
     (item: SequenceItem): { options: { voice?: string }; text: string } => {
@@ -515,21 +590,6 @@ const InteractiveMemorizationView = ({
     setRevealedLine(null);
   }, [cursor]);
 
-  useEffect(() => {
-    if (!isZenModeEnabled || !revealModeEnabled) return;
-    setRevealModeEnabled(false);
-    setRevealedLine(null);
-  }, [isZenModeEnabled, revealModeEnabled]);
-
-  useEffect(() => {
-    setCursor(0);
-    setLastEvaluation(null);
-    setRevealedLine(null);
-    setResults({ totalLines: 0, correctLines: 0, closeLines: 0 });
-    setTestComplete(false);
-    setError(null);
-  }, [sequence]);
-
   // Zen overlay auto-fade lifecycle
   const clearZenFadeTimer = useCallback(() => {
     if (zenFadeTimerRef.current !== null) {
@@ -545,6 +605,14 @@ const InteractiveMemorizationView = ({
     }
   }, []);
 
+  const clearCarModeTimer = useCallback(() => {
+    if (carModeTimerRef.current !== null) {
+      window.clearTimeout(carModeTimerRef.current);
+      carModeTimerRef.current = null;
+    }
+    setCarModeWaiting(false);
+  }, []);
+
   const triggerSuccessFlash = useCallback(() => {
     clearSuccessFlashTimer();
     setSphereSuccessFlash(true);
@@ -558,9 +626,29 @@ const InteractiveMemorizationView = ({
     () => () => {
       clearZenFadeTimer();
       clearSuccessFlashTimer();
+      clearCarModeTimer();
     },
-    [clearZenFadeTimer, clearSuccessFlashTimer],
+    [clearCarModeTimer, clearZenFadeTimer, clearSuccessFlashTimer],
   );
+
+  useEffect(() => {
+    if (!isZenModeEnabled || !revealModeEnabled) return;
+    setRevealModeEnabled(false);
+    setRevealedLine(null);
+    setCarModeActive(false);
+    clearCarModeTimer();
+  }, [clearCarModeTimer, isZenModeEnabled, revealModeEnabled]);
+
+  useEffect(() => {
+    clearCarModeTimer();
+    setCursor(0);
+    setLastEvaluation(null);
+    setRevealedLine(null);
+    setCarModeActive(false);
+    setResults({ totalLines: 0, correctLines: 0, closeLines: 0 });
+    setTestComplete(false);
+    setError(null);
+  }, [clearCarModeTimer, sequence]);
 
   const showZenOverlay = useCallback(() => {
     clearZenFadeTimer();
@@ -1054,6 +1142,8 @@ const InteractiveMemorizationView = ({
         enabled,
         scriptKey,
       });
+      clearCarModeTimer();
+      setCarModeActive(false);
       setRevealModeEnabled(enabled);
       setLastEvaluation(null);
       setRevealedLine(null);
@@ -1061,6 +1151,7 @@ const InteractiveMemorizationView = ({
       hideZenOverlay();
     },
     [
+      clearCarModeTimer,
       cursor,
       hideZenOverlay,
       isPlaying,
@@ -1118,6 +1209,212 @@ const InteractiveMemorizationView = ({
     setCursor((prev) => prev + 1);
   }, [cursor, hideZenOverlay, revealedLine, revealedLineActive, scriptKey]);
 
+  const handleStopCarMode = useCallback(
+    (reason = "manual-stop") => {
+      recordDiagnosticBreadcrumb("car-mode-stopped", {
+        cursor,
+        reason,
+        scriptKey,
+      });
+      clearCarModeTimer();
+      setCarModeActive(false);
+      setRevealedLine(null);
+      cancelRef.current = true;
+      openaiService.stopAudio("Car mode stopped");
+      setIsPlaying(false);
+      setNowSpeakingIndex(null);
+    },
+    [clearCarModeTimer, cursor, scriptKey],
+  );
+
+  const playCarModeUserLine = useCallback(async () => {
+    if (
+      !carModeRevealEnabled ||
+      !carModeActive ||
+      !userTurn ||
+      !nextUserLine ||
+      isPlaying ||
+      isTranscribing
+    ) {
+      return;
+    }
+
+    clearCarModeTimer();
+    setError(null);
+    setLastEvaluation(null);
+    hideZenOverlay();
+    setIsPlaying(true);
+    cancelRef.current = false;
+
+    const reveal: RevealedLine = {
+      expected: nextUserLine.line,
+      originalIndex: nextUserLine.originalIndex,
+      speaker: nextUserLine.speaker,
+    };
+    const lineStartedAt = diagnosticNow();
+    const { options: ttsOpts, text: ttsText } = buildTtsRequest(nextUserLine);
+    setRevealedLine(reveal);
+    recordDiagnosticBreadcrumb("car-mode-user-line-started", {
+      hasAssignedVoice: Boolean(ttsOpts.voice),
+      lineLength: nextUserLine.line.length,
+      originalIndex: nextUserLine.originalIndex,
+      scriptKey,
+      voice: ttsOpts.voice ?? null,
+    });
+
+    try {
+      const audioBlob = await openaiService.textToSpeech(ttsText, ttsOpts);
+      if (cancelRef.current) return;
+      recordDiagnosticBreadcrumb("car-mode-user-line-ready", {
+        elapsedMs: diagnosticElapsed(lineStartedAt),
+        generatedBytes: audioBlob.size,
+        mimeType: audioBlob.type || "unknown",
+        originalIndex: nextUserLine.originalIndex,
+      });
+
+      await openaiService.playAudio(audioBlob, { volume: 1 });
+      if (cancelRef.current) return;
+
+      const beepBlob = buildCarModeBeepBlob();
+      await openaiService.playAudio(beepBlob, { volume: 0.65 });
+      if (cancelRef.current) return;
+
+      recordDiagnosticBreadcrumb("car-mode-user-line-completed", {
+        elapsedMs: diagnosticElapsed(lineStartedAt),
+        originalIndex: nextUserLine.originalIndex,
+      });
+      if (isMountedRef.current) {
+        setRevealedLine(null);
+        setCursor((prev) => prev + 1);
+      }
+    } catch (err) {
+      if (cancelRef.current && isExpectedTtsCancellation(err)) {
+        recordDiagnosticBreadcrumb("car-mode-user-line-cancelled", {
+          elapsedMs: diagnosticElapsed(lineStartedAt),
+          originalIndex: nextUserLine.originalIndex,
+          message: err instanceof Error ? err.message : String(err),
+        });
+        return;
+      }
+      const friendly = friendlyTtsError(err, t);
+      recordDiagnosticBreadcrumb(
+        "car-mode-user-line-failed",
+        {
+          elapsedMs: diagnosticElapsed(lineStartedAt),
+          message: friendly,
+          originalIndex: nextUserLine.originalIndex,
+          scriptKey,
+        },
+        "error",
+      );
+      captureDiagnostic({
+        error: err,
+        extras: {
+          cursor,
+          originalIndex: nextUserLine.originalIndex,
+          scriptKey,
+        },
+        severity: "error",
+        type: "car-mode-tts-error",
+      });
+      if (isMountedRef.current) {
+        setError(friendly);
+        showToast(friendly, 5000, "error");
+        setCarModeActive(false);
+        setRevealedLine(null);
+      }
+    } finally {
+      if (isMountedRef.current) {
+        setIsPlaying(false);
+        setNowSpeakingIndex(null);
+      }
+    }
+  }, [
+    buildTtsRequest,
+    carModeActive,
+    carModeRevealEnabled,
+    clearCarModeTimer,
+    cursor,
+    hideZenOverlay,
+    isPlaying,
+    isTranscribing,
+    nextUserLine,
+    scriptKey,
+    t,
+    userTurn,
+  ]);
+
+  useEffect(() => {
+    if (!carModeActive || carModeRevealEnabled) return;
+    handleStopCarMode("mode-disabled");
+  }, [carModeActive, carModeRevealEnabled, handleStopCarMode]);
+
+  useEffect(() => {
+    if (!carModeActive || !carModeRevealEnabled || testComplete) return;
+    if (isPlaying || isTranscribing || userTurn) return;
+    if (upcomingNonUserLines.length === 0) return;
+    const timeoutId = window.setTimeout(() => {
+      void handlePlayNext();
+    }, 250);
+    return () => window.clearTimeout(timeoutId);
+  }, [
+    carModeActive,
+    carModeRevealEnabled,
+    handlePlayNext,
+    isPlaying,
+    isTranscribing,
+    testComplete,
+    upcomingNonUserLines.length,
+    userTurn,
+  ]);
+
+  useEffect(() => {
+    if (
+      !carModeActive ||
+      !carModeRevealEnabled ||
+      !userTurn ||
+      !nextUserLine ||
+      revealedLineActive ||
+      isPlaying ||
+      isTranscribing ||
+      testComplete
+    ) {
+      return;
+    }
+
+    const waitMs = estimateCarModeWaitMs(nextUserLine.line);
+    clearCarModeTimer();
+    setCarModeWaiting(true);
+    recordDiagnosticBreadcrumb("car-mode-user-line-wait-started", {
+      cursor,
+      lineLength: nextUserLine.line.length,
+      originalIndex: nextUserLine.originalIndex,
+      scriptKey,
+      waitMs,
+    });
+    carModeTimerRef.current = window.setTimeout(() => {
+      carModeTimerRef.current = null;
+      void playCarModeUserLine();
+    }, waitMs);
+
+    return () => {
+      clearCarModeTimer();
+    };
+  }, [
+    carModeActive,
+    carModeRevealEnabled,
+    clearCarModeTimer,
+    cursor,
+    isPlaying,
+    isTranscribing,
+    nextUserLine,
+    playCarModeUserLine,
+    revealedLineActive,
+    scriptKey,
+    testComplete,
+    userTurn,
+  ]);
+
   const handleRetryLine = useCallback(async () => {
     if (!retryableEvaluation || !lastEvaluation) return;
     recordDiagnosticBreadcrumb("line-evaluation-retry-requested", {
@@ -1146,6 +1443,51 @@ const InteractiveMemorizationView = ({
     revealModeEnabled,
     handleStartRecording,
     handleStopRecording,
+  ]);
+
+  const handlePlayNextClick = useCallback(async () => {
+    if (carModeRevealEnabled) {
+      recordDiagnosticBreadcrumb("car-mode-started", {
+        cursor,
+        scriptKey,
+        userTurn,
+      });
+      setRevealedLine(null);
+      setCarModeActive(true);
+      if (upcomingNonUserLines.length === 0 && userTurn) {
+        const primeStartedAt = diagnosticNow();
+        try {
+          const primed = await openaiService.primeAudioPlayback();
+          recordDiagnosticBreadcrumb(
+            "car-mode-playback-primed",
+            {
+              elapsedMs: diagnosticElapsed(primeStartedAt),
+              primed,
+            },
+            primed ? "info" : "warn",
+          );
+        } catch (err) {
+          recordDiagnosticBreadcrumb(
+            "car-mode-playback-prime-failed",
+            {
+              elapsedMs: diagnosticElapsed(primeStartedAt),
+              message: err instanceof Error ? err.message : String(err),
+            },
+            "warn",
+          );
+        }
+      }
+    }
+    if (upcomingNonUserLines.length > 0) {
+      await handlePlayNext();
+    }
+  }, [
+    carModeRevealEnabled,
+    cursor,
+    handlePlayNext,
+    scriptKey,
+    upcomingNonUserLines.length,
+    userTurn,
   ]);
 
   const handleCopyDebugReport = useCallback(async () => {
@@ -1202,17 +1544,20 @@ const InteractiveMemorizationView = ({
     cancelRecording();
     cancelRef.current = true;
     openaiService.stopAudio("Live playback restarted");
+    clearCarModeTimer();
     hideZenOverlay();
     clearSuccessFlashTimer();
     setSphereSuccessFlash(false);
     setCursor(0);
     setLastEvaluation(null);
     setRevealedLine(null);
+    setCarModeActive(false);
     setResults({ totalLines: 0, correctLines: 0, closeLines: 0 });
     setTestComplete(false);
     setError(null);
   }, [
     cancelRecording,
+    clearCarModeTimer,
     clearSuccessFlashTimer,
     cursor,
     hideZenOverlay,
@@ -1231,10 +1576,13 @@ const InteractiveMemorizationView = ({
     cancelRecording();
     cancelRef.current = true;
     openaiService.stopAudio("Live view left");
+    clearCarModeTimer();
+    setCarModeActive(false);
     hideZenOverlay();
     onBack();
   }, [
     cancelRecording,
+    clearCarModeTimer,
     cursor,
     hideZenOverlay,
     onBack,
@@ -1310,8 +1658,26 @@ const InteractiveMemorizationView = ({
   const retryLineLabel = t.retryLineButton ?? "Try again";
   const continueLineLabel = t.continueLineButton ?? "Continue";
   const revealLineLabel = t.revealLineButton ?? "Reveal line";
+  const carModeStartLabel = t.carModeStartButton ?? "Start car mode";
+  const carModeRunningLabel = t.carModeRunningButton ?? "Car mode running";
+  const carModeWaitingLabel =
+    t.carModeWaitingButton ?? "Waiting for your line...";
+  const carModeStopLabel = t.carModeStopButton ?? "Stop car mode";
   const revealModeUnavailable =
     isPlaying || isTranscribing || micRecording || isZenModeEnabled;
+  const playNextDisabled =
+    isPlaying ||
+    isTranscribing ||
+    (carModeRevealEnabled && carModeActive) ||
+    (upcomingNonUserLines.length === 0 &&
+      !(carModeRevealEnabled && userTurn && !carModeActive));
+  const playNextButtonLabel = isPlaying
+    ? (t.playingLabel ?? "Playing...")
+    : carModeRevealEnabled
+      ? carModeActive
+        ? carModeRunningLabel
+        : carModeStartLabel
+      : playLabel;
   const retryActionDisabled = isPlaying || isTranscribing || micRecording;
   const retryActions = retryableEvaluation ? (
     <div className="line-retry-actions" data-testid="line-retry-actions">
@@ -1652,13 +2018,25 @@ const InteractiveMemorizationView = ({
             </h3>
             <p className="user-line-hidden">
               <em>
-                {revealModeEnabled
+                {carModeRevealEnabled
+                  ? (t.userLineHiddenCarMode ??
+                    "Hands-free: say your line during the pause, then listen to the correction.")
+                  : revealModeEnabled
                   ? (t.userLineHiddenReveal ??
                     "Press Reveal line to show the correct line.")
                   : (t.userLineHidden ??
                     "Speak your line, then stop the recording to check it.")}
               </em>
             </p>
+            {carModeRevealEnabled && carModeActive && userTurn && (
+              <div
+                className="car-mode-status"
+                data-testid="car-mode-status"
+                aria-live="polite"
+              >
+                {carModeWaiting ? carModeWaitingLabel : carModeRunningLabel}
+              </div>
+            )}
             {revealedLineActive && revealedLine && (
               <div
                 className="revealed-user-line"
@@ -1699,15 +2077,22 @@ const InteractiveMemorizationView = ({
       <div className="live-controls" data-testid="live-controls">
         <button
           className="play-next-btn"
-          onClick={handlePlayNext}
-          disabled={
-            isPlaying || isTranscribing || upcomingNonUserLines.length === 0
-          }
+          onClick={handlePlayNextClick}
+          disabled={playNextDisabled}
           data-testid="play-next-btn"
         >
-          {isPlaying ? (t.playingLabel ?? "Playing...") : playLabel}
+          {playNextButtonLabel}
         </button>
-        {revealModeEnabled ? (
+        {carModeRevealEnabled ? (
+          <button
+            className="next-line-btn car-mode-stop-btn"
+            onClick={() => handleStopCarMode("manual-stop")}
+            disabled={!carModeActive}
+            data-testid="car-mode-stop-btn"
+          >
+            {carModeStopLabel}
+          </button>
+        ) : revealModeEnabled ? (
           <button
             className={revealedLineActive ? "next-line-btn" : "reveal-line-btn"}
             onClick={

@@ -25,6 +25,8 @@ function appContextDefaults(overrides: Partial<Record<string, unknown>> = {}) {
     setCustomScriptInputEnabled: vi.fn(),
     isLoginEnabled: false,
     setLoginEnabled: vi.fn(),
+    isCarModeEnabled: false,
+    setCarModeEnabled: vi.fn(),
     ...overrides,
   };
 }

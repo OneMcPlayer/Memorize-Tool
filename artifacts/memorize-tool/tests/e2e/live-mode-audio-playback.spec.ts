@@ -121,6 +121,81 @@ test.describe("Live mode audio playback", () => {
     expect(sttRequests).toBe(0);
   });
 
+  test("car mode automatically plays the revealed user line without STT", async ({
+    page,
+  }) => {
+    let sttRequests = 0;
+    const spokenTtsRequests: string[] = [];
+
+    await seedAppStorage(page, {
+      advancedMode: "true",
+      carModeEnabled: "true",
+    });
+
+    await page.route("**/api/tts/speech", async (route) => {
+      const body = JSON.parse(route.request().postData() ?? "{}") as {
+        cacheOnly?: boolean;
+        text?: string;
+      };
+      if (body.cacheOnly) {
+        await route.fulfill({ status: 204 });
+        return;
+      }
+      spokenTtsRequests.push(body.text ?? "");
+      await route.fulfill({
+        body: silentWav(900),
+        contentType: "audio/wav",
+        headers: {
+          "Cache-Control": "no-store",
+          "X-TTS-Cache-Status": "MISS",
+        },
+      });
+    });
+
+    await page.route("**/api/audio/transcriptions", async (route) => {
+      sttRequests += 1;
+      await route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({ text: "should not be used" }),
+      });
+    });
+
+    await page.goto("./");
+    await page.locator("#scriptLibrary").selectOption("finale-di-partita");
+    const characterSelect = page.locator("#characterSelect");
+    await expect(characterSelect).toBeVisible();
+    await characterSelect
+      .selectOption({ label: "HAMM" })
+      .catch(async () => characterSelect.selectOption({ index: 1 }));
+    await page.locator("#memorizationButton").click();
+
+    const startPractice = page
+      .getByRole("button", { name: /start practice|inizia/i })
+      .first();
+    if (await startPractice.isVisible().catch(() => false)) {
+      await startPractice.click();
+    }
+
+    await page.getByTestId("reveal-mode-toggle-input").check({ force: true });
+    await expect(page.getByTestId("reveal-line-btn")).toHaveCount(0);
+    await expect(page.getByTestId("car-mode-stop-btn")).toBeDisabled();
+
+    await page.getByTestId("play-next-btn").click();
+    await expect(page.getByTestId("car-mode-stop-btn")).toBeEnabled();
+    await expect(page.getByTestId("car-mode-status")).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(page.getByTestId("revealed-user-line")).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(page.getByTestId("revealed-user-line")).toHaveCount(0, {
+      timeout: 15_000,
+    });
+
+    expect(sttRequests).toBe(0);
+    expect(spokenTtsRequests.length).toBeGreaterThanOrEqual(2);
+  });
+
   test("keeps the cue tag editor open when the backdrop is clicked", async ({
     page,
   }) => {

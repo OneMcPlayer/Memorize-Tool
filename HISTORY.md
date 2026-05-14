@@ -53,6 +53,17 @@ Changes and decisions:
   - Behavior: outside Zen mode, a `Reveal Mode` toggle replaces the record
     action with reveal/continue buttons. Partner TTS speed is unchanged for now.
   - E2E coverage verifies that revealing a line does not call the STT endpoint.
+- Added experimental hands-free car mode for Reveal Mode.
+  - Reason: car practice should be possible after one start tap, without
+    watching the phone or tapping reveal/continue for each user line.
+  - Behavior: when the experimental option is enabled, Reveal Mode waits based
+    on the user line length, plays the correct user line through the normal TTS
+    cache path, plays a short local beep, advances, and continues the scene.
+  - Existing cache-only Live mode preloading now includes upcoming user lines
+    while car mode is active.
+  - iPhone Safari testing showed the first delayed user-line playback can be
+    rejected if car mode starts directly on a user line, so the start tap now
+    primes the reusable audio element before the hands-free wait begins.
 - Kept boot fallback diagnostics available before login.
   - Evidence: a PC test reached the static boot fallback and repeatedly hit
     `/dev/api/diag/web-health`, but the API returned `401`, so no boot-failure

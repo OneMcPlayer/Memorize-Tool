@@ -32,6 +32,8 @@ const Header = ({
     setLoginEnabled,
     isCopyButtonEnabled,
     setCopyButtonEnabled,
+    isCarModeEnabled,
+    setCarModeEnabled,
   } = useAppContext();
   const { isAuthenticated } = useAuth();
   const [optionsVisible, setOptionsVisible] = useState(false);
@@ -303,6 +305,20 @@ const Header = ({
                       className="options-modal__switch"
                       checked={isCopyButtonEnabled}
                       onChange={(e) => setCopyButtonEnabled(e.target.checked)}
+                    />
+                  </label>
+
+                  <label className="options-modal__row" id="optionCarMode">
+                    <span className="options-modal__row-label">
+                      {(t.carModeEnabled as string) ||
+                        "Car mode for Reveal Mode"}
+                    </span>
+                    <input
+                      type="checkbox"
+                      id="carModeToggle"
+                      className="options-modal__switch"
+                      checked={isCarModeEnabled}
+                      onChange={(e) => setCarModeEnabled(e.target.checked)}
                     />
                   </label>
 

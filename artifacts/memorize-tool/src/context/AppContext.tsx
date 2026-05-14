@@ -26,6 +26,7 @@ interface AppContextValue {
   isLoginEnabled: boolean;
   isZenModeEnabled: boolean;
   isCopyButtonEnabled: boolean;
+  isCarModeEnabled: boolean;
   setLanguage: (lang: string) => void;
   toggleDarkMode: () => boolean;
   setAdvancedMode: (enabled: boolean) => void;
@@ -33,6 +34,7 @@ interface AppContextValue {
   setLoginEnabled: (enabled: boolean) => void;
   setZenModeEnabled: (enabled: boolean) => void;
   setCopyButtonEnabled: (enabled: boolean) => void;
+  setCarModeEnabled: (enabled: boolean) => void;
   voiceAssignments: Record<string, string>;
   setVoiceAssignment: (character: string, voiceId: string | null) => void;
   clearVoiceAssignments: () => void;
@@ -64,6 +66,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isZenModeEnabled, setIsZenModeEnabled] = useState(false);
   const [isCopyButtonEnabled, setIsCopyButtonEnabled] = useState(false);
+  const [isCarModeEnabled, setIsCarModeEnabled] = useState(false);
   const [voiceAssignments, setVoiceAssignments] = useState<Record<string, string>>({});
 
   const [scriptLines, setScriptLines] = useState<string[]>([]);
@@ -97,6 +100,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
     const storedCopyButton = localStorage.getItem('copyButtonEnabled') === 'true';
     setIsCopyButtonEnabled(storedCopyButton);
+
+    const storedCarMode = localStorage.getItem('carModeEnabled') === 'true';
+    setIsCarModeEnabled(storedCarMode);
 
     // Legacy: clear out the deprecated Studio Mode flag if it lingers from
     // a previous version. The feature has been removed in favor of per-line
@@ -175,12 +181,19 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       localStorage.setItem('loginEnabled', 'false');
       setIsCopyButtonEnabled(false);
       localStorage.setItem('copyButtonEnabled', 'false');
+      setIsCarModeEnabled(false);
+      localStorage.setItem('carModeEnabled', 'false');
     }
   };
 
   const setCopyButtonEnabled = (enabled: boolean) => {
     setIsCopyButtonEnabled(enabled);
     localStorage.setItem('copyButtonEnabled', String(enabled));
+  };
+
+  const setCarModeEnabled = (enabled: boolean) => {
+    setIsCarModeEnabled(enabled);
+    localStorage.setItem('carModeEnabled', String(enabled));
   };
 
   const setCustomScriptInputEnabled = (enabled: boolean) => {
@@ -268,6 +281,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     isLoginEnabled,
     isZenModeEnabled,
     isCopyButtonEnabled,
+    isCarModeEnabled,
     setLanguage,
     toggleDarkMode,
     setAdvancedMode,
@@ -275,6 +289,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     setLoginEnabled,
     setZenModeEnabled,
     setCopyButtonEnabled,
+    setCarModeEnabled,
     voiceAssignments,
     setVoiceAssignment,
     clearVoiceAssignments,
