@@ -99,6 +99,8 @@ export const translations: Record<string, Record<string, unknown>> = {
     carModeRunningButton: "Car mode running",
     carModeWaitingButton: "Waiting for your line...",
     carModeStopButton: "Stop car mode",
+    carModeLineSkipped:
+      "Audio was unavailable for this line; car mode skipped it.",
     transcriptLabel: "Transcript:",
     expectedLabel: "Expected:",
     micUnsupported: "Microphone not supported in this browser.",
@@ -157,6 +159,8 @@ export const translations: Record<string, Record<string, unknown>> = {
     correctionNoInput: "No audio captured. Try recording again.",
     correctionNoUsableInput:
       "Recording did not start correctly. Tap Record and try again.",
+    correctionNoTranscript:
+      "No usable words were detected. Try recording again.",
     correctionError: "Transcription error",
     correctionPerfect: "Perfect — exact match!",
     feedbackCorrect: "Great — that matches the script.",
@@ -170,8 +174,9 @@ export const translations: Record<string, Record<string, unknown>> = {
     voiceAssignButton: "Assign voices",
     voiceAssignTitle: "Assign voices to characters",
     voiceAssignHelp:
-      "Experimental — pick a Gemini voice for each character and preview a sample line. Selections are saved on this device, and each (line + voice) is cached on the server so the same preview never re-generates.",
-    voiceDefaultOption: "Default (Zephyr)",
+      "Experimental — each character gets a stable automatic voice profile per script. Manual Gemini choices override the automatic profile and are saved on this device.",
+    voiceDefaultOption: "Auto",
+    voiceProfileLabel: "Voice",
     voiceGenderFemale: "female",
     voiceGenderMale: "male",
     voiceSampleButton: "Sample",
@@ -190,6 +195,8 @@ export const translations: Record<string, Record<string, unknown>> = {
     errorTtsNotConfigured:
       "Live mode isn't configured on the server. Ask the administrator to set OPENROUTER_API_KEY.",
     errorTtsGeneric: "Error playing audio. Please try again.",
+    errorTtsInvalidAudio:
+      "Could not generate playable audio for this line.",
     errorTtsRateLimit:
       "Rate limit reached. Please wait a moment and try again.",
     errorTtsNetwork: "Network error. Please check your connection.",
@@ -393,6 +400,8 @@ export const translations: Record<string, Record<string, unknown>> = {
     carModeRunningButton: "Modalità auto attiva",
     carModeWaitingButton: "Attesa della tua battuta...",
     carModeStopButton: "Ferma modalità auto",
+    carModeLineSkipped:
+      "Audio non disponibile per questa battuta; la modalità auto l'ha saltata.",
     transcriptLabel: "Trascrizione:",
     expectedLabel: "Atteso:",
     micUnsupported: "Microfono non supportato in questo browser.",
@@ -452,6 +461,8 @@ export const translations: Record<string, Record<string, unknown>> = {
     correctionNoInput: "Nessun audio acquisito. Prova a registrare di nuovo.",
     correctionNoUsableInput:
       "La registrazione non è partita correttamente. Tocca Registra e riprova.",
+    correctionNoTranscript:
+      "Non ho rilevato parole utilizzabili. Prova a registrare di nuovo.",
     correctionError: "Errore di trascrizione",
     correctionPerfect: "Perfetto — corrispondenza esatta!",
     feedbackCorrect: "Ottimo — corrisponde al copione.",
@@ -465,8 +476,9 @@ export const translations: Record<string, Record<string, unknown>> = {
     voiceAssignButton: "Assegna voci",
     voiceAssignTitle: "Assegna le voci ai personaggi",
     voiceAssignHelp:
-      "Sperimentale — scegli una voce Gemini per ogni personaggio e ascolta una battuta di esempio. Le scelte vengono salvate su questo dispositivo e ogni combinazione (battuta + voce) è memorizzata sul server, così la stessa anteprima non viene mai rigenerata.",
-    voiceDefaultOption: "Predefinita (Zephyr)",
+      "Sperimentale — ogni personaggio riceve un profilo voce automatico stabile per copione. Le scelte manuali Gemini sostituiscono il profilo automatico e vengono salvate su questo dispositivo.",
+    voiceDefaultOption: "Auto",
+    voiceProfileLabel: "Voce",
     voiceGenderFemale: "femminile",
     voiceGenderMale: "maschile",
     voiceSampleButton: "Ascolta",
@@ -485,6 +497,8 @@ export const translations: Record<string, Record<string, unknown>> = {
     errorTtsNotConfigured:
       "La modalità live non è configurata sul server. Chiedi all'amministratore di impostare OPENROUTER_API_KEY.",
     errorTtsGeneric: "Errore nella riproduzione dell'audio. Riprova.",
+    errorTtsInvalidAudio:
+      "Impossibile generare un audio riproducibile per questa battuta.",
     errorTtsRateLimit:
       "Limite di richieste raggiunto. Attendi qualche istante e riprova.",
     errorTtsNetwork: "Errore di rete. Controlla la connessione.",

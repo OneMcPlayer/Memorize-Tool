@@ -334,6 +334,7 @@
 .interactive-memorization-view .back-btn {
   background: transparent;
   border: 1px solid var(--border-color, #ddd);
+  color: var(--text-primary, #222);
   padding: 10px 20px;
   border-radius: 8px;
   cursor: pointer;

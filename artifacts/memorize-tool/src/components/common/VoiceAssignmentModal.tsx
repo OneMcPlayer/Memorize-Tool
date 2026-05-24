@@ -3,13 +3,15 @@ import { useAppContext } from "../../context/AppContext";
 import { translations } from "../../data/translations";
 import {
   GEMINI_VOICES,
-  DEFAULT_GEMINI_VOICE,
-  DEFAULT_VOICE_ID,
+  buildAutoVoiceProfileAssignments,
   pickSampleLinesForCharacter,
   getAllLinesForCharacter,
   pickRandomLineIndex,
+  resolveVoiceProfile,
+  type VoiceProfile,
 } from "../../data/geminiVoices";
 import openaiService from "../../services/openaiService";
+import { prepareLineForTts } from "../../services/lineTagsService";
 import { showToast } from "../../utils";
 import "./VoiceAssignmentModal.css";
 
@@ -101,6 +103,11 @@ const VoiceAssignmentModal: React.FC<VoiceAssignmentModalProps> = ({
     for (const c of characters) out[c] = pickSampleLinesForCharacter(scriptText, c);
     return out;
   }, [characters, scriptText]);
+
+  const autoVoiceProfileAssignments = useMemo(
+    () => buildAutoVoiceProfileAssignments(characters, scriptKey),
+    [characters, scriptKey],
+  );
 
   const allLines = useMemo(() => {
     const out: Record<string, string[]> = {};
@@ -198,12 +205,14 @@ const VoiceAssignmentModal: React.FC<VoiceAssignmentModalProps> = ({
       showToast(msg, 3000, "error");
       return;
     }
+    const ttsSample = prepareLineForTts(sample);
+    if (!ttsSample) return;
     const key = `${character}__${voiceId}`;
     setPlayingKey(key);
     try {
       // Use default speed/model so the request hashes to the same TTS cache
       // entry as any other call for the same (text, voice) pair.
-      const blob = await openaiService.textToSpeech(sample, { voice: voiceId });
+      const blob = await openaiService.textToSpeech(ttsSample, { voice: voiceId });
       await openaiService.playAudio(blob, { volume: 1 });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -225,9 +234,10 @@ const VoiceAssignmentModal: React.FC<VoiceAssignmentModalProps> = ({
   const formatVoiceLabel = (voice: (typeof GEMINI_VOICES)[number]): string =>
     `${voice.id} [${genderLabel(voice.gender)}] — ${voice.hint}`;
 
-  const defaultVoiceLabel = `${
-    t.voiceDefaultOption ?? `Default (${DEFAULT_VOICE_ID})`
-  } [${genderLabel(DEFAULT_GEMINI_VOICE.gender)}]`;
+  const formatVoiceProfileLabel = (profile: VoiceProfile): string => {
+    const numeric = profile.id.replace(/^voice-0?/, "");
+    return `${t.voiceProfileLabel ?? "Voice"} ${numeric} [${genderLabel(profile.gender)}] — ${profile.tone}`;
+  };
 
   return (
     <div
@@ -269,7 +279,14 @@ const VoiceAssignmentModal: React.FC<VoiceAssignmentModalProps> = ({
             <ul className="voice-character-list">
               {characters.map((character) => {
                 const assigned = voiceAssignments[character] ?? "";
-                const effectiveVoice = assigned || DEFAULT_VOICE_ID;
+                const autoVoice = resolveVoiceProfile(
+                  autoVoiceProfileAssignments[character],
+                  "gemini",
+                );
+                const effectiveVoice = assigned || autoVoice.voiceId;
+                const defaultVoiceLabel = `${
+                  t.voiceDefaultOption ?? "Auto"
+                }: ${formatVoiceProfileLabel(autoVoice.profile)}`;
                 const { text: sample, index: sIdx, total: sTotal } = getCurrentSample(character);
                 const isUser = userCharacter && character.toUpperCase() === userCharacter.toUpperCase();
                 const playKey = `${character}__${effectiveVoice}`;

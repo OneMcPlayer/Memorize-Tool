@@ -54,10 +54,14 @@ Thumbs.db
 # Local agent/session files
 .codex
 Code-Memorize.zip
+.deploy/
 .env.production
 .env.staging
+gitHubToken.env
+TOKEN
 
 # Generated verification and backup artifacts
 artifacts/videos/
 artifacts/backups/
+artifacts/runtime-logs/
 artifacts/api-server/output/

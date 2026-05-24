@@ -27,20 +27,20 @@ important decision or result to `HISTORY.md`.
     incomplete manual test.
 - [ ] Re-run Live mode on a real browser/device and capture a short E2E video.
   - Save the artifact in `artifacts/videos/` per `AGENTS.md`.
-- [ ] Re-test long TTS cue sequences on iPhone Safari.
+- [x] Re-test long TTS cue sequences on iPhone Safari.
   - Current mitigation: Live mode primes one persistent audio element from the
     `Play scene` tap and reuses it for every cue line.
   - Follow-up mitigation: Live mode now stops the persistent audio element on
     back/restart/unmount, waits for priming before starting TTS, records audio
     ended/error element timing, and only advances by played lines.
-  - Goal: confirm whether this removes later-sequence `NotAllowedError`
-    playback failures and the observed half-line/reload symptom.
-- [ ] Re-test the `PROCESSO AL POTERE` `[letteralmente] seduce` cue on iPhone Safari.
+  - Result: 2026-05-13 `/dev/` iPhone logs include long successful runs with
+    139, 150, and 137 `tts-audio-ended` events, with no later-sequence
+    `NotAllowedError`, `tts-sequence-failed`, or `tts-playback-error`.
+- [x] Re-test the `PROCESSO AL POTERE` `[letteralmente] seduce` cue on iPhone Safari.
   - Current mitigation: the bundled line was disambiguated with
     `[letteralmente] seduce`, invalid 44-byte TTS responses are ignored/retried
     by the API, and the frontend refuses tiny TTS blobs before playback.
-  - Goal: confirm the cue is spoken as the Italian line and no longer causes a
-    media decode error or navigation reset.
+  - Result: manual iPhone test confirmed the cue is now spoken as intended.
 
 ## Short Term
 
@@ -85,6 +85,12 @@ important decision or result to `HISTORY.md`.
     `dev` branch auto-update timer.
   - 2026-05-10 decision: because only `epicserver.vpsgh.it` DNS is available,
     use `/` for production and `/dev/` for staging instead of subdomains.
+  - 2026-05-15 decision: production auto-updates from committed/pushed
+    `origin/dev`, while `/dev/` is rebuilt manually from the local dirty
+    workspace with `deploy/vps/restart-dev-local.sh`.
+  - Remaining check: confirm this manual `/dev/` deploy workflow stays smooth
+    during the next feature iteration and does not accidentally restart
+    production services.
 - [x] Add focused tests for empty audio handling.
   - Backend: reject tiny/empty audio with a clear error before provider call.
   - Frontend: do not call STT if the recorded blob is too small.
@@ -102,7 +108,26 @@ important decision or result to `HISTORY.md`.
   - Current implementation: experimental option plus Reveal Mode waits based on
     user-line length, plays the correct line with cached TTS, beeps, advances,
     and continues without STT.
+  - 2026-05-13 `/dev/` logs show multiple successful iPhone car-mode runs with
+    no STT requests, including sessions with 11 and 14 completed user-line
+    playbacks.
+  - Remaining follow-up: one `Finale di partita`/CLOV session repeatedly failed
+    on a very short user line because Gemini TTS returned empty/invalid audio
+    even after the backend retry.
 - [ ] Decide whether reveal-only Live mode also needs faster partner TTS.
+- [ ] Decide whether manual voice overrides should migrate to provider-neutral
+      profiles before switching away from Gemini TTS.
+- [x] Harden TTS generation for very short or ambiguous Italian lines.
+  - Evidence: 2026-05-13 iPhone car-mode logs show repeated provider failures
+    for `Finale di partita`/CLOV original index 54, a 5-character line.
+  - Result: backend TTS now retries short/ambiguous lines with a hidden Italian
+    literal-pronunciation hint, caches the successful audio under the original
+    script text, and car mode skips a still-unavailable line with a distinct
+    error beep instead of disabling itself.
+- [ ] Re-test very short user lines in car mode on iPhone Safari.
+  - Target case: `Finale di partita`/CLOV original index 54, `Male.`.
+  - Goal: confirm Gemini accepts the hidden hint in production and car mode
+    either plays the corrected line or continues after the controlled skip.
 - [x] Decide the production deployment shape.
   - Result: use Caddy on `epicserver.vpsgh.it`, route production at `/`, and
     route staging at `/dev/` with separate localhost ports and data stores.

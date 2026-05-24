@@ -4,6 +4,7 @@ import {
   fetchLineTags,
   hashScriptText,
   migrateLegacyLineTags,
+  prepareLineForTts,
   resolveMarkedUpLine,
   saveLineTags,
 } from "./lineTagsService";
@@ -18,6 +19,20 @@ describe("lineTagsService — pure helpers", () => {
     expect(resolveMarkedUpLine("", "Hello")).toBe("Hello");
     expect(resolveMarkedUpLine(null, "Hello")).toBe("Hello");
     expect(resolveMarkedUpLine("   ", "Hello")).toBe("Hello");
+  });
+
+  it("prepareLineForTts removes parenthetical stage directions", () => {
+    expect(prepareLineForTts("Ciao (ride) mondo.")).toBe("Ciao mondo.");
+    expect(prepareLineForTts("[letteralmente] seduce (piano)")).toBe(
+      "[letteralmente] seduce",
+    );
+  });
+
+  it("prepareLineForTts removes nested parenthetical text", () => {
+    expect(prepareLineForTts("Vai (sottovoce (ride) piano), ora.")).toBe(
+      "Vai, ora.",
+    );
+    expect(prepareLineForTts("(pausa)")).toBe("");
   });
 
   it("hashScriptText is deterministic and length-aware", () => {

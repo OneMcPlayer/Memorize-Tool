@@ -4,6 +4,12 @@ export interface GeminiVoice {
   hint: string;
 }
 
+export interface VoiceProfile {
+  gender: "female" | "male";
+  id: string;
+  tone: string;
+}
+
 export const GEMINI_VOICES: GeminiVoice[] = [
   { id: "Zephyr", gender: "female", hint: "bright" },
   { id: "Puck", gender: "male", hint: "upbeat" },
@@ -41,6 +47,130 @@ export const DEFAULT_VOICE_ID = "Zephyr";
 export const DEFAULT_GEMINI_VOICE = GEMINI_VOICES.find(
   (voice) => voice.id === DEFAULT_VOICE_ID,
 ) ?? GEMINI_VOICES[0];
+
+export const VOICE_PROFILES: VoiceProfile[] = [
+  { id: "voice-01", gender: "female", tone: "bright" },
+  { id: "voice-02", gender: "male", tone: "upbeat" },
+  { id: "voice-03", gender: "male", tone: "informative" },
+  { id: "voice-04", gender: "female", tone: "firm" },
+  { id: "voice-05", gender: "male", tone: "excitable" },
+  { id: "voice-06", gender: "female", tone: "youthful" },
+  { id: "voice-07", gender: "male", tone: "firm" },
+  { id: "voice-08", gender: "female", tone: "breezy" },
+  { id: "voice-09", gender: "female", tone: "easy-going" },
+  { id: "voice-10", gender: "female", tone: "bright" },
+  { id: "voice-11", gender: "male", tone: "breathy" },
+  { id: "voice-12", gender: "male", tone: "clear" },
+  { id: "voice-13", gender: "male", tone: "easy-going" },
+  { id: "voice-14", gender: "male", tone: "smooth" },
+  { id: "voice-15", gender: "female", tone: "smooth" },
+  { id: "voice-16", gender: "female", tone: "clear" },
+  { id: "voice-17", gender: "male", tone: "gravelly" },
+  { id: "voice-18", gender: "male", tone: "informative" },
+  { id: "voice-19", gender: "female", tone: "upbeat" },
+  { id: "voice-20", gender: "female", tone: "soft" },
+  { id: "voice-21", gender: "male", tone: "firm" },
+  { id: "voice-22", gender: "male", tone: "even" },
+  { id: "voice-23", gender: "female", tone: "mature" },
+  { id: "voice-24", gender: "female", tone: "forward" },
+  { id: "voice-25", gender: "male", tone: "friendly" },
+  { id: "voice-26", gender: "male", tone: "casual" },
+  { id: "voice-27", gender: "female", tone: "gentle" },
+  { id: "voice-28", gender: "male", tone: "lively" },
+  { id: "voice-29", gender: "male", tone: "knowledgeable" },
+  { id: "voice-30", gender: "female", tone: "warm" },
+];
+
+const GEMINI_PROFILE_VOICE_IDS: Record<string, string> = {
+  "voice-01": "Zephyr",
+  "voice-02": "Puck",
+  "voice-03": "Charon",
+  "voice-04": "Kore",
+  "voice-05": "Fenrir",
+  "voice-06": "Leda",
+  "voice-07": "Orus",
+  "voice-08": "Aoede",
+  "voice-09": "Callirrhoe",
+  "voice-10": "Autonoe",
+  "voice-11": "Enceladus",
+  "voice-12": "Iapetus",
+  "voice-13": "Umbriel",
+  "voice-14": "Algieba",
+  "voice-15": "Despina",
+  "voice-16": "Erinome",
+  "voice-17": "Algenib",
+  "voice-18": "Rasalgethi",
+  "voice-19": "Laomedeia",
+  "voice-20": "Achernar",
+  "voice-21": "Alnilam",
+  "voice-22": "Schedar",
+  "voice-23": "Gacrux",
+  "voice-24": "Pulcherrima",
+  "voice-25": "Achird",
+  "voice-26": "Zubenelgenubi",
+  "voice-27": "Vindemiatrix",
+  "voice-28": "Sadachbia",
+  "voice-29": "Sadaltager",
+  "voice-30": "Sulafat",
+};
+
+function stableHash(input: string): number {
+  let hash = 2166136261;
+  for (let i = 0; i < input.length; i += 1) {
+    hash ^= input.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+function profileAt(index: number): VoiceProfile {
+  return VOICE_PROFILES[index % VOICE_PROFILES.length] ?? VOICE_PROFILES[0];
+}
+
+export function buildAutoVoiceProfileAssignments(
+  characters: string[],
+  scriptKey: string,
+): Record<string, string> {
+  const assigned: Record<string, string> = {};
+  const used = new Set<string>();
+  const seen = new Set<string>();
+
+  for (const character of characters) {
+    const normalized = character.trim().toUpperCase();
+    if (!normalized || seen.has(normalized)) continue;
+    seen.add(normalized);
+
+    const start = stableHash(`${scriptKey}\u0001${normalized}`) % VOICE_PROFILES.length;
+    let selected = profileAt(start);
+    for (let offset = 0; offset < VOICE_PROFILES.length; offset += 1) {
+      const candidate = profileAt(start + offset);
+      if (!used.has(candidate.id)) {
+        selected = candidate;
+        break;
+      }
+    }
+
+    assigned[character] = selected.id;
+    used.add(selected.id);
+  }
+
+  return assigned;
+}
+
+export function resolveVoiceProfile(
+  profileId: string | undefined,
+  provider: "gemini" = "gemini",
+): { profile: VoiceProfile; voiceId: string } {
+  const profile =
+    VOICE_PROFILES.find((item) => item.id === profileId) ?? VOICE_PROFILES[0];
+
+  if (provider === "gemini") {
+    const voiceId = GEMINI_PROFILE_VOICE_IDS[profile.id] ?? DEFAULT_VOICE_ID;
+    return { profile, voiceId };
+  }
+
+  return { profile, voiceId: DEFAULT_VOICE_ID };
+}
 
 const MIN_SAMPLE_LEN = 25;
 const IDEAL_MIN = 60;

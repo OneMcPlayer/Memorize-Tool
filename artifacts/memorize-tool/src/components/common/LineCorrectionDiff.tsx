@@ -37,7 +37,10 @@ const LineCorrectionDiff: React.FC<LineCorrectionDiffProps> = ({
 
   if (status === "no-input") {
     return (
-      <div className={`line-correction line-correction--no-input${compact ? " line-correction--compact" : ""}`}>
+      <div
+        className={`line-correction line-correction--no-input${compact ? " line-correction--compact" : ""}`}
+        data-testid="line-correction"
+      >
         <p className="line-correction__title">{labels.noInput ?? "Nessun audio acquisito."}</p>
         {message && <p className="line-correction__message">{message}</p>}
       </div>
@@ -46,7 +49,10 @@ const LineCorrectionDiff: React.FC<LineCorrectionDiffProps> = ({
 
   if (status === "error") {
     return (
-      <div className={`line-correction line-correction--error${compact ? " line-correction--compact" : ""}`}>
+      <div
+        className={`line-correction line-correction--error${compact ? " line-correction--compact" : ""}`}
+        data-testid="line-correction"
+      >
         <p className="line-correction__title">{labels.errorTitle ?? "Errore di trascrizione"}</p>
         {message && <p className="line-correction__message">{message}</p>}
       </div>

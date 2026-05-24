@@ -30,6 +30,20 @@ export function resolveMarkedUpLine(
   return trimmed.length > 0 ? trimmed : originalLine;
 }
 
+export function prepareLineForTts(line: string): string {
+  let result = line;
+  let previous: string;
+  do {
+    previous = result;
+    result = result.replace(/\([^()]*\)/g, " ");
+  } while (result !== previous);
+
+  return result
+    .replace(/\s+/g, " ")
+    .replace(/\s+([,.;:!?])/g, "$1")
+    .trim();
+}
+
 export interface CueLineForMigration {
   originalIndex: number;
   line: string;

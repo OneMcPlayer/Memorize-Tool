@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import ttsService from '../../utils/ttsService';
+import { prepareLineForTts } from '../../services/lineTagsService';
 
 interface ScriptLine {
   speaker: string;
@@ -131,9 +132,11 @@ const ScriptReader = ({ script, onClose }: ScriptReaderProps) => {
         setCurrentLineIndex(i);
         const line = script[i];
         const voice = characterVoices[line.speaker];
+        const ttsLine = prepareLineForTts(line.line);
+        if (!ttsLine) continue;
 
         try {
-          await ttsService.speak(line.line, {
+          await ttsService.speak(ttsLine, {
             voice: voice as SpeechSynthesisVoice,
             volume,
             rate,

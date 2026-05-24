@@ -1,7 +1,15 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useAppContext } from "../../context/AppContext";
 import { translations } from "../../data/translations";
-import { saveLineTags, type LineTagsMap } from "../../services/lineTagsService";
+import {
+  buildAutoVoiceProfileAssignments,
+  resolveVoiceProfile,
+} from "../../data/geminiVoices";
+import {
+  prepareLineForTts,
+  saveLineTags,
+  type LineTagsMap,
+} from "../../services/lineTagsService";
 import openaiService from "../../services/openaiService";
 import { showToast } from "../../utils";
 import "./LineTagsModal.css";
@@ -16,6 +24,7 @@ interface LineTagsModalProps {
   isOpen: boolean;
   onClose: () => void;
   scriptKey: string;
+  characters: string[];
   cueLines: CueLine[];
   initialTags: LineTagsMap;
   onSaved: (next: LineTagsMap) => void;
@@ -26,6 +35,7 @@ const LineTagsModal: React.FC<LineTagsModalProps> = ({
   isOpen,
   onClose,
   scriptKey,
+  characters,
   cueLines,
   initialTags,
   onSaved,
@@ -63,6 +73,10 @@ const LineTagsModal: React.FC<LineTagsModalProps> = ({
   // reference change would wipe unsaved edits whenever the parent
   // re-renders (timers, recording state, etc. produce new array refs).
   const wasOpenRef = useRef(false);
+  const autoVoiceProfileAssignments = useMemo(
+    () => buildAutoVoiceProfileAssignments(characters, scriptKey),
+    [characters, scriptKey],
+  );
 
   useEffect(() => {
     if (isOpen && !wasOpenRef.current) {
@@ -165,15 +179,18 @@ const LineTagsModal: React.FC<LineTagsModalProps> = ({
     // Stop any in-flight or current playback first.
     stopPreview();
 
-    const text = draftValueFor(c).trim();
+    const text = prepareLineForTts(draftValueFor(c));
     if (!text) return;
 
     const myToken = ++playTokenRef.current;
     setLoadingIdx(idx);
     try {
       const assignedVoice = voiceAssignments[c.speaker];
-      const ttsOpts: { voice?: string } = {};
-      if (assignedVoice) ttsOpts.voice = assignedVoice;
+      const autoVoice = resolveVoiceProfile(
+        autoVoiceProfileAssignments[c.speaker],
+        "gemini",
+      ).voiceId;
+      const ttsOpts: { voice?: string } = { voice: assignedVoice || autoVoice };
       const blob = await openaiService.textToSpeech(text, ttsOpts);
       if (myToken !== playTokenRef.current) return; // superseded
       setLoadingIdx(null);

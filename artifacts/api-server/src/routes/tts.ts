@@ -20,6 +20,10 @@ const PCM_DEFAULT_CHANNELS = 1;
 const PCM_DEFAULT_BITS_PER_SAMPLE = 16;
 const MIN_TTS_AUDIO_BYTES = 1024;
 const MAX_TTS_AUDIO_ATTEMPTS = 2;
+const SHORT_TTS_FALLBACK_MAX_CHARS = 24;
+const SHORT_TTS_FALLBACK_MAX_WORDS = 3;
+const SHORT_TTS_FALLBACK_PREFIX =
+  "[in italiano, battuta teatrale naturale, pronuncia letteralmente]";
 
 const MAX_TTS_TEXT_LENGTH = 5_000;
 const INVALID_TTS_AUDIO_MESSAGE =
@@ -160,6 +164,29 @@ function isInvalidTtsAudioError(err: unknown): boolean {
   return err instanceof Error && err.message === INVALID_TTS_AUDIO_MESSAGE;
 }
 
+function cleanTtsTextForFallbackDecision(text: string): string {
+  return text
+    .replace(/\[[^\]]*]/g, " ")
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function shouldUseShortTtsFallback(text: string): boolean {
+  const clean = cleanTtsTextForFallbackDecision(text);
+  if (!clean) return false;
+  const words = clean.split(/\s+/).filter(Boolean).length;
+  return (
+    clean.length <= SHORT_TTS_FALLBACK_MAX_CHARS ||
+    words <= SHORT_TTS_FALLBACK_MAX_WORDS
+  );
+}
+
+function buildShortTtsFallbackInput(text: string): string {
+  if (text.includes(SHORT_TTS_FALLBACK_PREFIX)) return text;
+  return `${SHORT_TTS_FALLBACK_PREFIX} ${text}`;
+}
+
 function finishTtsAudio(raw: Buffer, contentType: string | null): Buffer {
   if (hasWavHeader(raw)) return raw;
   if (isPcmContentType(contentType)) {
@@ -244,7 +271,13 @@ router.post("/tts/speech", async (req, res): Promise<void> => {
   if (!promise) {
     promise = (async () => {
       let lastErr: unknown = null;
+      const shortTextFallback = shouldUseShortTtsFallback(text);
       for (let attempt = 1; attempt <= MAX_TTS_AUDIO_ATTEMPTS; attempt += 1) {
+        const usingFallbackInput =
+          shortTextFallback && attempt === MAX_TTS_AUDIO_ATTEMPTS;
+        const providerInput = usingFallbackInput
+          ? buildShortTtsFallbackInput(text)
+          : text;
         try {
           const response = await fetch(
             "https://openrouter.ai/api/v1/audio/speech",
@@ -256,7 +289,7 @@ router.post("/tts/speech", async (req, res): Promise<void> => {
               },
               body: JSON.stringify({
                 model,
-                input: text,
+                input: providerInput,
                 voice,
                 speed,
                 response_format: "pcm",
@@ -290,6 +323,12 @@ router.post("/tts/speech", async (req, res): Promise<void> => {
           }
           const wav = finishTtsAudio(raw, upstreamContentType);
           assertUsableTtsAudio(wav);
+          if (usingFallbackInput) {
+            req.log.info(
+              { model, voice, length: text.length },
+              "TTS short-line fallback succeeded",
+            );
+          }
           await writeTtsCache(cacheKey, wav).catch((cacheErr) => {
             req.log.warn(
               { err: cacheErr, key: cacheKey, model, voice },
@@ -306,7 +345,15 @@ router.post("/tts/speech", async (req, res): Promise<void> => {
             throw err;
           }
           req.log.warn(
-            { err, attempt, model, voice, length: text.length },
+            {
+              err,
+              attempt,
+              fallbackNext:
+                shortTextFallback && attempt + 1 === MAX_TTS_AUDIO_ATTEMPTS,
+              model,
+              voice,
+              length: text.length,
+            },
             "Retrying TTS provider after invalid audio response",
           );
         }

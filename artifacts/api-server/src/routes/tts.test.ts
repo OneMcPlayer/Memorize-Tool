@@ -254,6 +254,45 @@ describe("/tts routes", () => {
     expect(writeTtsCache).toHaveBeenCalledTimes(1);
   });
 
+  it("POST /tts/speech retries short lines with an Italian literal hint", async () => {
+    readTtsCache.mockResolvedValueOnce(null);
+    writeTtsCache.mockResolvedValueOnce(undefined);
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(
+        new Response(new Uint8Array(), {
+          status: 200,
+          headers: { "Content-Type": "audio/pcm" },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(makePcm(), {
+          status: 200,
+          headers: {
+            "Content-Type": "audio/pcm; rate=24000; channels=1; bits=16",
+          },
+        }),
+      );
+
+    const res = await request(makeApp())
+      .post("/tts/speech")
+      .set("x-access-token", ACCESS)
+      .send({ text: "Male." });
+
+    expect(res.status).toBe(200);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    const firstBody = JSON.parse(
+      String(fetchMock.mock.calls[0]?.[1]?.body ?? "{}"),
+    ) as { input?: string };
+    const secondBody = JSON.parse(
+      String(fetchMock.mock.calls[1]?.[1]?.body ?? "{}"),
+    ) as { input?: string };
+    expect(firstBody.input).toBe("Male.");
+    expect(secondBody.input).toContain("Male.");
+    expect(secondBody.input).toContain("pronuncia letteralmente");
+    expect(writeTtsCache).toHaveBeenCalledTimes(1);
+  });
+
   it("POST /tts/speech rejects empty successful upstream audio", async () => {
     readTtsCache.mockResolvedValueOnce(null);
     const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(

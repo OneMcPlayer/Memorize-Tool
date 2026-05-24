@@ -24,6 +24,7 @@ import {
   saveLineTags,
   buildScriptKey,
   resolveMarkedUpLine,
+  prepareLineForTts,
   migrateLegacyLineTags,
   type LineTagsMap,
 } from "../../services/lineTagsService";
@@ -33,6 +34,10 @@ import LineCorrectionDiff, {
 import LineTagsModal from "../common/LineTagsModal";
 import VoiceAssignmentModal from "../common/VoiceAssignmentModal";
 import { evaluateComparableTextMatch } from "../../utils/wordDiff";
+import {
+  buildAutoVoiceProfileAssignments,
+  resolveVoiceProfile,
+} from "../../data/geminiVoices";
 
 const SUCCESS_FLASH_MS = 1300;
 const MIN_STT_CAPTURE_BYTES = 1024;
@@ -44,6 +49,8 @@ const CAR_MODE_MAX_WAIT_MS = 12000;
 const CAR_MODE_WORD_WAIT_MS = 650;
 const CAR_MODE_CHAR_WAIT_MS = 28;
 const CAR_MODE_BEEP_DURATION_MS = 180;
+const CAR_MODE_ERROR_BEEP_DURATION_MS = 320;
+const INVALID_TTS_AUDIO_MESSAGE = "empty or invalid audio";
 
 import { showToast } from "../../utils";
 import useMicrophoneRecorder, {
@@ -126,11 +133,22 @@ const friendlyTtsError = (
     );
   if (!message)
     return t.errorTtsGeneric ?? "Error playing audio. Please try again.";
+  if (message.toLowerCase().includes(INVALID_TTS_AUDIO_MESSAGE))
+    return (
+      t.errorTtsInvalidAudio ??
+      "Could not generate playable audio for this line."
+    );
   if (message.includes("Rate limit") || message.includes("rate"))
     return t.errorTtsRateLimit ?? "Rate limit reached.";
   if (message.includes("network") || message.includes("fetch"))
     return t.errorTtsNetwork ?? "Network error.";
   return message;
+};
+
+const isRecoverableCarModeTtsError = (error: unknown): boolean => {
+  const status = (error as { status?: number } | null)?.status;
+  const message = error instanceof Error ? error.message.toLowerCase() : "";
+  return status === 502 && message.includes(INVALID_TTS_AUDIO_MESSAGE);
 };
 
 const isExpectedTtsCancellation = (error: unknown): boolean =>
@@ -194,11 +212,11 @@ const estimateCarModeWaitMs = (line: string): number => {
   );
 };
 
-const buildCarModeBeepBlob = (): Blob => {
+const buildToneBlob = (frequency: number, durationMs: number): Blob => {
   const sampleRate = 16000;
   const samples = Math.max(
     1,
-    Math.round((CAR_MODE_BEEP_DURATION_MS / 1000) * sampleRate),
+    Math.round((durationMs / 1000) * sampleRate),
   );
   const dataBytes = samples * 2;
   const bytes = new Uint8Array(44 + dataBytes);
@@ -223,7 +241,6 @@ const buildCarModeBeepBlob = (): Blob => {
   writeAscii(36, "data");
   view.setUint32(40, dataBytes, true);
 
-  const frequency = 880;
   for (let i = 0; i < samples; i += 1) {
     const t = i / sampleRate;
     const fade = Math.min(i / 160, (samples - i) / 160, 1);
@@ -233,6 +250,12 @@ const buildCarModeBeepBlob = (): Blob => {
 
   return new Blob([bytes], { type: "audio/wav" });
 };
+
+const buildCarModeBeepBlob = (): Blob =>
+  buildToneBlob(880, CAR_MODE_BEEP_DURATION_MS);
+
+const buildCarModeErrorBeepBlob = (): Blob =>
+  buildToneBlob(220, CAR_MODE_ERROR_BEEP_DURATION_MS);
 
 const diagnosticNow = (): number =>
   typeof performance !== "undefined" ? performance.now() : Date.now();
@@ -318,6 +341,11 @@ const InteractiveMemorizationView = ({
     }
     return list;
   }, [sequence]);
+
+  const autoVoiceProfileAssignments = useMemo(
+    () => buildAutoVoiceProfileAssignments(detectedCharacters, scriptKey),
+    [detectedCharacters, scriptKey],
+  );
 
   const scriptText = useMemo(() => scriptLines.join("\n"), [scriptLines]);
   const userLineCount = useMemo(
@@ -491,14 +519,19 @@ const InteractiveMemorizationView = ({
   const buildTtsRequest = useCallback(
     (item: SequenceItem): { options: { voice?: string }; text: string } => {
       const assignedVoice = voiceAssignments[item.speaker];
-      const options: { voice?: string } = {};
-      if (assignedVoice) options.voice = assignedVoice;
+      const autoVoice = resolveVoiceProfile(
+        autoVoiceProfileAssignments[item.speaker],
+        "gemini",
+      ).voiceId;
+      const options: { voice?: string } = { voice: assignedVoice || autoVoice };
       return {
         options,
-        text: resolveMarkedUpLine(lineTags[String(item.originalIndex)], item.line),
+        text: prepareLineForTts(
+          resolveMarkedUpLine(lineTags[String(item.originalIndex)], item.line),
+        ),
       };
     },
-    [lineTags, voiceAssignments],
+    [autoVoiceProfileAssignments, lineTags, voiceAssignments],
   );
 
   useEffect(() => {
@@ -519,6 +552,7 @@ const InteractiveMemorizationView = ({
         ].join("\u0001");
         return { item, key, options, sequenceOffset, text };
       })
+      .filter(({ text }) => text.length > 0)
       .filter(({ key }) => {
         if (ttsPreloadAttemptedRef.current.has(key)) return false;
         ttsPreloadAttemptedRef.current.add(key);
@@ -720,6 +754,15 @@ const InteractiveMemorizationView = ({
         const lineStartedAt = diagnosticNow();
         setNowSpeakingIndex(i);
         const { options: ttsOpts, text: ttsText } = buildTtsRequest(item);
+        if (!ttsText) {
+          playedCount += 1;
+          recordDiagnosticBreadcrumb("tts-line-skipped", {
+            originalIndex: item.originalIndex,
+            reason: "empty-after-parenthetical-stage-directions",
+            sequenceOffset: i,
+          });
+          continue;
+        }
         recordDiagnosticBreadcrumb("tts-line-requested", {
           hasAssignedVoice: Boolean(ttsOpts.voice),
           lineLength: item.line.length,
@@ -1020,13 +1063,39 @@ const InteractiveMemorizationView = ({
       const transcript = await openaiService.speechToText(audio, {
         language: LIVE_STT_LANGUAGE,
       });
-      const status = evaluateMatch(expected, transcript);
+      const normalizedTranscript = transcript.trim();
+      if (!normalizedTranscript) {
+        recordDiagnosticBreadcrumb(
+          "stt-empty-transcript",
+          {
+            elapsedMs: diagnosticElapsed(sttStartedAt),
+            lineChars: expected.length,
+            originalIndex: nextUserLine.originalIndex,
+          },
+          "warn",
+        );
+        const evalResult: Evaluation = {
+          status: "no-input",
+          transcript: "",
+          message:
+            t.correctionNoTranscript ??
+            t.correctionNoInput ??
+            "No usable words were detected. Try recording again.",
+          expected,
+          originalIndex: nextUserLine.originalIndex,
+        };
+        setLastEvaluation(evalResult);
+        showZenOverlay();
+        showToast(evalResult.message, 4000, "warning");
+        return;
+      }
+      const status = evaluateMatch(expected, normalizedTranscript);
       recordDiagnosticBreadcrumb("stt-result", {
         elapsedMs: diagnosticElapsed(sttStartedAt),
         lineChars: expected.length,
         originalIndex: nextUserLine.originalIndex,
         status,
-        transcriptLength: transcript.length,
+        transcriptLength: normalizedTranscript.length,
       });
       const message =
         status === "correct"
@@ -1040,7 +1109,7 @@ const InteractiveMemorizationView = ({
               "That doesn't match the script. Try again or continue.");
       const evalResult: Evaluation = {
         status,
-        transcript,
+        transcript: normalizedTranscript,
         message,
         expected,
         originalIndex: nextUserLine.originalIndex,
@@ -1263,6 +1332,23 @@ const InteractiveMemorizationView = ({
     });
 
     try {
+      if (!ttsText) {
+        recordDiagnosticBreadcrumb("car-mode-user-line-skipped", {
+          elapsedMs: diagnosticElapsed(lineStartedAt),
+          originalIndex: nextUserLine.originalIndex,
+          reason: "empty-after-parenthetical-stage-directions",
+          scriptKey,
+        });
+        const beepBlob = buildCarModeBeepBlob();
+        await openaiService.playAudio(beepBlob, { volume: 0.65 });
+        if (cancelRef.current) return;
+        if (isMountedRef.current) {
+          setRevealedLine(null);
+          setCursor((prev) => prev + 1);
+        }
+        return;
+      }
+
       const audioBlob = await openaiService.textToSpeech(ttsText, ttsOpts);
       if (cancelRef.current) return;
       recordDiagnosticBreadcrumb("car-mode-user-line-ready", {
@@ -1317,6 +1403,51 @@ const InteractiveMemorizationView = ({
         severity: "error",
         type: "car-mode-tts-error",
       });
+      if (isRecoverableCarModeTtsError(err)) {
+        recordDiagnosticBreadcrumb(
+          "car-mode-user-line-skipped",
+          {
+            cursor,
+            message: friendly,
+            originalIndex: nextUserLine.originalIndex,
+            reason: "recoverable-tts-audio",
+            scriptKey,
+          },
+          "warn",
+        );
+        try {
+          const errorBeepBlob = buildCarModeErrorBeepBlob();
+          await openaiService.playAudio(errorBeepBlob, { volume: 0.75 });
+          recordDiagnosticBreadcrumb("car-mode-error-beep-played", {
+            originalIndex: nextUserLine.originalIndex,
+            scriptKey,
+          });
+        } catch (beepErr) {
+          recordDiagnosticBreadcrumb(
+            "car-mode-error-beep-failed",
+            {
+              message:
+                beepErr instanceof Error ? beepErr.message : String(beepErr),
+              originalIndex: nextUserLine.originalIndex,
+              scriptKey,
+            },
+            "warn",
+          );
+        }
+        if (cancelRef.current) return;
+        if (isMountedRef.current) {
+          setError(friendly);
+          showToast(
+            t.carModeLineSkipped ??
+              "Audio was unavailable for this line; car mode skipped it.",
+            5000,
+            "warning",
+          );
+          setRevealedLine(null);
+          setCursor((prev) => prev + 1);
+        }
+        return;
+      }
       if (isMountedRef.current) {
         setError(friendly);
         showToast(friendly, 5000, "error");
@@ -1613,32 +1744,35 @@ const InteractiveMemorizationView = ({
       results.totalLines > 0
         ? (results.correctLines / results.totalLines) * 100
         : 0;
+    const hasScoredResults = results.totalLines > 0;
     return (
       <div className="interactive-memorization-view">
         <h1>{t.interactiveMemorizationTitle ?? "Live Practice"}</h1>
         <div className="test-complete">
           <h2>{t.testComplete ?? "Practice Complete!"}</h2>
-          <div className="results-summary">
-            <h3>{t.resultsSummary ?? "Your Results"}</h3>
-            <div className="results-stats">
-              <div className="result-stat">
-                <span className="stat-label">
-                  {t.totalLines ?? "Total Lines"}
-                </span>
-                <span className="stat-value">{results.totalLines}</span>
-              </div>
-              <div className="result-stat">
-                <span className="stat-label">
-                  {t.correctLines ?? "Correct Lines"}
-                </span>
-                <span className="stat-value">{results.correctLines}</span>
-              </div>
-              <div className="result-stat">
-                <span className="stat-label">{t.accuracy ?? "Accuracy"}</span>
-                <span className="stat-value">{accuracy.toFixed(1)}%</span>
+          {hasScoredResults && (
+            <div className="results-summary" data-testid="results-summary">
+              <h3>{t.resultsSummary ?? "Your Results"}</h3>
+              <div className="results-stats">
+                <div className="result-stat">
+                  <span className="stat-label">
+                    {t.totalLines ?? "Total Lines"}
+                  </span>
+                  <span className="stat-value">{results.totalLines}</span>
+                </div>
+                <div className="result-stat">
+                  <span className="stat-label">
+                    {t.correctLines ?? "Correct Lines"}
+                  </span>
+                  <span className="stat-value">{results.correctLines}</span>
+                </div>
+                <div className="result-stat">
+                  <span className="stat-label">{t.accuracy ?? "Accuracy"}</span>
+                  <span className="stat-value">{accuracy.toFixed(1)}%</span>
+                </div>
               </div>
             </div>
-          </div>
+          )}
           <div className="test-complete-actions">
             <button onClick={handleRestart} className="restart-btn">
               {t.restartButton ?? "Restart"}
@@ -2165,6 +2299,7 @@ const InteractiveMemorizationView = ({
           isOpen={tagsModalOpen}
           onClose={() => setTagsModalOpen(false)}
           scriptKey={scriptKey}
+          characters={detectedCharacters}
           cueLines={cueLinesForModal}
           initialTags={lineTags}
           onSaved={(next) => setLineTags(next)}

@@ -27,6 +27,16 @@ Changes and decisions:
     DB migrations, and restarts services.
   - The updater is timer-based so it works without opening a webhook receiver
     or requiring root.
+- Split VPS production promotion from local `/dev/` testing.
+  - Production keeps using the clean checkout in
+    `/home/alle/apps/memorize-tool-prod` and the timer-based updater that pulls
+    committed changes from `origin/dev`.
+  - The public `/dev/` path is now intended for the current dirty workspace in
+    `/home/alle/codex-workspaces/Memorize-Tool`, so new work can be tested on
+    the VPS before it is committed and pushed.
+  - Added `deploy/vps/restart-dev-local.sh` to rebuild and restart the dev API
+    and web services from local files without `git fetch`, `git pull`, or a
+    clean-tree check.
 - Hardened the 2026-05-09 Live mode bug reports from iPhone Safari.
   - Matching now scores spoken lines with the same stage-direction-aware,
     punctuation-insensitive tokenization used by the correction diff. This
@@ -64,6 +74,56 @@ Changes and decisions:
   - iPhone Safari testing showed the first delayed user-line playback can be
     rejected if car mode starts directly on a user line, so the start tap now
     primes the reusable audio element before the hands-free wait begins.
+- Reviewed the 2026-05-13 iPhone Safari `/dev/` diagnostics for car mode and
+  long TTS playback.
+  - The relevant user-test window was on `/dev/`, not production.
+  - Long TTS sequences were verified by successful iPhone sessions with 139,
+    150, and 137 `tts-audio-ended` events and no later-sequence
+    `NotAllowedError`, `tts-sequence-failed`, or `tts-playback-error`.
+  - Car mode worked in several sessions without STT requests, including runs
+    with 11 and 14 completed user-line playbacks.
+  - A separate remaining car-mode issue was found on `Finale di partita`/CLOV:
+    Gemini TTS repeatedly returned empty/invalid audio for original index 54, a
+    very short line. The backend retried and rejected the invalid audio instead
+    of caching or playing it, but the rehearsal flow still needs a fallback.
+  - The user confirmed the `PROCESSO AL POTERE` `[letteralmente] seduce` cue is
+    now spoken correctly.
+- Hardened short-line TTS and car-mode recovery after the 2026-05-13 logs.
+  - Backend TTS now retries short/ambiguous lines with an internal Italian
+    literal-pronunciation hint while keeping the displayed script and cache key
+    unchanged.
+  - Car mode now treats invalid provider audio as a recoverable line failure:
+    it keeps the correct line visible briefly, plays a distinct low error beep,
+    advances past that one line, and continues the hands-free flow instead of
+    disabling car mode.
+  - Verification added for the backend fallback and the browser recovery path.
+- Added deterministic automatic voice profiles per script.
+  - Reason: without manual assignments every character used the same Gemini
+    default voice, which made multi-character TTS harder to follow.
+  - Behavior: each script character now receives a stable provider-independent
+    voice profile based on the script key and character name. The current
+    Gemini provider map resolves those profiles to Gemini voice IDs only at
+    TTS request time.
+  - Manual voice assignments remain explicit Gemini overrides and still win
+    over the automatic profile, so existing saved choices keep working.
+- Excluded parenthetical stage directions from TTS requests.
+  - Reason: script text inside parentheses is useful on screen but should not be
+    spoken by generated or browser TTS.
+  - Behavior: Live mode, car mode, cue preview playback, voice sample playback,
+    and the script reader now strip text between `(` and `)` before requesting
+    or speaking TTS. The displayed script text is unchanged.
+  - E2E video artifact: `artifacts/videos/tts-parenthetical-stage-directions-stripped.webm`.
+- Tightened Live mode correction and completion behavior from the 2026-05-16
+  screenshots.
+  - Empty STT transcripts are now treated as `no-input` instead of showing the
+    expected line as a wrong/missing correction.
+  - Reveal-only and car/reveal flows no longer show the scored accuracy card
+    when no spoken-line correction was run.
+  - The completion Back button now has an explicit text color so it remains
+    visible on the light completion screen.
+  - E2E video artifacts:
+    `artifacts/videos/empty-stt-transcript-no-input.webm` and
+    `artifacts/videos/reveal-mode-completion-hides-results.webm`.
 - Kept boot fallback diagnostics available before login.
   - Evidence: a PC test reached the static boot fallback and repeatedly hit
     `/dev/api/diag/web-health`, but the API returned `401`, so no boot-failure
