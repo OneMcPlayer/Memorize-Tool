@@ -9,7 +9,7 @@
     },
     {
       "speaker": "KRISTINA",
-      "line": "Ah si?... ma guarda!"
+      "line": "Ah sì?... ma guarda!"
     },
     {
       "speaker": "JEAN",
@@ -41,19 +41,19 @@
     },
     {
       "speaker": "KRISTINA",
-      "line": "Ah si?... Andò cosi?... È veramente incredibile!"
+      "line": "Ah sì?... Andò così?... È veramente incredibile!"
     },
     {
       "speaker": "JEAN",
-      "line": "Si, proprio cosi!... Ma dimmi, Kristina, non avresti nulla di buono da darmi?"
+      "line": "Sì, proprio così!... Ma dimmi, Kristina, non avresti nulla di buono da darmi?"
     },
     {
       "speaker": "KRISTINA",
-      "line": "(prelevando qualche cosa dalla padella e mettendola davanti a Jean). Ah ah, eccoti un pezzetto di rognone! l'ho sottratto dall'arrosto di vitello."
+      "line": "(prelevando qualche cosa dalla padella e mettendola davanti a Jean) Ah ah, eccoti un pezzetto di rognone! l'ho sottratto dall'arrosto di vitello."
     },
     {
       "speaker": "JEAN",
-      "line": "(annusando). Deve essere squisito! È la mia più grande délice, questo! (Riempiendo il piatto.) Avresti anche potuto scaldare il piatto, però!"
+      "line": "(annusando) Deve essere squisito! È la mia più grande délice, questo! (Riempiendo il piatto.) Avresti anche potuto scaldare il piatto, però!"
     },
     {
       "speaker": "KRISTINA",
@@ -61,7 +61,7 @@
     },
     {
       "speaker": "JEAN",
-      "line": "(indispettito). Li vuoi lasciare stare, i miei capelli?... Lo sai bene quanto sono sensibile!"
+      "line": "(indispettito) Li vuoi lasciare stare, i miei capelli?... Lo sai bene quanto sono sensibile!"
     },
     {
       "speaker": "KRISTINA",
@@ -69,7 +69,7 @@
     },
     {
       "speaker": "JEAN",
-      "line": "Birra la sera di San Giovanni?... No, mille grazie! Ho qualcosa di meglio, io! (Apre un cassetto e ne cava una bottiglia di vino rosso, chiusa con ceralacca gialla.) Ceralacca gialla! La vedi? E adesso dammi un bicchiere! Un bicchiere a calice, naturalmente."
+      "line": "Birra la sera di San Giovanni?... No, mille grazie! Ho qualcosa di meglio, io! (Apre un cassetto e ne cava una bottiglia di vino rosso, chiusa con ceralacca gialla.) Ceralacca gialla!... La vedi? E adesso dammi un bicchiere! Un bicchiere a calice, naturalmente."
     },
     {
       "speaker": "KRISTINA",
@@ -117,15 +117,11 @@
     },
     {
       "speaker": "JEAN",
-      "line": "Quando dico di voler fare una cosa, la faccio sempre! E grazie per lo spuntino... (La signorina Julie si fa sulla soglia della porta e parla verso l'interno dell'appartamento.)"
+      "line": "Quando dico di voler fare una cosa, la faccio sempre! E grazie per lo spuntino... (La signorina Julie si fa sulla soglia della porta e parla verso l'interno dell' appartamento.)"
     },
     {
       "speaker": "LA SIGNORINA",
-      "line": "Torno subito! Voi potete continuare!... (Jean nasconde la bottiglia nel cassetto e si alza rispettosamente; la signorina entra in cucina e va verso"
-    },
-    {
-      "speaker": "KRISTINA",
-      "line": "che si trova presso i fornelli)."
+      "line": "Torno subito! Voi potete continuare!... (Jean nasconde la bottiglia nel cassetto e si alza rispettosamente; la signorina entra in cucina e va verso KRISTINA che si trova presso i fornelli)."
     },
     {
       "speaker": "LA SIGNORINA",
@@ -133,11 +129,11 @@
     },
     {
       "speaker": "JEAN",
-      "line": "(con galanteria). Hanno dei segreti, le signore?"
+      "line": "(con galanteria) Hanno dei segreti, le signore?"
     },
     {
       "speaker": "LA SIGNORINA",
-      "line": "(colpendolo in viso col fazzoletto). Questo si chiama essere curioso!"
+      "line": "(colpendolo in viso col fazzoletto) Questo si chiama essere curioso!"
     },
     {
       "speaker": "JEAN",
@@ -145,15 +141,15 @@
     },
     {
       "speaker": "LA SIGNORINA",
-      "line": "(con civetteria). Sfacciato!... S'intende anche di profumi, costui? Balla bene, però. Filate via!"
+      "line": "(con civetteria) Sfacciato!... S'intende anche di profumi, costui? Balla bene, però. Filate via!"
     },
     {
       "speaker": "JEAN",
-      "line": "(impertinente e cortese). Non è un filtro magico? Qualcosa che insegni a leggere nelle stelle? Che faccia vedere il futuro?"
+      "line": "(impertinente e cortese) Non è un filtro magico? Qualcosa che insegni a leggere nelle stelle? Che faccia vedere il futuro?"
     },
     {
       "speaker": "LA SIGNORINA",
-      "line": "(con asprezza). Per vedere tutto ciò, occorrerebbe possedere buoni occhi. (A Kristina.) Versa il tutto in una bottiglia e tappala per bene!... E voi, Jean, venite di là a ballare con me una danza scozzese."
+      "line": "(con asprezza) Per vedere tutto ciò, occorrerebbe possedere buoni occhi. (A Kristina.) Versa il tutto in una bottiglia e tappala per bene!... E voi, Jean, venite di là a ballare con me una danza scozzese."
     },
     {
       "speaker": "JEAN",
@@ -193,7 +189,7 @@
     },
     {
       "speaker": "JEAN",
-      "line": "(rientrando da solo). È decisamente matta, costei! Ma come ballava!... E intanto la gente resta incantata a guardarla. Ma poi sghignazza, dietro le porte!... Che ne dici Kristina?"
+      "line": "(rientrando da solo) È decisamente matta, costei! Ma come ballava!... E intanto la gente resta incantata a guardarla. Ma poi sghignazza, dietro le porte!... Che ne dici Kristina?"
     },
     {
       "speaker": "KRISTINA",
@@ -209,7 +205,7 @@
     },
     {
       "speaker": "JEAN",
-      "line": "(cingendole la vita con un braccio). Tu sei una ragazza assennata, Kristina, e diventerai una brava moglie. Prima o poi. (Entra la signorina Julie e si mostra spiacevolmente sorpresa.)"
+      "line": "(cingendole la vita con un braccio) Tu sei una ragazza assennata, Kristina, e diventerai una brava moglie. Prima o poi. (Entra la signorina Julie e si mostra spiacevolmente sorpresa.)"
     },
     {
       "speaker": "LA SIGNORINA",
@@ -229,11 +225,11 @@
     },
     {
       "speaker": "LA SIGNORINA",
-      "line": "(a Kristina). Ascolta, Kristina, è tuo fidanzato, Jean, per potersi prendere con te certe confidenze?"
+      "line": "(a Kristina) Ascolta, Kristina, è tuo fidanzato, Jean, per potersi prendere con te certe confidenze?"
     },
     {
       "speaker": "KRISTINA",
-      "line": "Mio fidanzato? Già, così si dice. Ci chiamano appunto cosi!"
+      "line": "Mio fidanzato? Già, così si dice. Ci chiamano appunto così!"
     },
     {
       "speaker": "LA SIGNORINA",
@@ -273,7 +269,7 @@
     },
     {
       "speaker": "JEAN",
-      "line": "Si, mio padre era a servizio nella casa qui accanto; cosicché ho potuto veder spesso la signorina, quand'era bambina; ma la signorina non si è certo accorta di me!"
+      "line": "Sì, mio padre era a servizio nella casa qui accanto; cosicché ho potuto veder spesso la signorina, quand'era bambina; ma la signorina non si è certo accorta di me!"
     },
     {
       "speaker": "LA SIGNORINA",
@@ -297,7 +293,7 @@
     },
     {
       "speaker": "JEAN",
-      "line": "No, non lo è, ma è che lo farei malvolentieri! No!... Guardi quella li! (Indica Kristina che, seduta sopra una seggiola accanto ai fornelli, s'è addormentata profondamente.)"
+      "line": "No, non lo è, ma è che lo farei malvolentieri! No!... Guardi quella lì! (Indica Kristina che, seduta sopra una seggiola accanto ai fornelli, s'è addormentata profondamente.)"
     },
     {
       "speaker": "LA SIGNORINA",
@@ -305,11 +301,15 @@
     },
     {
       "speaker": "JEAN",
-      "line": "No, non russa, ma parla dormendo. LA SIGNORINA(cinicamente). To': come fate a saperlo?"
+      "line": "No, non russa, ma parla dormendo."
+    },
+    {
+      "speaker": "LA SIGNORINA",
+      "line": "(cinicamente) To': come fate a saperlo?"
     },
     {
       "speaker": "JEAN",
-      "line": "(sfacciato). Lo so perché l'ho sentita. (Pausa durante la quale i due si osservano.)"
+      "line": "(sfacciato) Lo so perché l'ho sentita. (Pausa durante la quale i due si osservano.)"
     },
     {
       "speaker": "LA SIGNORINA",

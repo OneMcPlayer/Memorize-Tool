@@ -34,7 +34,7 @@ export const scriptCatalog: ScriptMeta[] = [
     id: "a-porte-chiuse",
     title: "A PORTE CHIUSE",
     author: "Jean-Paul Sartre",
-    description: "Excerpt between Garcin and the waiter from No Exit",
+    description: "Excerpt featuring Garcin, Ines, and the waiter from No Exit",
     language: "it",
   },
   {

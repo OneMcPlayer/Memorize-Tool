@@ -4,10 +4,6 @@
   "language": "it",
   "lines": [
     {
-      "speaker": "DIDASCALIA",
-      "line": "Luogo: stanza senza finestre. Due letti. Una porta. Attesa."
-    },
-    {
       "speaker": "BEN",
       "line": "Cazzo! (Raccoglie il giornale) Senti questa. Un uomo di ottantasette anni voleva attraversare la strada. Troppo traffico. Si è infilato sotto un camion. A quattro zampe."
     },
@@ -257,7 +253,7 @@
     },
     {
       "speaker": "BEN",
-      "line": "Tua madre? Si fissano. (Avanzando) Accendi l’acqua, cretino. Buio."
+      "line": "Tua madre? Si fissano. (Avanzando) Accendi l’acqua, cretino. (Buio.)"
     }
   ]
 }

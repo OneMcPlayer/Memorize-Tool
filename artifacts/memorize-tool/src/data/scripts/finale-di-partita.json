@@ -5,11 +5,11 @@
   "lines": [
     {
       "speaker": "CLOV",
-      "line": "(sguardo fisso, voce bianca) Finita, è finita, sta per finire, sta forse per finire. (Pausa). I chicchi si aggiungono ai chicchi a uno a uno, e un giorno, all'improvviso, c'è il mucchio. (Pausa). Non possono più punirmi. (Pausa). Me ne vado nella mia cucina, tre metri per tre metri per tre metri, ad aspettare che mi faccia un fischio. Pausa. Hamm si muove. Sbadiglia sotto il fazzoletto. Si toglie il fazzoletto dalla faccia. Faccia molto rossa. Occhiali neri."
+      "line": "(sguardo fisso, voce bianca) Finita, è finita, sta per finire, sta forse per finire. (Pausa). I chicchi si aggiungono ai chicchi a uno a uno, e un giorno, all'improvviso, c'è il mucchio. (Pausa). Non possono più punirmi. (Pausa). Me ne vado nella mia cucina, tre metri per tre metri per tre metri, ad aspettare che mi faccia un fischio."
     },
     {
       "speaker": "HAMM",
-      "line": "A... (sbadigli)... a me. (Pausa). Tocca a me. S'è ma... (sbadigli)... mai visto un dolore più... più alto del mio? Può darsi. Nei tempi andati. Ma oggi? (Pausa). Clov! (Pausa). No, sono solo. (Pausa). Che sogni! Quelle foreste! (Pausa). Basta, è ora di farla finita, anche nel rifugio. (Pausa). E tuttavia esito, esito a... a farla finita. Sì, è proprio così, è ora di farla finita e tuttavia io esito ancora a... (sbadigli)... a farla finita. (Sbadigli) Oh, ma insomma, che cosa mi prende, farei meglio ad andarmene a dormire. (Dà un colpo di fischietto. Entra Clov, subito. Sì ferma accanto alla poltrona). Puzzi da far paura! (Pausa). Preparami, voglio dormire."
+      "line": "(Pausa. Hamm si muove. Sbadiglia sotto il fazzoletto. Si toglie il fazzoletto dalla faccia. Faccia molto rossa. Occhiali neri.) A... (sbadigli)... a me. (Pausa). Tocca a me. S'è ma... (sbadigli)... mai visto un dolore più... più alto del mio? Clov! (Pausa). No, sono solo. (Pausa). (Pausa). Basta, è ora di farla finita, anche nel rifugio. (Pausa). E tuttavia esito, esito a... a farla finita. Sì, è proprio così, è ora di farla finita e tuttavia io esito ancora a... (sbadigli)... a farla finita. (Sbadigli) Oh, ma insomma, che cosa mi prende, farei meglio ad andarmene a dormire. (Dà un colpo di fischietto. Entra Clov, subito. Si ferma accanto alla poltrona). Puzzi da far paura! (Pausa). Preparami, voglio dormire."
     },
     {
       "speaker": "CLOV",
@@ -281,7 +281,7 @@
     },
     {
       "speaker": "HAMM",
-      "line": "E’ una cosa impossibile."
+      "line": "È una cosa impossibile."
     },
     {
       "speaker": "CLOV",
@@ -305,7 +305,19 @@
     },
     {
       "speaker": "HAMM",
-      "line": "Fuori di qui è la morte. (Pausa). Va bene, vattene. (Clov esce. Pausa). E intanto si va avanti."
+      "line": "A far che, vorrei proprio saperlo."
+    },
+    {
+      "speaker": "CLOV",
+      "line": "A guardare il muro."
+    },
+    {
+      "speaker": "HAMM",
+      "line": "Il muro! E che cosa ci vedi; sul tuo muro?"
+    },
+    {
+      "speaker": "CLOV",
+      "line": "Vedo la mia luce che muore."
     }
   ]
 }

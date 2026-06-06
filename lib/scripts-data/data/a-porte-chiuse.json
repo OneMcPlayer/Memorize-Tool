@@ -4,8 +4,8 @@
   "language": "it",
   "lines": [
     {
-      "speaker": "DIDASCALIA",
-      "line": "Un salone in stile Secondo Impero. Un bronzo sul camino. GARCIN, entra e si guarda attorno. Dunque, eccoci."
+      "speaker": "GARCIN",
+      "line": "(entra e si guarda attorno) Dunque, eccoci."
     },
     {
       "speaker": "IL CAMERIERE",
@@ -21,7 +21,7 @@
     },
     {
       "speaker": "GARCIN",
-      "line": "Io...io penso che a lungo andare ci si debba abituare ai mobili."
+      "line": "Io... io penso che a lungo andare ci si debba abituare ai mobili."
     },
     {
       "speaker": "IL CAMERIERE",
@@ -37,15 +37,11 @@
     },
     {
       "speaker": "GARCIN",
-      "line": "Ed io, cosa vuole che me ne faccia? Sa chi sono? Bah! Non ha alcuna importanza. Dopotutto, io vivo sempre tra mobili che non amo e in finte situazioni; è bellissimo. Una finta situazione in una sala da pranzo Luigi Filippo, le dice niente?"
-    },
-    {
-      "speaker": "IL CAMERIERE",
-      "line": "Vede: in un salone Secondo Impero è peggio."
+      "line": "Ed io, cosa vuole che me ne faccia? Sa chi sono?"
     },
     {
       "speaker": "GARCIN",
-      "line": "Ah, bene! Bene, bene, bene. (si guarda intorno) Comunque, io non mi sarei mai aspettato...Lei non è al corrente di ciò che si racconta laggiù?"
+      "line": "(si guarda intorno) Comunque, io non mi sarei mai aspettato... Lei non è al corrente di ciò che si racconta laggiù?"
     },
     {
       "speaker": "IL CAMERIERE",
@@ -61,7 +57,11 @@
     },
     {
       "speaker": "GARCIN",
-      "line": "Sì. (ridono entrambi) GARCIN, ritornando serio improvvisamente. Dove sono i pali?"
+      "line": "Sì. (ridono entrambi)"
+    },
+    {
+      "speaker": "GARCIN",
+      "line": "(ritornando serio improvvisamente) Dove sono i pali?"
     },
     {
       "speaker": "IL CAMERIERE",
@@ -73,7 +73,11 @@
     },
     {
       "speaker": "IL CAMERIERE",
-      "line": "Vuole scherzare? GARCIN, (guardandolo) Ah, sì, certo. No, non voglio più scherzare. (Silenzio. Garcin passeggia) Niente vetri, niente finestre, naturalmente. Niente di fragile. (Con violenza improvvisa) E perché mi è stato tolto lo spazzolino da denti?"
+      "line": "Vuole scherzare?"
+    },
+    {
+      "speaker": "GARCIN",
+      "line": "((guardandolo)) Ah, sì, certo. No, non voglio più scherzare. (Silenzio. Garcin passeggia) Niente vetri, niente finestre, naturalmente. Niente di fragile. (Con violenza improvvisa) E perché mi è stato tolto lo spazzolino da denti?"
     },
     {
       "speaker": "IL CAMERIERE",
@@ -81,15 +85,15 @@
     },
     {
       "speaker": "GARCIN",
-      "line": "(sbattendo sul braccio della poltrona con collera) La prego di risparmiarmi la sua predica. Io non ignoro niente della mia condizione, ma non sopporterei che lei..."
+      "line": "(sbattendo sul braccio della poltrona con collera) La prego di risparmiarmi la sua predica."
     },
     {
       "speaker": "IL CAMERIERE",
-      "line": "Ok, ok! Mi scusi. Cosa vuole, tutti i clienti pongono la stessa domanda. Chiedono:”Dove sono i pali?”. In quel momento, glielo giuro, non sognano di lavarsi. E poi, non appena li si è rassicurati, ecco lo spazzolino da denti. Ma, per l'amor di Dio, non potete riflettere? In fin dei conti vi chiedo perché vi spazzolate i denti?"
+      "line": "Ok, ok! Mi scusi. Cosa vuole, tutti i clienti pongono la stessa domanda. Chiedono: “Dove sono i pali?”. In quel momento, glielo giuro, non sognano di lavarsi. E poi, non appena li si è rassicurati, ecco lo spazzolino da denti. Ma, per l'amor di Dio, non potete riflettere? In fin dei conti vi chiedo perché vi spazzolate i denti?"
     },
     {
       "speaker": "GARCIN",
-      "line": "(calmatosi) Già, in effetti, perché? E perché ci si guarda allo specchio? Io credo che ci siano certi momenti in cui guardo con tutti i miei occhi. Con tutti i miei occhi, capisce? Avanti, senza dubbio le è stato proibito di rispondermi, io non insisto. Ma si ricordi che non mi si prende alla sprovvista, io guardo la situazione in faccia. (Riprende a camminare) Dunque, niente spazzolino da denti. Niente letto. Perché non si dorme mai,beninteso?"
+      "line": "(calmatosi) Già, in effetti, perché? E perché ci si guarda allo specchio? Avanti, senza dubbio le è stato proibito di rispondermi, io non insisto. Ma si ricordi che non mi si prende alla sprovvista, io guardo la situazione in faccia. (Riprende a camminare) Dunque, niente spazzolino da denti. Niente letto. Perché non si dorme mai, beninteso?"
     },
     {
       "speaker": "IL CAMERIERE",
@@ -97,7 +101,7 @@
     },
     {
       "speaker": "GARCIN",
-      "line": "Ci avrei scommesso. Perché si dovrebbe dormire? Il sonno prende dietro le orecchie. Gli occhi si chiudono, ma perché dormire? Ci si distende sul canapé e puff...il sonno si dilegua. Bisogna stropicciarsi gli occhi, alzarsi e tutto ricomincia."
+      "line": "Ci avrei scommesso. Perché si dovrebbe dormire? Il sonno prende dietro le orecchie. Gli occhi si chiudono, ma perché dormire? Ci si distende sul canapé e puff... il sonno si dilegua. Bisogna stropicciarsi gli occhi, alzarsi e tutto ricomincia."
     },
     {
       "speaker": "IL CAMERIERE",
@@ -105,7 +109,7 @@
     },
     {
       "speaker": "GARCIN",
-      "line": "Taccia! Romantico? Allora non abbiamo nemmeno bisogno di sonno? Perché dormire se non si ha sonno? Aspetti...aspetti: perché è faticoso? Perché è fortemente faticoso? Ci sono: è la vita senza interruzione."
+      "line": "Taccia! Romantico? Allora non abbiamo nemmeno bisogno di sonno? Perché dormire se non si ha sonno? Aspetti... aspetti: perché è faticoso? Perché è fortemente faticoso? Ci sono: è la vita senza interruzione."
     },
     {
       "speaker": "IL CAMERIERE",
@@ -113,7 +117,7 @@
     },
     {
       "speaker": "GARCIN",
-      "line": "(imitandolo) Quale interruzione? (sospettoso) Mi guardi. Io ne sono certo! Ecco ciò che spiega l'indiscrezione rozza e insostenibile del suo sguardo. Sono atrofizzate."
+      "line": "(imitandolo) Quale interruzione? (sospettoso) Mi guardi. Io ne sono certa! Ecco ciò che spiega l'indiscrezione rozza e insostenibile del suo sguardo. Sono atrofizzate."
     },
     {
       "speaker": "IL CAMERIERE",
@@ -121,7 +125,7 @@
     },
     {
       "speaker": "GARCIN",
-      "line": "Le sue palpebre. Noi, noi sbattiamo le palpebre. Un batter d'occhio. Un piccolo lampo nero: l'interruzione è fatta. L'occhio si inumidisce, il mondo si annienta. Non può capire quanto sia rinfrescante. 4000 riposi in un'ora. 4000 piccole evasioni. Allora? Mi accingo a vivere senza palpebre? Non sia sciocco! Significa una sola cosa. Io non dormirò più... Ma come potrei sopportarmi? Provi a capire, faccia uno sforzo: io sono dispettoso, vede, e io... io ho l'abitudine di stuzzicare. È diventato giorno?"
+      "line": "Le sue palpebre. Noi, noi sbattiamo le palpebre: l'interruzione è fatta. L'occhio si inumidisce, il mondo si annienta. Non può capire quanto sia rinfrescante. Significa una sola cosa. Io non dormirò più... Ma come potrei sopportarmi? Io sono dispettoso, vede, e io... io ho l'abitudine di stuzzicare. È diventato giorno?"
     },
     {
       "speaker": "IL CAMERIERE",
@@ -181,7 +185,7 @@
     },
     {
       "speaker": "IL CAMERIERE",
-      "line": "La direzione può tagliare la corrente. Ma io non ricordo che l'abbia mai fatto su questo piano. Noi abbiamo l'elettricità a discrezione."
+      "line": "La direzione può tagliare la corrente. Ma io non ricordo che l'abbia mai fatto su questo piano."
     },
     {
       "speaker": "GARCIN",
@@ -233,23 +237,131 @@
     },
     {
       "speaker": "GARCIN",
-      "line": "No, niente. (Va al camino e prende il tagliacarte) Cos'è questo?"
+      "line": "No, niente. Può andare. (Esce)"
     },
     {
       "speaker": "IL CAMERIERE",
-      "line": "Non vede? un tagliacarte."
+      "line": "(a Garcin) Mi ha chiamato?"
     },
     {
       "speaker": "GARCIN",
-      "line": "Ci sono libri, qui?"
+      "line": "(Garcin si accinge a rispondere ma getta un'occhiata su Ines) No."
     },
     {
       "speaker": "IL CAMERIERE",
-      "line": "No."
+      "line": "(girandosi verso Ines) È a casa sua, signora. Se ha domande da pormi... Di solito i clienti amano avere informazioni... Non insisto. D'altra parte, riguardo allo spazzolino da denti, al campanello e al bronzo di Barbedienne, il signore è al corrente e le risponderà adeguatamente. (Esce. Silenzio. Garcin non guarda Ines; Ines si guarda intorno, poi si dirige improvvisamente verso Garcin)"
+    },
+    {
+      "speaker": "INES",
+      "line": "Dov'è Florence? (Silenzio di Garcin) Le ho chiesto dov'è Florence?"
     },
     {
       "speaker": "GARCIN",
-      "line": "Allora a che serve? (Il Cameriere alza le spalle) Va bene. Può andare. (Esce)"
+      "line": "Non lo so."
+    },
+    {
+      "speaker": "INES",
+      "line": "È tutto quello che ha da dire? La tortura per l'assenza? Bene, è mancata. Florence era una piccola sciocca e io non la rimpiango."
+    },
+    {
+      "speaker": "GARCIN",
+      "line": "Scusi, ma con chi mi confonde?"
+    },
+    {
+      "speaker": "INES",
+      "line": "Lei? Lei è il boia."
+    },
+    {
+      "speaker": "GARCIN",
+      "line": "(sussulta e poi si mette a ridere) È un'accusa, tuttavia, divertente. Il boia, davvero? Lei è entrata, mi ha guardato e ha pensato: è il boia. Che stravaganza! Il Cameriere è uno stolto, avrebbe dovuto presentarci. Il boia! Io sono Joseph Garcin, pubblicista e uomo di lettere. La verità è che noi siamo nella stessa condizione, signora..."
+    },
+    {
+      "speaker": "INES",
+      "line": "(seccata) Ines Serrano. Signorina."
+    },
+    {
+      "speaker": "GARCIN",
+      "line": "Molto bene. Così, secondo lei, avrei l'aspetto di un boia? E da cosa si riconosce un boia, se non le spiace?"
+    },
+    {
+      "speaker": "INES",
+      "line": "Hanno l'aria di avere paura."
+    },
+    {
+      "speaker": "GARCIN",
+      "line": "Paura? È ridicolo. E di chi? Delle proprie vittime?"
+    },
+    {
+      "speaker": "INES",
+      "line": "La pianti! So quel che dico. Io mi sono guardata nello specchio."
+    },
+    {
+      "speaker": "GARCIN",
+      "line": "Nello specchio? (Si guarda intorno). Hanno tolto tutto ciò che potesse assomigliare ad uno specchio. (Pausa) Ad ogni modo, io posso dire con certezza che non ho paura. Io non prendo la situazione alla leggera e sono profondamente consapevole della sua gravità."
+    },
+    {
+      "speaker": "INES",
+      "line": "(sollevando le spalle) Non le viene mai voglia di andare a fare un giro fuori?"
+    },
+    {
+      "speaker": "GARCIN",
+      "line": "La porta è chiusa a chiave."
+    },
+    {
+      "speaker": "INES",
+      "line": "Tanto peggio."
+    },
+    {
+      "speaker": "GARCIN",
+      "line": "Io capisco bene che la mia presenza la infastidisca. E da parte mia preferirei restare solo. Ma sono sicuro che potremo metterci d'accordo: io non parlo, non mi muovo molto e faccio poco rumore. Però, se posso permettermi di darle un consiglio, bisognerà conservare tra noi un'estrema educazione. Sarà la nostra migliore difesa."
+    },
+    {
+      "speaker": "INES",
+      "line": "Io non sono pulita."
+    },
+    {
+      "speaker": "GARCIN",
+      "line": "Allora io lo sarò per due."
+    },
+    {
+      "speaker": "INES",
+      "line": "(Silenzio. Garcin è seduto sul canapè. Ines passeggia in lungo e in largo) (guardando Garcin) La sua bocca."
+    },
+    {
+      "speaker": "GARCIN",
+      "line": "(svegliato dal suo sonno) Come dice?"
+    },
+    {
+      "speaker": "INES",
+      "line": "Non può fermare la sua bocca? Gira come una trottola sotto il suo naso."
+    },
+    {
+      "speaker": "GARCIN",
+      "line": "Le chiedo scusa: non me ne sono reso conto."
+    },
+    {
+      "speaker": "INES",
+      "line": "È questo che le rimprovero. (tic di Garcin) Ancora! Pretende di essere pulito e non controlla il suo viso. Non è solo qui e non ha il diritto di obbligarmi ad assistere allo spettacolo della sua paura."
+    },
+    {
+      "speaker": "GARCIN",
+      "line": "(si alza e va verso Ines) Non ha paura, lei?"
+    },
+    {
+      "speaker": "INES",
+      "line": "Perché dovrei? La paura era un bene prima, quando avevamo la speranza."
+    },
+    {
+      "speaker": "GARCIN",
+      "line": "(dolcemente) Non c'è più speranza, ma noi siamo sempre come prima. Non abbiamo cominciato a soffrire, signorina."
+    },
+    {
+      "speaker": "INES",
+      "line": "Lo so. (Pausa) Allora cosa aspettiamo?"
+    },
+    {
+      "speaker": "GARCIN",
+      "line": "Non lo so. Aspetto. Io voglio sapere con chi ho a che fare."
     }
   ]
 }
